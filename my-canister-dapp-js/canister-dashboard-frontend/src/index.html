@@ -1,0 +1,132 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta
+      http-equiv="Content-Security-Policy"
+      content="default-src 'none'; script-src 'self'; style-src 'self'; connect-src 'self' https://identity.internetcomputer.org https://*.icp0.io https://icp0.io https://icp-api.io https://*.icp-api.io http://localhost:* http://*.localhost:*"
+    />
+    <title>My Canister Dashboard</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+
+  <body>
+    <div id="error-section" class="hidden"></div>
+
+    <div id="loading-overlay" class="hidden">
+      <div>Loading...</div>
+    </div>
+
+    <div class="container">
+      <h1>Canister Dashboard</h1>
+
+      <div id="auth-section" class="card">
+        <div class="auth-section">
+          <button id="auth-btn" class="btn"></button>
+          <div id="ii-principal" class="data-display hidden"></div>
+        </div>
+      </div>
+
+      <div id="authenticated-content" class="hidden">
+        <div id="balance-section" class="card">
+          <h3>Top up</h3>
+          <div id="balance-content">
+            <p>
+              <strong>Balance:</strong>
+              <span id="balance-value">Loading...</span> ICP
+            </p>
+            <p>
+              <button id="refresh-balance-btn" class="btn">Refresh</button>
+              <button id="top-up-btn" class="btn">Top-up</button>
+            </p>
+          </div>
+        </div>
+
+        <div id="status-section" class="card">
+          <h3>Canister Status</h3>
+          <div id="status-content">
+            <div class="status-info">
+              <p>
+                <strong>Status:</strong>
+                <span id="status-value">Loading...</span>
+              </p>
+              <p>
+                <strong>Memory Size:</strong>
+                <span id="memory-size-value">Loading...</span>
+              </p>
+              <p>
+                <strong>Cycles:</strong>
+                <span id="cycles-value">Loading...</span>
+              </p>
+              <div>
+                <strong>Module Hash:</strong>
+                <div id="module-hash-value" class="data-display">
+                  Loading...
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div id="controllers-section" class="card">
+          <h3>Controllers</h3>
+          <div id="controllers-content">
+            <div class="controllers-info">
+              <div class="form-group">
+                <input
+                  type="text"
+                  id="controller-input"
+                  placeholder="Enter controller principal"
+                />
+                <div class="button-group">
+                  <button type="button" id="controller-add" class="btn">
+                    Add
+                  </button>
+                  <button type="button" id="controller-remove" class="btn">
+                    Remove
+                  </button>
+                </div>
+              </div>
+              <ul id="controllers-list">
+                <li class="data-display">Loading...</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div id="alternative-origins-section" class="card">
+          <h3>Alternative Origins</h3>
+          <div id="alternative-origins-content">
+            <div class="alternative-origins-info">
+              <div class="form-group">
+                <input
+                  type="text"
+                  id="alternative-origin-input"
+                  placeholder="Enter alternative origin"
+                />
+                <div class="button-group">
+                  <button type="button" id="alternative-origin-add" class="btn">
+                    Add
+                  </button>
+                  <button
+                    type="button"
+                    id="alternative-origin-remove"
+                    class="btn"
+                  >
+                    Remove
+                  </button>
+                </div>
+              </div>
+              <ul id="alternative-origins-list">
+                <li class="data-display">Loading...</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <script type="module" src="./main.ts"></script>
+  </body>
+</html>

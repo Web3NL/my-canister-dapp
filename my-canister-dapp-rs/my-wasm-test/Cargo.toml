@@ -1,0 +1,19 @@
+[package]
+name = "my-wasm-test"
+version = "0.1.0"
+description = "Test for wasm binaries compatible with my-canister-dashboard"
+edition = { workspace = true }
+
+[dependencies]
+candid = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+sha2 = { workspace = true }
+hex = { workspace = true }
+
+[dev-dependencies]
+ic-cdk = { workspace = true }
+pocket-ic = { workspace = true }
+ic-http-certification = { workspace = true }
+
+my-canister-dashboard = { workspace = true }

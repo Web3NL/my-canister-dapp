@@ -1,0 +1,20 @@
+[package]
+name = "my-canister-frontend"
+version = "0.4.0-beta.24"
+description = "Frontend asset processing library for Internet Computer canisters"
+edition = { workspace = true }
+license = { workspace = true }
+authors = { workspace = true }
+repository = "https://github.com/Web3NL/my-canister-dashboard/tree/main/my-canister-dapp-rs/my-canister-frontend"
+keywords = ["internet-computer", "canister", "frontend", "assets", "ic"]
+categories = ["web-programming", "development-tools"]
+
+[lib]
+crate-type = ["rlib"]
+
+[dependencies]
+ic-asset-certification = { workspace = true }
+ic-http-certification = { workspace = true }
+ic-cdk = { workspace = true }
+include_dir = { workspace = true }
+mime_guess = { workspace = true }

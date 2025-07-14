@@ -1,0 +1,57 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "module": "ESNext",
+    "moduleResolution": "Node",
+    "lib": [
+      "ES2022",
+      "DOM",
+      "DOM.Iterable"
+    ],
+    "types": [
+      "node"
+    ],
+    "declaration": true,
+    "declarationMap": true,
+    "sourceMap": true,
+    "outDir": "./dist",
+    "allowJs": true,
+    "skipLibCheck": true,
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true,
+    "forceConsistentCasingInFileNames": true,
+    "resolveJsonModule": true,
+    "isolatedModules": true,
+    "strict": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noImplicitReturns": true,
+    "noFallthroughCasesInSwitch": true,
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+    // Ensure consistent cross-platform behavior
+    "preserveSymlinks": false,
+    "preserveWatchOutput": true,
+    "baseUrl": ".",
+    "paths": {
+      "$declarations/*": [
+        "declarations/*"
+      ]
+    }
+  },
+  "include": [
+    "my-canister-dapp-js/canister-dashboard-frontend/src/**/*",
+    "my-canister-app/src/**/*",
+    "my-canister-dapp-js/my-canister-dashboard-js/src/**/*",
+    "tests/**/*",
+    "examples/my-hello-world/src/**/*"
+  ],
+  "exclude": [
+    "node_modules",
+    "dist",
+    "build",
+    ".svelte-kit",
+    "target",
+    "assets"
+  ]
+}

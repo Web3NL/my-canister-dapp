@@ -1,0 +1,37 @@
+{
+  "canisters": {
+    "my-canister-app": {
+      "type": "assets",
+      "source": ["my-canister-app/build"],
+      "build": "npm run build:app"
+    },
+    "my-hello-world": {
+      "candid": "examples/my-hello-world/src/my-hello-world/my-hello-world.did",
+      "type": "custom",
+      "wasm": "target/wasm32-unknown-unknown/release/my-hello-world.wasm.gz",
+      "declarations": {
+        "output": "examples/my-hello-world/src/declarations/"
+      },
+      "specified_id": "22ajg-aqaaa-aaaap-adukq-cai"
+    },
+    "icp-index": {
+      "type": "custom",
+      "candid": "https://github.com/dfinity/ic/releases/download/ledger-suite-icp-2025-05-15/index.did",
+      "wasm": "https://github.com/dfinity/ic/releases/download/ledger-suite-icp-2025-05-15/ic-icp-index-canister.wasm.gz",
+      "init_arg_file": "declarations/icp-index-args/icp-index-args",
+      "specified_id": "ca77u-aiaaa-aaaap-abxiq-cai",
+      "declarations": {
+        "output": "declarations/icp-index/"
+      }
+    }
+  },
+  "networks": {
+    "local": {
+      "bind": "127.0.0.1:8080",
+      "type": "ephemeral",
+      "replica": {
+        "subnet_type": "system"
+      }
+    }
+  }
+}

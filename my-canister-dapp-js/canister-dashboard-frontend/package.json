@@ -1,0 +1,25 @@
+{
+  "name": "canister-dashboard-frontend",
+  "version": "0.4.0-beta.24",
+  "description": "Self-contained dashboard for Internet Computer canisters (BETA - not production ready)",
+  "repository": "https://github.com/Web3NL/my-canister-dashboard/tree/main/my-canister-dapp-js/canister-dashboard-frontend",
+  "type": "module",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "build:dev": "vite build --mode development",
+    "lint": "eslint src",
+    "lint:fix": "eslint src --fix",
+    "format": "prettier --check src",
+    "format:fix": "prettier --write src",
+    "typecheck": "tsc --noEmit",
+    "test": "vitest --run"
+  },
+  "dependencies": {
+    "@web3nl/my-canister-dashboard": "*"
+  },
+  "devDependencies": {}
+}

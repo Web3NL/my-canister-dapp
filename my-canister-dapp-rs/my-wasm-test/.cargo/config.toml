@@ -1,0 +1,2 @@
+[env]
+POCKET_IC_BIN = "../../pocket-ic/pocket-ic"

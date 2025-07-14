@@ -1,0 +1,49 @@
+{
+  "name": "@web3nl/my-canister-dashboard",
+  "version": "0.4.0-beta.24",
+  "description": "Utility functions for canisters using My Canister Dashboard",
+  "keywords": [
+    "internet-computer",
+    "canister",
+    "dfinity",
+    "ic",
+    "utilities"
+  ],
+  "author": "Web3NL",
+  "license": "MIT",
+  "homepage": "",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Web3NL/my-canister-dashboard.git",
+    "directory": "my-canister-dapp-js/my-canister-dashboard-js"
+  },
+  "type": "module",
+  "main": "dist/index.js",
+  "module": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md"
+  ],
+  "scripts": {
+    "build": "vite build",
+    "lint": "eslint src",
+    "lint:fix": "eslint src --fix",
+    "format": "prettier --check src",
+    "format:fix": "prettier --write src",
+    "typecheck": "tsc --noEmit",
+    "docs:build": "typedoc",
+    "docs:clean": "rm -rf docs"
+  },
+  "dependencies": {},
+  "devDependencies": {},
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}

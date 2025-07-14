@@ -1,0 +1,19 @@
+[package]
+name = "my-hello-world"
+version = "0.1.0"
+edition = "2021"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+candid = "0.10"
+ic-cdk = "0.18"
+ic-asset-certification = "3.0"
+ic-http-certification = "3.0"
+include_dir = "0.7"
+
+my-canister-dashboard = { path = "../../../../my-canister-dapp-rs/my-canister-dashboard" }
+my-canister-frontend = { path = "../../../../my-canister-dapp-rs/my-canister-frontend" }

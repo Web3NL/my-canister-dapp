@@ -1,0 +1,12 @@
+src/
+tsconfig.json
+eslint.config.js
+.prettierrc
+.git
+.gitignore
+node_modules/
+*.log
+.DS_Store
+coverage/
+.nyc_output/
+*.tgz

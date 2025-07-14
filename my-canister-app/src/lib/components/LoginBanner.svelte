@@ -1,0 +1,15 @@
+<script>
+  import { IconCanistersPage, PageBanner } from '@dfinity/gix-components';
+  import { authStore } from '$lib/stores/auth';
+</script>
+
+<PageBanner>
+  <IconCanistersPage slot="image" />
+  <span slot="title">My Canister dApp</span>
+
+  <p slot="description">Login to install and manage dApps</p>
+
+  <button class="primary" slot="actions" on:click={authStore.login}
+    >Connect with Internet Identity</button
+  >
+</PageBanner>

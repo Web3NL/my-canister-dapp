@@ -1,0 +1,24 @@
+[package]
+name = "my-canister-dashboard"
+version = "0.4.0-beta.24"
+description = "Self-contained dashboard assets for Internet Computer canisters"
+edition = { workspace = true }
+license = { workspace = true }
+authors = { workspace = true }
+repository = "https://github.com/Web3NL/my-canister-dashboard/tree/main/my-canister-dapp-rs/my-canister-dashboard"
+keywords = ["internet-computer", "canister", "dashboard", "ic", "dfinity"]
+categories = ["web-programming", "development-tools"]
+readme = "README.md"
+
+[lib]
+crate-type = ["rlib"]
+
+[dependencies]
+candid = { workspace = true }
+ic-asset-certification = { workspace = true }
+ic-http-certification = { workspace = true }
+ic-cdk = { workspace = true }
+include_dir = { workspace = true }
+mime_guess = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
