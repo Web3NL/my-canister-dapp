@@ -25,7 +25,8 @@
     "test:e2e": "playwright test --project=canister-dashboard-frontend",
     "dev:dashboard": "npm run dev --workspace=canister-dashboard-frontend",
     "dev:app": "npm run dev --workspace=my-canister-app",
-    "serve:docs": "npx http-server my-canister-dapp-js/my-canister-dashboard-js/docs"
+    "serve:docs": "npx http-server my-canister-dapp-js/my-canister-dashboard-js/docs",
+    "deploy:app": "dfx deploy my-canister-app --ic"
   },
   "dependencies": {
     "@dfinity/agent": "2.4.1",
