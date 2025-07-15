@@ -24,4 +24,4 @@ jobs:
           dfx-version: 0.28.0
 
       - name: Run checks
-        run: ./scripts/check.sh
+        run: ./validate-and-test.sh
