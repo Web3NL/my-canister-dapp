@@ -24,7 +24,6 @@ export default defineConfig(({ mode }) => {
 
   return {
     root: 'src',
-    publicDir: false,
     base: '/canister-dashboard',
     envDir: __dirname,
     build: {
