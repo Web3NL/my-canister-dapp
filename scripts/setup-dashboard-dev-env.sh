@@ -11,6 +11,7 @@ echo "Using dfx identity ident-1..."
 dfx identity use ident-1
 
 echo "Creating my-hello-world canister..."
+cargo install ic-wasm
 ./scripts/build-wasms-dev.sh
 dfx canister create my-hello-world
 dfx build my-hello-world
