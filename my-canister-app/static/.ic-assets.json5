@@ -3,4 +3,8 @@
     match: '**/*',
     security_policy: 'disabled',
   },
+  {
+    match: '.well-known',
+    ignore: false,
+  },
 ]
