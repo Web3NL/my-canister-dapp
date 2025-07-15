@@ -4,6 +4,7 @@ set -e
 echo "Setting up dashboard development environment..."
 
 echo "Running Internet Identity setup..."
+npx playwright install 
 npx playwright test tests/internet-identity-setup/setup-ii.spec.ts
 
 echo "Using dfx identity ident-1..."
