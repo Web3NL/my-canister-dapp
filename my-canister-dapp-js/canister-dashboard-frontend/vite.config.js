@@ -26,6 +26,7 @@ export default defineConfig(({ mode }) => {
     root: 'src',
     base: '/canister-dashboard',
     envDir: __dirname,
+    publicDir: path.resolve(__dirname, 'public'),
     build: {
       outDir: path.resolve(__dirname, 'dist'),
       emptyOutDir: true,
