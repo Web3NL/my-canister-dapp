@@ -3,14 +3,8 @@
     "target": "ES2022",
     "module": "ESNext",
     "moduleResolution": "Node",
-    "lib": [
-      "ES2022",
-      "DOM",
-      "DOM.Iterable"
-    ],
-    "types": [
-      "node"
-    ],
+    "lib": ["ES2022", "DOM", "DOM.Iterable"],
+    "types": ["node"],
     "declaration": true,
     "declarationMap": true,
     "sourceMap": true,
@@ -34,14 +28,11 @@
     "preserveWatchOutput": true,
     "baseUrl": ".",
     "paths": {
-      "$declarations/*": [
-        "declarations/*"
-      ]
+      "$declarations/*": ["declarations/*"]
     }
   },
   "include": [
     "my-canister-dapp-js/canister-dashboard-frontend/src/**/*",
-    "my-canister-app/src/**/*",
     "my-canister-dapp-js/my-canister-dashboard-js/src/**/*",
     "tests/**/*",
     "examples/my-hello-world/src/**/*"
