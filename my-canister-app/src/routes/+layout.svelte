@@ -27,6 +27,13 @@
     <button slot="toolbar-end" on:click={handleLogout}><IconLogout /></button>
 
     <main>
+      <div class="development-warning">
+        <p>DEMO</p>
+        <p>
+          Dapps can be installed for small amounts of ICP but are useless in
+          practice
+        </p>
+      </div>
       {#if !$authStore}
         <LoginBanner />
       {:else}
@@ -38,4 +45,12 @@
 
 <style lang="scss" global>
   @import '../../../node_modules/@dfinity/gix-components/dist/styles/global.scss';
+
+  .development-warning {
+    background-color: #ffcc00;
+    color: #333;
+    padding: 10px;
+    text-align: center;
+    font-weight: bold;
+  }
 </style>

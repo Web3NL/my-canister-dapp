@@ -4,12 +4,14 @@ set -e
 echo "Setting up dashboard development environment..."
 
 echo "Running Internet Identity setup..."
+npx playwright install 
 npx playwright test tests/internet-identity-setup/setup-ii.spec.ts
 
 echo "Using dfx identity ident-1..."
 dfx identity use ident-1
 
 echo "Creating my-hello-world canister..."
+cargo install ic-wasm
 ./scripts/build-wasms-dev.sh
 dfx canister create my-hello-world
 dfx build my-hello-world
