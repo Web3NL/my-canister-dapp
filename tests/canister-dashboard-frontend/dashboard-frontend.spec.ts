@@ -1,4 +1,3 @@
-/* eslint-disable no-console */
 import { test, expect } from '@playwright/test';
 import { readTestData, transferToPrincipal } from '../helpers';
 import { formatIcpBalance } from '../../my-canister-dapp-js/canister-dashboard-frontend/src/helpers';
@@ -13,7 +12,6 @@ test('Canister Dashboard Frontend Suite', async ({ page }) => {
     'https://22ajg-aqaaa-aaaap-adukq-cai.icp0.io',
     'https://my-canister.app',
   ];
-  const LOADING_OVERLAY_DELAY = 500; // Wait time before checking loading overlay state
   // Read the saved ii anchor from the previous test
   const iiAnchor = readTestData('ii-anchor.txt');
 
@@ -40,21 +38,13 @@ test('Canister Dashboard Frontend Suite', async ({ page }) => {
   // Click refresh button to update balance
   await page.getByRole('button', { name: 'Refresh' }).click();
 
-  // Handle race condition: loading overlay might appear and disappear very quickly in CI
-  // First, wait a brief moment to allow the loading to start
-  await page.waitForTimeout(LOADING_OVERLAY_DELAY);
+  // Wait for loading overlay to appear (refresh started)
+  await page.waitForSelector('#loading-overlay', {
+    state: 'visible',
+    timeout: 10000,
+  });
 
-  // Try to catch the loading state, but don't fail if it's too fast
-  try {
-    await page.waitForSelector('#loading-overlay', {
-      state: 'visible',
-      timeout: 1000,
-    });
-  } catch {
-    // Loading might have already completed - that's okay
-  }
-
-  // Always wait for loading to be hidden (either it was visible and now hidden, or already hidden)
+  // Wait for loading overlay to disappear (refresh finished)
   await page.waitForSelector('#loading-overlay', {
     state: 'hidden',
     timeout: 10000,
@@ -76,19 +66,13 @@ test('Canister Dashboard Frontend Suite', async ({ page }) => {
 
   await page.getByRole('button', { name: 'Top-up' }).click();
 
-  // Handle race condition: loading overlay might appear and disappear very quickly in CI
-  await page.waitForTimeout(LOADING_OVERLAY_DELAY);
+  // Wait for loading overlay to become visible
+  await page.waitForSelector('#loading-overlay', {
+    state: 'visible',
+    timeout: 10000,
+  });
 
-  try {
-    await page.waitForSelector('#loading-overlay', {
-      state: 'visible',
-      timeout: 1000,
-    });
-  } catch {
-    // Loading might have already completed - that's okay
-  }
-
-  // Always wait for loading to be hidden
+  // Wait for loading overlay to disappear
   await page.waitForSelector('#loading-overlay', {
     state: 'hidden',
     timeout: 30000,
@@ -110,19 +94,11 @@ test('Canister Dashboard Frontend Suite', async ({ page }) => {
   await page.fill('#controller-input', TEST_CONTROLLER);
   await page.click('#controller-add');
 
-  // Handle race condition: loading overlay might appear and disappear very quickly in CI
-  await page.waitForTimeout(LOADING_OVERLAY_DELAY);
-
-  try {
-    await page.waitForSelector('#loading-overlay', {
-      state: 'visible',
-      timeout: 1000,
-    });
-  } catch {
-    // Loading might have already completed - that's okay
-  }
-
-  // Always wait for loading to be hidden
+  // Wait for loading overlay to appear and disappear
+  await page.waitForSelector('#loading-overlay', {
+    state: 'visible',
+    timeout: 10000,
+  });
   await page.waitForSelector('#loading-overlay', {
     state: 'hidden',
     timeout: 10000,
@@ -142,19 +118,11 @@ test('Canister Dashboard Frontend Suite', async ({ page }) => {
   await page.fill('#controller-input', TEST_CONTROLLER);
   await page.click('#controller-remove');
 
-  // Handle race condition: loading overlay might appear and disappear very quickly in CI
-  await page.waitForTimeout(LOADING_OVERLAY_DELAY);
-
-  try {
-    await page.waitForSelector('#loading-overlay', {
-      state: 'visible',
-      timeout: 1000,
-    });
-  } catch {
-    // Loading might have already completed - that's okay
-  }
-
-  // Always wait for loading to be hidden
+  // Wait for loading overlay to appear and disappear
+  await page.waitForSelector('#loading-overlay', {
+    state: 'visible',
+    timeout: 10000,
+  });
   await page.waitForSelector('#loading-overlay', {
     state: 'hidden',
     timeout: 10000,
@@ -181,19 +149,11 @@ test('Canister Dashboard Frontend Suite', async ({ page }) => {
     await page.fill('#alternative-origin-input', origin);
     await page.click('#alternative-origin-add');
 
-    // Handle race condition: loading overlay might appear and disappear very quickly in CI
-    await page.waitForTimeout(LOADING_OVERLAY_DELAY);
-
-    try {
-      await page.waitForSelector('#loading-overlay', {
-        state: 'visible',
-        timeout: 1000,
-      });
-    } catch {
-      // Loading might have already completed - that's okay
-    }
-
-    // Always wait for loading to be hidden
+    // Wait for loading overlay to appear and disappear
+    await page.waitForSelector('#loading-overlay', {
+      state: 'visible',
+      timeout: 10000,
+    });
     await page.waitForSelector('#loading-overlay', {
       state: 'hidden',
       timeout: 10000,
@@ -219,19 +179,11 @@ test('Canister Dashboard Frontend Suite', async ({ page }) => {
     await page.fill('#alternative-origin-input', origin);
     await page.click('#alternative-origin-remove');
 
-    // Handle race condition: loading overlay might appear and disappear very quickly in CI
-    await page.waitForTimeout(LOADING_OVERLAY_DELAY);
-
-    try {
-      await page.waitForSelector('#loading-overlay', {
-        state: 'visible',
-        timeout: 1000,
-      });
-    } catch {
-      // Loading might have already completed - that's okay
-    }
-
-    // Always wait for loading to be hidden
+    // Wait for loading overlay to appear and disappear
+    await page.waitForSelector('#loading-overlay', {
+      state: 'visible',
+      timeout: 10000,
+    });
     await page.waitForSelector('#loading-overlay', {
       state: 'hidden',
       timeout: 10000,
