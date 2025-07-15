@@ -1,13 +1,3 @@
 import rootConfig from '../eslint.config.js';
 
-export default [
-  ...rootConfig,
-  {
-    languageOptions: {
-      parserOptions: {
-        project: './tsconfig.json',
-        tsconfigRootDir: import.meta.dirname,
-      },
-    },
-  },
-];
+export default rootConfig;
