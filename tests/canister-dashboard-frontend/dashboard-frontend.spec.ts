@@ -13,6 +13,7 @@ test('Canister Dashboard Frontend Suite', async ({ page }) => {
     'https://22ajg-aqaaa-aaaap-adukq-cai.icp0.io',
     'https://my-canister.app',
   ];
+  const LOADING_OVERLAY_DELAY = 500; // Wait time before checking loading overlay state
   // Read the saved ii anchor from the previous test
   const iiAnchor = readTestData('ii-anchor.txt');
 
@@ -41,7 +42,7 @@ test('Canister Dashboard Frontend Suite', async ({ page }) => {
 
   // Handle race condition: loading overlay might appear and disappear very quickly in CI
   // First, wait a brief moment to allow the loading to start
-  await page.waitForTimeout(50);
+  await page.waitForTimeout(LOADING_OVERLAY_DELAY);
 
   // Try to catch the loading state, but don't fail if it's too fast
   try {
@@ -76,7 +77,7 @@ test('Canister Dashboard Frontend Suite', async ({ page }) => {
   await page.getByRole('button', { name: 'Top-up' }).click();
 
   // Handle race condition: loading overlay might appear and disappear very quickly in CI
-  await page.waitForTimeout(50);
+  await page.waitForTimeout(LOADING_OVERLAY_DELAY);
 
   try {
     await page.waitForSelector('#loading-overlay', {
@@ -110,7 +111,7 @@ test('Canister Dashboard Frontend Suite', async ({ page }) => {
   await page.click('#controller-add');
 
   // Handle race condition: loading overlay might appear and disappear very quickly in CI
-  await page.waitForTimeout(50);
+  await page.waitForTimeout(LOADING_OVERLAY_DELAY);
 
   try {
     await page.waitForSelector('#loading-overlay', {
@@ -142,7 +143,7 @@ test('Canister Dashboard Frontend Suite', async ({ page }) => {
   await page.click('#controller-remove');
 
   // Handle race condition: loading overlay might appear and disappear very quickly in CI
-  await page.waitForTimeout(50);
+  await page.waitForTimeout(LOADING_OVERLAY_DELAY);
 
   try {
     await page.waitForSelector('#loading-overlay', {
@@ -181,7 +182,7 @@ test('Canister Dashboard Frontend Suite', async ({ page }) => {
     await page.click('#alternative-origin-add');
 
     // Handle race condition: loading overlay might appear and disappear very quickly in CI
-    await page.waitForTimeout(50);
+    await page.waitForTimeout(LOADING_OVERLAY_DELAY);
 
     try {
       await page.waitForSelector('#loading-overlay', {
@@ -219,7 +220,7 @@ test('Canister Dashboard Frontend Suite', async ({ page }) => {
     await page.click('#alternative-origin-remove');
 
     // Handle race condition: loading overlay might appear and disappear very quickly in CI
-    await page.waitForTimeout(50);
+    await page.waitForTimeout(LOADING_OVERLAY_DELAY);
 
     try {
       await page.waitForSelector('#loading-overlay', {
