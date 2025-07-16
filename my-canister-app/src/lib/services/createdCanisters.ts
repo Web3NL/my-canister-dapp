@@ -12,11 +12,17 @@ export function createDashboardUrl(canisterId: string): string {
   return `${origin}/canister-dashboard`;
 }
 
+export function createFrontpageUrl(canisterId: string): string {
+  const origin = createDerivationOrigin(canisterId);
+  return origin;
+}
+
 function createTransactionUrl(transactionHash: string): string {
   return `https://dashboard.internetcomputer.org/transaction/${transactionHash}`;
 }
 
 export interface CreatedCanister {
+  frontpageUrl: string;
   dashboardUrl: string;
   transactionUrl: string;
   blockId: bigint;
@@ -50,6 +56,7 @@ export async function getCreatedCanister(
   }
 
   return {
+    frontpageUrl: createFrontpageUrl(canisterId.toText()),
     dashboardUrl: createDashboardUrl(canisterId.toText()),
     transactionUrl: createTransactionUrl(transactionHash),
     blockId: blockId,
