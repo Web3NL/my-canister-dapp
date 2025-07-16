@@ -1,11 +1,11 @@
 [package]
 name = "my-canister-frontend"
-version = "0.1.1"
+version = "0.1.2"
 description = "Frontend asset utilities Canister Dapps"
 edition = { workspace = true }
 license = { workspace = true }
 authors = { workspace = true }
-repository = "https://github.com/Web3NL/my-canister-dashboard/tree/main/my-canister-dapp-rs/my-canister-frontend"
+repository = "https://github.com/Web3NL/my-canister-dapp/tree/main/my-canister-dapp-rs/my-canister-frontend"
 
 [lib]
 crate-type = ["rlib"]
