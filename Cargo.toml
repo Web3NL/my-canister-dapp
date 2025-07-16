@@ -30,4 +30,4 @@ sha2 = "0.10.9"
 my-canister-dashboard = { path = "my-canister-dapp-rs/my-canister-dashboard" }
 
 [workspace.metadata.release]
-pre-release-hook = ["./scripts/rust-lint-format.sh"]
+pre-release-hook = ["../../scripts/rust-lint-format.sh"]
