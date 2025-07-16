@@ -16,9 +16,10 @@
     "examples/my-hello-world/src/my-hello-world-frontend"
   ],
   "scripts": {
-    "build": "npm run build --workspaces",
+    "build": "npm run build --workspaces && npm run copy-dashboard-assets",
     "build:app": "npm run build --workspace=my-canister-app",
     "build:docs": "npm run docs:clean --workspace=@web3nl/my-canister-dashboard && npm run docs:build --workspace=@web3nl/my-canister-dashboard",
+    "copy-dashboard-assets": "mkdir -p my-canister-dapp-rs/my-canister-dashboard/assets/ && cp -r my-canister-dapp-js/canister-dashboard-frontend/dist/* my-canister-dapp-rs/my-canister-dashboard/assets/",
     "check": "npm run lint --workspaces && npm run format --workspaces && npm run typecheck --workspaces",
     "fix": "npm run lint:fix --workspaces && npm run format:fix --workspaces && npm run typecheck --workspaces",
     "test:ii-setup": "playwright test --project=setup-internet-identity",
