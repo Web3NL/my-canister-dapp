@@ -54,8 +54,10 @@
       {#each createdCanisters as canister (canister.blockId)}
         <InstalledDappCard
           name={canister.name}
+          frontpageUrl={canister.frontpageUrl}
           dashboardUrl={canister.dashboardUrl}
           transactionUrl={canister.transactionUrl}
+          blockId={canister.blockId}
         />
       {/each}
     </div>
