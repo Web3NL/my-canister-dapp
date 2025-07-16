@@ -2,9 +2,34 @@ use ic_asset_certification::{Asset, AssetConfig, AssetEncoding, AssetFallbackCon
 use ic_http_certification::StatusCode;
 use include_dir::Dir;
 
-/// Process a directory of assets and create Asset and AssetConfig vectors
-/// suitable for use with AssetRouter.certify_assets()
-pub fn process_assets_dir(
+/// Process a [`Dir`](https://docs.rs/include_dir/latest/include_dir/struct.Dir.html) of frontend assets and create [`Asset`](https://docs.rs/ic-asset-certification/latest/ic_asset_certification/struct.Asset.html) and [`AssetConfig`](https://docs.rs/ic-asset-certification/latest/ic_asset_certification/enum.AssetConfig.html) vectors
+/// suitable for use with [`AssetRouter.certify_assets()`](https://docs.rs/ic-asset-certification/latest/ic_asset_certification/struct.AssetRouter.html).
+///
+/// All assets are configured as `AssetConfig::File` with automatic MIME type detection using [`mime_guess`](https://docs.rs/mime_guess/latest/mime_guess/).
+/// The `index.html` file, if present, is configured as a fallback for `/` route.
+///
+/// # Arguments
+///
+/// * `assets_dir` - A static directory containing the assets to process
+///
+/// # Returns
+///
+/// A tuple containing:
+/// * `Vec<`[`Asset`](https://docs.rs/ic-asset-certification/latest/ic_asset_certification/struct.Asset.html)`>` - Vector of assets with their content
+/// * `Vec<`[`AssetConfig`](https://docs.rs/ic-asset-certification/latest/ic_asset_certification/enum.AssetConfig.html)`>` - Vector of asset configurations for routing
+///
+/// # Example
+///
+/// ```rust,ignore
+/// use include_dir::{include_dir, Dir};
+/// use my_canister_frontend::asset_router_configs;
+///
+/// static ASSETS: Dir = include_dir!("$CARGO_MANIFEST_DIR/assets");
+///
+/// let (assets, configs) = asset_router_configs(&ASSETS);
+/// // Use with AssetRouter.certify_assets(assets, configs)
+/// ```
+pub fn asset_router_configs(
     assets_dir: &Dir<'static>,
 ) -> (Vec<Asset<'static, 'static>>, Vec<AssetConfig>) {
     let mut assets = Vec::new();

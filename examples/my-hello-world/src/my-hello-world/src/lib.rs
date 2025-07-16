@@ -8,7 +8,7 @@ use my_canister_dashboard::{
     guards::only_canister_controllers_guard, ManageAlternativeOriginsArg,
     ManageAlternativeOriginsResult, ManageIIPrincipalArg, ManageIIPrincipalResult, WasmStatus,
 };
-use my_canister_frontend::process_assets_dir;
+use my_canister_frontend::asset_router_configs;
 use std::borrow::Cow;
 use std::cell::RefCell;
 
@@ -33,7 +33,7 @@ fn init() {
             ]),
         );
 
-        let (assets, asset_configs) = process_assets_dir(&FRONTEND_DIR);
+        let (assets, asset_configs) = asset_router_configs(&FRONTEND_DIR);
         router
             .certify_assets(assets, asset_configs)
             .expect("Failed to certify frontend assets");
