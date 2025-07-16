@@ -39,4 +39,7 @@ export default defineConfig({
     ],
     dedupe: ['@dfinity/agent'],
   },
+  define: {
+    'process.env': process.env,
+  },
 });
