@@ -1,3 +1,5 @@
+#![doc = include_str!("../README.md")]
+
 mod dashboard;
 pub mod guards;
 pub mod setup;

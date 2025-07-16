@@ -6,18 +6,45 @@ thread_local! {
     static II_PRINCIPAL: RefCell<Option<Principal>> = const { RefCell::new(None) };
 }
 
+/// Arguments for managing the Internet Identity principal at user dapp domain.
 #[derive(CandidType, Serialize, Deserialize, Clone, Debug)]
 pub enum ManageIIPrincipalArg {
+    /// Set the II principal to the provided value.
     Set(Principal),
+    /// Get the currently stored II principal.
     Get,
 }
 
+/// Result of managing the Internet Identity principal.
 #[derive(CandidType, Serialize, Deserialize, Clone, Debug)]
 pub enum ManageIIPrincipalResult {
+    /// Operation succeeded, returns the principal.
     Ok(Principal),
+    /// Operation failed with an error message.
     Err(String),
 }
 
+/// Manages the storage for Internet Identity principal at user dapp domain
+///
+/// # Arguments
+///
+/// * `arg` - The operation to perform (Set or Get)
+///
+/// # Returns
+///
+/// The result of the operation containing either the principal or an error.
+///
+/// # Example
+///
+/// ```rust
+/// use my_canister_dashboard::{ManageIIPrincipalArg, ManageIIPrincipalResult, guards::only_canister_controllers_guard};
+/// use ic_cdk::update;
+///
+/// #[update(guard = "only_canister_controllers_guard")]
+/// fn manage_ii_principal(arg: ManageIIPrincipalArg) -> ManageIIPrincipalResult {
+///     my_canister_dashboard::manage_ii_principal(arg)
+/// }
+/// ```
 pub fn manage_ii_principal(arg: ManageIIPrincipalArg) -> ManageIIPrincipalResult {
     match arg {
         ManageIIPrincipalArg::Set(principal) => {

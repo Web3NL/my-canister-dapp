@@ -1,3 +1,5 @@
+#![doc = include_str!("../README.md")]
+
 use ic_asset_certification::{Asset, AssetConfig, AssetEncoding, AssetFallbackConfig};
 use ic_http_certification::StatusCode;
 use include_dir::Dir;
@@ -20,7 +22,7 @@ use include_dir::Dir;
 ///
 /// # Example
 ///
-/// ```rust,ignore
+/// ```rust
 /// use include_dir::{include_dir, Dir};
 /// use my_canister_frontend::asset_router_configs;
 ///

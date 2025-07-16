@@ -1,3 +1,5 @@
+#![doc = include_str!("../README.md")]
+
 use candid::Principal;
 use serde::{Deserialize, Serialize};
 // use sha2::{Digest, Sha256};

@@ -1,7 +1,9 @@
 # My Canister Frontend
 
-[![Crates.io](https://img.shields.io/crates/v/my-canister-frontend.svg)](https://crates.io/crates/my-canister-frontend)
+[![Crates.io](https://img.shields.io/crates/v/my-canister-frontend)](https://crates.io/crates/my-canister-frontend)
 [![Documentation](https://docs.rs/my-canister-frontend/badge.svg)](https://docs.rs/my-canister-frontend)
+[![Build Status](https://github.com/Web3NL/my-canister-dapp/workflows/Release/badge.svg)](https://github.com/Web3NL/my-canister-dapp/actions)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
 
 Frontend asset processing library for Internet Computer Canister Dapps.
 

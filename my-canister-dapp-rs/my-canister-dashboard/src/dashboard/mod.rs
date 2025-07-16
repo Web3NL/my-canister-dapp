@@ -5,14 +5,19 @@ pub mod wasm_status;
 use ic_asset_certification::{Asset, AssetConfig, AssetEncoding, AssetRouter};
 use include_dir::{Dir, include_dir};
 
-// Dashboard asset path constants
+/// Path to the canister dashboard HTML endpoint
 pub const CANISTER_DASHBOARD_HTML_PATH: &str = "/canister-dashboard";
+
+/// Path to the canister dashboard JavaScript file
 pub const CANISTER_DASHBOARD_JS_PATH: &str = "/canister-dashboard/index.js";
+
+/// Path to the canister dashboard CSS file
 pub const CANISTER_DASHBOARD_CSS_PATH: &str = "/canister-dashboard/style.css";
+
+/// Path to the Internet Identity alternative origins file
 pub const ALTERNATIVE_ORIGINS_PATH: &str = "/.well-known/ii-alternative-origins";
 
-static ASSETS_DIR: Dir<'_> =
-    include_dir!("$CARGO_MANIFEST_DIR/../../my-canister-dapp-js/canister-dashboard-frontend/dist");
+static ASSETS_DIR: Dir<'_> = include_dir!("$CARGO_MANIFEST_DIR/assets");
 
 // Functions from assets.rs
 pub fn add_dashboard_assets_to_router(asset_router: &mut AssetRouter) -> Result<(), String> {
