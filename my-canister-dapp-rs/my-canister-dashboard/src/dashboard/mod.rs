@@ -17,8 +17,7 @@ pub const CANISTER_DASHBOARD_CSS_PATH: &str = "/canister-dashboard/style.css";
 /// Path to the Internet Identity alternative origins file
 pub const ALTERNATIVE_ORIGINS_PATH: &str = "/.well-known/ii-alternative-origins";
 
-static ASSETS_DIR: Dir<'_> =
-    include_dir!("$CARGO_MANIFEST_DIR/../../my-canister-dapp-js/canister-dashboard-frontend/dist");
+static ASSETS_DIR: Dir<'_> = include_dir!("$CARGO_MANIFEST_DIR/assets");
 
 // Functions from assets.rs
 pub fn add_dashboard_assets_to_router(asset_router: &mut AssetRouter) -> Result<(), String> {

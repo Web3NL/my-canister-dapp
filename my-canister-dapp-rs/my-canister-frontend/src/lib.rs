@@ -22,7 +22,7 @@ use include_dir::Dir;
 ///
 /// # Example
 ///
-/// ```rust,ignore
+/// ```rust
 /// use include_dir::{include_dir, Dir};
 /// use my_canister_frontend::asset_router_configs;
 ///
