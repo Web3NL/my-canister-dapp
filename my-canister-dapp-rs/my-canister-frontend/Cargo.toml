@@ -2,6 +2,10 @@
 name = "my-canister-frontend"
 version = "0.1.2"
 description = "Frontend asset utilities Canister Dapps"
+documentation = "https://docs.rs/my-canister-frontend"
+readme = "README.md"
+keywords = ["internet-computer", "canister", "frontend", "assets", "dapp"]
+categories = ["web-programming", "development-tools"]
 edition = { workspace = true }
 license = { workspace = true }
 authors = { workspace = true }
