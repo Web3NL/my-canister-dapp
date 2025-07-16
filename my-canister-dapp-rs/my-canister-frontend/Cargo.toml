@@ -1,6 +1,6 @@
 [package]
 name = "my-canister-frontend"
-version = "0.1.0"
+version = "0.1.1"
 description = "Frontend asset utilities Canister Dapps"
 edition = { workspace = true }
 license = { workspace = true }
