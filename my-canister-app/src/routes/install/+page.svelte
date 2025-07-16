@@ -12,13 +12,17 @@
   import { onMount, onDestroy } from 'svelte';
   import { browser } from '$app/environment';
   import { page } from '$app/stores';
-  import { MIN_CANISTER_CREATION_BALANCE } from '$lib/constants';
+  import { E8S_PER_TOKEN, MIN_CANISTER_CREATION_BALANCE } from '$lib/constants';
   import { createDashboardUrl } from '$lib/services/createdCanisters';
   import GoodNewsCard from '$lib/components/install/GoodNewsCard.svelte';
   import ConnectIICard from '$lib/components/install/ConnectIICard.svelte';
   import FundAccountCard from '$lib/components/install/FundAccountCard.svelte';
 
   const principalText = $authStore ? $authStore.toText() : '';
+  const minimumBalance = (
+    Number(MIN_CANISTER_CREATION_BALANCE) / Number(E8S_PER_TOKEN)
+  ).toFixed(2);
+
   let formattedBalance = '0.00000000 ICP';
   let canisterPrincipal: Principal | null = null;
   let balanceTimer: ReturnType<typeof setInterval> | null = null;
@@ -167,6 +171,7 @@
 {#if currentStep === 1 || currentStep === 2}
   <FundAccountCard
     {principalText}
+    {minimumBalance}
     {formattedBalance}
     showSpinner={balanceTimer !== null}
     disabled={currentBalance < MIN_CANISTER_CREATION_BALANCE}

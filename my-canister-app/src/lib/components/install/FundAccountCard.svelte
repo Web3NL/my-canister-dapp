@@ -8,6 +8,7 @@
   } from '@dfinity/gix-components';
 
   export let principalText: string;
+  export let minimumBalance: string;
   export let formattedBalance: string;
   export let showSpinner: boolean;
   export let disabled: boolean;
@@ -16,6 +17,8 @@
 
 <Card>
   <h3>Fund account</h3>
+
+  <p>Deposit {minimumBalance} ICP to create your Dapp</p>
 
   <div class="keyVal">
     <KeyValuePair>
