@@ -28,8 +28,8 @@ fn init() {
         my_canister_dashboard::setup::setup_dashboard_assets(
             &mut router,
             Some(vec![
+                "https://mycanister.app".to_string(),
                 "http://localhost:5174".to_string(),
-                "https://c7lwu-3qaaa-aaaam-qbgia-cai.icp0.io".to_string(),
             ]),
         );
 
