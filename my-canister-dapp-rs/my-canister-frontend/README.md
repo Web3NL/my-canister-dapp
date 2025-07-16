@@ -1,6 +1,9 @@
-# my-canister-frontend
+# My Canister Frontend
 
-Frontend asset processing library for Internet Computer canisters.
+[![Crates.io](https://img.shields.io/crates/v/my-canister-frontend.svg)](https://crates.io/crates/my-canister-frontend)
+[![Documentation](https://docs.rs/my-canister-frontend/badge.svg)](https://docs.rs/my-canister-frontend)
+
+Frontend asset processing library for Internet Computer Canister Dapps.
 
 ## Usage
 
