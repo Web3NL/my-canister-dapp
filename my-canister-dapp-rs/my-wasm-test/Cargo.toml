@@ -16,4 +16,4 @@ ic-cdk = { workspace = true }
 pocket-ic = { workspace = true }
 ic-http-certification = { workspace = true }
 
-my-canister-dashboard = { workspace = true }
+my-canister-dashboard = "=0.5.1"
