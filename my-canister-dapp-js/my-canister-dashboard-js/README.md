@@ -1,6 +1,6 @@
-# @web3nl/my-canister-dashboard
+Utility functions for Canister Dapps on the Internet Computer.
 
-Utility functions for canisters using My Canister Dashboard on the Internet Computer.
+Used in conjunction with [my-canister-dashboard Rust crate](https://crates.io/crates/my-canister-dashboard)
 
 ## Installation
 
@@ -11,19 +11,3 @@ npm install @web3nl/my-canister-dashboard
 ## Usage
 
 ### Basic Setup
-
-```typescript
-import { MyCanisterDashboard } from '@web3nl/my-canister-dashboard';
-
-const agent = await HttpAgent.create(...);
-const canisterId = Principal.fromText('your-canister-id');
-
-const dashboard = MyCanisterDashboard.create(agent, canisterId);
-```
-
-### Check Cycles Balance
-
-```typescript
-// Basic cycles check
-const result = await dashboard.checkCyclesBalance();
-```

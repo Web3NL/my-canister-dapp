@@ -1,6 +1,11 @@
 {
   "$schema": "https://typedoc.org/schema.json",
-  "entryPoints": ["./src/index.ts"],
+  "entryPoints": [
+    "./src/index.ts"
+  ],
   "out": "./docs",
-  "name": "@web3nl/my-canister-dashboard"
+  "name": "@web3nl/my-canister-dashboard",
+  "excludeExternals": false,
+  "includeVersion": true,
+  "readme": "README.md"
 }
