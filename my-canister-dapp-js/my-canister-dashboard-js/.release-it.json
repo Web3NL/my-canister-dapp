@@ -12,8 +12,7 @@
         "access": "public"
     },
     "github": {
-        "release": true,
-        "releaseName": "@web3nl/my-canister-dashboard v${version}"
+        "release": false
     },
     "hooks": {
         "before:init": [
