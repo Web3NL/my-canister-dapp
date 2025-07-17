@@ -18,7 +18,7 @@ mkdir -p wasm/dev
 cp target/wasm32-unknown-unknown/release/my-hello-world.wasm wasm/dev/my-hello-world-dev.wasm
 cp target/wasm32-unknown-unknown/release/my-hello-world.wasm.gz wasm/dev/my-hello-world-dev.wasm.gz
 
-# Build canister-dashboard-frontend for production
+# Build canister-dashboard-frontend for production again to ensure dist/ contains production files
 echo "Building canister-dashboard-frontend (prod)..."
 npm run build --workspace=canister-dashboard-frontend
 

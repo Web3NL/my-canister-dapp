@@ -16,7 +16,10 @@ ic-wasm target/wasm32-unknown-unknown/release/my_hello_world.wasm -o target/wasm
 # Shrink WASM
 ic-wasm target/wasm32-unknown-unknown/release/my_hello_world_optimized.wasm -o target/wasm32-unknown-unknown/release/my-hello-world.wasm shrink
 
-# Compress WASM
-gzip -kf target/wasm32-unknown-unknown/release/my-hello-world.wasm
+# Compress
+# -k: keep original file
+# -f: force overwrite existing .gz file
+# -n: don't save original filename/timestamp (for deterministic builds)
+gzip -kfn target/wasm32-unknown-unknown/release/my-hello-world.wasm
 
 echo "✅ my-hello-world build complete!"
