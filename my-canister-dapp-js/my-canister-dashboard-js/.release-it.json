@@ -1,0 +1,28 @@
+{
+    "git": {
+        "requireBranch": [
+            "main"
+        ],
+        "commitMessage": "chore: release @web3nl/my-canister-dashboard v${version}",
+        "tagName": "web3nl/my-canister-dashboard-v${version}",
+        "tagAnnotation": "Release @web3nl/my-canister-dashboard v${version}"
+    },
+    "npm": {
+        "publish": true,
+        "access": "public"
+    },
+    "github": {
+        "release": true,
+        "releaseName": "@web3nl/my-canister-dashboard v${version}"
+    },
+    "hooks": {
+        "before:init": [
+            "npm run lint",
+            "npm run typecheck"
+        ],
+        "after:bump": [
+            "npm run build"
+        ],
+        "after:release": "echo Successfully released @web3nl/my-canister-dashboard v${version}"
+    }
+}

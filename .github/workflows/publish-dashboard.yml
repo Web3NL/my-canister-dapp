@@ -1,0 +1,54 @@
+name: Publish Dashboard Package
+
+on:
+  push:
+    tags:
+      - 'web3nl/my-canister-dashboard-v*'
+
+jobs:
+  publish:
+    name: Publish to NPM and GitHub Pages
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pages: write
+      id-token: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build package
+        run: npm run build --workspace=@web3nl/my-canister-dashboard
+
+      - name: Build documentation
+        run: npm run build:docs
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload docs to Pages
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: './my-canister-dapp-js/my-canister-dashboard-js/docs'
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+      - name: Publish to NPM
+        run: npm publish --workspace=@web3nl/my-canister-dashboard
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
