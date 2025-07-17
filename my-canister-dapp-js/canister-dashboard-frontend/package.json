@@ -1,7 +1,7 @@
 {
   "name": "canister-dashboard-frontend",
-  "version": "0.4.0-beta.24",
-  "description": "Self-contained dashboard for Internet Computer canisters (BETA - not production ready)",
+  "version": "0.5.1",
+  "description": "Dashboard frontend assets for Internet Computer Canister Dapps",
   "repository": "https://github.com/Web3NL/my-canister-dashboard/tree/main/my-canister-dapp-js/canister-dashboard-frontend",
   "type": "module",
   "engines": {
