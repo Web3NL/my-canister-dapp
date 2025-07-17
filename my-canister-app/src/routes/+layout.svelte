@@ -8,7 +8,6 @@
     Toasts,
   } from '@dfinity/gix-components';
   import Menu from '$lib/layout/Menu.svelte';
-  import LoginBanner from '$lib/components/LoginBanner.svelte';
   import { authStore } from '$lib/stores/auth';
 
   const handleLogout = async () => {
@@ -25,20 +24,16 @@
   <Content>
     <div slot="title"><ThemeToggleButton /></div>
     <button slot="toolbar-end" on:click={handleLogout}><IconLogout /></button>
+    <div class="development-warning">
+      <p>DEMO</p>
+      <p>
+        Dapps can be installed for small amounts of ICP but are useless in
+        practice
+      </p>
+    </div>
 
     <main>
-      <div class="development-warning">
-        <p>DEMO</p>
-        <p>
-          Dapps can be installed for small amounts of ICP but are useless in
-          practice
-        </p>
-      </div>
-      {#if !$authStore}
-        <LoginBanner />
-      {:else}
-        <slot />
-      {/if}
+      <slot />
     </main>
   </Content>
 </Layout>
