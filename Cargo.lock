@@ -237,9 +237,9 @@ dependencies = [
 
 [[package]]
 name = "crc32fast"
-version = "1.4.2"
+version = "1.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a97769d94ddab943e4510d138150169a2758b5ef3eb191a9ee688de3e23ef7b3"
+checksum = "9481c1c90cbf2ac953f07c8d4a58aa3945c425b7185c9154d67a65e4230da511"
 dependencies = [
  "cfg-if",
 ]
@@ -1137,8 +1137,37 @@ dependencies = [
 ]
 
 [[package]]
+name = "my-canister-dashboard"
+version = "0.5.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a34507cf92bdcbc4176e36446d340ee9791d8a7fe5e0c7d506c825981fbaeaf2"
+dependencies = [
+ "candid",
+ "ic-asset-certification",
+ "ic-cdk",
+ "ic-http-certification",
+ "include_dir",
+ "mime_guess",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
 name = "my-canister-frontend"
 version = "0.1.3"
+dependencies = [
+ "ic-asset-certification",
+ "ic-cdk",
+ "ic-http-certification",
+ "include_dir",
+ "mime_guess",
+]
+
+[[package]]
+name = "my-canister-frontend"
+version = "0.1.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1650ec0a286528a6d74912b8159d8a687b0d23f1d9ab174253b57101a093730c"
 dependencies = [
  "ic-asset-certification",
  "ic-cdk",
@@ -1156,8 +1185,8 @@ dependencies = [
  "ic-cdk",
  "ic-http-certification",
  "include_dir",
- "my-canister-dashboard",
- "my-canister-frontend",
+ "my-canister-dashboard 0.5.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "my-canister-frontend 0.1.3 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
@@ -1168,7 +1197,7 @@ dependencies = [
  "hex",
  "ic-cdk",
  "ic-http-certification",
- "my-canister-dashboard",
+ "my-canister-dashboard 0.5.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "pocket-ic",
  "serde",
  "serde_json",
@@ -1635,15 +1664,15 @@ checksum = "357703d41365b4b27c590e3ed91eabb1b663f07c4c084095e60cbed4362dff0d"
 
 [[package]]
 name = "rustix"
-version = "1.0.7"
+version = "1.0.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c71e83d6afe7ff64890ec6b71d6a69bb8a610ab78ce364b3352876bb4c801266"
+checksum = "11181fbabf243db407ef8df94a6ce0b2f9a733bd8be4ad02b4eda9602296cac8"
 dependencies = [
  "bitflags",
  "errno",
  "libc",
  "linux-raw-sys",
- "windows-sys 0.59.0",
+ "windows-sys 0.60.2",
 ]
 
 [[package]]
