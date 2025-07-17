@@ -32,6 +32,9 @@ export interface MyDashboardBackendConfig {
   canisterId: string | Principal;
 }
 
+/**
+ * Create an canister actor for the My Canister Dashboard backend.
+ */
 export function createMyCanisterActor(
   config: MyDashboardBackendConfig
 ): ActorSubclass<MyDashboardService> {
