@@ -8,13 +8,13 @@
   export let memo: string;
 
   function handleInstall() {
-    goto(`/install?id=${id}`);
+    goto(`/install?id=${id}&name=${name}`);
   }
 </script>
 
 <Card>
   <h4>{name}</h4>
-  <p>{memo}</p>
+  <p class="memo">{memo}</p>
   <p class="version">Version: {version}</p>
   <button class="primary" on:click={handleInstall}>Install</button>
 </Card>

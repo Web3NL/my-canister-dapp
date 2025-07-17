@@ -13,10 +13,14 @@
   import { browser } from '$app/environment';
   import { page } from '$app/stores';
   import { E8S_PER_TOKEN, MIN_CANISTER_CREATION_BALANCE } from '$lib/constants';
-  import { createDashboardUrl } from '$lib/services/createdCanisters';
+  import {
+    createFrontpageUrl,
+    createDashboardUrl,
+  } from '$lib/services/createdCanisters';
   import GoodNewsCard from '$lib/components/install/GoodNewsCard.svelte';
   import ConnectIICard from '$lib/components/install/ConnectIICard.svelte';
   import FundAccountCard from '$lib/components/install/FundAccountCard.svelte';
+  import { goto } from '$app/navigation';
 
   const principalText = $authStore ? $authStore.toText() : '';
   const minimumBalance = (
@@ -30,6 +34,10 @@
 
   $: wasmId = $page.url.searchParams.get('id');
   $: wasmIdNumber = wasmId != null ? parseInt(wasmId, 10) : null;
+
+  $: dappName = $page.url.searchParams.get('name');
+  $: dappNameText =
+    dappName != null && dappName.length > 0 ? dappName.toString() : null;
 
   const CANISTER_STORAGE_KEY = 'pendingCanisterId';
 
@@ -110,7 +118,8 @@
 
   async function createCanister() {
     if (wasmIdNumber == null) {
-      throw new Error('WASM ID is required');
+      goto('/dapp-store');
+      return;
     }
 
     busyStore.startBusy({
@@ -145,6 +154,11 @@
   }
 
   onMount(() => {
+    if (!wasmIdNumber || !dappNameText) {
+      goto('/dapp-store');
+      return;
+    }
+
     if (browser) {
       const storedCanisterId = localStorage.getItem(CANISTER_STORAGE_KEY);
       if (storedCanisterId != null) {
@@ -163,8 +177,9 @@
   });
 </script>
 
-<h1>Install Web3 dApp</h1>
-<div style="margin-bottom: 30px;">
+<h1>Install Dapp</h1>
+<h3>{dappNameText}</h3>
+<div id="progress-steps">
   <ProgressSteps {steps} />
 </div>
 
@@ -180,8 +195,14 @@
 {:else if currentStep === 3}
   <ConnectIICard onConnect={takeControlOfCanister} />
 {:else if currentStep === 4 && canisterPrincipal}
-  <GoodNewsCard dashboardUrl={createDashboardUrl(canisterPrincipal.toText())} />
+  <GoodNewsCard
+    frontPageUrl={createFrontpageUrl(canisterPrincipal.toText())}
+    dashboardUrl={createDashboardUrl(canisterPrincipal.toText())}
+  />
 {/if}
 
 <style>
+  #progress-steps {
+    margin: 1rem 0 1rem 0;
+  }
 </style>
