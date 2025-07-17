@@ -1,5 +1,11 @@
 import { Principal } from '@dfinity/principal';
 
+/**
+ * Infer the canister ID from the current window location.
+ * In production, we expect the canister ID to be in the hostname (e.g., https://canister-id.icp0.io).
+ * In development, we try catch this function. It may succeed when served from dfx (http://canister-id.localhost:port) or it may fail when served from a dev server (http://localhost:port).
+ * I case of dev server, you need to manually obtain a canister-id
+ */
 export function inferCanisterIdFromLocation(): Principal {
   const hostname = window.location.hostname;
   const protocol = window.location.protocol;

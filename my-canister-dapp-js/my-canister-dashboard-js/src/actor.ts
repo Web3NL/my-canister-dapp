@@ -13,7 +13,6 @@ import type {
   WasmStatus,
 } from '$declarations/my-canister/my-canister.did.d';
 
-// Re-export types for convenience
 export type {
   _SERVICE as MyDashboardService,
   HttpRequest,
@@ -25,6 +24,9 @@ export type {
   WasmStatus,
 } from '$declarations/my-canister/my-canister.did.d';
 
+/**
+ * Configuration for MyDashboardBackend
+ */
 export interface MyDashboardBackendConfig {
   agent: HttpAgent;
   canisterId: string | Principal;
@@ -44,7 +46,7 @@ export function createMyCanisterActor(
 }
 
 /**
- * MyDashboardBackend class for canister interactions
+ * MyDashboardBackend actor class for the dashboard of a Canister Dapp
  */
 export class MyDashboardBackend {
   private actor: ActorSubclass<MyDashboardService>;
@@ -62,7 +64,7 @@ export class MyDashboardBackend {
   }
 
   /**
-   * Handle HTTP requests to the canister
+   * Handle HTTP requests to the Canister Dapp
    */
   async httpRequest(request: HttpRequest): Promise<HttpResponse> {
     return await (
@@ -71,7 +73,7 @@ export class MyDashboardBackend {
   }
 
   /**
-   * Update alternative origins for the canister
+   * Update alternative origins for the Canister Dapp
    */
   async manageAlternativeOrigins(
     arg: ManageAlternativeOriginsArg
@@ -84,7 +86,7 @@ export class MyDashboardBackend {
   }
 
   /**
-   * Update or get the Internet Identity principal
+   * Update or get the Internet Identity principal of the Canister Dapp
    */
   async manageIIPrincipal(
     arg: ManageIIPrincipalArg
@@ -97,7 +99,7 @@ export class MyDashboardBackend {
   }
 
   /**
-   * Get the WASM status of the canister
+   * Get the WASM status of the Canister Dapp
    */
   async wasmStatus(): Promise<WasmStatus> {
     return await (this.actor.wasm_status as () => Promise<WasmStatus>)();
