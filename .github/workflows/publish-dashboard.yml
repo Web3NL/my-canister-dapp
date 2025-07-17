@@ -39,16 +39,16 @@ jobs:
       - name: Setup Pages
         uses: actions/configure-pages@v4
 
+      - name: Create docs structure
+        run: |
+          mkdir -p ./pages-deploy/web3nl-my-canister-dashboard-js
+          cp -r ./my-canister-dapp-js/my-canister-dashboard-js/docs/* ./pages-deploy/web3nl-my-canister-dashboard-js/
+
       - name: Upload docs to Pages
         uses: actions/upload-pages-artifact@v3
         with:
-          path: './my-canister-dapp-js/my-canister-dashboard-js/docs'
+          path: './pages-deploy'
 
       - name: Deploy to GitHub Pages
         id: deployment
         uses: actions/deploy-pages@v4
-
-      - name: Publish to NPM
-        run: npm publish --workspace=@web3nl/my-canister-dashboard
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
