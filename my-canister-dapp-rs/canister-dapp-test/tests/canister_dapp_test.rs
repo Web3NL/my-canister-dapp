@@ -1,3 +1,4 @@
+use canister_dapp_test::*;
 use ic_cdk::management_canister::CanisterSettings;
 use ic_http_certification::{HttpRequest, HttpResponse};
 use my_canister_dashboard::{
@@ -5,12 +6,11 @@ use my_canister_dashboard::{
     CANISTER_DASHBOARD_JS_PATH, ManageAlternativeOriginsArg, ManageAlternativeOriginsResult,
     ManageIIPrincipalArg, ManageIIPrincipalResult, WasmStatus,
 };
-use my_wasm_test::*;
 use pocket_ic::{PocketIc, query_candid, update_candid_as};
 use std::fs;
 
 #[test]
-fn my_wasm_test() {
+fn canister_dapp_test() {
     let pic = PocketIc::new();
 
     // Setup principals

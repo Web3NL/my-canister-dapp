@@ -1,7 +1,7 @@
-# My Wasm Test
+# Canister Dapp Test
 
-[![Crates.io](https://img.shields.io/crates/v/my-wasm-test)](https://crates.io/crates/my-wasm-test)
-[![Documentation](https://docs.rs/my-wasm-test/badge.svg)](https://docs.rs/my-wasm-test)
+[![Crates.io](https://img.shields.io/crates/v/canister-dapp-test)](https://crates.io/crates/canister-dapp-test)
+[![Documentation](https://docs.rs/canister-dapp-test/badge.svg)](https://docs.rs/canister-dapp-test)
 [![Build Status](https://github.com/Web3NL/my-canister-dapp/workflows/Release/badge.svg)](https://github.com/Web3NL/my-canister-dapp/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
 

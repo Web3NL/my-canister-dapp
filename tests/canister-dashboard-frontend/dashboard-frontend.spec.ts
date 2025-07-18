@@ -1,3 +1,4 @@
+// eslint-disable @typescript-eslint/no-console
 import { test, expect } from '@playwright/test';
 import { readTestData, transferToPrincipal } from '../helpers';
 import { formatIcpBalance } from '../../my-canister-dapp-js/canister-dashboard-frontend/src/helpers';
