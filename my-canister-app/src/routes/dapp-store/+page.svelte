@@ -36,7 +36,7 @@
   });
 </script>
 
-<h1>My dApp Store</h1>
+<h1>Dapp Store</h1>
 
 {#if loading}
   <p>Loading dapps...</p>

@@ -1,9 +1,9 @@
 {
   "$schema": "http://json-schema.org/draft-07/schema#",
-  "title": "My Canister Dapp Wasm Repository Registry",
+  "title": "Canister Dapp Registry",
   "type": "object",
   "properties": {
-    "wasm_modules": {
+    "canister_dapps": {
       "type": "array",
       "items": {
         "type": "object",
@@ -11,28 +11,40 @@
           "id": {
             "type": "integer",
             "minimum": 1,
-            "description": "Unique identifier for the WASM repository"
+            "description": "Unique identifier for the Dapp"
           },
           "name": {
             "type": "string",
-            "description": "Name of the WASM repository"
+            "description": "Name of the Dapp"
           },
           "version": {
             "type": "integer",
             "minimum": 1,
-            "description": "Version number of the WASM"
+            "description": "Version number of the Dapp"
           },
           "wasm_url": {
             "type": "string",
             "format": "uri",
             "description": "URL to download the WASM file"
+          },
+          "memo": {
+            "type": "string",
+            "description": "Optional memo or description for the Dapp"
           }
         },
-        "required": ["id", "name", "version", "wasm_url"],
+        "required": [
+          "id",
+          "name",
+          "version",
+          "wasm_url",
+          "memo"
+        ],
         "additionalProperties": false
       }
     }
   },
-  "required": ["wasm_modules"],
-  "additionalProperties": false
+  "required": [
+    "canister_dapps"
+  ],
+  "additionalProperties": true
 }

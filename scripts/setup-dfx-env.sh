@@ -22,5 +22,6 @@ dfx deploy icp-index
 
 echo "Setting up dashboard dev environment..."
 ./scripts/setup-dashboard-dev-env.sh
+./scripts/generate-registry-dev.sh
 
 echo "✓ Initialization complete"

@@ -1,7 +1,3 @@
-/**
- * My Canister Dashboard utilities for Canister Dapps
- */
-
 export { LOW_CYCLES_THRESHOLD } from './constants';
 
 export { MyCanisterDashboard } from './dashboard';

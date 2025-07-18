@@ -41,7 +41,7 @@
 </script>
 
 <div>
-  <h2>Installed dApps</h2>
+  <h2>Installed Dapps</h2>
 
   {#if loading}
     <Card>

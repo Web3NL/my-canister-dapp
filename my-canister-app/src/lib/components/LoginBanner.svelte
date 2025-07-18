@@ -5,7 +5,7 @@
 
 <PageBanner>
   <IconCanistersPage slot="image" />
-  <span slot="title">My Canister dApp</span>
+  <span slot="title">My Canister Dapp</span>
 
   <p slot="description">Login to install and manage dApps</p>
 

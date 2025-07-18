@@ -1,6 +1,13 @@
-# @web3nl/my-canister-dashboard
+# My Canister Dashboard
 
-Utility functions for canisters using My Canister Dashboard on the Internet Computer.
+[![npm version](https://img.shields.io/npm/v/@web3nl/my-canister-dashboard)](https://www.npmjs.com/package/@web3nl/my-canister-dashboard)
+[![Documentation](https://img.shields.io/badge/docs-GitHub%20Pages-blue)](https://web3nl.github.io/my-canister-dapp/web3nl-my-canister-dashboard-js/)
+[![Build Status](https://github.com/Web3NL/my-canister-dapp/workflows/Publish%20Dashboard%20Package/badge.svg)](https://github.com/Web3NL/my-canister-dapp/actions)
+[![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
+
+Utility functions for Canister Dapps on the Internet Computer.
+
+Used in conjunction with [my-canister-dashboard Rust crate](https://crates.io/crates/my-canister-dashboard)
 
 ## Installation
 
@@ -11,19 +18,3 @@ npm install @web3nl/my-canister-dashboard
 ## Usage
 
 ### Basic Setup
-
-```typescript
-import { MyCanisterDashboard } from '@web3nl/my-canister-dashboard';
-
-const agent = await HttpAgent.create(...);
-const canisterId = Principal.fromText('your-canister-id');
-
-const dashboard = MyCanisterDashboard.create(agent, canisterId);
-```
-
-### Check Cycles Balance
-
-```typescript
-// Basic cycles check
-const result = await dashboard.checkCyclesBalance();
-```
