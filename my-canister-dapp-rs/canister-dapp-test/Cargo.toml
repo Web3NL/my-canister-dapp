@@ -1,5 +1,5 @@
 [package]
-name = "my-wasm-test"
+name = "canister-dapp-test"
 version = "0.1.0"
 description = "Test for wasm binaries compatible with my-canister-dashboard"
 edition = { workspace = true }
