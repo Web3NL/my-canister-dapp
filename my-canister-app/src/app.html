@@ -10,6 +10,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>MyCanister Dapp</title>
 
+    <!-- Domain check and redirect -->
+    <script>
+      if (window.location.hostname !== 'mycanister.app') {
+        window.location.href = 'https://mycanister.app';
+      }
+    </script>
+
     <!-- Init theme as fast as possible -->
     <script>
       try {
