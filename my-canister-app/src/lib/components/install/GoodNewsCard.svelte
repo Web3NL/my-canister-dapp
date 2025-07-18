@@ -14,9 +14,9 @@
 </script>
 
 <Card>
-  <h3 slot="start">Good news</h3>
+  <h3>Good news</h3>
   <p>You are the sole controller of your Dapp!</p>
-  <div class="final-buttons" slot="end">
+  <div class="final-buttons">
     <button class="primary" on:click={openDappFrontpage}>Dapp frontpage</button>
     <button class="secondary" on:click={openDashboard}>Dapp Dashboard</button>
   </div>
