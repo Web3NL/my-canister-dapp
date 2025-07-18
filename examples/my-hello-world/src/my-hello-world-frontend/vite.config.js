@@ -21,8 +21,7 @@ export default defineConfig({
   server: {
     proxy: {
       "/api": {
-        target: "http://127.0.0.1:4943",
-        changeOrigin: true,
+        target: "http://127.0.0.1:8080",
       },
     },
   },
@@ -41,5 +40,6 @@ export default defineConfig({
   },
   define: {
     global: 'globalThis',
+    'process.env.DFX_NETWORK': JSON.stringify(process.env.DFX_NETWORK),
   },
 });

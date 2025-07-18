@@ -7,7 +7,7 @@
     "node": ">=18.0.0"
   },
   "scripts": {
-    "start": "vite --port 3000",
+    "start": "vite --port 5173",
     "build": "tsc && vite build",
     "lint": "eslint src",
     "lint:fix": "eslint src --fix",
@@ -16,6 +16,6 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "@web3nl/my-canister-dashboard": "*"
+    "@web3nl/my-canister-dashboard": "0.5.2"
   }
 }
