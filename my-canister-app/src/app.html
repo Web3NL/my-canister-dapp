@@ -10,6 +10,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <title>MyCanister Dapp</title>
 
+    <!-- Domain check and redirect -->
+    <script>
+      if (window.location.hostname !== 'mycanister.app') {
+        window.location.href = 'https://mycanister.app';
+      }
+    </script>
+
     <!-- Init theme as fast as possible -->
     <script>
       try {
@@ -50,6 +57,7 @@
     </script>
 
     <!-- Google tag (gtag.js) -->
+    <!-- mycanister.app -->
     <script
       async
       src="https://www.googletagmanager.com/gtag/js?id=G-3PTE85TQC4"
@@ -62,6 +70,22 @@
       gtag('js', new Date());
 
       gtag('config', 'G-3PTE85TQC4');
+    </script>
+
+    <!-- Google tag (gtag.js) -->
+    <!-- https://c7lwu-3qaaa-aaaam-qbgia-cai.icp0.io/ -->
+    <script
+      async
+      src="https://www.googletagmanager.com/gtag/js?id=G-VZDYH6FEKW"
+    ></script>
+    <script>
+      window.dataLayer = window.dataLayer || [];
+      function gtag() {
+        dataLayer.push(arguments);
+      }
+      gtag('js', new Date());
+
+      gtag('config', 'G-VZDYH6FEKW');
     </script>
 
     %sveltekit.head%
