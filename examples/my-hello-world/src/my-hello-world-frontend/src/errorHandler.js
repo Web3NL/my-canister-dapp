@@ -1,49 +1,31 @@
 export function showError(message) {
-  const toast = createToast(message, 'error-toast', true);
-  document.body.appendChild(toast);
+  createNotification(message, 'error');
 }
 
 export function showWarning(message) {
-  const toast = createToast(message, 'warning-toast', false);
-  document.body.appendChild(toast);
+  createNotification(message, 'warning');
 }
 
-function createToast(message, className, autoClose = true) {
-  const toast = document.createElement('div');
-  toast.className = className;
+function createNotification(message, type) {
+  // Remove any existing notifications of the same type
+  const existing = document.querySelectorAll(`.${type}-notification`);
+  existing.forEach(n => n.remove());
+  
+  const notification = document.createElement('div');
+  notification.className = `${type}-notification`;
   
   const messageSpan = document.createElement('span');
   messageSpan.textContent = message;
-  toast.appendChild(messageSpan);
+  notification.appendChild(messageSpan);
   
-  // Add close button for warnings
-  if (!autoClose) {
-    const closeBtn = document.createElement('button');
-    closeBtn.innerHTML = '×';
-    closeBtn.className = 'toast-close-btn';
-    closeBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      if (toast.parentNode) {
-        toast.parentNode.removeChild(toast);
-      }
-    });
-    toast.appendChild(closeBtn);
-  }
+  // Add close button
+  const closeBtn = document.createElement('button');
+  closeBtn.innerHTML = '×';
+  closeBtn.className = 'notification-close-btn';
+  closeBtn.addEventListener('click', () => {
+    notification.remove();
+  });
+  notification.appendChild(closeBtn);
   
-  // Add click to dismiss for errors only
-  if (autoClose) {
-    toast.addEventListener('click', () => {
-      if (toast.parentNode) {
-        toast.parentNode.removeChild(toast);
-      }
-    });
-    
-    setTimeout(() => {
-      if (toast.parentNode) {
-        toast.parentNode.removeChild(toast);
-      }
-    }, 5000);
-  }
-  
-  return toast;
+  document.body.appendChild(notification);
 }

@@ -5,8 +5,9 @@ use ic_cdk::{init, query, update};
 use ic_http_certification::{HttpRequest, HttpResponse, StatusCode};
 use include_dir::{include_dir, Dir};
 use my_canister_dashboard::{
-    guards::only_canister_controllers_guard, ManageAlternativeOriginsArg,
-    ManageAlternativeOriginsResult, ManageIIPrincipalArg, ManageIIPrincipalResult, WasmStatus,
+    guards::{only_canister_controllers_guard, only_ii_principal_guard},
+    ManageAlternativeOriginsArg, ManageAlternativeOriginsResult, ManageIIPrincipalArg,
+    ManageIIPrincipalResult, WasmStatus,
 };
 use my_canister_frontend::asset_router_configs;
 use std::borrow::Cow;
@@ -81,7 +82,7 @@ fn manage_alternative_origins(arg: ManageAlternativeOriginsArg) -> ManageAlterna
     })
 }
 
-#[query]
+#[query(guard = "only_ii_principal_guard")]
 fn greet(name: String) -> String {
     format!("Hello, {name}!")
 }

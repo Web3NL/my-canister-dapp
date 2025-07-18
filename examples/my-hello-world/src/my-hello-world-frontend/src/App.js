@@ -3,7 +3,7 @@ import { createActor } from 'declarations/index.js';
 import { createCyclesChecker } from './cyclesChecker.js';
 import { authManager } from './auth.js';
 import { getCanisterId } from './utils.js';
-import { showError } from './errorHandler.js';
+import { showError, showWarning } from './errorHandler.js';
 import logo from './logo2.svg';
 
 class App {
@@ -58,6 +58,7 @@ class App {
     this.greeting = '';
     this.#render();
   };
+
 
   #handleSubmit = async e => {
     e.preventDefault();
@@ -126,6 +127,7 @@ class App {
     if (logoutBtn) {
       logoutBtn.addEventListener('click', this.#handleLogout);
     }
+    
   }
 }
 

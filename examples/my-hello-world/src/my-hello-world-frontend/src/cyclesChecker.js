@@ -30,14 +30,26 @@ export class CyclesChecker {
     const result = await this.checkCyclesBalance(agent);
     
     if (result && 'ok' in result) {
-      const cycles = result.ok;
-      if (cycles < this.threshold) {
-        const message = `⚠️ Low Cycles Warning: ${this.formatCycles(cycles)} remaining (threshold: ${this.formatCycles(this.threshold)})`;
-        showWarning(message);
-        return true;
-      }
+      // Cycles are sufficient
+      return false;
     } else if (result && 'error' in result) {
-      showError(`Cycles check failed: ${result.error}`);
+      // Check if this is a low cycles warning or an actual error
+      if (result.error.includes('Low cycles warning')) {
+        // Extract cycles amount from the error message
+        const match = result.error.match(/(\d+) cycles remaining/);
+        if (match) {
+          const cycles = BigInt(match[1]);
+          showWarning(`Low cycles: ${this.formatCycles(cycles)} remaining`);
+          return true;
+        } else {
+          // Fallback if we can't parse the cycles amount
+          showWarning('Low cycles detected');
+          return true;
+        }
+      } else {
+        // This is an actual error, not a low cycles warning
+        showError(`Cycles check failed: ${result.error}`);
+      }
     }
     
     return false;

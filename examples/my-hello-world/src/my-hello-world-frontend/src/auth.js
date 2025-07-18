@@ -87,16 +87,8 @@ export class AuthManager {
     return this.agent;
   }
 
-  getPrincipal() {
-    return this.principal;
-  }
-
   getPrincipalText() {
     return this.principal?.toString() || '';
-  }
-
-  getIdentity() {
-    return this.identity;
   }
 }
 
