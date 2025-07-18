@@ -142,16 +142,6 @@ fn canister_dapp_test() {
         );
     }
 
-    // // Verify frontend assets match a known version
-    // let version = verify_frontend_assets(
-    //     html_response.0.body(),
-    //     js_response.0.body(),
-    //     css_response.0.body(),
-    // )
-    // .expect("Failed to verify frontend assets");
-
-    // println!("Frontend assets verified for version: {version:?} \n");
-
     // Test wasm_status query - verify structure and type
     let wasm_status = query_candid::<(), (WasmStatus,)>(&pic, canister_id, "wasm_status", ())
         .expect("Failed to call wasm_status");
