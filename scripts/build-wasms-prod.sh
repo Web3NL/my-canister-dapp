@@ -7,6 +7,7 @@ echo "Building WASM files for production..."
 # Build canister-dashboard-frontend for production
 echo "Building canister-dashboard-frontend..."
 npm run build --workspace=canister-dashboard-frontend
+./scripts/copy-dashboard-assets-to-crate.sh
 
 # Build my-hello-world canister
 echo "Building my-hello-world canister..."

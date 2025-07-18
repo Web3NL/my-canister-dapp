@@ -7,6 +7,7 @@ echo "Building WASM files for development..."
 # Build canister-dashboard-frontend for development
 echo "Building canister-dashboard-frontend (dev)..."
 npm run build:dev --workspace=canister-dashboard-frontend
+./scripts/copy-dashboard-assets-to-crate.sh
 
 # Build my-hello-world canister
 echo "Building my-hello-world canister..."
@@ -21,5 +22,6 @@ cp target/wasm32-unknown-unknown/release/my-hello-world.wasm.gz wasm/dev/my-hell
 # Build canister-dashboard-frontend for production again to ensure dist/ contains production files
 echo "Building canister-dashboard-frontend (prod)..."
 npm run build --workspace=canister-dashboard-frontend
+./scripts/copy-dashboard-assets-to-crate.sh
 
 echo "✅ All WASM files built and copied to dev registry!"
