@@ -1,4 +1,4 @@
-# My Canister Dapp
+# <img src="./my-canister-app/static/favicon.svg" alt="My Canister" width="32" height="32" style="vertical-align: middle;"> My Canister Dapp
 
 [![Build Status](https://github.com/Web3NL/my-canister-dapp/workflows/Release/badge.svg)](https://github.com/Web3NL/my-canister-dapp/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
