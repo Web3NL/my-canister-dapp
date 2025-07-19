@@ -45,8 +45,8 @@
         A user can use a service like <a href="https://mycanister.app"
           >mycanister.app</a
         > to create a new canister with their own funds, install a Canister Dapp
-        Wasm and be the sole controller. The user can use the Canister Dashboard
-        to top-up their Dapp with cycles and perform other management tasks.
+        and be the sole controller. The user can use the Canister Dashboard to top-up
+        their Dapp with cycles and perform other management tasks.
       </p>
     </Collapsible>
   </div>
@@ -135,6 +135,31 @@
       </p>
     </Collapsible>
   </div>
+
+  <div class="faq-item">
+    <Collapsible iconSize="medium">
+      <h3 slot="header">Does mycanister.app store user data?</h3>
+      <p>
+        No, mycanister.app does not store any user data. The platform is
+        designed to give users full control over their decentralized
+        applications without relying on an intermediary. The user will be able
+        to run mycanister.app from their local computer if they wish.
+      </p>
+    </Collapsible>
+  </div>
+
+  <div class="faq-item">
+    <Collapsible iconSize="medium">
+      <h3 slot="header">
+        How does mycanister.app remember my installed app history?
+      </h3>
+      <p>
+        When you create a new canister, you deposit ICP to an account only you
+        can access. The canister creation transaction is public. mycanister.app
+        fetches that data from the Internet Computer.
+      </p>
+    </Collapsible>
+  </div>
 </div>
 
 <style>
@@ -143,6 +168,6 @@
   }
 
   .faq-item {
-    margin-bottom: 1.5rem;
+    margin-bottom: 3rem;
   }
 </style>

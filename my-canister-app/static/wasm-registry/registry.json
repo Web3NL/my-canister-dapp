@@ -1,5 +1,5 @@
 {
-  "wasm_modules": [
+  "canister_dapps": [
     {
       "id": 1,
       "name": "My Hello World",

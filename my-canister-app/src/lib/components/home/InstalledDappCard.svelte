@@ -2,6 +2,7 @@
   import { Card, IconNorthEast } from '@dfinity/gix-components';
 
   export let name: string;
+  export let version: number;
   export let frontpageUrl: string;
   export let dashboardUrl: string;
   export let transactionUrl: string;
@@ -10,6 +11,7 @@
 
 <Card>
   <h4>{name}</h4>
+  <p class="version-subtitle">Version {version}</p>
 
   <a href={frontpageUrl} target="_blank" class="card-section-link">
     <div class="card-section">
@@ -69,7 +71,7 @@
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: var(--padding-1_5x);
+    padding-top: var(--padding-1_5x);
     margin-bottom: var(--padding-1x);
     border: 1px solid var(--border-color);
     border-radius: 6px;
@@ -111,5 +113,11 @@
     width: 24px;
     height: 24px;
     color: var(--primary);
+  }
+
+  .version-subtitle {
+    font-size: var(--font-size-standard);
+    color: var(--description-color);
+    margin: 0 0 var(--padding-1x) 0;
   }
 </style>
