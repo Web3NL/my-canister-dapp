@@ -16,7 +16,6 @@ pnpm-debug.log
 # Dependency directories
 node_modules/
 target/
-examples/my-hello-world/target/
 
 # Build artifacts
 dist/
