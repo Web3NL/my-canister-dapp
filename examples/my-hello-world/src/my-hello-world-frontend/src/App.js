@@ -25,6 +25,10 @@ class App {
       this.isAuthorized = await authManager.checkAuthorization();
       if (!this.isAuthorized) {
         showError('You are not authorized to access this application');
+        await authManager.logout();
+        this.isAuthenticated = false;
+        this.isAuthorized = false;
+        this.principal = '';
       }
     }
 
@@ -56,6 +60,10 @@ class App {
         this.isAuthorized = await authManager.checkAuthorization();
         if (!this.isAuthorized) {
           showError('You are not authorized to access this application');
+          await authManager.logout();
+          this.isAuthenticated = false;
+          this.isAuthorized = false;
+          this.principal = '';
         }
       }
 
