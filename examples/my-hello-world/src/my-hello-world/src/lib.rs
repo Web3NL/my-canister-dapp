@@ -64,8 +64,8 @@ fn http_request(request: HttpRequest) -> HttpResponse {
 fn wasm_status() -> WasmStatus {
     WasmStatus {
         name: "My Hello World".to_string(),
-        version: 1,
-        memo: None,
+        version: 3,
+        memo: Some("The Internet Computer Hello World Dapp".to_string()),
     }
 }
 
