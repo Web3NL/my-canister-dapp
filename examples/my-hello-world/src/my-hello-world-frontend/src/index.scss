@@ -59,28 +59,23 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
-/* Layout */
-main {
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  padding: var(--space-xl);
-  max-width: 800px;
-  margin: 0 auto;
-}
-
 /* Logo */
 img {
-  width: 120px;
+  width: 100%;
+  max-width: 480px;
   height: auto;
-  margin-bottom: var(--space-xl);
-  filter: grayscale(0.2);
-  transition: filter 0.2s ease;
+  filter: grayscale(0.1);
+  transition: all 0.3s ease;
+  box-shadow: var(--shadow-sm);
+  border-radius: var(--radius-md);
+  background: white;
+  padding: var(--space-sm);
 }
 
 img:hover {
   filter: grayscale(0);
+  transform: scale(1.05);
+  box-shadow: var(--shadow-md);
 }
 
 /* Authentication Section */
@@ -88,6 +83,8 @@ img:hover {
   width: 100%;
   max-width: 480px;
   margin-bottom: var(--space-2xl);
+  display: flex;
+  justify-content: center;
 }
 
 .user-info {
@@ -154,6 +151,8 @@ button:disabled {
   background: var(--accent);
   color: white;
   box-shadow: var(--shadow-sm);
+  width: 100%;
+  max-width: 280px;
 }
 
 .login-btn:hover:not(:disabled) {
@@ -184,7 +183,6 @@ form {
   background: var(--bg-secondary);
   border: 1px solid var(--border-light);
   border-radius: var(--radius-lg);
-  padding: var(--space-xl);
 }
 
 label {
@@ -215,8 +213,6 @@ input[type="text"]:focus {
 button[type="submit"] {
   background: var(--success);
   color: white;
-  align-self: flex-end;
-  min-width: 120px;
 }
 
 button[type="submit"]:hover:not(:disabled) {
@@ -247,7 +243,8 @@ button[type="submit"]:hover:not(:disabled) {
 .error-notification, .warning-notification {
   position: fixed;
   top: 20px;
-  right: 20px;
+  left: 50%;
+  transform: translateX(-50%);
   font-family: var(--font-family);
   font-size: 0.875rem;
   font-weight: 500;
@@ -255,6 +252,7 @@ button[type="submit"]:hover:not(:disabled) {
   border-radius: var(--radius-md);
   box-shadow: var(--shadow-md);
   z-index: 10000;
+  width: 90%;
   max-width: 400px;
   display: flex;
   align-items: flex-start;
@@ -289,22 +287,64 @@ button[type="submit"]:hover:not(:disabled) {
   opacity: 1;
 }
 
-/* Responsive Design */
-@media (max-width: 640px) {
+/* Mobile First Responsive Design */
+
+/* Mobile styles (default - up to 640px) */
+main {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: var(--space-lg);
+  max-width: 800px;
+  margin: 0 auto;
+}
+
+img {
+  margin-bottom: var(--space-xl);
+}
+
+form {
+  padding: var(--space-lg);
+}
+
+button[type="submit"] {
+  align-self: stretch;
+}
+
+.principal {
+  font-size: 0.7rem;
+}
+
+/* Tablet styles (641px and up) */
+@media (min-width: 641px) {
   main {
-    padding: var(--space-lg);
+    padding: var(--space-xl);
+  }
+  
+  img {
+    margin-bottom: var(--space-2xl);
   }
   
   form {
-    padding: var(--space-lg);
+    padding: var(--space-xl);
   }
   
   button[type="submit"] {
-    align-self: stretch;
+    align-self: flex-end;
+    min-width: 120px;
   }
   
   .principal {
-    font-size: 0.7rem;
+    font-size: 0.75rem;
+  }
+}
+
+/* Desktop styles (1024px and up) */
+@media (min-width: 1024px) {
+  
+  .login-btn {
+    max-width: 320px;
   }
 }
 

@@ -6,6 +6,11 @@ export function showWarning(message) {
   createNotification(message, 'warning');
 }
 
+export function clearAllNotifications() {
+  const notifications = document.querySelectorAll('.error-notification, .warning-notification');
+  notifications.forEach(n => n.remove());
+}
+
 function createNotification(message, type) {
   // Remove any existing notifications of the same type
   const existing = document.querySelectorAll(`.${type}-notification`);
@@ -15,7 +20,7 @@ function createNotification(message, type) {
   notification.className = `${type}-notification`;
   
   const messageSpan = document.createElement('span');
-  messageSpan.textContent = message;
+  messageSpan.innerHTML = message;
   notification.appendChild(messageSpan);
   
   // Add close button

@@ -3,13 +3,14 @@ import { createActor } from 'declarations/index.js';
 import { createCyclesChecker } from './cyclesChecker.js';
 import { authManager } from './auth.js';
 import { getCanisterId } from './utils.js';
-import { showError, showWarning } from './errorHandler.js';
+import { showError, showWarning, clearAllNotifications } from './errorHandler.js';
 import logo from './logo2.svg';
 
 class App {
   greeting = '';
   isAuthenticated = false;
   principal = '';
+  eventListeners = [];
 
   constructor() {
     this.#init();
@@ -19,7 +20,7 @@ class App {
     this.isAuthenticated = await authManager.init();
     this.principal = authManager.getPrincipalText();
     this.#render();
-    
+
     if (this.isAuthenticated) {
       await this.#checkCycles();
     }
@@ -42,7 +43,7 @@ class App {
       this.isAuthenticated = await authManager.login();
       this.principal = authManager.getPrincipalText();
       this.#render();
-      
+
       if (this.isAuthenticated) {
         await this.#checkCycles();
       }
@@ -56,13 +57,14 @@ class App {
     this.isAuthenticated = false;
     this.principal = '';
     this.greeting = '';
+    this.#clearAllNotifications();
     this.#render();
   };
 
 
   #handleSubmit = async e => {
     e.preventDefault();
-    
+
     if (!this.isAuthenticated) {
       showError('Please login with Internet Identity first');
       return;
@@ -70,20 +72,41 @@ class App {
 
     const name = document.getElementById('name').value;
 
-    // Get canister ID using our utility function
-    const canisterId = getCanisterId();
-    const agent = authManager.getAgent();
-    const my_hello_world_backend = createActor(canisterId, { agent });
+    try {
+      // Get canister ID using our utility function
+      const canisterId = getCanisterId();
+      const agent = authManager.getAgent();
+      const my_hello_world_backend = createActor(canisterId, { agent });
 
-    this.greeting = await my_hello_world_backend.greet(name);
-    this.#render();
+      this.greeting = await my_hello_world_backend.greet(name);
+      this.#render();
+    } catch (error) {
+      showError('Failed to call backend service. Please try again.');
+      console.error('Backend call failed:', error);
+    }
   };
+
+  #clearAllNotifications() {
+    clearAllNotifications();
+  }
+
+  #removeEventListeners() {
+    // Remove existing event listeners to prevent memory leaks
+    this.eventListeners.forEach(({ element, event, handler }) => {
+      element.removeEventListener(event, handler);
+    });
+    this.eventListeners = [];
+  }
+
+  #addEventListener(element, event, handler) {
+    element.addEventListener(event, handler);
+    this.eventListeners.push({ element, event, handler });
+  }
 
   #render() {
     const body = html`
       <main>
         <img src="${logo}" alt="DFINITY logo" />
-        <br />
         <br />
         
         <div class="auth-section">
@@ -111,23 +134,25 @@ class App {
       </main>
     `;
     render(body, document.getElementById('root'));
-    
+
+    // Clean up existing event listeners before adding new ones
+    this.#removeEventListeners();
+
     // Add event listeners
     const form = document.querySelector('form');
     if (form) {
-      form.addEventListener('submit', this.#handleSubmit);
+      this.#addEventListener(form, 'submit', this.#handleSubmit);
     }
-    
+
     const loginBtn = document.querySelector('.login-btn');
     if (loginBtn) {
-      loginBtn.addEventListener('click', this.#handleLogin);
+      this.#addEventListener(loginBtn, 'click', this.#handleLogin);
     }
-    
+
     const logoutBtn = document.querySelector('.logout-btn');
     if (logoutBtn) {
-      logoutBtn.addEventListener('click', this.#handleLogout);
+      this.#addEventListener(logoutBtn, 'click', this.#handleLogout);
     }
-    
   }
 }
 
