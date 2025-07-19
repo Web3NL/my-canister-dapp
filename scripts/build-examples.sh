@@ -7,19 +7,19 @@ DEV_MODE="$1"
 
 if [ "$DEV_MODE" = "dev" ]; then
   echo "Building examples for development..."
-  export DFX_NETWORK="local"
+  export DAPP_BUILD_MODE="dev"
   REGISTRY_DIR="wasm/dev"
   WASM_SUFFIX="-dev"
 else
   echo "Building examples for production..."
-  export DFX_NETWORK="ic"
+  export DAPP_BUILD_MODE="prod"
   REGISTRY_DIR="wasm"
   WASM_SUFFIX=""
 fi
 
-# Build my-hello-world example using dfx (always use local network for building)
+# Build my-hello-world example using dfx (always local, no flags)
 echo "Building my-hello-world canister with dfx..."
-dfx build my-hello-world --network local
+dfx build my-hello-world
 
 # Copy WASM to registry (dfx handles optimization, shrinking, and compression)
 echo "Copying WASM to registry..."
