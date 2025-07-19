@@ -168,6 +168,6 @@
   }
 
   .faq-item {
-    margin-bottom: 1.5rem;
+    margin-bottom: 3rem;
   }
 </style>
