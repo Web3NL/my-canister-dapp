@@ -3,7 +3,17 @@ use std::path::Path;
 use std::process::Command;
 
 fn main() {
-    let build_mode = env::var("DAPP_BUILD_MODE").unwrap_or_else(|_| "prod".to_string());
+    let dfx_network = env::var("DFX_NETWORK").unwrap_or_else(|_| "local".to_string());
+
+    // Map DFX_NETWORK to build mode: local -> dev, ic -> prod, others -> prod
+    let build_mode = match dfx_network.as_str() {
+        "local" => "dev",
+        "ic" => "prod",
+        _ => {
+            eprintln!("Warning: Unknown DFX_NETWORK '{dfx_network}', defaulting to 'prod'");
+            "prod"
+        }
+    };
 
     println!("cargo:rerun-if-changed=../../my-canister-dapp-js/canister-dashboard-frontend/src");
     println!(
@@ -12,7 +22,7 @@ fn main() {
     println!(
         "cargo:rerun-if-changed=../../my-canister-dapp-js/canister-dashboard-frontend/vite.config.ts"
     );
-    println!("cargo:rerun-if-env-changed=DAPP_BUILD_MODE");
+    println!("cargo:rerun-if-env-changed=DFX_NETWORK");
 
     let workspace_root = Path::new(env!("CARGO_MANIFEST_DIR"))
         .parent()
@@ -29,16 +39,13 @@ fn main() {
 
     std::fs::create_dir_all(&assets_dir).expect("Failed to create assets directory");
 
-    let npm_command = match build_mode.as_str() {
+    let npm_command = match build_mode {
         "dev" => "build:dev",
         "prod" => "build",
-        _ => {
-            eprintln!("Warning: Unknown build mode '{build_mode}', defaulting to 'prod'");
-            "build"
-        }
+        _ => unreachable!(),
     };
 
-    println!("Building frontend assets in {build_mode} mode...");
+    println!("Building frontend assets for DFX_NETWORK='{dfx_network}' in {build_mode} mode...");
 
     let output = Command::new("npm")
         .args([

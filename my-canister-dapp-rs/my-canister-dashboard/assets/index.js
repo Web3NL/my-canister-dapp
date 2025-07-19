@@ -18514,9 +18514,10 @@ async function _deleteStorage(storage) {
   await storage.remove(KEY_STORAGE_DELEGATION);
   await storage.remove(KEY_VECTOR);
 }
-const PROD = true;
-const IDENTITY_PROVIDER = "https://identity.internetcomputer.org";
-const HOST = "https://icp0.io";
+const PROD = false;
+const IDENTITY_PROVIDER = "http://qhbym-qaaaa-aaaaa-aaafq-cai.localhost:8080";
+const HOST = "http://localhost:8080";
+const CANISTER_ID_DEV = "22ajg-aqaaa-aaaap-adukq-cai";
 const MAX_TIME_TO_LIVE = BigInt(15) * BigInt(60) * BigInt(1e9);
 const CMC_CANISTER_ID = "rkp4c-7iaaa-aaaaa-aaaca-cai";
 const ICP_TX_FEE = BigInt(1e4);
@@ -18768,7 +18769,6 @@ const DUPLICATE_CONTROLLER_MESSAGE = "Controller already exists.";
 const CONTROLLER_NOT_FOUND_MESSAGE = "Controller not found.";
 const REQUIRED_CONTROLLERS_MESSAGE = "Cannot remove required controllers.";
 const INVALID_ORIGIN_MESSAGE = "Invalid origin format.";
-const CANISTER_ID_ERROR_MESSAGE = "Unable to determine canister ID.";
 const HTTP_AGENT_ERROR_MESSAGE = "Failed to create HTTP agent.";
 const DASHBOARD_INIT_ERROR_MESSAGE = "Failed to initialize dashboard.";
 function showError(message) {
@@ -18802,8 +18802,9 @@ function canisterId() {
   try {
     return O$2();
   } catch {
-    showError(CANISTER_ID_ERROR_MESSAGE);
-    throw new Error("No canister ID available");
+    {
+      return Principal$1.fromText(CANISTER_ID_DEV);
+    }
   }
 }
 async function createHttpAgent() {
@@ -18814,7 +18815,9 @@ async function createHttpAgent() {
       identity,
       host: HOST
     });
-    if (!PROD) ;
+    if (!PROD) {
+      await agent.fetchRootKey();
+    }
     return agent;
   } catch (error) {
     showError(HTTP_AGENT_ERROR_MESSAGE);
