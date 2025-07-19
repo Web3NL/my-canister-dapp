@@ -1,5 +1,5 @@
 <script lang="ts">
-  import CreatedCanistersList from '$lib/components/home/CreatedCanistersList.svelte';
+  import CreatedCanistersList from '$lib/components/my-dapps/CreatedCanistersList.svelte';
   import { Card } from '@dfinity/gix-components';
 </script>
 

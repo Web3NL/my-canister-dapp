@@ -7,10 +7,14 @@
   export let dashboardUrl: string;
   export let transactionUrl: string;
   export let blockId: bigint;
+  export let memo: string | undefined = undefined;
 </script>
 
 <Card>
   <h4>{name}</h4>
+  {#if memo}
+    <p class="memo-subtitle">{memo}</p>
+  {/if}
   <p class="version-subtitle">Version {version}</p>
 
   <a href={frontpageUrl} target="_blank" class="card-section-link">
@@ -119,5 +123,12 @@
     font-size: var(--font-size-standard);
     color: var(--description-color);
     margin: 0 0 var(--padding-1x) 0;
+  }
+
+  .memo-subtitle {
+    font-size: var(--font-size-small);
+    color: var(--description-color);
+    margin: 0 0 var(--padding-0_5x) 0;
+    font-style: italic;
   }
 </style>

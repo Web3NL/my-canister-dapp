@@ -28,6 +28,7 @@ export interface CreatedCanister {
   blockId: bigint;
   name: string;
   version: number;
+  memo?: string;
 }
 
 export async function getCreateCanisterTransactions(): Promise<
@@ -49,6 +50,7 @@ export async function getCreatedCanister(
 
   let name = 'Private dApp';
   let version = 1;
+  let memo: string | undefined;
 
   const agent = await createHttpAgent();
   const backend = MyDashboardBackend.create({ agent, canisterId });
@@ -57,8 +59,11 @@ export async function getCreatedCanister(
     name = status.name;
   }
   version = status.version;
+  if (status.memo.length > 0) {
+    memo = status.memo[0];
+  }
 
-  return {
+  const result: CreatedCanister = {
     frontpageUrl: createFrontpageUrl(canisterId.toText()),
     dashboardUrl: createDashboardUrl(canisterId.toText()),
     transactionUrl: createTransactionUrl(transactionHash),
@@ -66,4 +71,10 @@ export async function getCreatedCanister(
     name: name,
     version: version,
   };
+
+  if (memo !== undefined) {
+    result.memo = memo;
+  }
+
+  return result;
 }
