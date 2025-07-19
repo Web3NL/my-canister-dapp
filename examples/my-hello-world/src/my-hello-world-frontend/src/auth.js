@@ -105,11 +105,11 @@ export class AuthManager {
       const canisterId = getCanisterId();
       const backend = MyDashboardBackend.create({
         agent: this.agent,
-        canisterId: canisterId
+        canisterId: canisterId,
       });
 
       const result = await backend.manageIIPrincipal({ Get: null });
-      
+
       if ('Ok' in result) {
         const authorizedPrincipal = result.Ok.toString();
         const currentPrincipal = this.getPrincipalText();

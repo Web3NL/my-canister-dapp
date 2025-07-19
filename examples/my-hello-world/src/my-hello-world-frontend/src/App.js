@@ -20,14 +20,14 @@ class App {
   async #init() {
     this.isAuthenticated = await authManager.init();
     this.principal = authManager.getPrincipalText();
-    
+
     if (this.isAuthenticated) {
       this.isAuthorized = await authManager.checkAuthorization();
       if (!this.isAuthorized) {
         showError('You are not authorized to access this application');
       }
     }
-    
+
     this.#render();
 
     if (this.isAuthenticated && this.isAuthorized) {
@@ -51,14 +51,14 @@ class App {
     try {
       this.isAuthenticated = await authManager.login();
       this.principal = authManager.getPrincipalText();
-      
+
       if (this.isAuthenticated) {
         this.isAuthorized = await authManager.checkAuthorization();
         if (!this.isAuthorized) {
           showError('You are not authorized to access this application');
         }
       }
-      
+
       this.#render();
 
       if (this.isAuthenticated && this.isAuthorized) {
