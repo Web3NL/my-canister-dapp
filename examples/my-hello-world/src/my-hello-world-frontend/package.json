@@ -9,6 +9,7 @@
   "scripts": {
     "start": "vite --port 5173",
     "build": "tsc && vite build",
+    "build:dev": "tsc && vite build --mode development",
     "lint": "eslint src",
     "lint:fix": "eslint src --fix",
     "format": "prettier --check src",
