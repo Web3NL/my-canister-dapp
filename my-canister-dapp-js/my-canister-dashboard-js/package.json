@@ -1,6 +1,6 @@
 {
   "name": "@web3nl/my-canister-dashboard",
-  "version": "0.5.2",
+  "version": "0.5.3",
   "description": "Utility functions for canisters using My Canister Dashboard",
   "keywords": [
     "internet-computer",
