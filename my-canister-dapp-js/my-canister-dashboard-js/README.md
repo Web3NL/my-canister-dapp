@@ -17,4 +17,38 @@ npm install @web3nl/my-canister-dashboard
 
 ## Usage
 
-### Basic Setup
+### Check Cycles Balance
+
+```typescript
+import { HttpAgent } from '@dfinity/agent';
+import {
+  MyCanisterDashboard,
+  inferCanisterIdFromLocation,
+} from '@web3nl/my-canister-dashboard';
+
+// IMPORTANT: Infer canister ID from current browser window location
+const canisterId = inferCanisterIdFromLocation();
+
+// Initialize agent with identity (identity should be obtained from auth-client)
+const agent = new HttpAgent({
+  host: 'https://icp0.io',
+  identity, // Assumes identity is available in scope
+});
+
+// Create dashboard instance
+const dashboard = MyCanisterDashboard.create(agent, canisterId);
+
+// Check cycles balance
+const result = await dashboard.checkCyclesBalance();
+
+if ('ok' in result) {
+  console.log(`Cycles balance: ${result.ok}`);
+} else {
+  console.error(`Error: ${result.error}`);
+}
+
+// Check with custom threshold
+const customResult = await dashboard.checkCyclesBalance({
+  threshold: BigInt(1_000_000_000), // 1B cycles
+});
+```
