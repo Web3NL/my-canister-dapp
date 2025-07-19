@@ -12,6 +12,8 @@ export function getCanisterId() {
       return Principal.fromText(CANISTER_ID_DEV);
     }
 
-    throw new Error('No canister ID available - please set VITE_CANISTER_ID in .env.development');
+    throw new Error(
+      'No canister ID available - please set VITE_CANISTER_ID in .env.development'
+    );
   }
 }

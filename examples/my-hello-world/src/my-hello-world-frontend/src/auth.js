@@ -3,7 +3,9 @@ import { HttpAgent } from '@dfinity/agent';
 import { showError } from './errorHandler.js';
 
 const PROD = import.meta.env.MODE === 'production';
-const II_URL = import.meta.env.VITE_IDENTITY_PROVIDER ?? 'https://identity.internetcomputer.org';
+const II_URL =
+  import.meta.env.VITE_IDENTITY_PROVIDER ??
+  'https://identity.internetcomputer.org';
 const HOST = import.meta.env.VITE_DFXHOST ?? 'https://icp0.io';
 
 export class AuthManager {
@@ -30,6 +32,7 @@ export class AuthManager {
       await this.init();
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     return new Promise((resolve, reject) => {
       this.authClient.login({
         identityProvider: II_URL,
@@ -37,7 +40,7 @@ export class AuthManager {
           await this.#updateAuthState();
           resolve(this.isAuthenticated);
         },
-        onError: (error) => {
+        onError: error => {
           showError('Login failed. Please try again.');
           reject(error);
         },
@@ -69,7 +72,7 @@ export class AuthManager {
       if (!PROD) {
         try {
           await this.agent.fetchRootKey();
-        } catch (err) {
+        } catch {
           showError('Unable to connect to local network');
         }
       }
@@ -88,7 +91,7 @@ export class AuthManager {
   }
 
   getPrincipalText() {
-    return this.principal?.toString() || '';
+    return this.principal?.toString() ?? '';
   }
 }
 

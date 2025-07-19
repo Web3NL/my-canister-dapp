@@ -3,7 +3,7 @@ import { createActor } from 'declarations/index.js';
 import { createCyclesChecker } from './cyclesChecker.js';
 import { authManager } from './auth.js';
 import { getCanisterId } from './utils.js';
-import { showError, showWarning, clearAllNotifications } from './errorHandler.js';
+import { showError, clearAllNotifications } from './errorHandler.js';
 import logo from './logo2.svg';
 
 class App {
@@ -33,7 +33,7 @@ class App {
         const cyclesChecker = createCyclesChecker();
         await cyclesChecker.checkAndWarn(agent);
       }
-    } catch (error) {
+    } catch {
       showError('Failed to check cycles');
     }
   }
@@ -47,7 +47,7 @@ class App {
       if (this.isAuthenticated) {
         await this.#checkCycles();
       }
-    } catch (error) {
+    } catch {
       showError('Login failed');
     }
   };
@@ -61,8 +61,8 @@ class App {
     this.#render();
   };
 
-
   #handleSubmit = async e => {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
     e.preventDefault();
 
     if (!this.isAuthenticated) {
@@ -76,12 +76,15 @@ class App {
       // Get canister ID using our utility function
       const canisterId = getCanisterId();
       const agent = authManager.getAgent();
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
       const my_hello_world_backend = createActor(canisterId, { agent });
 
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
       this.greeting = await my_hello_world_backend.greet(name);
       this.#render();
     } catch (error) {
       showError('Failed to call backend service. Please try again.');
+      // eslint-disable-next-line no-console
       console.error('Backend call failed:', error);
     }
   };
@@ -93,12 +96,14 @@ class App {
   #removeEventListeners() {
     // Remove existing event listeners to prevent memory leaks
     this.eventListeners.forEach(({ element, event, handler }) => {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
       element.removeEventListener(event, handler);
     });
     this.eventListeners = [];
   }
 
   #addEventListener(element, event, handler) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
     element.addEventListener(event, handler);
     this.eventListeners.push({ element, event, handler });
   }
@@ -108,29 +113,33 @@ class App {
       <main>
         <img src="${logo}" alt="DFINITY logo" />
         <br />
-        
+
         <div class="auth-section">
-          ${this.isAuthenticated ? html`
-            <div class="user-info">
-              <p><strong>Logged in as:</strong></p>
-              <p class="principal">${this.principal}</p>
-              <button class="logout-btn">Logout</button>
-            </div>
-          ` : html`
-            <button class="login-btn">Login with Internet Identity</button>
-          `}
+          ${this.isAuthenticated
+            ? html`
+                <div class="user-info">
+                  <p><strong>Logged in as:</strong></p>
+                  <p class="principal">${this.principal}</p>
+                  <button class="logout-btn">Logout</button>
+                </div>
+              `
+            : html`
+                <button class="login-btn">Login with Internet Identity</button>
+              `}
         </div>
-        
-        ${this.isAuthenticated ? html`
-          <br />
-          
-          <form action="#">
-            <label for="name">Enter your name: &nbsp;</label>
-            <input id="name" alt="Name" type="text" />
-            <button type="submit">Click Me!</button>
-          </form>
-          <section id="greeting">${this.greeting}</section>
-        ` : ''}
+
+        ${this.isAuthenticated
+          ? html`
+              <br />
+
+              <form action="#">
+                <label for="name">Enter your name: &nbsp;</label>
+                <input id="name" alt="Name" type="text" />
+                <button type="submit">Click Me!</button>
+              </form>
+              <section id="greeting">${this.greeting}</section>
+            `
+          : ''}
       </main>
     `;
     render(body, document.getElementById('root'));

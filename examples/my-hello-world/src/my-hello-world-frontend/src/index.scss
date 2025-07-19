@@ -17,20 +17,23 @@
   --danger: #ef4444;
   --danger-hover: #dc2626;
   --warning: #fbbf24;
-  
+
   /* Background Colors */
   --bg-primary: #ffffff;
   --bg-secondary: #f8fafc;
   --bg-tertiary: #f1f5f9;
-  
+
   /* Border Colors */
   --border-light: #e2e8f0;
   --border-medium: #cbd5e1;
-  
+
   /* Typography */
-  --font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  --font-mono: ui-monospace, SFMono-Regular, 'SF Mono', Monaco, 'Cascadia Code', 'Roboto Mono', Consolas, 'Courier New', monospace;
-  
+  --font-family:
+    system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  --font-mono:
+    ui-monospace, SFMono-Regular, 'SF Mono', Monaco, 'Cascadia Code',
+    'Roboto Mono', Consolas, 'Courier New', monospace;
+
   /* Spacing */
   --space-xs: 0.25rem;
   --space-sm: 0.5rem;
@@ -38,12 +41,12 @@
   --space-lg: 1.5rem;
   --space-xl: 2rem;
   --space-2xl: 3rem;
-  
+
   /* Border Radius */
   --radius-sm: 0.375rem;
   --radius-md: 0.5rem;
   --radius-lg: 0.75rem;
-  
+
   /* Shadows */
   --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
   --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
@@ -193,7 +196,7 @@ label {
   display: block;
 }
 
-input[type="text"] {
+input[type='text'] {
   width: 100%;
   padding: 0.75rem 1rem;
   border: 1px solid var(--border-medium);
@@ -201,21 +204,23 @@ input[type="text"] {
   font-size: 1rem;
   font-family: inherit;
   background: var(--bg-primary);
-  transition: border-color 0.15s ease, box-shadow 0.15s ease;
+  transition:
+    border-color 0.15s ease,
+    box-shadow 0.15s ease;
 }
 
-input[type="text"]:focus {
+input[type='text']:focus {
   outline: none;
   border-color: var(--accent);
   box-shadow: 0 0 0 3px rgb(59 130 246 / 0.1);
 }
 
-button[type="submit"] {
+button[type='submit'] {
   background: var(--success);
   color: white;
 }
 
-button[type="submit"]:hover:not(:disabled) {
+button[type='submit']:hover:not(:disabled) {
   background: var(--success-hover);
   box-shadow: var(--shadow-md);
 }
@@ -226,7 +231,11 @@ button[type="submit"]:hover:not(:disabled) {
   max-width: 480px;
   margin-top: var(--space-lg);
   padding: var(--space-lg);
-  background: linear-gradient(135deg, var(--bg-tertiary) 0%, var(--bg-secondary) 100%);
+  background: linear-gradient(
+    135deg,
+    var(--bg-tertiary) 0%,
+    var(--bg-secondary) 100%
+  );
   border: 1px solid var(--border-light);
   border-radius: var(--radius-lg);
   text-align: center;
@@ -240,7 +249,8 @@ button[type="submit"]:hover:not(:disabled) {
 }
 
 /* Notifications */
-.error-notification, .warning-notification {
+.error-notification,
+.warning-notification {
   position: fixed;
   top: 20px;
   left: 50%;
@@ -308,7 +318,7 @@ form {
   padding: var(--space-lg);
 }
 
-button[type="submit"] {
+button[type='submit'] {
   align-self: stretch;
 }
 
@@ -321,20 +331,20 @@ button[type="submit"] {
   main {
     padding: var(--space-xl);
   }
-  
+
   img {
     margin-bottom: var(--space-2xl);
   }
-  
+
   form {
     padding: var(--space-xl);
   }
-  
-  button[type="submit"] {
+
+  button[type='submit'] {
     align-self: flex-end;
     min-width: 120px;
   }
-  
+
   .principal {
     font-size: 0.75rem;
   }
@@ -342,7 +352,6 @@ button[type="submit"] {
 
 /* Desktop styles (1024px and up) */
 @media (min-width: 1024px) {
-  
   .login-btn {
     max-width: 320px;
   }

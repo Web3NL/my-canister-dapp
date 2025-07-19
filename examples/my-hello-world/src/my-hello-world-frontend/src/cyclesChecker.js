@@ -10,17 +10,20 @@ export class CyclesChecker {
   }
 
   async checkCyclesBalance(agent) {
+    // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
     if (!agent) {
-      throw new Error('Authenticated agent is required for cycles balance check');
+      throw new Error(
+        'Authenticated agent is required for cycles balance check'
+      );
     }
 
     try {
       const canisterId = getCanisterId();
       const dashboard = MyCanisterDashboard.create(agent, canisterId);
       const result = await dashboard.checkCyclesBalance();
-      
+
       return result;
-    } catch (error) {
+    } catch {
       showError('Failed to check cycles balance');
       return null;
     }
@@ -28,7 +31,7 @@ export class CyclesChecker {
 
   async checkAndWarn(agent) {
     const result = await this.checkCyclesBalance(agent);
-    
+
     if (result && 'ok' in result) {
       // Cycles are sufficient
       return false;
@@ -39,11 +42,15 @@ export class CyclesChecker {
         const match = result.error.match(/(\d+) cycles remaining/);
         if (match) {
           const cycles = BigInt(match[1]);
-          showWarning(`Low cycles: ${this.formatCycles(cycles)} remaining<br><br><a href="/canister-dashboard" target="_blank">Goto dashboard to top-up</a>`);
+          showWarning(
+            `Low cycles: ${this.formatCycles(cycles)} remaining<br><br><a href="/canister-dashboard" target="_blank">Goto dashboard to top-up</a>`
+          );
           return true;
         } else {
           // Fallback if we can't parse the cycles amount
-          showWarning(`Low cycles detected<br><br><a href="/canister-dashboard" target="_blank">Goto dashboard to top-up</a>`);
+          showWarning(
+            `Low cycles detected<br><br><a href="/canister-dashboard" target="_blank">Goto dashboard to top-up</a>`
+          );
           return true;
         }
       } else {
@@ -51,10 +58,9 @@ export class CyclesChecker {
         showError(`Cycles check failed: ${result.error}`);
       }
     }
-    
+
     return false;
   }
-
 
   formatCycles(cycles) {
     const cyclesNum = Number(cycles);
@@ -62,4 +68,4 @@ export class CyclesChecker {
   }
 }
 
-export const createCyclesChecker = (threshold) => new CyclesChecker(threshold);
+export const createCyclesChecker = threshold => new CyclesChecker(threshold);
