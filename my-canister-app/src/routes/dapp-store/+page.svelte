@@ -9,11 +9,10 @@
     version: number;
     wasm_url: string;
     memo: string;
-    created_at: string;
   }
 
   interface Registry {
-    wasm_modules: WasmModule[];
+    canister_dapps: WasmModule[];
   }
 
   let dapps: WasmModule[] = [];
@@ -27,7 +26,7 @@
         throw new Error(`Failed to load registry: ${response.statusText}`);
       }
       const registry = (await response.json()) as Registry;
-      dapps = registry.wasm_modules;
+      dapps = registry.canister_dapps;
     } catch (err) {
       error = err instanceof Error ? err.message : 'Failed to load dapps';
     } finally {

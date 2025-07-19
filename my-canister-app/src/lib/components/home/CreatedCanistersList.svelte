@@ -54,6 +54,7 @@
       {#each createdCanisters as canister (canister.blockId)}
         <InstalledDappCard
           name={canister.name}
+          version={canister.version}
           frontpageUrl={canister.frontpageUrl}
           dashboardUrl={canister.dashboardUrl}
           transactionUrl={canister.transactionUrl}

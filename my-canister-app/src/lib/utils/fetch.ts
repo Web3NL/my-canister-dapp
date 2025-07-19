@@ -6,11 +6,10 @@ interface WasmModule {
   version: number;
   wasm_url: string;
   memo: string;
-  created_at: string;
 }
 
 interface Registry {
-  wasm_modules: WasmModule[];
+  canister_dapps: WasmModule[];
 }
 
 export async function fetchDappWasmFromRegistry(
@@ -24,7 +23,7 @@ export async function fetchDappWasmFromRegistry(
   }
 
   const registry = (await response.json()) as Registry;
-  const wasmModule = registry.wasm_modules.find(module => module.id === id);
+  const wasmModule = registry.canister_dapps.find(module => module.id === id);
 
   if (!wasmModule) {
     throw new Error(`WASM module with id ${id} not found in registry`);

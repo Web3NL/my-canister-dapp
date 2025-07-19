@@ -27,6 +27,7 @@ export interface CreatedCanister {
   transactionUrl: string;
   blockId: bigint;
   name: string;
+  version: number;
 }
 
 export async function getCreateCanisterTransactions(): Promise<
@@ -47,6 +48,7 @@ export async function getCreatedCanister(
   const transactionHash = blockId.toString(16);
 
   let name = 'Private dApp';
+  let version = 1;
 
   const agent = await createHttpAgent();
   const backend = MyDashboardBackend.create({ agent, canisterId });
@@ -54,6 +56,7 @@ export async function getCreatedCanister(
   if (status.name.length > 0) {
     name = status.name;
   }
+  version = status.version;
 
   return {
     frontpageUrl: createFrontpageUrl(canisterId.toText()),
@@ -61,5 +64,6 @@ export async function getCreatedCanister(
     transactionUrl: createTransactionUrl(transactionHash),
     blockId: blockId,
     name: name,
+    version: version,
   };
 }
