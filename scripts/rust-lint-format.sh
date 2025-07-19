@@ -7,4 +7,3 @@ cargo check --all-targets --all-features
 cargo test --workspace --exclude canister-dapp-test
 
 npm run build --workspace=canister-dashboard-frontend
-npm run copy-dashboard-assets

@@ -1,10 +1,10 @@
-import { defineConfig } from 'vite';
+import { defineConfig, loadEnv } from 'vite';
 import { fileURLToPath, URL } from 'url';
-import dotenv from 'dotenv';
 
-dotenv.config({ path: '../../.env' });
-
-export default defineConfig({
+export default defineConfig(({ mode }) => {
+  const env = loadEnv(mode, process.cwd(), '');
+  
+  return {
   build: {
     emptyOutDir: true,
     rollupOptions: {
@@ -21,8 +21,12 @@ export default defineConfig({
   server: {
     proxy: {
       "/api": {
-        target: "http://127.0.0.1:4943",
+        target: env.VITE_DFXHOST,
+      },
+      "/canister-dashboard": {
+        target: env.VITE_DFXHOST,
         changeOrigin: true,
+        rewrite: (path) => `${path}?canisterId=${env.VITE_CANISTER_ID}`,
       },
     },
   },
@@ -41,5 +45,7 @@ export default defineConfig({
   },
   define: {
     global: 'globalThis',
+    'process.env.DFX_NETWORK': JSON.stringify(process.env.DFX_NETWORK),
   },
+  };
 });

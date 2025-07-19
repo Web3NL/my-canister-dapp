@@ -12,8 +12,8 @@ dfx identity use ident-1
 
 echo "Creating my-hello-world canister..."
 cargo install ic-wasm
-./scripts/build-wasms-dev.sh
-dfx canister create my-hello-world
+./scripts/build-examples.sh dev
+dfx canister create my-hello-world --with-cycles 900000000000
 dfx build my-hello-world
 dfx canister install my-hello-world
 
@@ -27,5 +27,8 @@ IDENT1=$(dfx identity get-principal)
 
 echo "Setting controllers for my-hello-world canister..."
 dfx canister update-settings my-hello-world --set-controller $CANISTER_ID --set-controller $PRINCIPAL --set-controller $IDENT1
+
+echo "Setting authorized Internet Identity principal..."
+dfx canister call my-hello-world manage_ii_principal "(variant { Set = principal \"$PRINCIPAL\" })"
 
 echo "✓ Dashboard development environment setup complete"
