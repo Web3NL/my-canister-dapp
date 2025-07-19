@@ -21,11 +21,12 @@ export default defineConfig(({ mode }) => {
   server: {
     proxy: {
       "/api": {
-        target: "http://127.0.0.1:8080",
+        target: env.VITE_DFXHOST,
       },
       "/canister-dashboard": {
-        target: `http://${env.VITE_CANISTER_ID}.${env.VITE_HOSTNAME}`,
+        target: env.VITE_DFXHOST,
         changeOrigin: true,
+        rewrite: (path) => `${path}?canisterId=${env.VITE_CANISTER_ID}`,
       },
     },
   },

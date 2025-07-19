@@ -43,13 +43,13 @@ export class CyclesChecker {
         if (match) {
           const cycles = BigInt(match[1]);
           showWarning(
-            `Low cycles: ${this.formatCycles(cycles)} remaining<br><br><a href="/canister-dashboard" target="_blank">Goto dashboard to top-up</a>`
+            `Low cycles: ${this.formatCycles(cycles)} remaining<br><br><a href="/canister-dashboard">Goto dashboard to top-up</a>`
           );
           return true;
         } else {
           // Fallback if we can't parse the cycles amount
           showWarning(
-            `Low cycles detected<br><br><a href="/canister-dashboard" target="_blank">Goto dashboard to top-up</a>`
+            `Low cycles detected<br><br><a href="/canister-dashboard">Goto dashboard to top-up</a>`
           );
           return true;
         }
