@@ -27,7 +27,7 @@ pub fn get_wasm_file_name() -> Result<String, String> {
         .filter_map(|entry| {
             let entry = entry.ok()?;
             let path = entry.path();
-            if path.is_file() && path.extension()? == "wasm" {
+            if path.is_file() && path.to_string_lossy().ends_with(".wasm.gz") {
                 Some(path.to_string_lossy().to_string())
             } else {
                 None
@@ -36,10 +36,10 @@ pub fn get_wasm_file_name() -> Result<String, String> {
         .collect();
 
     match wasm_files.len() {
-        0 => Err("No .wasm files found in target-wasm directory".to_string()),
+        0 => Err("No .wasm.gz files found in target-wasm directory".to_string()),
         1 => Ok(wasm_files[0].clone()),
         _ => Err(format!(
-            "Multiple .wasm files found: expected exactly one, found {}",
+            "Multiple .wasm.gz files found: expected exactly one, found {}",
             wasm_files.len()
         )),
     }

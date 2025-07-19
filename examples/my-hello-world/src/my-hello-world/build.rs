@@ -19,10 +19,7 @@ fn main() {
     let npm_command = match build_mode.as_str() {
         "dev" => "build:dev",
         "prod" => "build",
-        _ => {
-            eprintln!("Warning: Unknown build mode '{build_mode}', defaulting to 'prod'");
-            "build"
-        }
+        _ => unreachable!(),
     };
 
     println!("Building my-hello-world frontend assets in {build_mode} mode...");

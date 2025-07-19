@@ -12,7 +12,8 @@ DEV_WASM_DIR="wasm/dev"
 cp "$REGISTRY_FILE" "$DEV_REGISTRY_FILE"
 
 # Replace remote URLs with local dev paths in the dev registry
-sed "s|https://raw.githubusercontent.com/Web3NL/my-canister-dapp/main/wasm|$DEV_WASM_DIR|g" "$DEV_REGISTRY_FILE" > "$DEV_REGISTRY_FILE.tmp"
+# This handles both main branch and commit-specific URLs
+sed -E "s|https://raw.githubusercontent.com/Web3NL/my-canister-dapp/[a-f0-9]+/wasm|$DEV_WASM_DIR|g; s|https://raw.githubusercontent.com/Web3NL/my-canister-dapp/main/wasm|$DEV_WASM_DIR|g" "$DEV_REGISTRY_FILE" > "$DEV_REGISTRY_FILE.tmp"
 mv "$DEV_REGISTRY_FILE.tmp" "$DEV_REGISTRY_FILE"
 
 # Replace .wasm.gz with -dev.wasm.gz and .wasm with -dev.wasm in the dev registry
