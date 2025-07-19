@@ -1,4 +1,5 @@
 #!/bin/bash
+# This script should be run from the monorepo root directory
 
 set -e
 
@@ -15,6 +16,9 @@ ic-wasm target/wasm32-unknown-unknown/release/my_hello_world.wasm -o target/wasm
 
 # Shrink WASM
 ic-wasm target/wasm32-unknown-unknown/release/my_hello_world_optimized.wasm -o target/wasm32-unknown-unknown/release/my-hello-world.wasm shrink
+
+# Add Candid interface metadata
+ic-wasm target/wasm32-unknown-unknown/release/my-hello-world.wasm -o target/wasm32-unknown-unknown/release/my-hello-world.wasm metadata candid:service -f examples/my-hello-world/src/my-hello-world/my-hello-world.did -v public
 
 # Compress
 # -k: keep original file

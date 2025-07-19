@@ -9,6 +9,7 @@ import logo from './logo2.svg';
 class App {
   greeting = '';
   isAuthenticated = false;
+  isAuthorized = false;
   principal = '';
   eventListeners = [];
 
@@ -19,9 +20,17 @@ class App {
   async #init() {
     this.isAuthenticated = await authManager.init();
     this.principal = authManager.getPrincipalText();
+    
+    if (this.isAuthenticated) {
+      this.isAuthorized = await authManager.checkAuthorization();
+      if (!this.isAuthorized) {
+        showError('You are not authorized to access this application');
+      }
+    }
+    
     this.#render();
 
-    if (this.isAuthenticated) {
+    if (this.isAuthenticated && this.isAuthorized) {
       await this.#checkCycles();
     }
   }
@@ -42,9 +51,17 @@ class App {
     try {
       this.isAuthenticated = await authManager.login();
       this.principal = authManager.getPrincipalText();
+      
+      if (this.isAuthenticated) {
+        this.isAuthorized = await authManager.checkAuthorization();
+        if (!this.isAuthorized) {
+          showError('You are not authorized to access this application');
+        }
+      }
+      
       this.#render();
 
-      if (this.isAuthenticated) {
+      if (this.isAuthenticated && this.isAuthorized) {
         await this.#checkCycles();
       }
     } catch {
@@ -55,6 +72,7 @@ class App {
   #handleLogout = async () => {
     await authManager.logout();
     this.isAuthenticated = false;
+    this.isAuthorized = false;
     this.principal = '';
     this.greeting = '';
     this.#clearAllNotifications();
@@ -65,7 +83,7 @@ class App {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
     e.preventDefault();
 
-    if (!this.isAuthenticated) {
+    if (!this.isAuthenticated || !this.isAuthorized) {
       showError('Please login with Internet Identity first');
       return;
     }
@@ -128,7 +146,7 @@ class App {
               `}
         </div>
 
-        ${this.isAuthenticated
+        ${this.isAuthenticated && this.isAuthorized
           ? html`
               <br />
 

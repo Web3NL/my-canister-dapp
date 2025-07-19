@@ -1,6 +1,8 @@
 import { AuthClient } from '@dfinity/auth-client';
 import { HttpAgent } from '@dfinity/agent';
+import { MyDashboardBackend } from '@web3nl/my-canister-dashboard';
 import { showError } from './errorHandler.js';
+import { getCanisterId } from './utils.js';
 
 const PROD = import.meta.env.MODE === 'production';
 const II_URL =
@@ -92,6 +94,34 @@ export class AuthManager {
 
   getPrincipalText() {
     return this.principal?.toString() ?? '';
+  }
+
+  async checkAuthorization() {
+    if (!this.agent || !this.isAuthenticated) {
+      return false;
+    }
+
+    try {
+      const canisterId = getCanisterId();
+      const backend = MyDashboardBackend.create({
+        agent: this.agent,
+        canisterId: canisterId
+      });
+
+      const result = await backend.manageIIPrincipal({ Get: null });
+      
+      if ('Ok' in result) {
+        const authorizedPrincipal = result.Ok.toString();
+        const currentPrincipal = this.getPrincipalText();
+        return authorizedPrincipal === currentPrincipal;
+      } else {
+        showError(`Authorization check failed: ${result.Err}`);
+        return false;
+      }
+    } catch {
+      showError('Failed to check authorization');
+      return false;
+    }
   }
 }
 
