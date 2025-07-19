@@ -59,6 +59,7 @@
           dashboardUrl={canister.dashboardUrl}
           transactionUrl={canister.transactionUrl}
           blockId={canister.blockId}
+          memo={canister.memo}
         />
       {/each}
     </div>
