@@ -1,11 +1,5 @@
 {
-  "name": "my-canister-dashboard-workspace",
-  "version": "0.4.0-beta.24",
-  "private": true,
   "type": "module",
-  "description": "My Canister Dashboard - Workspace root",
-  "repository": "https://github.com/Web3NL/my-canister-dashboard",
-  "license": "MIT",
   "engines": {
     "node": ">=18.0.0"
   },
