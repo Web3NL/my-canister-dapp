@@ -17,8 +17,8 @@ export function createFrontpageUrl(canisterId: string): string {
   return origin;
 }
 
-function createTransactionUrl(transactionHash: string): string {
-  return `https://dashboard.internetcomputer.org/transaction/${transactionHash}`;
+function createTransactionUrl(blockId: string): string {
+  return `https://dashboard.internetcomputer.org/transaction/${blockId}`;
 }
 
 export interface CreatedCanister {
@@ -46,7 +46,6 @@ export async function getCreatedCanister(
   const cmc = await CmcApi.create();
 
   const canisterId = await cmc.notifyCreateCanister(blockId, principal);
-  const transactionHash = blockId.toString(16);
 
   let name = 'Private dApp';
   let version = 1;
@@ -66,7 +65,7 @@ export async function getCreatedCanister(
   const result: CreatedCanister = {
     frontpageUrl: createFrontpageUrl(canisterId.toText()),
     dashboardUrl: createDashboardUrl(canisterId.toText()),
-    transactionUrl: createTransactionUrl(transactionHash),
+    transactionUrl: createTransactionUrl(blockId.toString()),
     blockId: blockId,
     name: name,
     version: version,
