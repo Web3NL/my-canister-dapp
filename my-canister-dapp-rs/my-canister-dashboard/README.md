@@ -29,7 +29,7 @@ fn init() {
         let mut router = router.borrow_mut();
         setup::setup_dashboard_assets(
             &mut router,
-            Some(vec!["https://myapp.com".to_string()]),
+            Some(vec!["https://mycanister.app".to_string()]),
         );
         certified_data_set(router.root_hash());
     });
