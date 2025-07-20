@@ -2,14 +2,15 @@
   "canisters": {
     "my-canister-app": {
       "type": "assets",
-      "source": ["my-canister-app/build"],
+      "source": [
+        "my-canister-app/build"
+      ],
       "build": "npm run build:app"
     },
     "my-hello-world": {
       "type": "rust",
       "package": "my-hello-world",
       "candid": "examples/my-hello-world/src/my-hello-world/my-hello-world.did",
-      "optimize": "O3",
       "shrink": true,
       "gzip": true,
       "declarations": {

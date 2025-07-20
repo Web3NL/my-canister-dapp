@@ -5,5 +5,3 @@ cargo fmt
 cargo clippy --all-targets --all-features -- -D warnings
 cargo check --all-targets --all-features
 cargo test --workspace --exclude canister-dapp-test
-
-npm run build --workspace=canister-dashboard-frontend
