@@ -9,9 +9,14 @@ fn log_message(message: &str) {
     if let Some(parent) = log_path.parent() {
         let _ = std::fs::create_dir_all(parent);
     }
-    
-    if let Ok(mut file) = OpenOptions::new().create(true).write(true).truncate(true).open(log_path) {
-        let _ = writeln!(file, "{}", message);
+
+    if let Ok(mut file) = OpenOptions::new()
+        .create(true)
+        .write(true)
+        .truncate(true)
+        .open(log_path)
+    {
+        let _ = writeln!(file, "{message}");
     }
 }
 
@@ -35,7 +40,9 @@ fn main() {
         _ => "build", // default to prod build for other modes
     };
 
-    log_message(&format!("Building my-hello-world frontend assets in {dapp_build_mode} mode..."));
+    log_message(&format!(
+        "Building my-hello-world frontend assets in {dapp_build_mode} mode..."
+    ));
 
     let output = Command::new("npm")
         .args(["run", npm_command])
