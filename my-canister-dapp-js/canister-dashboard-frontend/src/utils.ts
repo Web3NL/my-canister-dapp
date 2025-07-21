@@ -1,6 +1,6 @@
 import { Principal } from '@dfinity/principal';
 import { HttpAgent } from '@dfinity/agent';
-import { getConfig, isDevMode } from './envvars';
+import { getConfig, isDevMode } from './environment';
 import { AuthClient } from '@dfinity/auth-client';
 import { inferCanisterIdFromLocation } from '@web3nl/my-canister-dashboard';
 import {

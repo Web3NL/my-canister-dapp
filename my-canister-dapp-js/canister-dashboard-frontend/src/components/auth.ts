@@ -1,6 +1,6 @@
 import { AuthClient } from '@dfinity/auth-client';
 import type { Principal } from '@dfinity/principal';
-import { getConfig } from '../envvars';
+import { getConfig } from '../environment';
 import { MAX_TIME_TO_LIVE } from '../constants';
 
 export class AuthManager {

@@ -5,7 +5,7 @@ import { ControllersManager } from './components/controllers';
 import { AlternativeOriginsManager } from './components/alternativeOrigins';
 import { canisterId } from './utils';
 import { showError, DASHBOARD_INIT_ERROR_MESSAGE } from './error';
-import { getConfig } from './envvars';
+import { getConfig } from './environment';
 
 class Dashboard {
   private authManager: AuthManager | null = null;
