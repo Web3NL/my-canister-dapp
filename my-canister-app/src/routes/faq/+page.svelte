@@ -128,12 +128,13 @@
         maintained.
       </p>
       <p>
-        Yet, a mature Dapp, for instance a secure <a
+        Appart from this, a Canister Dapp lives on-chain and is at all times
+        fully controlled by the user. A mature Dapp, for instance a secure <a
           href="https://wiki.internetcomputer.org/wiki/VetKD"
           target="_blank"
           rel="noopener noreferrer">vetKD</a
-        > password manager, could be installed once and theoretically run forever
-        without any further updates.
+        > password manager, could be installed once and theoretically run for a very
+        long time without any further updates, only cycle top-ups.
       </p>
     </Collapsible>
   </div>
