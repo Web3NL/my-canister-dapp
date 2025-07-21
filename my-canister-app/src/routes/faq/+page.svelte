@@ -61,16 +61,26 @@
           rel="noopener noreferrer">Internet Computer</a
         >
         is a versatile blockchain that allows for varying degrees of security, user
-        privacy and ownership. For starters, it's a publicly governed blockchain
-        with a 'liquid democracy'. Second, the security and authentication model
-        of the IC together with
+        privacy and ownership.
+      </p>
+      <p>
+        For starters, it's a publicly governed blockchain with a 'liquid
+        democracy'. Second, the security and authentication model of the IC
+        together with
         <a
           href="https://identity.internetcomputer.org"
           target="_blank"
           rel="noopener noreferrer">Internet Identity</a
         >
-        are ahead of legacy Web2 technology by default. Furthermore, the ecosystem
-        allows for
+        are ahead of legacy Web2 technology by default, giving users more control
+        over their data and on-chain assets. For example, the
+        <a
+          href="https://internetcomputer.org/docs/references/icrc1-standard"
+          target="_blank"
+          rel="noopener noreferrer">ICRC-1</a
+        >
+        standard uses the IC's caller authentication model when sending funds. Furthermore,
+        the ecosystem allows for
         <a
           href="https://wiki.internetcomputer.org/wiki/Service_Nervous_System"
           target="_blank"
@@ -78,9 +88,14 @@
         > to give users more guarantees and ownership stake in certain projects.
       </p>
       <p>
-        Canister Dapps go one step further by allowing non-technical users to
-        create and fully own their own decentralized applications. This allows
-        for true decentralized software without any intermediaries.
+        Despite these advantages, in practice it is still nearly impossible for
+        non-technical users to be in full control of a single canister that runs
+        their app.
+      </p>
+      <p>
+        Canister Dapps allow non-technical users to create and fully own their
+        decentralized applications. This allows for true decentralized software
+        without any intermediaries.
       </p>
     </Collapsible>
   </div>
