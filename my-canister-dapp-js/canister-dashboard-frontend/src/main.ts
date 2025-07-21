@@ -5,6 +5,7 @@ import { ControllersManager } from './components/controllers';
 import { AlternativeOriginsManager } from './components/alternativeOrigins';
 import { canisterId } from './utils';
 import { showError, DASHBOARD_INIT_ERROR_MESSAGE } from './error';
+import { getConfig } from './envvars';
 
 class Dashboard {
   private authManager: AuthManager | null = null;
@@ -15,6 +16,9 @@ class Dashboard {
 
   async create(): Promise<void> {
     try {
+      // Load configuration first
+      await getConfig();
+
       this.authManager = new AuthManager();
       await this.authManager.create();
       await this.initializeAuthenticatedState();
@@ -36,7 +40,7 @@ class Dashboard {
       const principalText = iiPrincipal.toText();
       this.setLoggedInState(principalText);
 
-      const canisterIdPrincipal = canisterId();
+      const canisterIdPrincipal = await canisterId();
 
       const topupManager = new TopupManager();
       const statusManager = new StatusManager();

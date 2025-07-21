@@ -15,7 +15,7 @@ export class ManagementApi {
   async getCanisterStatus(): Promise<CanisterStatusResponse> {
     try {
       const icManagement = await this.managmentApi();
-      const canisterIdPrincipal = canisterId();
+      const canisterIdPrincipal = await canisterId();
 
       return await icManagement.canisterStatus(canisterIdPrincipal);
     } catch (error) {
@@ -27,7 +27,7 @@ export class ManagementApi {
   async updateControllers(controllers: Principal[]): Promise<void> {
     try {
       const icManagement = await this.managmentApi();
-      const canisterIdPrincipal = canisterId();
+      const canisterIdPrincipal = await canisterId();
 
       await icManagement.updateSettings({
         canisterId: canisterIdPrincipal,

@@ -1200,7 +1200,7 @@ dependencies = [
  "ic-cdk",
  "ic-http-certification",
  "include_dir",
- "my-canister-dashboard 0.5.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "my-canister-dashboard 0.5.1",
  "my-canister-frontend 0.1.3 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 

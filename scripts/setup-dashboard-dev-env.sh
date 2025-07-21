@@ -12,6 +12,7 @@ dfx identity use ident-1
 
 echo "Creating my-hello-world canister..."
 dfx canister create my-hello-world --with-cycles 900000000000
+./scripts/prepublish-mcd.sh dev
 ./scripts/build-examples.sh dev
 dfx canister install my-hello-world
 

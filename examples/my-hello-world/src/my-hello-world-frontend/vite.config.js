@@ -1,5 +1,7 @@
 import { defineConfig, loadEnv } from 'vite';
 import { fileURLToPath, URL } from 'url';
+import { viteStaticCopy } from 'vite-plugin-static-copy';
+import { resolve } from 'path';
 
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '');
@@ -7,9 +9,6 @@ export default defineConfig(({ mode }) => {
   return {
     build: {
       emptyOutDir: true,
-      rollupOptions: {
-        external: [],
-      },
     },
     optimizeDeps: {
       esbuildOptions: {
@@ -36,8 +35,18 @@ export default defineConfig(({ mode }) => {
         },
       },
     },
-    publicDir: "assets",
-    plugins: [],
+    // plugins: [
+    //   ...(mode === 'development' ? [
+    //     viteStaticCopy({
+    //       targets: [
+    //         {
+    //           src: 'config/*',
+    //           dest: 'public'
+    //         }
+    //       ]
+    //     })
+    //   ] : [])
+    // ],
     resolve: {
       alias: [
         {
@@ -45,6 +54,10 @@ export default defineConfig(({ mode }) => {
           replacement: fileURLToPath(
             new URL("../declarations/", import.meta.url)
           ),
+        },
+        {
+          find: "/dashboard-config.json",
+          replacement: resolve(process.cwd(), "config/dashboard-config.json"),
         },
       ],
       dedupe: ['@dfinity/agent'],

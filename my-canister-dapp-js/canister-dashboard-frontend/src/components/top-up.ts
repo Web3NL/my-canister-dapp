@@ -69,7 +69,8 @@ export class TopupManager {
     const blockHeight = await this.transferToCMC(transferAmount);
 
     const cmcApi = new CMCApi();
-    const canisterIdString = canisterId().toString();
+    const canisterIdPrincipal = await canisterId();
+    const canisterIdString = canisterIdPrincipal.toString();
     await cmcApi.notifyTopUp(canisterIdString, blockHeight);
 
     await this.updateBalanceAndStatus();
@@ -95,7 +96,7 @@ export class TopupManager {
   private async transferToCMC(amount: bigint): Promise<bigint> {
     const ledgerApi = new LedgerApi();
 
-    const canisterIdPrincipal = canisterId();
+    const canisterIdPrincipal = await canisterId();
     const subaccount = principalToSubaccount(canisterIdPrincipal);
 
     const cmcPrincipal = Principal.fromText(CMC_CANISTER_ID);

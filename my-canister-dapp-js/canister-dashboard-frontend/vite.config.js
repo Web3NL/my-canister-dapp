@@ -48,7 +48,9 @@ export default defineConfig(({ mode }) => {
     resolve: {
       alias: {
         $declarations: path.resolve(__dirname, '../../declarations'),
+        "/dashboard-config.json": path.resolve(__dirname, "config/dashboard-config.json"),
       },
+
     },
     test: {
       include: ['../test/**/*.{test,spec}.{js,ts}'],

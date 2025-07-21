@@ -3,12 +3,12 @@ use std::path::Path;
 use std::process::Command;
 
 fn main() {
-    let build_mode = env::var("DAPP_BUILD_MODE").unwrap_or_else(|_| "prod".to_string());
+    let dfx_network = env::var("DFX_NETWORK").unwrap_or_else(|_| "ic".to_string());
 
     println!("cargo:rerun-if-changed=../my-hello-world-frontend/src");
     println!("cargo:rerun-if-changed=../my-hello-world-frontend/package.json");
     println!("cargo:rerun-if-changed=../my-hello-world-frontend/vite.config.ts");
-    println!("cargo:rerun-if-env-changed=DAPP_BUILD_MODE");
+    println!("cargo:rerun-if-env-changed=DFX_NETWORK");
 
     let frontend_dir = Path::new(env!("CARGO_MANIFEST_DIR")).join("../my-hello-world-frontend");
 
@@ -16,13 +16,13 @@ fn main() {
         panic!("Frontend directory not found: {}", frontend_dir.display());
     }
 
-    let npm_command = match build_mode.as_str() {
-        "dev" => "build:dev",
-        "prod" => "build",
-        _ => unreachable!(),
+    let npm_command = match dfx_network.as_str() {
+        "local" => "build:dev",
+        "ic" => "build",
+        _ => "build", // default to prod build for other networks
     };
 
-    println!("Building my-hello-world frontend assets in {build_mode} mode...");
+    println!("Building my-hello-world frontend assets for {dfx_network} network...");
 
     let output = Command::new("npm")
         .args(["run", npm_command])
