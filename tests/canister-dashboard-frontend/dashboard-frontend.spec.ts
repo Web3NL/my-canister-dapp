@@ -31,6 +31,15 @@ test('Canister Dashboard Frontend Suite', async ({ page }) => {
     }
   };
 
+  const waitForCyclesBalanceChange = async (beforeBalance: string, timeoutMs: number = 15000) => {
+    const cyclesLocator = page.locator('.status-info p:has-text("Cycles:")');
+    await expect(async () => {
+      const cyclesText = await cyclesLocator.textContent();
+      const currentBalance = cyclesText?.replace('Cycles: ', '').trim();
+      expect(currentBalance).not.toBe(beforeBalance);
+    }).toPass({ timeout: timeoutMs });
+  };
+
   // Read the saved ii anchor from the previous test
   const iiAnchor = readTestData('ii-anchor.txt');
 
@@ -67,9 +76,10 @@ test('Canister Dashboard Frontend Suite', async ({ page }) => {
   const balanceText = await page.textContent('#balance-value');
   expect(balanceText).toContain(expectedBalance);
 
-  // Record the cycles balance value before top-up
+  // Wait for cycles balance to be loaded before recording the "before" value
   const cyclesElement = page.locator('.status-info p:has-text("Cycles:")');
   await cyclesElement.waitFor({ timeout: 10000 });
+  await expect(cyclesElement).not.toHaveText(/Loading\.\.\./);
   const cyclesTextBefore = await cyclesElement.textContent();
   const cyclesBalanceBefore = cyclesTextBefore?.replace('Cycles: ', '').trim();
   console.log(`Recorded cycles balance before top-up: ${cyclesBalanceBefore}`);
@@ -83,12 +93,13 @@ test('Canister Dashboard Frontend Suite', async ({ page }) => {
   // Give minimal time for UI to stabilize after top-up
   await page.waitForLoadState('networkidle');
 
-  // Check that the cycles balance has changed after top-up
+  // Wait for cycles balance to change with retry logic to handle varying retrieval times
+  await waitForCyclesBalanceChange(cyclesBalanceBefore || '');
+  
+  // Log the final cycles balance for debugging
   const cyclesTextAfter = await cyclesElement.textContent();
   const cyclesBalanceAfter = cyclesTextAfter?.replace('Cycles: ', '').trim();
   console.log(`Recorded cycles balance after top-up: ${cyclesBalanceAfter}`);
-  
-  expect(cyclesBalanceAfter).not.toBe(cyclesBalanceBefore);
   console.log('Top-up successfully completed - cycles balance has changed');
 
   // Test controller management functionality
