@@ -67,12 +67,12 @@ test('Canister Dashboard Frontend Suite', async ({ page }) => {
   const balanceText = await page.textContent('#balance-value');
   expect(balanceText).toContain(expectedBalance);
 
-  // Record the cycles balance value after the pause
+  // Record the cycles balance value before top-up
   const cyclesElement = page.locator('.status-info p:has-text("Cycles:")');
   await cyclesElement.waitFor({ timeout: 10000 });
-  const cyclesText = await cyclesElement.textContent();
-  const cyclesBalance = cyclesText?.replace('Cycles: ', '').trim();
-  console.log(`Recorded cycles balance: ${cyclesBalance}`);
+  const cyclesTextBefore = await cyclesElement.textContent();
+  const cyclesBalanceBefore = cyclesTextBefore?.replace('Cycles: ', '').trim();
+  console.log(`Recorded cycles balance before top-up: ${cyclesBalanceBefore}`);
 
   await page.getByRole('button', { name: 'Top-up' }).click();
 
@@ -83,7 +83,13 @@ test('Canister Dashboard Frontend Suite', async ({ page }) => {
   // Give minimal time for UI to stabilize after top-up
   await page.waitForLoadState('networkidle');
 
-  // TODO: Check that the cycles balance has changed after top-up
+  // Check that the cycles balance has changed after top-up
+  const cyclesTextAfter = await cyclesElement.textContent();
+  const cyclesBalanceAfter = cyclesTextAfter?.replace('Cycles: ', '').trim();
+  console.log(`Recorded cycles balance after top-up: ${cyclesBalanceAfter}`);
+  
+  expect(cyclesBalanceAfter).not.toBe(cyclesBalanceBefore);
+  console.log('Top-up successfully completed - cycles balance has changed');
 
   // Test controller management functionality
   console.log('Testing controller addition...');
