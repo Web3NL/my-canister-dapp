@@ -1,12 +1,18 @@
 import { LedgerApi } from '../api/ledger';
 import { CMCApi } from '../api/cmc';
 import { formatIcpBalance, principalToSubaccount } from '../helpers';
-import { showLoading, hideLoading } from '../loading';
 import { ICP_TX_FEE, TPUP_MEMO, CMC_CANISTER_ID } from '../constants';
 import { canisterId } from '../utils';
 import { StatusManager } from './status';
 import { Principal } from '@dfinity/principal';
-import { showError, INSUFFICIENT_BALANCE_MESSAGE } from '../error';
+import { INSUFFICIENT_BALANCE_MESSAGE } from '../error';
+import {
+  updateBalanceDisplay,
+  showLoading,
+  hideLoading,
+  showError,
+  addEventListener,
+} from '../dom';
 
 export class TopupManager {
   async create(): Promise<void> {
@@ -19,32 +25,14 @@ export class TopupManager {
     const balance = await ledgerApi.balance();
     const formattedBalance = formatIcpBalance(balance);
 
-    const balanceValue = document.getElementById('balance-value');
-    if (!balanceValue) {
-      throw new Error('Balance value element not found');
-    }
-
-    balanceValue.textContent = formattedBalance;
+    updateBalanceDisplay(formattedBalance);
   }
 
   private attachEventListeners(): void {
-    const topUpBtn = document.getElementById('top-up-btn');
-    const refreshBtn = document.getElementById('refresh-balance-btn');
-
-    if (!topUpBtn) {
-      throw new Error('Top up button element not found');
-    }
-    if (!refreshBtn) {
-      throw new Error('Refresh balance button element not found');
-    }
-
-    topUpBtn.addEventListener('click', () => {
-      void this.performTopUp();
-    });
-
-    refreshBtn.addEventListener('click', () => {
-      void this.refreshBalance();
-    });
+    addEventListener('top-up-btn', 'click', () => this.performTopUp());
+    addEventListener('refresh-balance-btn', 'click', () =>
+      this.refreshBalance()
+    );
   }
 
   private async refreshBalance(): Promise<void> {
