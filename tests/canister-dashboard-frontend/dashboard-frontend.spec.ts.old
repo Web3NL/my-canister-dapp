@@ -13,24 +13,6 @@ test('Canister Dashboard Frontend Suite', async ({ page }) => {
     'https://22ajg-aqaaa-aaaap-adukq-cai.icp0.io',
     'https://my-canister.app',
   ];
-  
-  // Helper functions for content-based waiting using locators
-  const waitForBalanceUpdate = async (expectedBalance: string) => {
-    const balanceLocator = page.locator('#balance-value');
-    await expect(balanceLocator).not.toHaveText(/Loading\.\.\./);
-    await expect(balanceLocator).toContainText(expectedBalance);
-  };
-
-  const waitForListUpdate = async (listSelector: string, expectedItem: string, shouldContain: boolean = true) => {
-    const listLocator = page.locator(listSelector);
-    await expect(listLocator).not.toHaveText(/Loading\.\.\./);
-    if (shouldContain) {
-      await expect(listLocator).toContainText(expectedItem);
-    } else {
-      await expect(listLocator).not.toContainText(expectedItem);
-    }
-  };
-
   // Read the saved ii anchor from the previous test
   const iiAnchor = readTestData('ii-anchor.txt');
 
@@ -57,13 +39,22 @@ test('Canister Dashboard Frontend Suite', async ({ page }) => {
   // Click refresh button to update balance
   await page.getByRole('button', { name: 'Refresh' }).click();
 
+  // Wait for loading overlay to appear (refresh started)
+  await page.waitForSelector('#loading-overlay', {
+    state: 'visible',
+    timeout: 10000,
+  });
+
+  // Wait for loading overlay to disappear (refresh finished)
+  await page.waitForSelector('#loading-overlay', {
+    state: 'hidden',
+    timeout: 10000,
+  });
+
   // Calculate expected balance using same formatting as frontend
   const expectedBalance = formatIcpBalance(TOPUP_AMOUNT);
 
-  // Wait for balance to be updated with the expected amount
-  await waitForBalanceUpdate(expectedBalance);
-
-  // Verify the balance is displayed correctly
+  // Check the balance - refresh is complete when loading overlay is hidden
   const balanceText = await page.textContent('#balance-value');
   expect(balanceText).toContain(expectedBalance);
 
@@ -76,12 +67,21 @@ test('Canister Dashboard Frontend Suite', async ({ page }) => {
 
   await page.getByRole('button', { name: 'Top-up' }).click();
 
-  // Wait for cycles element to be ready (indicating top-up completed)
-  const cyclesLocator = page.locator('.status-info p:has-text("Cycles:")');
-  await expect(cyclesLocator).not.toHaveText(/Loading\.\.\./);
-  
-  // Give minimal time for UI to stabilize after top-up
+  // Wait for loading overlay to become visible
+  await page.waitForSelector('#loading-overlay', {
+    state: 'visible',
+    timeout: 10000,
+  });
+
+  // Wait for loading overlay to disappear
+  await page.waitForSelector('#loading-overlay', {
+    state: 'hidden',
+    timeout: 30000,
+  });
+
+  // Give extra time for the direct UI updates to complete after top-up
   await page.waitForLoadState('networkidle');
+  await page.waitForTimeout(1000);
 
   // TODO: Check that the cycles balance has changed after top-up
 
@@ -95,15 +95,22 @@ test('Canister Dashboard Frontend Suite', async ({ page }) => {
   await page.fill('#controller-input', TEST_CONTROLLER);
   await page.click('#controller-add');
 
-  // Wait for controller to appear in the list
-  await waitForListUpdate('#controllers-list', TEST_CONTROLLER, true);
+  // Wait for loading overlay to appear and disappear
+  await page.waitForSelector('#loading-overlay', {
+    state: 'visible',
+    timeout: 10000,
+  });
+  await page.waitForSelector('#loading-overlay', {
+    state: 'hidden',
+    timeout: 10000,
+  });
 
-  // Verify the controller appears in the list
+  // Check that the controller appears in the list
   const controllersListAfterAdd = await page.textContent('#controllers-list');
   expect(controllersListAfterAdd).toContain(TEST_CONTROLLER);
   console.log('Controller successfully added to the list');
 
-  // Verify input is cleared
+  // Check that input is cleared
   const inputValueAfterAdd = await page.inputValue('#controller-input');
   expect(inputValueAfterAdd).toBe('');
 
@@ -112,15 +119,23 @@ test('Canister Dashboard Frontend Suite', async ({ page }) => {
   await page.fill('#controller-input', TEST_CONTROLLER);
   await page.click('#controller-remove');
 
-  // Wait for controller to be removed from the list
-  await waitForListUpdate('#controllers-list', TEST_CONTROLLER, false);
+  // Wait for loading overlay to appear and disappear
+  await page.waitForSelector('#loading-overlay', {
+    state: 'visible',
+    timeout: 10000,
+  });
+  await page.waitForSelector('#loading-overlay', {
+    state: 'hidden',
+    timeout: 10000,
+  });
 
-  // Verify the controller is no longer in the list
-  const controllersListAfterRemove = await page.textContent('#controllers-list');
+  // Check that the controller is no longer in the list
+  const controllersListAfterRemove =
+    await page.textContent('#controllers-list');
   expect(controllersListAfterRemove).not.toContain(TEST_CONTROLLER);
   console.log('Controller successfully removed from the list');
 
-  // Verify input is cleared
+  // Check that input is cleared
   const inputValueAfterRemove = await page.inputValue('#controller-input');
   expect(inputValueAfterRemove).toBe('');
 
@@ -135,8 +150,15 @@ test('Canister Dashboard Frontend Suite', async ({ page }) => {
     await page.fill('#alternative-origin-input', origin);
     await page.click('#alternative-origin-add');
 
-    // Wait for origin to appear in the list
-    await waitForListUpdate('#alternative-origins-list', origin, true);
+    // Wait for loading overlay to appear and disappear
+    await page.waitForSelector('#loading-overlay', {
+      state: 'visible',
+      timeout: 10000,
+    });
+    await page.waitForSelector('#loading-overlay', {
+      state: 'hidden',
+      timeout: 10000,
+    });
 
     // Verify origin was added
     const listItems = await page
@@ -158,8 +180,15 @@ test('Canister Dashboard Frontend Suite', async ({ page }) => {
     await page.fill('#alternative-origin-input', origin);
     await page.click('#alternative-origin-remove');
 
-    // Wait for origin to be removed from the list
-    await waitForListUpdate('#alternative-origins-list', origin, false);
+    // Wait for loading overlay to appear and disappear
+    await page.waitForSelector('#loading-overlay', {
+      state: 'visible',
+      timeout: 10000,
+    });
+    await page.waitForSelector('#loading-overlay', {
+      state: 'hidden',
+      timeout: 10000,
+    });
 
     // Verify origin was removed
     const listItems = await page
