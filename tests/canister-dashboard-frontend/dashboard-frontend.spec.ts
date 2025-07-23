@@ -13,7 +13,7 @@ test('Canister Dashboard Frontend Suite', async ({ page }) => {
     'https://22ajg-aqaaa-aaaap-adukq-cai.icp0.io',
     'https://my-canister.app',
   ];
-  
+
   // Helper functions for content-based waiting using locators
   const waitForBalanceUpdate = async (expectedBalance: string) => {
     const balanceLocator = page.locator('#balance-value');
@@ -81,21 +81,29 @@ test('Canister Dashboard Frontend Suite', async ({ page }) => {
   await cyclesElement.waitFor({ timeout: 10000 });
   await expect(cyclesElement).not.toHaveText(/Loading\.\.\./);
   const cyclesTextBefore = await cyclesElement.textContent();
-  const cyclesBalanceBefore = cyclesTextBefore?.replace('Cycles: ', '').trim();
+  // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
+  if (!cyclesTextBefore) {
+    throw new Error('Cycles balance not found before top-up');
+  }
+  const cyclesBalanceBefore = cyclesTextBefore.replace('Cycles: ', '').trim();
   console.log(`Recorded cycles balance before top-up: ${cyclesBalanceBefore}`);
 
   await page.getByRole('button', { name: 'Top-up' }).click();
 
-  // Wait for cycles element to be ready (indicating top-up completed)
-  const cyclesLocator = page.locator('.status-info p:has-text("Cycles:")');
-  await expect(cyclesLocator).not.toHaveText(/Loading\.\.\./);
-  
   // Give minimal time for UI to stabilize after top-up
   await page.waitForLoadState('networkidle');
 
+  // Wait for cycles element to be ready (indicating top-up completed)
+  const cyclesLocator = page.locator('.status-info p:has-text("Cycles:")');
+  await expect(cyclesLocator).not.toHaveText(/Loading\.\.\./);
+
   // Wait for cycles balance to change with retry logic to handle varying retrieval times
-  await waitForCyclesBalanceChange(cyclesBalanceBefore || '');
-  
+  if (!cyclesBalanceBefore) {
+    await waitForCyclesBalanceChange(cyclesBalanceBefore);
+  } else {
+    throw new Error('Unable to retrieve cycles balance before top-up');
+  }
+
   // Log the final cycles balance for debugging
   const cyclesTextAfter = await cyclesElement.textContent();
   const cyclesBalanceAfter = cyclesTextAfter?.replace('Cycles: ', '').trim();

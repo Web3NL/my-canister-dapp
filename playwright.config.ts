@@ -40,11 +40,11 @@ export default defineConfig({
       reuseExistingServer: true,
       timeout: 5000,
     },
-    {
-      command: 'npm run dev:app',
-      url: 'http://localhost:5174',
-      reuseExistingServer: true,
-      timeout: 5000,
-    },
+    // {
+    //   command: 'npm run dev:app',
+    //   url: 'http://localhost:5174',
+    //   reuseExistingServer: true,
+    //   timeout: 5000,
+    // },
   ],
 });

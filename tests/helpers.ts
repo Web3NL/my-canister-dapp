@@ -1,7 +1,7 @@
 import { exec } from 'child_process';
 import { promisify } from 'util';
 import { AccountIdentifier } from '@dfinity/ledger-icp';
-import { Principal } from '@dfinity/principal';
+import type { Principal } from '@dfinity/principal';
 import fs from 'fs';
 import path from 'path';
 
@@ -61,6 +61,27 @@ export function readTestData(filename: string): string {
   }
 
   return fs.readFileSync(filePath, 'utf8').trim();
+}
+
+export function myCanisterAppDfxUrl(): string {
+  const dfxJsonPath = path.join(process.cwd(), 'dfx.json');
+
+  if (!fs.existsSync(dfxJsonPath)) {
+    throw new Error('dfx.json not found');
+  }
+
+  const dfxJson = JSON.parse(fs.readFileSync(dfxJsonPath, 'utf8'));
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+  const canisterId = dfxJson.canisters?.['my-canister-app']?.specified_id;
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/strict-boolean-expressions, @typescript-eslint/prefer-nullish-coalescing
+  const dfxHost = dfxJson.networks?.local?.bind || '127.0.0.1:8080';
+
+  // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
+  if (!canisterId) {
+    throw new Error('my-canister-app canister ID not found in dfx.json');
+  }
+
+  return `http://${canisterId}.${dfxHost}`;
 }
 
 

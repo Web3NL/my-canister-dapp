@@ -5,7 +5,8 @@
       "source": [
         "my-canister-app/build"
       ],
-      "build": "npm run build:app"
+      "build": "npm run build:app",
+      "specified_id": "c7lwu-3qaaa-aaaam-qbgia-cai"
     },
     "my-hello-world": {
       "type": "custom",
