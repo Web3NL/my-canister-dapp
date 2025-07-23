@@ -43,4 +43,13 @@ echo "Copying WASM to registry..."
 mkdir -p "$REGISTRY_DIR"
 cp "$WASM_FILE.gz" "$REGISTRY_DIR/my-hello-world$WASM_SUFFIX.wasm.gz"
 
+# Copy wasm files to my-canister-app static folder for dev mode
+if [ "$DEV_MODE" = "dev" ]; then
+  echo "Copying WASM files to my-canister-app static directory..."
+  STATIC_WASM_DIR="my-canister-app/static/wasm"
+  mkdir -p "$STATIC_WASM_DIR"
+  cp -r "$REGISTRY_DIR" "$STATIC_WASM_DIR/"
+  echo "✅ WASM files copied to $STATIC_WASM_DIR/dev/"
+fi
+
 echo "✅ Examples built successfully!"
