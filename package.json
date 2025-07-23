@@ -16,7 +16,7 @@
     "check": "npm run lint --workspaces && npm run format --workspaces && npm run typecheck --workspaces",
     "fix": "npm run lint:fix --workspaces && npm run format:fix --workspaces && npm run typecheck --workspaces",
     "test:ii-setup": "playwright test --project=setup-internet-identity",
-    "test:e2e": "playwright test --project=canister-dashboard-frontend",
+    "test:e2e": "playwright test --project=canister-dashboard-frontend --project=my-canister-app",
     "dev:dashboard": "npm run dev --workspace=canister-dashboard-frontend",
     "dev:app": "npm run dev --workspace=my-canister-app",
     "serve:docs": "npx http-server my-canister-dapp-js/my-canister-dashboard-js/docs",

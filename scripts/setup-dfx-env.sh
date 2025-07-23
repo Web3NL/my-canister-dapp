@@ -22,6 +22,9 @@ dfx deploy icp-index
 
 echo "Setting up dashboard dev environment..."
 ./scripts/setup-dashboard-dev-env.sh
+
+echo "Setup my-canister-app canister..."
 ./scripts/generate-registry-dev.sh
+dfx deploy my-canister-app
 
 echo "✓ Initialization complete"
