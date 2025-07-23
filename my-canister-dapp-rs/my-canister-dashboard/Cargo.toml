@@ -27,4 +27,4 @@ serde_json = { workspace = true }
 pre-release-replacements = [
   {file="../../my-canister-dapp-js/canister-dashboard-frontend/package.json", search="\"version\": \".*\"", replace="\"version\": \"{{version}}\"", exactly=1},
 ]
-pre-release-hook = ["../../scripts/prerelease-mcd.sh"]
+pre-release-hook = ["../../scripts/prebuild-mcd.sh"]

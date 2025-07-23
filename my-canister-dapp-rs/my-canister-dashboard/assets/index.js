@@ -18676,34 +18676,45 @@ async function _deleteStorage(storage) {
   await storage.remove(KEY_VECTOR);
 }
 let configCache = null;
-let isConfigFromJson = false;
+async function getConfig() {
+  return loadDashboardConfig();
+}
+function isDevMode() {
+  return configCache !== null;
+}
 async function loadDashboardConfig() {
   if (configCache) {
     return configCache;
   }
+  const viteConfig = loadViteConfig();
+  if (viteConfig) {
+    configCache = viteConfig;
+    return viteConfig;
+  }
   try {
-    const response = await fetch("/dashboard-config.json");
-    if (response.ok) {
-      const config2 = await response.json();
-      configCache = config2;
-      isConfigFromJson = true;
-      return config2;
+    const jsonConfig = await loadJsonConfig();
+    if (jsonConfig) {
+      configCache = jsonConfig;
+      return jsonConfig;
     }
   } catch {
   }
   const config = {
     identityProvider: "https://identity.internetcomputer.org",
-    dfxHost: "https://icp0.io"
+    dfxHost: "https://icp-api.io"
   };
   configCache = config;
-  isConfigFromJson = false;
   return config;
 }
-async function getConfig() {
-  return loadDashboardConfig();
+function loadViteConfig() {
+  return null;
 }
-function isDevMode() {
-  return isConfigFromJson;
+async function loadJsonConfig() {
+  const response = await fetch("/dashboard-config.json");
+  if (response.ok) {
+    return await response.json();
+  }
+  return null;
 }
 const MAX_TIME_TO_LIVE = BigInt(15) * BigInt(60) * BigInt(1e9);
 const CMC_CANISTER_ID = "rkp4c-7iaaa-aaaaa-aaaca-cai";
@@ -18950,6 +18961,93 @@ function O$2() {
   }
   throw new Error(`Could not infer canister ID from hostname: ${t3}`);
 }
+function getElement(id) {
+  const element = document.getElementById(id);
+  if (!element) {
+    throw new Error(`Element with id '${id}' not found`);
+  }
+  return element;
+}
+function setText(id, text) {
+  const element = getElement(id);
+  element.textContent = text;
+}
+function toggleVisibility(id, show) {
+  const element = getElement(id);
+  if (show) {
+    element.classList.remove("hidden");
+  } else {
+    element.classList.add("hidden");
+  }
+}
+function addEventListener(id, event, handler) {
+  const element = getElement(id);
+  element.addEventListener(event, async () => {
+    await handler();
+  });
+}
+function setLoggedInState(principalText, onLogout) {
+  const authBtn = getElement("auth-btn");
+  authBtn.textContent = "Logout";
+  authBtn.onclick = async () => {
+    try {
+      await onLogout();
+    } catch {
+      showError("Logout failed. Please try again.");
+    }
+  };
+  toggleVisibility("ii-principal", true);
+  setText("ii-principal", principalText);
+  toggleVisibility("authenticated-content", true);
+}
+function setLoggedOutState(onLogin) {
+  const authBtn = getElement("auth-btn");
+  authBtn.textContent = "Login";
+  authBtn.onclick = async () => {
+    try {
+      await onLogin();
+    } catch {
+      showError("Login failed. Please try again.");
+    }
+  };
+  toggleVisibility("ii-principal", false);
+  setText("ii-principal", "");
+  toggleVisibility("authenticated-content", false);
+  toggleVisibility("error-section", false);
+  setText("error-section", "");
+  toggleVisibility("loading-overlay", false);
+}
+function updateStatusDisplay(statusText, memorySizeFormatted, cyclesFormatted, moduleHashHex) {
+  setText("status-value", statusText);
+  setText("memory-size-value", memorySizeFormatted);
+  setText("cycles-value", cyclesFormatted);
+  setText("module-hash-value", moduleHashHex);
+}
+function updateBalanceDisplay(formattedBalance) {
+  setText("balance-value", formattedBalance);
+}
+function showLoading() {
+  toggleVisibility("loading-overlay", true);
+}
+function hideLoading() {
+  toggleVisibility("loading-overlay", false);
+}
+function showError(message) {
+  const errorSection = getElement("error-section");
+  const errorMessage = document.createElement("div");
+  errorMessage.className = "error-message";
+  errorMessage.textContent = message;
+  errorSection.appendChild(errorMessage);
+  toggleVisibility("error-section", true);
+}
+function getInputValue(id) {
+  const input = getElement(id);
+  return input.value.trim();
+}
+function clearInput(id) {
+  const input = getElement(id);
+  input.value = "";
+}
 const NETWORK_ERROR_MESSAGE = "Network error occurred. Please try again.";
 const INVALID_PRINCIPAL_MESSAGE = "Invalid principal format.";
 const INSUFFICIENT_BALANCE_MESSAGE = "Insufficient balance for this operation.";
@@ -18960,17 +19058,6 @@ const INVALID_ORIGIN_MESSAGE = "Invalid origin format.";
 const CANISTER_ID_ERROR_MESSAGE = "Unable to determine canister ID.";
 const HTTP_AGENT_ERROR_MESSAGE = "Failed to create HTTP agent.";
 const DASHBOARD_INIT_ERROR_MESSAGE = "Failed to initialize dashboard.";
-function showError(message) {
-  const errorSection = document.getElementById("error-section");
-  if (!errorSection) {
-    throw new Error("Error section element not found");
-  }
-  const errorMessage = document.createElement("div");
-  errorMessage.className = "error-message";
-  errorMessage.textContent = message;
-  errorSection.appendChild(errorMessage);
-  errorSection.classList.remove("hidden");
-}
 function isValidPrincipal(text) {
   try {
     Principal$1.fromText(text);
@@ -19082,25 +19169,12 @@ class StatusManager {
     const managementApi = new ManagementApi();
     const status = await managementApi.getCanisterStatus();
     const { statusText, memorySizeFormatted, cyclesFormatted, moduleHashHex } = this.formatStatusData(status);
-    this.renderStatusContent(
+    updateStatusDisplay(
       statusText,
       memorySizeFormatted,
       cyclesFormatted,
       moduleHashHex
     );
-  }
-  renderStatusContent(statusText, memorySizeFormatted, cyclesFormatted, moduleHashHex) {
-    const statusValue = document.getElementById("status-value");
-    const memorySizeValue = document.getElementById("memory-size-value");
-    const cyclesValue = document.getElementById("cycles-value");
-    const moduleHashValue = document.getElementById("module-hash-value");
-    if (!statusValue || !memorySizeValue || !cyclesValue || !moduleHashValue) {
-      throw new Error("Status value elements not found");
-    }
-    statusValue.textContent = statusText;
-    memorySizeValue.textContent = memorySizeFormatted;
-    cyclesValue.textContent = cyclesFormatted;
-    moduleHashValue.textContent = moduleHashHex;
   }
   formatStatusData(status) {
     const statusText = "running" in status.status ? "Running" : "stopped" in status.status ? "Stopped" : "stopping" in status.status ? "Stopping" : "Unknown";
@@ -20421,18 +20495,6 @@ class CMCApi {
     }
   }
 }
-function showLoading() {
-  const loadingOverlay = document.getElementById("loading-overlay");
-  if (loadingOverlay) {
-    loadingOverlay.classList.remove("hidden");
-  }
-}
-function hideLoading() {
-  const loadingOverlay = document.getElementById("loading-overlay");
-  if (loadingOverlay) {
-    loadingOverlay.classList.add("hidden");
-  }
-}
 class TopupManager {
   async create() {
     await this.fetchAndRenderBalance();
@@ -20442,27 +20504,15 @@ class TopupManager {
     const ledgerApi = new LedgerApi();
     const balance = await ledgerApi.balance();
     const formattedBalance = formatIcpBalance(balance);
-    const balanceValue = document.getElementById("balance-value");
-    if (!balanceValue) {
-      throw new Error("Balance value element not found");
-    }
-    balanceValue.textContent = formattedBalance;
+    updateBalanceDisplay(formattedBalance);
   }
   attachEventListeners() {
-    const topUpBtn = document.getElementById("top-up-btn");
-    const refreshBtn = document.getElementById("refresh-balance-btn");
-    if (!topUpBtn) {
-      throw new Error("Top up button element not found");
-    }
-    if (!refreshBtn) {
-      throw new Error("Refresh balance button element not found");
-    }
-    topUpBtn.addEventListener("click", () => {
-      void this.performTopUp();
-    });
-    refreshBtn.addEventListener("click", () => {
-      void this.refreshBalance();
-    });
+    addEventListener("top-up-btn", "click", () => this.performTopUp());
+    addEventListener(
+      "refresh-balance-btn",
+      "click",
+      () => this.refreshBalance()
+    );
   }
   async refreshBalance() {
     showLoading();
@@ -20528,10 +20578,7 @@ class ControllersManager {
     this.renderControllersContent();
   }
   renderControllersContent() {
-    const controllersList = document.getElementById("controllers-list");
-    if (!controllersList) {
-      throw new Error("Controllers list element not found");
-    }
+    const controllersList = getElement("controllers-list");
     const controllersListHtml = this.controllersList.map(
       (controller) => `<li class="data-display">${controller.toString()}</li>`
     ).join("");
@@ -20539,28 +20586,17 @@ class ControllersManager {
     this.attachEventListeners();
   }
   attachEventListeners() {
-    const addButton = document.getElementById("controller-add");
-    const removeButton = document.getElementById("controller-remove");
-    if (!addButton) {
-      throw new Error("Controller add button element not found");
-    }
-    addButton.addEventListener("click", () => this.handleAdd());
-    if (!removeButton) {
-      throw new Error("Controller remove button element not found");
-    }
-    removeButton.addEventListener("click", () => this.handleRemove());
+    addEventListener("controller-add", "click", () => this.handleAdd());
+    addEventListener("controller-remove", "click", () => this.handleRemove());
   }
   async handleAdd() {
-    const input = document.getElementById(
-      "controller-input"
-    );
-    const principalText = input.value.trim();
+    const principalText = getInputValue("controller-input");
     if (!principalText) {
       return;
     }
     if (!isValidPrincipal(principalText)) {
       showError(INVALID_PRINCIPAL_MESSAGE);
-      input.value = "";
+      clearInput("controller-input");
       return;
     }
     const newController = Principal$1.fromText(principalText);
@@ -20569,33 +20605,30 @@ class ControllersManager {
     const hasDuplicates = controllerStrings.length !== new Set(controllerStrings).size;
     if (hasDuplicates) {
       showError(DUPLICATE_CONTROLLER_MESSAGE);
-      input.value = "";
+      clearInput("controller-input");
       return;
     }
     if (!this.hasRequiredPrincipals(updatedControllers)) {
       showError(REQUIRED_CONTROLLERS_MESSAGE);
-      input.value = "";
+      clearInput("controller-input");
       return;
     }
     showLoading();
     const managementApi = new ManagementApi();
     await managementApi.updateControllers(updatedControllers);
     this.controllersList = updatedControllers;
-    input.value = "";
+    clearInput("controller-input");
     this.renderControllersContent();
     hideLoading();
   }
   async handleRemove() {
-    const input = document.getElementById(
-      "controller-input"
-    );
-    const principalText = input.value.trim();
+    const principalText = getInputValue("controller-input");
     if (!principalText) {
       throw new Error("Principal input is required");
     }
     if (!isValidPrincipal(principalText)) {
       showError(INVALID_PRINCIPAL_MESSAGE);
-      input.value = "";
+      clearInput("controller-input");
       return;
     }
     const controllerToRemove = Principal$1.fromText(principalText);
@@ -20604,7 +20637,7 @@ class ControllersManager {
     );
     if (!controllerExists) {
       showError(CONTROLLER_NOT_FOUND_MESSAGE);
-      input.value = "";
+      clearInput("controller-input");
       return;
     }
     const updatedControllers = this.controllersList.filter(
@@ -20612,14 +20645,14 @@ class ControllersManager {
     );
     if (!this.hasRequiredPrincipals(updatedControllers)) {
       showError(REQUIRED_CONTROLLERS_MESSAGE);
-      input.value = "";
+      clearInput("controller-input");
       return;
     }
     showLoading();
     const managementApi = new ManagementApi();
     await managementApi.updateControllers(updatedControllers);
     this.controllersList = updatedControllers;
-    input.value = "";
+    clearInput("controller-input");
     this.renderControllersContent();
     hideLoading();
   }
@@ -20716,12 +20749,7 @@ class AlternativeOriginsManager {
     this.attachEventListeners();
   }
   renderAlternativeOriginsContent(originsList) {
-    const alternativeOriginsList = document.getElementById(
-      "alternative-origins-list"
-    );
-    if (!alternativeOriginsList) {
-      throw new Error("Alternative origins list element not found");
-    }
+    const alternativeOriginsList = getElement("alternative-origins-list");
     alternativeOriginsList.innerHTML = originsList;
   }
   async fetchAlternativeOrigins() {
@@ -20735,26 +20763,21 @@ class AlternativeOriginsManager {
     }
   }
   attachEventListeners() {
-    const addButton = document.getElementById("alternative-origin-add");
-    const removeButton = document.getElementById("alternative-origin-remove");
-    if (addButton) {
-      addButton.addEventListener("click", () => this.handleAdd());
-    }
-    if (removeButton) {
-      removeButton.addEventListener("click", () => this.handleRemove());
-    }
+    addEventListener("alternative-origin-add", "click", () => this.handleAdd());
+    addEventListener(
+      "alternative-origin-remove",
+      "click",
+      () => this.handleRemove()
+    );
   }
   async handleAdd() {
-    const input = document.getElementById(
-      "alternative-origin-input"
-    );
-    const origin = input.value.trim();
+    const origin = getInputValue("alternative-origin-input");
     if (!origin) {
       throw new Error("Origin input is required");
     }
     if (!isValidOrigin(origin)) {
       showError(INVALID_ORIGIN_MESSAGE);
-      input.value = "";
+      clearInput("alternative-origin-input");
       return;
     }
     showLoading();
@@ -20764,7 +20787,7 @@ class AlternativeOriginsManager {
     if ("Ok" in result) {
       await new Promise((resolve) => setTimeout(resolve, IC_UPDATE_CALL_DELAY));
       await this.create();
-      input.value = "";
+      clearInput("alternative-origin-input");
     } else {
       showError(NETWORK_ERROR_MESSAGE);
       throw new Error(`Failed to add alternative origin: ${result.Err}`);
@@ -20772,16 +20795,13 @@ class AlternativeOriginsManager {
     hideLoading();
   }
   async handleRemove() {
-    const input = document.getElementById(
-      "alternative-origin-input"
-    );
-    const origin = input.value.trim();
+    const origin = getInputValue("alternative-origin-input");
     if (!origin) {
       throw new Error("Origin input is required");
     }
     if (!isValidOrigin(origin)) {
       showError(INVALID_ORIGIN_MESSAGE);
-      input.value = "";
+      clearInput("alternative-origin-input");
       return;
     }
     showLoading();
@@ -20791,7 +20811,7 @@ class AlternativeOriginsManager {
     if ("Ok" in result) {
       await new Promise((resolve) => setTimeout(resolve, IC_UPDATE_CALL_DELAY));
       await this.create();
-      input.value = "";
+      clearInput("alternative-origin-input");
     } else {
       showError(NETWORK_ERROR_MESSAGE);
       throw new Error(`Failed to remove alternative origin: ${result.Err}`);
@@ -20841,47 +20861,10 @@ class Dashboard {
     }
   }
   setLoggedInState(principalText) {
-    const authBtn = document.getElementById("auth-btn");
-    const principalEl = document.getElementById("ii-principal");
-    const contentEl = document.getElementById("authenticated-content");
-    if (!authBtn || !principalEl || !contentEl) {
-      throw new Error("Required elements not found");
-    }
-    authBtn.textContent = "Logout";
-    authBtn.onclick = async () => {
-      try {
-        await this.handleLogout();
-      } catch {
-        showError("Logout failed. Please try again.");
-      }
-    };
-    principalEl.classList.remove("hidden");
-    principalEl.textContent = principalText;
-    contentEl.classList.remove("hidden");
+    setLoggedInState(principalText, () => this.handleLogout());
   }
   setLoggedOutState() {
-    const authBtn = document.getElementById("auth-btn");
-    const principalEl = document.getElementById("ii-principal");
-    const contentEl = document.getElementById("authenticated-content");
-    const errorSection = document.getElementById("error-section");
-    const loadingOverlay = document.getElementById("loading-overlay");
-    if (!authBtn || !principalEl || !contentEl || !errorSection || !loadingOverlay) {
-      throw new Error("Required elements not found");
-    }
-    authBtn.textContent = "Login";
-    authBtn.onclick = async () => {
-      try {
-        await this.handleLogin();
-      } catch {
-        showError("Login failed. Please try again.");
-      }
-    };
-    principalEl.classList.add("hidden");
-    principalEl.textContent = "";
-    contentEl.classList.add("hidden");
-    errorSection.classList.add("hidden");
-    errorSection.textContent = "";
-    loadingOverlay.classList.add("hidden");
+    setLoggedOutState(() => this.handleLogin());
   }
   async handleLogin() {
     if (!this.authManager) {
