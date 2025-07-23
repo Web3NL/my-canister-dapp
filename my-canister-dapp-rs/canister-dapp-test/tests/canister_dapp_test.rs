@@ -157,7 +157,8 @@ fn canister_dapp_test() {
     // Test alternative origins management
     let test_origin_canister = format!("https://{canister_id}.icp0.io");
     let test_origin_localhost = "http://localhost:8080".to_string();
-    let invalid_origin = "http://sub.localhost:8080".to_string();
+    let valid_canister_origin = "http://22ajg-aqaaa-aaaap-adukq-cai.localhost:8080".to_string();
+    let invalid_origin = "ftp://invalid-protocol.com".to_string();
 
     // Get initial alternative origins
     let initial_response = query_candid::<(HttpRequest,), (HttpResponse,)>(
@@ -186,6 +187,11 @@ fn canister_dapp_test() {
         !initial_list
             .iter()
             .any(|o| o.as_str() == Some(&test_origin_localhost))
+    );
+    assert!(
+        !initial_list
+            .iter()
+            .any(|o| o.as_str() == Some(&valid_canister_origin))
     );
 
     // Test canister origin: Add, verify, remove, verify
@@ -344,6 +350,41 @@ fn canister_dapp_test() {
             .any(|o| o.as_str() == Some(&test_origin_localhost))
     );
     println!("Alternative origin removed \n {test_origin_localhost} \n");
+
+    // Test that canister localhost origin is now valid (new validation logic)
+    let add_valid_canister_result =
+        update_candid_as::<(ManageAlternativeOriginsArg,), (ManageAlternativeOriginsResult,)>(
+            &pic,
+            canister_id,
+            owner,
+            "manage_alternative_origins",
+            (ManageAlternativeOriginsArg::Add(
+                valid_canister_origin.clone(),
+            ),),
+        )
+        .expect("Failed to test canister localhost validation");
+    assert!(matches!(
+        add_valid_canister_result.0,
+        ManageAlternativeOriginsResult::Ok
+    ));
+    println!("Canister localhost origin validation successful \n {valid_canister_origin} \n");
+
+    // Clean up - remove the test origin
+    let remove_valid_canister_result =
+        update_candid_as::<(ManageAlternativeOriginsArg,), (ManageAlternativeOriginsResult,)>(
+            &pic,
+            canister_id,
+            owner,
+            "manage_alternative_origins",
+            (ManageAlternativeOriginsArg::Remove(
+                valid_canister_origin.clone(),
+            ),),
+        )
+        .expect("Failed to remove test canister localhost origin");
+    assert!(matches!(
+        remove_valid_canister_result.0,
+        ManageAlternativeOriginsResult::Ok
+    ));
 
     // Test invalid origin: Should fail validation
     let add_invalid_result =

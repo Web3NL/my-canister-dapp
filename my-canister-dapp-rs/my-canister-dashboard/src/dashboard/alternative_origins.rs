@@ -66,7 +66,7 @@ impl AlternativeOrigins {
 /// Manages alternative origins for Internet Identity.
 ///
 /// Adds or removes alternative origin URLs and updates the asset router with the changes.
-/// URLs must start with 'http://localhost:' or 'https://'.
+/// URLs must start with 'http://localhost:', 'http://*.localhost:', or 'https://'.
 ///
 /// See [Alternative Frontend Origins](https://internetcomputer.org/docs/references/ii-spec#alternative-frontend-origins) for more information.
 ///
@@ -131,10 +131,16 @@ pub fn manage_alternative_origins(
 }
 
 fn validate_alternative_origin(origin: &str) -> Result<(), String> {
-    if origin.starts_with("http://localhost:") || origin.starts_with("https://") {
+    if origin.starts_with("http://localhost:")
+        || origin.starts_with("https://")
+        || (origin.starts_with("http://") && origin.contains(".localhost:"))
+    {
         Ok(())
     } else {
-        Err("URL must start with 'http://localhost:' or 'https://'".to_string())
+        Err(
+            "URL must start with 'http://localhost:', 'http://*.localhost:', or 'https://'"
+                .to_string(),
+        )
     }
 }
 
@@ -200,13 +206,21 @@ mod tests {
         );
         assert_eq!(origins.alternative_origins.len(), 2);
 
+        // Test adding valid canister ID localhost origin
+        assert!(
+            origins
+                .add_origin("http://22ajg-aqaaa-aaaap-adukq-cai.localhost:8080".to_string())
+                .is_ok()
+        );
+        assert_eq!(origins.alternative_origins.len(), 3);
+
         // Test adding invalid origin
         assert!(
             origins
                 .add_origin("http://invalid.com".to_string())
                 .is_err()
         );
-        assert_eq!(origins.alternative_origins.len(), 2);
+        assert_eq!(origins.alternative_origins.len(), 3);
     }
 
     #[test]

@@ -1,7 +1,7 @@
 import { defineConfig, devices } from '@playwright/test';
 import dotenv from 'dotenv';
 
-// Load global environment variables from .env.development
+// Load dfx environment variables from .env.development
 dotenv.config({ path: '.env.development' });
 
 export default defineConfig({
@@ -18,9 +18,6 @@ export default defineConfig({
     {
       name: 'canister-dashboard-frontend',
       testMatch: /.*canister-dashboard-frontend.*\.spec\.ts/,
-      use: {
-        baseURL: 'http://localhost:5173',
-      },
     },
     {
       name: 'my-canister-app',
@@ -39,12 +36,6 @@ export default defineConfig({
       url: 'http://localhost:5173',
       reuseExistingServer: true,
       timeout: 5000,
-    },
-    // {
-    //   command: 'npm run dev:app',
-    //   url: 'http://localhost:5174',
-    //   reuseExistingServer: true,
-    //   timeout: 5000,
-    // },
+    }
   ],
 });

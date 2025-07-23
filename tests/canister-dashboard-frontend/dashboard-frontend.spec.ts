@@ -10,6 +10,7 @@ test('Canister Dashboard Frontend Suite', async ({ page }) => {
   const TEST_CONTROLLER = 'rkp4c-7iaaa-aaaaa-aaaca-cai';
   const TEST_ORIGINS = [
     'http://localhost:9999',
+    'http://22ajg-aqaaa-aaaap-adukq-cai.localhost:8080',
     'https://22ajg-aqaaa-aaaap-adukq-cai.icp0.io',
     'https://my-canister.app',
   ];
@@ -74,6 +75,13 @@ test('Canister Dashboard Frontend Suite', async ({ page }) => {
 
       // Test that new value is larger than old value
       expect(currentNum).toBeGreaterThan(beforeNum);
+    }).toPass({ timeout: timeoutMs });
+  };
+
+  const waitForInputToClear = async (inputSelector: string, timeoutMs: number = 10000) => {
+    await expect(async () => {
+      const inputValue = await page.inputValue(inputSelector);
+      expect(inputValue).toBe('');
     }).toPass({ timeout: timeoutMs });
   };
 
@@ -205,9 +213,8 @@ test('Canister Dashboard Frontend Suite', async ({ page }) => {
       `Origin ${origin} successfully added to the list. Current list: ${listItems.join(', ')}`
     );
 
-    // Verify input is cleared
-    const inputValue = await page.inputValue('#alternative-origin-input');
-    expect(inputValue).toBe('');
+    // Wait for input to be cleared
+    await waitForInputToClear('#alternative-origin-input');
   }
 
   // Test removing each origin
@@ -227,9 +234,8 @@ test('Canister Dashboard Frontend Suite', async ({ page }) => {
     expect(listItems).not.toContain(origin);
     console.log(`Origin ${origin} successfully removed from the list`);
 
-    // Verify input is cleared
-    const inputValue = await page.inputValue('#alternative-origin-input');
-    expect(inputValue).toBe('');
+    // Wait for input to be cleared
+    await waitForInputToClear('#alternative-origin-input');
   }
 
   console.log('Alternative origins management tests completed successfully');
