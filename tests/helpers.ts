@@ -4,6 +4,7 @@ import { AccountIdentifier } from '@dfinity/ledger-icp';
 import type { Principal } from '@dfinity/principal';
 import fs from 'fs';
 import path from 'path';
+import dotenv from 'dotenv';
 
 const execAsync = promisify(exec);
 
@@ -82,6 +83,27 @@ export function myCanisterAppDfxUrl(): string {
   }
 
   return `http://${canisterId}.${dfxHost}`;
+}
+
+export function loadDfxEnv(): void {
+  const envPath = path.join(process.cwd(), '.env.development');
+  
+  if (!fs.existsSync(envPath)) {
+    throw new Error('Global .env.development not found at monorepo root');
+  }
+
+  dotenv.config({ path: envPath });
+}
+
+export function getDfxEnv(key: string): string {
+  const value = process.env[key];
+  
+  // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
+  if (!value) {
+    throw new Error(`DFX environment variable ${key} not found. Make sure to call loadDfxEnv() first.`);
+  }
+
+  return value;
 }
 
 

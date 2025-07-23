@@ -50,7 +50,7 @@ async function loadDashboardConfig(): Promise<DashboardConfig> {
 function loadViteConfig(): DashboardConfig | null {
   const identityProvider = import.meta.env.VITE_IDENTITY_PROVIDER;
   const dfxHost = import.meta.env.VITE_DFXHOST;
-  const canisterId = import.meta.env.VITE_CANISTER_ID;
+  const canisterId = import.meta.env.VITE_DASHBOARD_CANISTER_ID;
 
   // Check for required env vars (canister ID is optional)
   if (isValidEnvVar(identityProvider) && isValidEnvVar(dfxHost)) {

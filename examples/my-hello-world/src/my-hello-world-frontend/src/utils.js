@@ -1,7 +1,7 @@
 import { Principal } from '@dfinity/principal';
 import { inferCanisterIdFromLocation } from '@web3nl/my-canister-dashboard';
 
-const CANISTER_ID_DEV = import.meta.env.VITE_CANISTER_ID;
+const CANISTER_ID_DEV = import.meta.env.VITE_MY_HELLO_WORLD_CANISTER_ID;
 
 export function getCanisterId() {
   try {
@@ -13,7 +13,7 @@ export function getCanisterId() {
     }
 
     throw new Error(
-      'No canister ID available - please set VITE_CANISTER_ID in .env.development'
+      'No canister ID available - please set VITE_MY_HELLO_WORLD_CANISTER_ID in global .env.development'
     );
   }
 }

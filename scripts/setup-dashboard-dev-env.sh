@@ -15,8 +15,8 @@ dfx canister create my-hello-world --with-cycles 900000000000
 dfx build my-hello-world
 dfx canister install my-hello-world
 
-echo "Reading canister ID from .env.development..."
-CANISTER_ID=$(grep VITE_CANISTER_ID my-canister-dapp-js/canister-dashboard-frontend/.env.development | cut -d '=' -f2)
+echo "Reading canister ID from global .env.development..."
+CANISTER_ID=$(grep VITE_MY_HELLO_WORLD_CANISTER_ID .env.development | cut -d '=' -f2)
 
 echo "Reading principal from ii-principal.txt..."
 PRINCIPAL=$(cat test-output/ii-principal.txt)

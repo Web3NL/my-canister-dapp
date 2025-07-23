@@ -98,11 +98,7 @@ test('Canister Dashboard Frontend Suite', async ({ page }) => {
   await expect(cyclesLocator).not.toHaveText(/Loading\.\.\./);
 
   // Wait for cycles balance to change with retry logic to handle varying retrieval times
-  if (!cyclesBalanceBefore) {
-    await waitForCyclesBalanceChange(cyclesBalanceBefore);
-  } else {
-    throw new Error('Unable to retrieve cycles balance before top-up');
-  }
+  await waitForCyclesBalanceChange(cyclesBalanceBefore);
 
   // Log the final cycles balance for debugging
   const cyclesTextAfter = await cyclesElement.textContent();

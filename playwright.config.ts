@@ -1,8 +1,8 @@
 import { defineConfig, devices } from '@playwright/test';
 import dotenv from 'dotenv';
 
-// Load environment variables from .env.development
-dotenv.config({ path: 'my-canister-dapp-js/canister-dashboard-frontend/.env.development' });
+// Load global environment variables from .env.development
+dotenv.config({ path: '.env.development' });
 
 export default defineConfig({
   testDir: './tests',

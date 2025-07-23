@@ -2,12 +2,12 @@ import { defineConfig, loadEnv } from 'vite';
 import path from 'path';
 
 export default defineConfig(({ mode }) => {
-  const env = loadEnv(mode, '.', 'VITE_');
+  const env = loadEnv(mode, '../..', 'VITE_');
   console.log('Mode:', mode);
   console.log('Loaded env:', env);
 
   const dfxHost = env.VITE_DFXHOST;
-  const canisterId = env.VITE_CANISTER_ID;
+  const canisterId = env.VITE_DASHBOARD_CANISTER_ID;
 
   if (mode === 'development') {
     if (!dfxHost) {
@@ -17,7 +17,7 @@ export default defineConfig(({ mode }) => {
     }
     if (!canisterId) {
       throw new Error(
-        'VITE_CANISTER_ID environment variable is required in development mode'
+        'VITE_DASHBOARD_CANISTER_ID environment variable is required in development mode'
       );
     }
   }
