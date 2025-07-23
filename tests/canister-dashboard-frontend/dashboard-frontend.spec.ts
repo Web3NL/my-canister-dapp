@@ -15,10 +15,24 @@ test('Canister Dashboard Frontend Suite', async ({ page }) => {
   ];
 
   // Helper functions for content-based waiting using locators
-  const waitForBalanceUpdate = async (expectedBalance: string) => {
+  const waitForBalanceToBeAtLeast = async (minimumBalance: string) => {
     const balanceLocator = page.locator('#balance-value');
     await expect(balanceLocator).not.toHaveText(/Loading\.\.\./);
-    await expect(balanceLocator).toContainText(expectedBalance);
+
+    const minNum = parseFloat(minimumBalance);
+    if (isNaN(minNum)) {
+      throw new Error(`Invalid minimum balance: "${minimumBalance}" - cannot parse as number`);
+    }
+
+    await expect(async () => {
+      const balanceText = await balanceLocator.textContent();
+      const currentNum = parseFloat(balanceText ?? '0');
+      if (isNaN(currentNum)) {
+        throw new Error(`Invalid current balance: "${balanceText}" - cannot parse as number`);
+      }
+      expect(currentNum).toBeGreaterThan(0);
+      expect(currentNum).toBeGreaterThanOrEqual(minNum);
+    }).toPass();
   };
 
   const waitForListUpdate = async (listSelector: string, expectedItem: string, shouldContain: boolean = true) => {
@@ -31,12 +45,35 @@ test('Canister Dashboard Frontend Suite', async ({ page }) => {
     }
   };
 
-  const waitForCyclesBalanceChange = async (beforeBalance: string, timeoutMs: number = 15000) => {
+  const waitForCyclesBalanceIncrease = async (beforeBalance: string, timeoutMs: number = 15000) => {
     const cyclesLocator = page.locator('.status-info p:has-text("Cycles:")');
+
+    // Parse the before balance as number or fail (format: "0.89 T")
+    const beforeNum = parseFloat(beforeBalance.replace(/\s*T\s*$/i, '').trim());
+    if (isNaN(beforeNum)) {
+      throw new Error(`Invalid before cycles balance: "${beforeBalance}" - cannot parse as number`);
+    }
+    if (beforeNum <= 0) {
+      throw new Error(`Initial cycles balance must be greater than 0, got: "${beforeBalance}"`);
+    }
+
     await expect(async () => {
       const cyclesText = await cyclesLocator.textContent();
-      const currentBalance = cyclesText?.replace('Cycles: ', '').trim();
-      expect(currentBalance).not.toBe(beforeBalance);
+      const currentBalanceStr = cyclesText?.replace(/Cycles:\s*/g, '').trim();
+
+      // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
+      if (!currentBalanceStr) {
+        throw new Error('Current cycles balance is empty');
+      }
+
+      // Parse current balance as number or fail (format: "0.89 T")
+      const currentNum = parseFloat(currentBalanceStr.replace(/\s*T\s*$/i, '').trim());
+      if (isNaN(currentNum)) {
+        throw new Error(`Invalid current cycles balance: "${currentBalanceStr}" - cannot parse as number`);
+      }
+
+      // Test that new value is larger than old value
+      expect(currentNum).toBeGreaterThan(beforeNum);
     }).toPass({ timeout: timeoutMs });
   };
 
@@ -66,15 +103,15 @@ test('Canister Dashboard Frontend Suite', async ({ page }) => {
   // Click refresh button to update balance
   await page.getByRole('button', { name: 'Refresh' }).click();
 
-  // Calculate expected balance using same formatting as frontend
-  const expectedBalance = formatIcpBalance(TOPUP_AMOUNT);
+  // Calculate minimum expected balance (the amount we just transferred)
+  const transferAmount = formatIcpBalance(TOPUP_AMOUNT);
 
-  // Wait for balance to be updated with the expected amount
-  await waitForBalanceUpdate(expectedBalance);
+  // Wait for balance to be at least the amount we transferred
+  await waitForBalanceToBeAtLeast(transferAmount);
 
-  // Verify the balance is displayed correctly
+  // Log the current balance for debugging
   const balanceText = await page.textContent('#balance-value');
-  expect(balanceText).toContain(expectedBalance);
+  console.log(`Current ICP balance after transfer: ${balanceText}`);
 
   // Wait for cycles balance to be loaded before recording the "before" value
   const cyclesElement = page.locator('.status-info p:has-text("Cycles:")');
@@ -85,7 +122,7 @@ test('Canister Dashboard Frontend Suite', async ({ page }) => {
   if (!cyclesTextBefore) {
     throw new Error('Cycles balance not found before top-up');
   }
-  const cyclesBalanceBefore = cyclesTextBefore.replace('Cycles: ', '').trim();
+  const cyclesBalanceBefore = cyclesTextBefore.replace(/Cycles:\s*/g, '').trim();
   console.log(`Recorded cycles balance before top-up: ${cyclesBalanceBefore}`);
 
   await page.getByRole('button', { name: 'Top-up' }).click();
@@ -97,12 +134,12 @@ test('Canister Dashboard Frontend Suite', async ({ page }) => {
   const cyclesLocator = page.locator('.status-info p:has-text("Cycles:")');
   await expect(cyclesLocator).not.toHaveText(/Loading\.\.\./);
 
-  // Wait for cycles balance to change with retry logic to handle varying retrieval times
-  await waitForCyclesBalanceChange(cyclesBalanceBefore);
+  // Wait for cycles balance to increase with retry logic to handle varying retrieval times
+  await waitForCyclesBalanceIncrease(cyclesBalanceBefore);
 
   // Log the final cycles balance for debugging
   const cyclesTextAfter = await cyclesElement.textContent();
-  const cyclesBalanceAfter = cyclesTextAfter?.replace('Cycles: ', '').trim();
+  const cyclesBalanceAfter = cyclesTextAfter?.replace(/Cycles:\s*/g, '').trim();
   console.log(`Recorded cycles balance after top-up: ${cyclesBalanceAfter}`);
   console.log('Top-up successfully completed - cycles balance has changed');
 

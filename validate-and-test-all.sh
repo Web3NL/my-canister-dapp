@@ -22,12 +22,10 @@ fi
 
 ./scripts/check.sh
 ./scripts/setup-dfx-env.sh
-./scripts/run-tests.sh
+./scripts/run-test.sh
 
 if [ "$E2E_FLAG" = "true" ]; then
-    echo "Running E2E dashboard frontend test..."
-    npx playwright test tests/canister-dashboard-frontend/dashboard-frontend.spec.ts
-    echo "E2E test completed successfully!"
+    ./scripts/run-test:e2e.sh
 fi
 
 echo "All tests passed successfully!"
