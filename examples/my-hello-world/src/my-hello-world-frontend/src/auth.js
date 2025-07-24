@@ -3,9 +3,7 @@ import { HttpAgent } from '@dfinity/agent';
 import { MyDashboardBackend } from '@web3nl/my-canister-dashboard';
 import { showError } from './errorHandler.js';
 import { getCanisterId } from './utils.js';
-import { getConfig } from './environment.js';
-
-const PROD = import.meta.env.MODE === 'production';
+import { getConfig, isDevMode } from './environment.js';
 
 export class AuthManager {
   constructor() {
@@ -72,7 +70,7 @@ export class AuthManager {
       });
 
       // Fetch root key for certificate validation during development
-      if (!PROD) {
+      if (isDevMode()) {
         try {
           await this.agent.fetchRootKey();
         } catch {

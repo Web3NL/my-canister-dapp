@@ -18,7 +18,7 @@ export class CyclesChecker {
     }
 
     try {
-      const canisterId = getCanisterId();
+      const canisterId = await getCanisterId();
       const dashboard = MyCanisterDashboard.create(agent, canisterId);
       const result = await dashboard.checkCyclesBalance();
 

@@ -100,7 +100,7 @@ class App {
 
     try {
       // Get canister ID using our utility function
-      const canisterId = getCanisterId();
+      const canisterId = await getCanisterId();
       const agent = authManager.getAgent();
       // eslint-disable-next-line @typescript-eslint/no-unsafe-call
       const my_hello_world_backend = createActor(canisterId, { agent });
