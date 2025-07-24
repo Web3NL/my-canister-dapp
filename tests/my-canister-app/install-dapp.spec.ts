@@ -59,5 +59,8 @@ test('My Canister App E2E Suite', async ({ page }) => {
     await page2.getByRole('button', { name: 'Remind me later' }).waitFor({ state: 'visible' });
     await page2.getByRole('button', { name: 'Remind me later' }).click();
 
-    await page.getByRole('heading', { name: 'Good news' }).waitFor({ state: 'visible' });
+    await page.getByRole('menuitem', { name: 'My Dapps' }).waitFor({ state: 'visible' });
+    await page.getByRole('menuitem', { name: 'My Dapps' }).click();
+
+    await page.locator('article[data-tid="card"]').filter({ hasText: 'My Hello World' }).first().waitFor({ state: 'visible' });
 });
