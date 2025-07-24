@@ -35,18 +35,18 @@ export default defineConfig(({ mode }) => {
         },
       },
     },
-    // plugins: [
-    //   ...(mode === 'development' ? [
-    //     viteStaticCopy({
-    //       targets: [
-    //         {
-    //           src: 'config/*',
-    //           dest: 'public'
-    //         }
-    //       ]
-    //     })
-    //   ] : [])
-    // ],
+    plugins: [
+      ...(mode === 'development' ? [
+        viteStaticCopy({
+          targets: [
+            {
+              src: 'config/*',
+              dest: '.'
+            }
+          ]
+        })
+      ] : [])
+    ],
     resolve: {
       alias: [
         {

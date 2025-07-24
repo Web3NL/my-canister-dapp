@@ -3,12 +3,9 @@ import { HttpAgent } from '@dfinity/agent';
 import { MyDashboardBackend } from '@web3nl/my-canister-dashboard';
 import { showError } from './errorHandler.js';
 import { getCanisterId } from './utils.js';
+import { getConfig } from './environment.js';
 
 const PROD = import.meta.env.MODE === 'production';
-const II_URL =
-  import.meta.env.VITE_IDENTITY_PROVIDER ??
-  'https://identity.internetcomputer.org';
-const HOST = import.meta.env.VITE_DFXHOST ?? 'https://icp0.io';
 
 export class AuthManager {
   constructor() {
@@ -34,10 +31,12 @@ export class AuthManager {
       await this.init();
     }
 
+    const config = await getConfig();
+
     // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     return new Promise((resolve, reject) => {
       this.authClient.login({
-        identityProvider: II_URL,
+        identityProvider: config.identityProvider,
         onSuccess: async () => {
           await this.#updateAuthState();
           resolve(this.isAuthenticated);
@@ -65,9 +64,11 @@ export class AuthManager {
     this.isAuthenticated = !this.principal.isAnonymous();
 
     if (this.isAuthenticated) {
+      const config = await getConfig();
+
       this.agent = new HttpAgent({
         identity: this.identity,
-        host: HOST,
+        host: config.dfxHost,
       });
 
       // Fetch root key for certificate validation during development
@@ -102,7 +103,7 @@ export class AuthManager {
     }
 
     try {
-      const canisterId = getCanisterId();
+      const canisterId = await getCanisterId();
       const backend = MyDashboardBackend.create({
         agent: this.agent,
         canisterId: canisterId,

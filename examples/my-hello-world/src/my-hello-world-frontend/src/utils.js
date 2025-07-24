@@ -1,15 +1,15 @@
 import { Principal } from '@dfinity/principal';
 import { inferCanisterIdFromLocation } from '@web3nl/my-canister-dashboard';
+import { getConfig } from './environment.js';
 
-const CANISTER_ID_DEV = import.meta.env.VITE_MY_HELLO_WORLD_CANISTER_ID;
-
-export function getCanisterId() {
+export async function getCanisterId() {
   try {
     return inferCanisterIdFromLocation();
   } catch {
     // When in dev server inference fails and we use local canister ID
-    if (CANISTER_ID_DEV !== undefined) {
-      return Principal.fromText(CANISTER_ID_DEV);
+    const config = await getConfig();
+    if (config.canisterIdDev !== undefined) {
+      return Principal.fromText(config.canisterIdDev);
     }
 
     throw new Error(
