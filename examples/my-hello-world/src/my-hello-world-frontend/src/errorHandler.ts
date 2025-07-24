@@ -1,19 +1,19 @@
-export function showError(message) {
+export function showError(message: string): void {
   createNotification(message, 'error');
 }
 
-export function showWarning(message) {
+export function showWarning(message: string): void {
   createNotification(message, 'warning');
 }
 
-export function clearAllNotifications() {
+export function clearAllNotifications(): void {
   const notifications = document.querySelectorAll(
     '.error-notification, .warning-notification'
   );
   notifications.forEach(n => n.remove());
 }
 
-function createNotification(message, type) {
+function createNotification(message: string, type: 'error' | 'warning'): void {
   // Remove any existing notifications of the same type
   const existing = document.querySelectorAll(`.${type}-notification`);
   existing.forEach(n => n.remove());

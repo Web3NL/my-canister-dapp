@@ -56,6 +56,12 @@ export default defineConfig(({ mode }) => {
           ),
         },
         {
+          find: "$declarations",
+          replacement: fileURLToPath(
+            new URL("../declarations/", import.meta.url)
+          ),
+        },
+        {
           find: "/dashboard-config.json",
           replacement: resolve(process.cwd(), "config/dashboard-config.json"),
         },
