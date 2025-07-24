@@ -1,23 +1,29 @@
 import { html, render } from 'lit-html';
-import { createActor } from 'declarations/index.js';
-import { createCyclesChecker } from './cyclesChecker.js';
-import { authManager } from './auth.js';
-import { getCanisterId } from './utils.js';
-import { showError, clearAllNotifications } from './errorHandler.js';
+import { createActor } from '$declarations/index.js';
+import { createCyclesChecker } from './cyclesChecker';
+import { authManager } from './auth';
+import { getCanisterId } from './utils';
+import { showError, clearAllNotifications } from './errorHandler';
 import logo from './logo2.svg';
 
-class App {
-  greeting = '';
-  isAuthenticated = false;
-  isAuthorized = false;
-  principal = '';
-  eventListeners = [];
+interface EventListenerInfo {
+  element: Element;
+  event: string;
+  handler: EventListenerOrEventListenerObject;
+}
+
+export default class App {
+  private greeting = '';
+  private isAuthenticated = false;
+  private isAuthorized = false;
+  private principal = '';
+  private eventListeners: EventListenerInfo[] = [];
 
   constructor() {
-    this.#init();
+    this.init();
   }
 
-  async #init() {
+  private async init(): Promise<void> {
     this.isAuthenticated = await authManager.init();
     this.principal = authManager.getPrincipalText();
 
@@ -32,14 +38,14 @@ class App {
       }
     }
 
-    this.#render();
+    this.render();
 
     if (this.isAuthenticated && this.isAuthorized) {
-      await this.#checkCycles();
+      await this.checkCycles();
     }
   }
 
-  async #checkCycles() {
+  private async checkCycles(): Promise<void> {
     try {
       const agent = authManager.getAgent();
       if (agent) {
@@ -51,7 +57,7 @@ class App {
     }
   }
 
-  #handleLogin = async () => {
+  private handleLogin = async (): Promise<void> => {
     try {
       this.isAuthenticated = await authManager.login();
       this.principal = authManager.getPrincipalText();
@@ -67,28 +73,27 @@ class App {
         }
       }
 
-      this.#render();
+      this.render();
 
       if (this.isAuthenticated && this.isAuthorized) {
-        await this.#checkCycles();
+        await this.checkCycles();
       }
     } catch {
       showError('Login failed');
     }
   };
 
-  #handleLogout = async () => {
+  private handleLogout = async (): Promise<void> => {
     await authManager.logout();
     this.isAuthenticated = false;
     this.isAuthorized = false;
     this.principal = '';
     this.greeting = '';
-    this.#clearAllNotifications();
-    this.#render();
+    this.clearAllNotifications();
+    this.render();
   };
 
-  #handleSubmit = async e => {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+  private handleSubmit = async (e: Event): Promise<void> => {
     e.preventDefault();
 
     if (!this.isAuthenticated || !this.isAuthorized) {
@@ -96,18 +101,22 @@ class App {
       return;
     }
 
-    const name = document.getElementById('name').value;
+    const nameInput = document.getElementById('name') as HTMLInputElement;
+    const name = nameInput.value;
 
     try {
       // Get canister ID using our utility function
       const canisterId = await getCanisterId();
       const agent = authManager.getAgent();
+      if (!agent) {
+        throw new Error('No authenticated agent available');
+      }
       // eslint-disable-next-line @typescript-eslint/no-unsafe-call
       const my_hello_world_backend = createActor(canisterId, { agent });
 
       // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-      this.greeting = await my_hello_world_backend.greet(name);
-      this.#render();
+      this.greeting = (await my_hello_world_backend.greet(name)) as string;
+      this.render();
     } catch (error) {
       showError('Failed to call backend service. Please try again.');
       // eslint-disable-next-line no-console
@@ -115,26 +124,28 @@ class App {
     }
   };
 
-  #clearAllNotifications() {
+  private clearAllNotifications(): void {
     clearAllNotifications();
   }
 
-  #removeEventListeners() {
+  private removeEventListeners(): void {
     // Remove existing event listeners to prevent memory leaks
     this.eventListeners.forEach(({ element, event, handler }) => {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
       element.removeEventListener(event, handler);
     });
     this.eventListeners = [];
   }
 
-  #addEventListener(element, event, handler) {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+  private addEventListener(
+    element: Element,
+    event: string,
+    handler: EventListenerOrEventListenerObject
+  ): void {
     element.addEventListener(event, handler);
     this.eventListeners.push({ element, event, handler });
   }
 
-  #render() {
+  private render(): void {
     const body = html`
       <main>
         <img src="${logo}" alt="DFINITY logo" />
@@ -168,27 +179,29 @@ class App {
           : ''}
       </main>
     `;
-    render(body, document.getElementById('root'));
+
+    const rootElement = document.getElementById('root');
+    if (rootElement) {
+      render(body, rootElement);
+    }
 
     // Clean up existing event listeners before adding new ones
-    this.#removeEventListeners();
+    this.removeEventListeners();
 
     // Add event listeners
     const form = document.querySelector('form');
     if (form) {
-      this.#addEventListener(form, 'submit', this.#handleSubmit);
+      this.addEventListener(form, 'submit', this.handleSubmit);
     }
 
     const loginBtn = document.querySelector('.login-btn');
     if (loginBtn) {
-      this.#addEventListener(loginBtn, 'click', this.#handleLogin);
+      this.addEventListener(loginBtn, 'click', this.handleLogin);
     }
 
     const logoutBtn = document.querySelector('.logout-btn');
     if (logoutBtn) {
-      this.#addEventListener(logoutBtn, 'click', this.#handleLogout);
+      this.addEventListener(logoutBtn, 'click', this.handleLogout);
     }
   }
 }
-
-export default App;

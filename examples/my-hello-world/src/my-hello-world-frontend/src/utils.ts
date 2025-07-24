@@ -1,8 +1,8 @@
 import { Principal } from '@dfinity/principal';
 import { inferCanisterIdFromLocation } from '@web3nl/my-canister-dashboard';
-import { getConfig } from './environment.js';
+import { getConfig } from './environment';
 
-export async function getCanisterId() {
+export async function getCanisterId(): Promise<Principal> {
   try {
     return inferCanisterIdFromLocation();
   } catch {

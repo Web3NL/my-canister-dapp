@@ -1,31 +1,20 @@
-/**
- * @typedef {Object} HelloWorldConfig
- * @property {string} identityProvider
- * @property {string} dfxHost
- * @property {string} [canisterIdDev]
- */
+export interface HelloWorldConfig {
+  identityProvider: string;
+  dfxHost: string;
+  canisterIdDev?: string;
+}
 
-/** @type {HelloWorldConfig | null} */
-let configCache = null;
+let configCache: HelloWorldConfig | null = null;
 
-/**
- * @returns {Promise<HelloWorldConfig>}
- */
-export async function getConfig() {
+export async function getConfig(): Promise<HelloWorldConfig> {
   return loadHelloWorldConfig();
 }
 
-/**
- * @returns {boolean}
- */
-export function isDevMode() {
+export function isDevMode(): boolean {
   return configCache !== null;
 }
 
-/**
- * @returns {Promise<HelloWorldConfig>}
- */
-async function loadHelloWorldConfig() {
+async function loadHelloWorldConfig(): Promise<HelloWorldConfig> {
   if (configCache !== null) {
     return configCache;
   }
@@ -49,7 +38,7 @@ async function loadHelloWorldConfig() {
   }
 
   // Fallback to production constants
-  const config = {
+  const config: HelloWorldConfig = {
     identityProvider: 'https://identity.internetcomputer.org',
     dfxHost: 'https://icp-api.io',
   };
@@ -58,17 +47,14 @@ async function loadHelloWorldConfig() {
   return config;
 }
 
-/**
- * @returns {HelloWorldConfig | null}
- */
-function loadViteConfig() {
+function loadViteConfig(): HelloWorldConfig | null {
   const identityProvider = import.meta.env.VITE_IDENTITY_PROVIDER;
   const dfxHost = import.meta.env.VITE_DFXHOST;
   const canisterId = import.meta.env.VITE_MY_HELLO_WORLD_CANISTER_ID;
 
   // Check for required env vars (canister ID is optional)
   if (isValidEnvVar(identityProvider) && isValidEnvVar(dfxHost)) {
-    const config = {
+    const config: HelloWorldConfig = {
       identityProvider,
       dfxHost,
     };
@@ -82,23 +68,15 @@ function loadViteConfig() {
   return null;
 }
 
-/**
- * @returns {Promise<HelloWorldConfig | null>}
- */
-async function loadJsonConfig() {
+async function loadJsonConfig(): Promise<HelloWorldConfig | null> {
   const response = await fetch('/my-hello-world-config.json');
   if (response.ok) {
     const data = await response.json();
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-    return /** @type {HelloWorldConfig} */ (data);
+    return data as HelloWorldConfig;
   }
   return null;
 }
 
-/**
- * @param {string | undefined} value
- * @returns {value is string}
- */
-function isValidEnvVar(value) {
+function isValidEnvVar(value: string | undefined): value is string {
   return typeof value === 'string' && value.length > 0;
 }
