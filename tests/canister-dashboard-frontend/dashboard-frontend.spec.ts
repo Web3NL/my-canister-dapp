@@ -38,11 +38,19 @@ test('Canister Dashboard Frontend Suite', async ({ page }) => {
 
   const waitForListUpdate = async (listSelector: string, expectedItem: string, shouldContain: boolean = true) => {
     const listLocator = page.locator(listSelector);
+    
+    // Wait for list to be ready (not loading)
     await expect(listLocator).not.toHaveText(/Loading\.\.\./);
+    
     if (shouldContain) {
-      await expect(listLocator).toContainText(expectedItem);
+      // Wait for the specific item to appear in the list
+      await expect(listLocator.locator('li', { hasText: expectedItem })).toBeVisible({ timeout: 10000 });
     } else {
-      await expect(listLocator).not.toContainText(expectedItem);
+      // Wait for the specific item to be removed from the list with retry logic
+      await expect(async () => {
+        const listItems = await listLocator.locator('li').allTextContents();
+        expect(listItems).not.toContain(expectedItem);
+      }).toPass({ timeout: 10000, intervals: [500, 1000, 2000] });
     }
   };
 
@@ -82,7 +90,7 @@ test('Canister Dashboard Frontend Suite', async ({ page }) => {
     await expect(async () => {
       const inputValue = await page.inputValue(inputSelector);
       expect(inputValue).toBe('');
-    }).toPass({ timeout: timeoutMs });
+    }).toPass({ timeout: timeoutMs, intervals: [100, 500, 1000] });
   };
 
   // Read the saved ii anchor from the previous test
@@ -99,8 +107,8 @@ test('Canister Dashboard Frontend Suite', async ({ page }) => {
   await page1.getByRole('button', { name: 'Continue', exact: true }).click();
   await page1.getByRole('button', { name: 'Remind me later' }).click();
 
-  // Wait for the top-up button to appear
-  await page.waitForSelector('#top-up-btn', { timeout: 10000 });
+  // Wait for the top-up button to appear and be visible
+  await page.getByRole('button', { name: 'Top-up' }).waitFor({ state: 'visible', timeout: 10000 });
 
   // Read the saved principal and transfer funds
   const principalText = readTestData('ii-principal.txt');
@@ -204,17 +212,22 @@ test('Canister Dashboard Frontend Suite', async ({ page }) => {
     // Wait for origin to appear in the list
     await waitForListUpdate('#alternative-origins-list', origin, true);
 
-    // Verify origin was added
-    const listItems = await page
-      .locator('#alternative-origins-list li')
-      .allTextContents();
-    expect(listItems).toContain(origin);
-    console.log(
-      `Origin ${origin} successfully added to the list. Current list: ${listItems.join(', ')}`
-    );
+    // Verify origin was added with retry
+    await expect(async () => {
+      const listItems = await page
+        .locator('#alternative-origins-list li')
+        .allTextContents();
+      expect(listItems).toContain(origin);
+      console.log(
+        `Origin ${origin} successfully added to the list. Current list: ${listItems.join(', ')}`
+      );
+    }).toPass({ timeout: 5000 });
 
     // Wait for input to be cleared
     await waitForInputToClear('#alternative-origin-input');
+    
+    // Small delay between operations for stability
+    await page.waitForTimeout(200);
   }
 
   // Test removing each origin
@@ -226,16 +239,21 @@ test('Canister Dashboard Frontend Suite', async ({ page }) => {
     // Wait for origin to be removed from the list
     await waitForListUpdate('#alternative-origins-list', origin, false);
 
-    // Verify origin was removed
-    const listItems = await page
-      .locator('#alternative-origins-list li')
-      .allTextContents();
-    console.log(`Current origins list: ${listItems.join(', ')}`);
-    expect(listItems).not.toContain(origin);
-    console.log(`Origin ${origin} successfully removed from the list`);
+    // Verify origin was removed with retry
+    await expect(async () => {
+      const listItems = await page
+        .locator('#alternative-origins-list li')
+        .allTextContents();
+      console.log(`Current origins list: ${listItems.join(', ')}`);
+      expect(listItems).not.toContain(origin);
+      console.log(`Origin ${origin} successfully removed from the list`);
+    }).toPass({ timeout: 5000 });
 
     // Wait for input to be cleared
     await waitForInputToClear('#alternative-origin-input');
+    
+    // Small delay between operations for stability
+    await page.waitForTimeout(200);
   }
 
   console.log('Alternative origins management tests completed successfully');
