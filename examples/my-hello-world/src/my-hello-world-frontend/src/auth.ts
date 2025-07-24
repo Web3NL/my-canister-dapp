@@ -12,7 +12,7 @@ interface AuthorizationResult {
   Err?: string;
 }
 
-export class AuthManager {
+class AuthManager {
   private authClient: AuthClient | null = null;
   private agent: HttpAgent | null = null;
   private identity: Identity | null = null;

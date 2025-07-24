@@ -9,32 +9,18 @@ export function getElement<T extends HTMLElement = HTMLElement>(id: string): T {
   return element;
 }
 
-export function getElements(...ids: string[]): HTMLElement[] {
-  return ids.map(id => getElement(id));
-}
-
-export function setText(id: string, text: string): void {
+function setText(id: string, text: string): void {
   const element = getElement(id);
   element.textContent = text;
 }
 
-export function toggleVisibility(id: string, show: boolean): void {
+function toggleVisibility(id: string, show: boolean): void {
   const element = getElement(id);
   if (show) {
     element.classList.remove('hidden');
   } else {
     element.classList.add('hidden');
   }
-}
-
-export function setClickHandler(
-  id: string,
-  handler: () => void | Promise<void>
-): void {
-  const element = getElement(id);
-  element.onclick = async (): Promise<void> => {
-    await handler();
-  };
 }
 
 export function addEventListener(
@@ -137,26 +123,4 @@ export function clearInput(id: string): void {
   input.value = '';
 }
 
-export function setInputValue(id: string, value: string): void {
-  const input = getElement<HTMLInputElement>(id);
-  input.value = value;
-}
-
 // List Management Helpers
-
-export function clearList(id: string): void {
-  const list = getElement(id);
-  list.innerHTML = '';
-}
-
-export function addListItem(listId: string, content: string): void {
-  const list = getElement(listId);
-  const listItem = document.createElement('li');
-  listItem.textContent = content;
-  list.appendChild(listItem);
-}
-
-export function setListContent(listId: string, items: string[]): void {
-  clearList(listId);
-  items.forEach(item => addListItem(listId, item));
-}

@@ -1,4 +1,4 @@
-w#!/bin/bash
+#!/bin/bash
 set -e
 
 echo "Setting up dashboard development environment..."

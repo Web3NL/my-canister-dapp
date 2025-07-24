@@ -10,7 +10,6 @@ export const CONTROLLER_NOT_FOUND_MESSAGE = 'Controller not found.';
 export const REQUIRED_CONTROLLERS_MESSAGE =
   'Cannot remove required controllers.';
 export const INVALID_ORIGIN_MESSAGE = 'Invalid origin format.';
-export const STATUS_LOAD_ERROR_MESSAGE = 'Failed to load canister status.';
 export const CANISTER_ID_ERROR_MESSAGE = 'Unable to determine canister ID.';
 export const HTTP_AGENT_ERROR_MESSAGE = 'Failed to create HTTP agent.';
 export const DASHBOARD_INIT_ERROR_MESSAGE = 'Failed to initialize dashboard.';
