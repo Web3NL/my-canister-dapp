@@ -5,18 +5,19 @@
       "source": [
         "my-canister-app/build"
       ],
-      "build": "npm run build:app"
+      "build": "npm run build:app",
+      "specified_id": "c7lwu-3qaaa-aaaam-qbgia-cai"
     },
     "my-hello-world": {
-      "type": "rust",
+      "type": "custom",
       "package": "my-hello-world",
       "candid": "examples/my-hello-world/src/my-hello-world/my-hello-world.did",
-      "shrink": true,
-      "gzip": true,
+      "build": "./scripts/build-examples.sh dev",
+      "wasm": "wasm/dev/my-hello-world-dev.wasm.gz",
+      "specified_id": "22ajg-aqaaa-aaaap-adukq-cai",
       "declarations": {
         "output": "examples/my-hello-world/src/declarations/"
-      },
-      "specified_id": "22ajg-aqaaa-aaaap-adukq-cai"
+      }
     },
     "icp-index": {
       "type": "custom",

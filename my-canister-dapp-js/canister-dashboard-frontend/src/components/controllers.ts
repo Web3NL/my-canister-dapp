@@ -1,14 +1,21 @@
 import { ManagementApi } from '../api/management';
 import { Principal } from '@dfinity/principal';
-import { showLoading, hideLoading } from '../loading';
 import {
-  showError,
   INVALID_PRINCIPAL_MESSAGE,
   DUPLICATE_CONTROLLER_MESSAGE,
   CONTROLLER_NOT_FOUND_MESSAGE,
   REQUIRED_CONTROLLERS_MESSAGE,
   isValidPrincipal,
 } from '../error';
+import {
+  getElement,
+  addEventListener,
+  showLoading,
+  hideLoading,
+  showError,
+  getInputValue,
+  clearInput,
+} from '../dom';
 
 export class ControllersManager {
   private canisterId: Principal;
@@ -29,10 +36,7 @@ export class ControllersManager {
   }
 
   private renderControllersContent(): void {
-    const controllersList = document.getElementById('controllers-list');
-    if (!controllersList) {
-      throw new Error('Controllers list element not found');
-    }
+    const controllersList = getElement('controllers-list');
 
     const controllersListHtml = this.controllersList
       .map(
@@ -46,33 +50,19 @@ export class ControllersManager {
   }
 
   private attachEventListeners(): void {
-    const addButton = document.getElementById('controller-add');
-    const removeButton = document.getElementById('controller-remove');
-
-    if (!addButton) {
-      throw new Error('Controller add button element not found');
-    }
-    addButton.addEventListener('click', () => this.handleAdd());
-
-    if (!removeButton) {
-      throw new Error('Controller remove button element not found');
-    }
-    removeButton.addEventListener('click', () => this.handleRemove());
+    addEventListener('controller-add', 'click', () => this.handleAdd());
+    addEventListener('controller-remove', 'click', () => this.handleRemove());
   }
 
   private async handleAdd(): Promise<void> {
-    const input = document.getElementById(
-      'controller-input'
-    ) as HTMLInputElement;
-
-    const principalText = input.value.trim();
+    const principalText = getInputValue('controller-input');
     if (!principalText) {
       return;
     }
 
     if (!isValidPrincipal(principalText)) {
       showError(INVALID_PRINCIPAL_MESSAGE);
-      input.value = '';
+      clearInput('controller-input');
       return;
     }
 
@@ -86,13 +76,13 @@ export class ControllersManager {
 
     if (hasDuplicates) {
       showError(DUPLICATE_CONTROLLER_MESSAGE);
-      input.value = '';
+      clearInput('controller-input');
       return;
     }
 
     if (!this.hasRequiredPrincipals(updatedControllers)) {
       showError(REQUIRED_CONTROLLERS_MESSAGE);
-      input.value = '';
+      clearInput('controller-input');
       return;
     }
 
@@ -102,25 +92,21 @@ export class ControllersManager {
     await managementApi.updateControllers(updatedControllers);
 
     this.controllersList = updatedControllers;
-    input.value = '';
+    clearInput('controller-input');
     this.renderControllersContent();
 
     hideLoading();
   }
 
   private async handleRemove(): Promise<void> {
-    const input = document.getElementById(
-      'controller-input'
-    ) as HTMLInputElement;
-
-    const principalText = input.value.trim();
+    const principalText = getInputValue('controller-input');
     if (!principalText) {
       throw new Error('Principal input is required');
     }
 
     if (!isValidPrincipal(principalText)) {
       showError(INVALID_PRINCIPAL_MESSAGE);
-      input.value = '';
+      clearInput('controller-input');
       return;
     }
 
@@ -132,7 +118,7 @@ export class ControllersManager {
 
     if (!controllerExists) {
       showError(CONTROLLER_NOT_FOUND_MESSAGE);
-      input.value = '';
+      clearInput('controller-input');
       return;
     }
 
@@ -142,7 +128,7 @@ export class ControllersManager {
 
     if (!this.hasRequiredPrincipals(updatedControllers)) {
       showError(REQUIRED_CONTROLLERS_MESSAGE);
-      input.value = '';
+      clearInput('controller-input');
       return;
     }
 
@@ -152,7 +138,7 @@ export class ControllersManager {
     await managementApi.updateControllers(updatedControllers);
 
     this.controllersList = updatedControllers;
-    input.value = '';
+    clearInput('controller-input');
     this.renderControllersContent();
 
     hideLoading();

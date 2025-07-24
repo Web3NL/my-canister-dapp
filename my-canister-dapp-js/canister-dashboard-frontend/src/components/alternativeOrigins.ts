@@ -1,11 +1,18 @@
 import { CanisterApi } from '../api/canister';
-import { showLoading, hideLoading } from '../loading';
 import {
-  showError,
   INVALID_ORIGIN_MESSAGE,
   isValidOrigin,
   NETWORK_ERROR_MESSAGE,
 } from '../error';
+import {
+  getElement,
+  addEventListener,
+  showLoading,
+  hideLoading,
+  showError,
+  getInputValue,
+  clearInput,
+} from '../dom';
 
 const IC_UPDATE_CALL_DELAY = 3000;
 
@@ -31,13 +38,7 @@ export class AlternativeOriginsManager {
   }
 
   private renderAlternativeOriginsContent(originsList: string): void {
-    const alternativeOriginsList = document.getElementById(
-      'alternative-origins-list'
-    );
-    if (!alternativeOriginsList) {
-      throw new Error('Alternative origins list element not found');
-    }
-
+    const alternativeOriginsList = getElement('alternative-origins-list');
     alternativeOriginsList.innerHTML = originsList;
   }
 
@@ -53,31 +54,21 @@ export class AlternativeOriginsManager {
   }
 
   private attachEventListeners(): void {
-    const addButton = document.getElementById('alternative-origin-add');
-    const removeButton = document.getElementById('alternative-origin-remove');
-
-    if (addButton) {
-      addButton.addEventListener('click', () => this.handleAdd());
-    }
-
-    if (removeButton) {
-      removeButton.addEventListener('click', () => this.handleRemove());
-    }
+    addEventListener('alternative-origin-add', 'click', () => this.handleAdd());
+    addEventListener('alternative-origin-remove', 'click', () =>
+      this.handleRemove()
+    );
   }
 
   private async handleAdd(): Promise<void> {
-    const input = document.getElementById(
-      'alternative-origin-input'
-    ) as HTMLInputElement;
-
-    const origin = input.value.trim();
+    const origin = getInputValue('alternative-origin-input');
     if (!origin) {
       throw new Error('Origin input is required');
     }
 
     if (!isValidOrigin(origin)) {
       showError(INVALID_ORIGIN_MESSAGE);
-      input.value = '';
+      clearInput('alternative-origin-input');
       return;
     }
 
@@ -90,7 +81,7 @@ export class AlternativeOriginsManager {
     if ('Ok' in result) {
       await new Promise(resolve => setTimeout(resolve, IC_UPDATE_CALL_DELAY));
       await this.create();
-      input.value = '';
+      clearInput('alternative-origin-input');
     } else {
       showError(NETWORK_ERROR_MESSAGE);
       throw new Error(`Failed to add alternative origin: ${result.Err}`);
@@ -100,18 +91,14 @@ export class AlternativeOriginsManager {
   }
 
   private async handleRemove(): Promise<void> {
-    const input = document.getElementById(
-      'alternative-origin-input'
-    ) as HTMLInputElement;
-
-    const origin = input.value.trim();
+    const origin = getInputValue('alternative-origin-input');
     if (!origin) {
       throw new Error('Origin input is required');
     }
 
     if (!isValidOrigin(origin)) {
       showError(INVALID_ORIGIN_MESSAGE);
-      input.value = '';
+      clearInput('alternative-origin-input');
       return;
     }
 
@@ -124,7 +111,7 @@ export class AlternativeOriginsManager {
     if ('Ok' in result) {
       await new Promise(resolve => setTimeout(resolve, IC_UPDATE_CALL_DELAY));
       await this.create();
-      input.value = '';
+      clearInput('alternative-origin-input');
     } else {
       showError(NETWORK_ERROR_MESSAGE);
       throw new Error(`Failed to remove alternative origin: ${result.Err}`);

@@ -17,16 +17,39 @@ else
   WASM_SUFFIX=""
 fi
 
-# Build my-hello-world example using dfx (always local, no flags)
-echo "Building my-hello-world canister with dfx..."
-dfx build my-hello-world
+# Build my-hello-world example
+echo "Building my-hello-world canister"
+cargo build --release --target wasm32-unknown-unknown -p my-hello-world
 
-# Copy WASM to registry (dfx handles optimization, shrinking, and compression)
+# Process WASM with ic-wasm
+echo "Optimizing WASM with ic-wasm..."
+cargo install ic-wasm
+WASM_FILE="target/wasm32-unknown-unknown/release/my_hello_world.wasm"
+
+# Optimize for small code size
+ic-wasm "$WASM_FILE" -o "$WASM_FILE" optimize Oz
+
+# Shrink
+ic-wasm "$WASM_FILE" -o "$WASM_FILE" shrink
+
+# Add metadata (if candid file exists)
+ic-wasm "$WASM_FILE" -o "$WASM_FILE" metadata candid:service -f examples/my-hello-world/src/my-hello-world/my-hello-world.did -v public
+
+# Gzip the processed WASM
+gzip -c "$WASM_FILE" > "$WASM_FILE.gz"
+
+# Copy WASM to registry
 echo "Copying WASM to registry..."
 mkdir -p "$REGISTRY_DIR"
+cp "$WASM_FILE.gz" "$REGISTRY_DIR/my-hello-world$WASM_SUFFIX.wasm.gz"
 
-# dfx stores the optimized and compressed WASM in .dfx/local/canisters/my-hello-world/
-CANISTER_DIR=".dfx/local/canisters/my-hello-world"
-cp "$CANISTER_DIR/my-hello-world.wasm.gz" "$REGISTRY_DIR/my-hello-world$WASM_SUFFIX.wasm.gz"
+# Copy wasm files to my-canister-app static folder for dev mode
+if [ "$DEV_MODE" = "dev" ]; then
+  echo "Copying WASM files to my-canister-app static directory..."
+  STATIC_WASM_DIR="my-canister-app/static/wasm"
+  mkdir -p "$STATIC_WASM_DIR"
+  cp -r "$REGISTRY_DIR" "$STATIC_WASM_DIR/"
+  echo "✅ WASM files copied to $STATIC_WASM_DIR/dev/"
+fi
 
 echo "✅ Examples built successfully!"

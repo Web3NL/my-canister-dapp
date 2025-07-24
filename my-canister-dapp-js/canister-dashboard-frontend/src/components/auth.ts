@@ -1,6 +1,6 @@
 import { AuthClient } from '@dfinity/auth-client';
 import type { Principal } from '@dfinity/principal';
-import { IDENTITY_PROVIDER } from '../envvars';
+import { getConfig } from '../environment';
 import { MAX_TIME_TO_LIVE } from '../constants';
 
 export class AuthManager {
@@ -21,9 +21,11 @@ export class AuthManager {
       return;
     }
 
+    const config = await getConfig();
+
     return new Promise<void>((resolve, reject) => {
       this.authClient!.login({
-        identityProvider: IDENTITY_PROVIDER,
+        identityProvider: config.identityProvider,
         maxTimeToLive: MAX_TIME_TO_LIVE,
         onSuccess: () => {
           resolve();

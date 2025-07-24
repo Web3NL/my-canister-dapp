@@ -19,7 +19,7 @@ export class CanisterApi {
 
   private async create(): Promise<void> {
     const agent = await createHttpAgent();
-    const canisterIdPrincipal = canisterId();
+    const canisterIdPrincipal = await canisterId();
 
     this.canisterApi = Actor.createActor(idlFactory, {
       agent,

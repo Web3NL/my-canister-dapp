@@ -1,6 +1,6 @@
 import { Principal } from '@dfinity/principal';
 import { HttpAgent } from '@dfinity/agent';
-import { HOST, PROD, CANISTER_ID_DEV } from './envvars';
+import { getConfig, isDevMode } from './environment';
 import { AuthClient } from '@dfinity/auth-client';
 import { inferCanisterIdFromLocation } from '@web3nl/my-canister-dashboard';
 import {
@@ -9,13 +9,14 @@ import {
   HTTP_AGENT_ERROR_MESSAGE,
 } from './error';
 
-export function canisterId(): Principal {
+export async function canisterId(): Promise<Principal> {
   try {
     return inferCanisterIdFromLocation();
   } catch {
     // When in dev server inference fails and we use local canister ID
-    if (CANISTER_ID_DEV !== undefined) {
-      return Principal.fromText(CANISTER_ID_DEV);
+    const config = await getConfig();
+    if (config.canisterIdDev !== undefined) {
+      return Principal.fromText(config.canisterIdDev);
     }
 
     showError(CANISTER_ID_ERROR_MESSAGE);
@@ -26,15 +27,16 @@ export function canisterId(): Principal {
 export async function createHttpAgent(): Promise<HttpAgent> {
   try {
     const authClient = await AuthClient.create();
+    const config = await getConfig();
 
     const identity = authClient.getIdentity();
 
     const agent = await HttpAgent.create({
       identity,
-      host: HOST,
+      host: config.dfxHost,
     });
 
-    if (!PROD) {
+    if (isDevMode()) {
       await agent.fetchRootKey();
     }
 

@@ -1,17 +1,11 @@
+/* eslint-disable no-console */
 import { test } from '@playwright/test';
-import dotenv from 'dotenv';
-import { saveTestData, readTestData } from '../helpers';
+import { saveTestData, readTestData, loadDfxEnv, getDfxEnv } from '../helpers';
 import { Principal } from '@dfinity/principal';
 
-dotenv.config({ path: 'canister-dashboard-frontend/.env.development' });
+loadDfxEnv();
 
-const identityProvider = process.env.VITE_IDENTITY_PROVIDER;
-
-if (!identityProvider) {
-  throw new Error(
-    'VITE_IDENTITY_PROVIDER environment variable is required for local testing'
-  );
-}
+const identityProvider = getDfxEnv('VITE_IDENTITY_PROVIDER');
 
 test.describe.only('setup internet identity', () => {
   test.only('should create new internet identity account', async ({ page }) => {
@@ -34,6 +28,7 @@ test.describe.only('setup internet identity', () => {
       'data-usernumber'
     );
 
+    // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
     if (!userNumber) {
       throw new Error('User number not found in data-usernumber attribute');
     }
@@ -72,6 +67,7 @@ test.describe.only('setup internet identity', () => {
       return element ? element.textContent : null;
     });
 
+    // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
     if (!principalValue) {
       throw new Error('Principal value not found in #ii-principal element');
     }

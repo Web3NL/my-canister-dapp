@@ -2,6 +2,7 @@ import { ManagementApi } from '../api/management';
 import { uint8ArrayToHexString } from '@dfinity/utils';
 import { formatMemorySize, formatCycles } from '../helpers';
 import type { CanisterStatusResponse } from '@dfinity/ic-management';
+import { updateStatusDisplay } from '../dom';
 
 interface FormattedStatusData {
   statusText: string;
@@ -18,33 +19,12 @@ export class StatusManager {
     const { statusText, memorySizeFormatted, cyclesFormatted, moduleHashHex } =
       this.formatStatusData(status);
 
-    this.renderStatusContent(
+    updateStatusDisplay(
       statusText,
       memorySizeFormatted,
       cyclesFormatted,
       moduleHashHex
     );
-  }
-
-  private renderStatusContent(
-    statusText: string,
-    memorySizeFormatted: string,
-    cyclesFormatted: string,
-    moduleHashHex: string
-  ): void {
-    const statusValue = document.getElementById('status-value');
-    const memorySizeValue = document.getElementById('memory-size-value');
-    const cyclesValue = document.getElementById('cycles-value');
-    const moduleHashValue = document.getElementById('module-hash-value');
-
-    if (!statusValue || !memorySizeValue || !cyclesValue || !moduleHashValue) {
-      throw new Error('Status value elements not found');
-    }
-
-    statusValue.textContent = statusText;
-    memorySizeValue.textContent = memorySizeFormatted;
-    cyclesValue.textContent = cyclesFormatted;
-    moduleHashValue.textContent = moduleHashHex;
   }
 
   private formatStatusData(

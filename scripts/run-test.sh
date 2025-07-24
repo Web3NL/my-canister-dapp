@@ -2,9 +2,9 @@
 
 set -e
 
-echo "Testing canister dashboard frontend"
+echo "Unit testing canister dashboard frontend"
 npm run test --workspace=canister-dashboard-frontend
-# npm run test:e2e
 
 echo "🧪 Running Canister Dapp Test"
+./scripts/build-examples.sh
 cargo test -p canister-dapp-test

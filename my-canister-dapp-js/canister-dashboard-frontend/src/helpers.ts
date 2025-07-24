@@ -1,17 +1,6 @@
 import type { Principal } from '@dfinity/principal';
 import { E8S } from './constants';
 
-export function convertMemoToBigInt(memo: Uint8Array): bigint {
-  let result = BigInt(0);
-  for (let i = 0; i < memo.length; i++) {
-    const byte = memo[i];
-    if (byte !== undefined) {
-      result = (result << BigInt(8)) | BigInt(byte);
-    }
-  }
-  return result;
-}
-
 export function principalToSubaccount(principal: Principal): Uint8Array {
   const principalBytes = principal.toUint8Array();
   const subaccount = new Uint8Array(32);
