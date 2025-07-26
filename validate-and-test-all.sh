@@ -25,7 +25,7 @@ fi
 ./scripts/run-test.sh
 
 if [ "$E2E_FLAG" = "true" ]; then
-    ./scripts/run-test:e2e.sh
+    ./scripts/run-test-e2e.sh
 fi
 
 echo "All tests passed successfully!"
