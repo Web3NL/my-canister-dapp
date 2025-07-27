@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.6.0] - 2025-07-27
+
 ### Added
 
 - Canister dashboard frontend DOM abstraction layer.
