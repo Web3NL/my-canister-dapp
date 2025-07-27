@@ -215,9 +215,9 @@
 
 <div class="file-picker">
   <label for="wasm-file">Select WASM file (.wasm.gz):</label>
-  <input 
+  <input
     id="wasm-file"
-    type="file" 
+    type="file"
     accept=".wasm.gz"
     on:change={handleFileSelect}
   />
@@ -259,7 +259,7 @@
     font-weight: 500;
   }
 
-  .file-picker input[type="file"] {
+  .file-picker input[type='file'] {
     width: 100%;
   }
 
