@@ -31,6 +31,7 @@ fn init() {
             Some(vec![
                 "https://mycanister.app".to_string(),
                 "http://localhost:5174".to_string(),
+                "http://c7lwu-3qaaa-aaaam-qbgia-cai.localhost:8080".to_string(),
             ]),
         );
 

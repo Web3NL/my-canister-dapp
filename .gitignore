@@ -41,3 +41,4 @@ test-output/
 # Registry development files
 my-canister-app/static/wasm-registry/registry-dev.json
 wasm/dev/
+my-canister-app/static/wasm/dev/

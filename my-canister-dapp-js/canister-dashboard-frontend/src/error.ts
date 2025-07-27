@@ -10,24 +10,11 @@ export const CONTROLLER_NOT_FOUND_MESSAGE = 'Controller not found.';
 export const REQUIRED_CONTROLLERS_MESSAGE =
   'Cannot remove required controllers.';
 export const INVALID_ORIGIN_MESSAGE = 'Invalid origin format.';
-export const STATUS_LOAD_ERROR_MESSAGE = 'Failed to load canister status.';
 export const CANISTER_ID_ERROR_MESSAGE = 'Unable to determine canister ID.';
 export const HTTP_AGENT_ERROR_MESSAGE = 'Failed to create HTTP agent.';
 export const DASHBOARD_INIT_ERROR_MESSAGE = 'Failed to initialize dashboard.';
 
-export function showError(message: string): void {
-  const errorSection = document.getElementById('error-section');
-  if (!errorSection) {
-    throw new Error('Error section element not found');
-  }
-
-  const errorMessage = document.createElement('div');
-  errorMessage.className = 'error-message';
-  errorMessage.textContent = message;
-
-  errorSection.appendChild(errorMessage);
-  errorSection.classList.remove('hidden');
-}
+export { showError } from './dom';
 
 export function isValidPrincipal(text: string): boolean {
   try {

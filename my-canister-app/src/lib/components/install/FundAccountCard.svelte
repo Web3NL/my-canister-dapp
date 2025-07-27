@@ -20,7 +20,7 @@
 
   <p>Deposit {minimumBalance} ICP to create your Dapp</p>
 
-  <div class="keyVal">
+  <div class="keyVal" id="principal">
     <KeyValuePair>
       <Value slot="key">{principalText}</Value>
       <Copy slot="value" value={principalText}></Copy>

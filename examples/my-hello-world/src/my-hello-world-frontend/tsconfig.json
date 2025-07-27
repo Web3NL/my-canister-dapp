@@ -3,7 +3,11 @@
   "compilerOptions": {
     "noEmit": true,
     "jsx": "react-jsx",
-    "types": ["vite/client"]
+    "types": ["vite/client"],
+    "baseUrl": ".",
+    "paths": {
+      "$declarations/*": ["../declarations/*"]
+    }
   },
   "include": [
     "src/**/*"

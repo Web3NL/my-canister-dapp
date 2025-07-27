@@ -46,7 +46,7 @@ export async function installAndTakeControl(
   await setControllers(canisterPrincipal, [canisterPrincipal, iiPrincipal]);
 }
 
-async function sendToCmc(balance: bigint): Promise<bigint> {
+export async function sendToCmc(balance: bigint): Promise<bigint> {
   const transferAmount = balance - TRANSACTION_FEE;
   const ledgerApi = await LedgerApi.create();
   const blockIndex =
@@ -55,7 +55,7 @@ async function sendToCmc(balance: bigint): Promise<bigint> {
   return blockIndex;
 }
 
-async function createCanister(blockIndex: bigint): Promise<Principal> {
+export async function createCanister(blockIndex: bigint): Promise<Principal> {
   const userPrincipal = await authStore.getPrincipal();
 
   const cmcApi = await CmcApi.create();
@@ -67,7 +67,7 @@ async function createCanister(blockIndex: bigint): Promise<Principal> {
   return canisterPrincipal;
 }
 
-async function installCodeToCanister(
+export async function installCodeToCanister(
   canisterId: Principal,
   wasmModule: Uint8Array
 ): Promise<void> {

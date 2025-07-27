@@ -3,7 +3,7 @@ use std::path::Path;
 use std::process::Command;
 
 fn main() {
-    let build_mode = env::var("DAPP_BUILD_MODE").unwrap_or_else(|_| "prod".to_string());
+    let dapp_build_mode = env::var("DAPP_BUILD_MODE").unwrap_or_else(|_| "prod".to_string());
 
     println!("cargo:rerun-if-changed=../my-hello-world-frontend/src");
     println!("cargo:rerun-if-changed=../my-hello-world-frontend/package.json");
@@ -16,13 +16,11 @@ fn main() {
         panic!("Frontend directory not found: {}", frontend_dir.display());
     }
 
-    let npm_command = match build_mode.as_str() {
+    let npm_command = match dapp_build_mode.as_str() {
         "dev" => "build:dev",
         "prod" => "build",
-        _ => unreachable!(),
+        _ => "build", // default to prod build for other modes
     };
-
-    println!("Building my-hello-world frontend assets in {build_mode} mode...");
 
     let output = Command::new("npm")
         .args(["run", npm_command])
@@ -45,9 +43,4 @@ fn main() {
             dist_dir.display()
         );
     }
-
-    println!(
-        "Frontend assets built successfully at: {}",
-        dist_dir.display()
-    );
 }

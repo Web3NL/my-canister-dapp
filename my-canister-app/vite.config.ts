@@ -37,7 +37,7 @@ export default defineConfig({
     port: 5174,
     host: 'localhost',
     fs: {
-      allow: ['..', './test', '../examples'],
+      allow: ['..', './test'],
     },
     proxy: {
       '/api': {
@@ -65,7 +65,7 @@ export default defineConfig({
           if (fs.existsSync(filePath) && fs.statSync(filePath).isFile()) {
             const content = fs.readFileSync(filePath);
             res.writeHead(200, {
-              'Content-Type': req.url!.endsWith('.wasm')
+              'Content-Type': req.url!.endsWith('.wasm.gz')
                 ? 'application/wasm'
                 : 'application/octet-stream',
             });

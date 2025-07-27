@@ -1,9 +1,10 @@
 import { exec } from 'child_process';
 import { promisify } from 'util';
 import { AccountIdentifier } from '@dfinity/ledger-icp';
-import { Principal } from '@dfinity/principal';
+import type { Principal } from '@dfinity/principal';
 import fs from 'fs';
 import path from 'path';
+import dotenv from 'dotenv';
 
 const execAsync = promisify(exec);
 
@@ -61,6 +62,35 @@ export function readTestData(filename: string): string {
   }
 
   return fs.readFileSync(filePath, 'utf8').trim();
+}
+
+export function myCanisterAppDfxUrl(): string {
+  // Get canister ID and hostname from global env
+  const canisterId = getDfxEnv('VITE_MY_CANISTER_APP_CANISTER_ID');
+  const hostname = getDfxEnv('VITE_HOSTNAME');
+
+  return `http://${canisterId}.${hostname}`;
+}
+
+export function loadDfxEnv(): void {
+  const envPath = path.join(process.cwd(), '.env.development');
+  
+  if (!fs.existsSync(envPath)) {
+    throw new Error('Global .env.development not found at monorepo root');
+  }
+
+  dotenv.config({ path: envPath });
+}
+
+export function getDfxEnv(key: string): string {
+  const value = process.env[key];
+  
+  // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
+  if (!value) {
+    throw new Error(`DFX environment variable ${key} not found. Make sure to call loadDfxEnv() first.`);
+  }
+
+  return value;
 }
 
 
