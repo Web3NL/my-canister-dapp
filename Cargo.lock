@@ -197,7 +197,7 @@ dependencies = [
  "hex",
  "ic-cdk",
  "ic-http-certification",
- "my-canister-dashboard 0.5.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "my-canister-dashboard 0.5.1",
  "pocket-ic",
  "serde",
  "serde_json",
@@ -1140,6 +1140,8 @@ dependencies = [
 [[package]]
 name = "my-canister-dashboard"
 version = "0.5.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "a34507cf92bdcbc4176e36446d340ee9791d8a7fe5e0c7d506c825981fbaeaf2"
 dependencies = [
  "candid",
  "ic-asset-certification",
@@ -1153,9 +1155,7 @@ dependencies = [
 
 [[package]]
 name = "my-canister-dashboard"
-version = "0.5.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a34507cf92bdcbc4176e36446d340ee9791d8a7fe5e0c7d506c825981fbaeaf2"
+version = "0.6.0"
 dependencies = [
  "candid",
  "ic-asset-certification",
@@ -1200,7 +1200,7 @@ dependencies = [
  "ic-cdk",
  "ic-http-certification",
  "include_dir",
- "my-canister-dashboard 0.5.1",
+ "my-canister-dashboard 0.6.0",
  "my-canister-frontend 0.1.3 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 

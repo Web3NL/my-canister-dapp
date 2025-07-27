@@ -36,7 +36,8 @@ ic-wasm "$WASM_FILE" -o "$WASM_FILE" shrink
 ic-wasm "$WASM_FILE" -o "$WASM_FILE" metadata candid:service -f examples/my-hello-world/src/my-hello-world/my-hello-world.did -v public
 
 # Gzip the processed WASM
-gzip -c "$WASM_FILE" > "$WASM_FILE.gz"
+# -n: no timestamp (deterministic), -9: max compression, -c: keep original
+gzip -n -9 -c "$WASM_FILE" > "$WASM_FILE.gz"
 
 # Copy WASM to registry
 echo "Copying WASM to registry..."
