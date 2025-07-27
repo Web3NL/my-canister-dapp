@@ -12,5 +12,3 @@
 
 - Canister dashboard frontend in Typescript.
 - Allow dfx host as alternative origin.
-
-## [0.5.1]
