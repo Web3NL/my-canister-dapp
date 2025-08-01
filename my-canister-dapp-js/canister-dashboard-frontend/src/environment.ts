@@ -1,3 +1,5 @@
+import config from 'virtual:dapp-config';
+
 export interface DashboardConfig {
   identityProvider: string;
   dfxHost: string;
@@ -5,91 +7,37 @@ export interface DashboardConfig {
 }
 
 let configCache: DashboardConfig | null = null;
+let devModeCache: boolean | null = null;
 
 export async function getConfig(): Promise<DashboardConfig> {
-  return loadDashboardConfig();
-}
-
-export function isDevMode(): boolean {
-  return configCache !== null;
-}
-
-async function loadDashboardConfig(): Promise<DashboardConfig> {
   if (configCache) {
     return configCache;
   }
 
-  // First try: Check if we're in vite dev server and use environment variables
-  const viteConfig = loadViteConfig();
-  if (viteConfig) {
-    configCache = viteConfig;
-    return viteConfig;
-  }
-
-  // Second try: Fetch dashboard-config.json if in running  in dfx
+  // Try to fetch dapp-config.json for runtime dev detection
   try {
-    const jsonConfig = await loadJsonConfig();
-    if (jsonConfig) {
-      configCache = jsonConfig;
-      return jsonConfig;
+    const response = await fetch('/dapp-config.json');
+    if (response.ok) {
+      const devConfig = (await response.json()) as DashboardConfig;
+      configCache = devConfig;
+      devModeCache = true;
+      return devConfig;
     }
   } catch {
-    // If fetch fails entirely, fall through to production constants
+    // If fetch fails, use build-time config
   }
 
-  // Fallback to production constants
-  const config: DashboardConfig = {
-    identityProvider: 'https://identity.internetcomputer.org',
-    dfxHost: 'https://icp-api.io',
-  };
-
-  configCache = config;
-  return config;
+  // Fallback to build-time resolved config
+  configCache = config as DashboardConfig;
+  devModeCache = false;
+  return configCache;
 }
 
-function loadViteConfig(): DashboardConfig | null {
-  const identityProvider = import.meta.env.VITE_IDENTITY_PROVIDER;
-  const dfxHost = import.meta.env.VITE_DFXHOST;
-  const canisterId = import.meta.env.VITE_DASHBOARD_CANISTER_ID;
-
-  // Check for required env vars (canister ID is optional)
-  if (isValidEnvVar(identityProvider) && isValidEnvVar(dfxHost)) {
-    const config: DashboardConfig = {
-      identityProvider,
-      dfxHost,
-    };
-
-    if (isValidEnvVar(canisterId)) {
-      config.canisterIdDev = canisterId;
-    }
-
-    return config;
-  }
-  return null;
-}
-
-async function loadJsonConfig(): Promise<DashboardConfig | null> {
-  const dfxHost = import.meta.env.VITE_DFXHOST;
-  if (!isValidEnvVar(dfxHost)) {
-    return null;
+export function isDevMode(): boolean {
+  if (devModeCache !== null) {
+    return devModeCache;
   }
 
-  const dfxHostUrl = new URL(dfxHost);
-  const currentHost = window.location.hostname;
-
-  const isLocalhost = currentHost === dfxHostUrl.hostname;
-
-  if (!isLocalhost) {
-    return null;
-  }
-
-  const response = await fetch('/dashboard-config.json');
-  if (response.ok) {
-    return (await response.json()) as DashboardConfig;
-  }
-  return null;
-}
-
-function isValidEnvVar(value: string | undefined): value is string {
-  return typeof value === 'string' && value.length > 0;
+  // Synchronous check - if we haven't loaded config yet, assume prod
+  return false;
 }

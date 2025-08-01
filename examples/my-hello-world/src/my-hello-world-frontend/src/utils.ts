@@ -13,7 +13,7 @@ export async function getCanisterId(): Promise<Principal> {
     }
 
     throw new Error(
-      'No canister ID available - please set VITE_MY_HELLO_WORLD_CANISTER_ID in global .env.development'
+      'No canister ID available - please configure canisterIdDev in vite.config.js dappConfigPlugin'
     );
   }
 }
