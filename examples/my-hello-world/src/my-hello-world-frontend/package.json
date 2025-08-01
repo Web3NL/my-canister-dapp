@@ -19,5 +19,8 @@
   "dependencies": {
     "@web3nl/my-canister-dashboard": "0.5.2",
     "lit-html": "2.8.0"
+  },
+  "devDependencies": {
+    "@web3nl/vite-plugin-dapp-config": "file:../../../../../my-canister-dapp-js/vite-plugin-dapp-config"
   }
 }

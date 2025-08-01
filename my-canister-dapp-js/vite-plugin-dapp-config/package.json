@@ -1,0 +1,38 @@
+{
+  "name": "@web3nl/vite-plugin-dapp-config",
+  "version": "0.1.0",
+  "description": "Vite plugin for Canister Dapp configuration",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    }
+  },
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsc",
+    "clean": "rm -rf dist",
+    "dev": "tsc --watch",
+    "lint": "eslint src",
+    "lint:fix": "eslint src --fix",
+    "format": "prettier --check src",
+    "format:fix": "prettier --write src",
+    "typecheck": "tsc --noEmit"
+  },
+  "keywords": [
+    "vite",
+    "plugin",
+    "dapp",
+    "configuration",
+    "internet computer",
+    "canister",
+    "web3"
+  ],
+  "author": "Samer",
+  "license": "MIT"
+}

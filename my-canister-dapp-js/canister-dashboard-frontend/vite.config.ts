@@ -1,7 +1,7 @@
 import { defineConfig } from 'vite';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { dappConfigPlugin } from '../vite-plugin-dapp-config.js';
+import { dappConfigPlugin } from '@web3nl/vite-plugin-dapp-config';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 

@@ -1,7 +1,7 @@
 import { defineConfig } from 'vite';
 import { fileURLToPath, URL } from 'url';
 import { resolve } from 'path';
-import { dappConfigPlugin } from './vite-plugin-dapp-config.js';
+import { dappConfigPlugin } from '@web3nl/vite-plugin-dapp-config';
 
 export default defineConfig(({ mode }) => {
 

@@ -33,6 +33,7 @@ export default [
           './my-canister-dapp-js/canister-dashboard-frontend/tsconfig.json',
           './my-canister-app/tsconfig.json',
           './my-canister-dapp-js/my-canister-dashboard-js/tsconfig.json',
+          './my-canister-dapp-js/vite-plugin-dapp-config/tsconfig.json',
           './examples/my-hello-world/src/my-hello-world-frontend/tsconfig.json',
         ],
         tsconfigRootDir: __dirname,
