@@ -1,10 +1,11 @@
 /* eslint-disable no-console */
+/* eslint-disable @typescript-eslint/strict-boolean-expressions */
 import { test, expect } from '@playwright/test';
 import { readTestData, transferToPrincipal } from '../helpers';
 import { formatIcpBalance } from '../../my-canister-dapp-js/canister-dashboard-frontend/src/helpers';
 import { Principal } from '@dfinity/principal';
 
-test('Canister Dashboard Frontend Suite', async ({ page }) => {
+test('Canister Dashboard Frontend Suite', async ({ page }, testInfo) => {
   test.setTimeout(60000); // 1 minute timeout
   const TOPUP_AMOUNT = BigInt(100_000_000);
   const TEST_CONTROLLER = 'rkp4c-7iaaa-aaaaa-aaaca-cai';
@@ -14,6 +15,17 @@ test('Canister Dashboard Frontend Suite', async ({ page }) => {
     'https://22ajg-aqaaa-aaaap-adukq-cai.icp0.io',
     'https://my-canister.app',
   ];
+
+  // Get configuration from project metadata
+  const testUrl = testInfo.project.metadata.testUrl;
+  const principalFile = testInfo.project.metadata.principalFile;
+
+  if (!testUrl) {
+    throw new Error('testUrl not found in project metadata');
+  }
+  if (!principalFile) {
+    throw new Error('principalFile not found in project metadata');
+  }
 
   // Helper functions for content-based waiting using locators
   const waitForBalanceToBeAtLeast = async (minimumBalance: string) => {
@@ -70,7 +82,6 @@ test('Canister Dashboard Frontend Suite', async ({ page }) => {
       const cyclesText = await cyclesLocator.textContent();
       const currentBalanceStr = cyclesText?.replace(/Cycles:\s*/g, '').trim();
 
-      // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
       if (!currentBalanceStr) {
         throw new Error('Current cycles balance is empty');
       }
@@ -96,7 +107,7 @@ test('Canister Dashboard Frontend Suite', async ({ page }) => {
   // Read the saved ii anchor from the previous test
   const iiAnchor = readTestData('ii-anchor.txt');
 
-  await page.goto('http://localhost:5173/canister-dashboard');
+  await page.goto(testUrl);
 
   const page1Promise = page.waitForEvent('popup');
   await page.getByRole('button', { name: 'Login' }).click();
@@ -111,7 +122,7 @@ test('Canister Dashboard Frontend Suite', async ({ page }) => {
   await page.getByRole('button', { name: 'Top-up' }).waitFor({ state: 'visible', timeout: 10000 });
 
   // Read the saved principal and transfer funds
-  const principalText = readTestData('derived-ii-principal-vite.txt');
+  const principalText = readTestData(principalFile);
   const principal = Principal.fromText(principalText);
   const formattedAmount = formatIcpBalance(TOPUP_AMOUNT);
   await transferToPrincipal(principal, formattedAmount);
@@ -134,7 +145,6 @@ test('Canister Dashboard Frontend Suite', async ({ page }) => {
   await cyclesElement.waitFor({ timeout: 10000 });
   await expect(cyclesElement).not.toHaveText(/Loading\.\.\./);
   const cyclesTextBefore = await cyclesElement.textContent();
-  // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
   if (!cyclesTextBefore) {
     throw new Error('Cycles balance not found before top-up');
   }

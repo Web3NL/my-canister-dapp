@@ -12,8 +12,20 @@ export default defineConfig({
   },
   projects: [
     {
-      name: 'canister-dashboard-frontend',
+      name: 'canister-dashboard-frontend-vite',
       testMatch: /.*canister-dashboard-frontend.*\.spec\.ts/,
+      metadata: {
+        testUrl: 'http://localhost:5173/canister-dashboard',
+        principalFile: 'derived-ii-principal-vite.txt'
+      }
+    },
+    {
+      name: 'canister-dashboard-frontend-dfx',
+      testMatch: /.*canister-dashboard-frontend.*\.spec\.ts/,
+      metadata: {
+        testUrl: 'http://22ajg-aqaaa-aaaap-adukq-cai.localhost:8080/canister-dashboard',
+        principalFile: 'derived-ii-principal-dfx.txt'
+      }
     },
     {
       name: 'my-canister-app',
