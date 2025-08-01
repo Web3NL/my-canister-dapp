@@ -1,9 +1,9 @@
-import { AuthClient } from '@dfinity/auth-client';
+import { AuthClient, type AuthClientLoginOptions } from '@dfinity/auth-client';
 import { Principal } from '@dfinity/principal';
 
 declare global {
   interface Window {
-    IIAuthBundle: {
+    DeriveIIPrincipal: {
       performAuth: (identityProvider: string, derivationOrigin?: string) => Promise<string>;
       createAuthButton: () => void;
     };
@@ -16,7 +16,7 @@ async function performAuth(identityProvider: string, derivationOrigin?: string):
       keyType: 'Ed25519'
     }).then(async (client) => {
       try {
-        const loginOptions = {
+        const loginOptions: AuthClientLoginOptions = {
           identityProvider,
           onSuccess: async () => {
             const identity = client.getIdentity();
@@ -27,13 +27,13 @@ async function performAuth(identityProvider: string, derivationOrigin?: string):
             
             resolve(principalText);
           },
-          onError: (error: any) => {
+          onError: (error: unknown) => {
             reject(new Error(`Authentication failed: ${String(error)}`));
           }
         };
         
         if (derivationOrigin != null) {
-          (loginOptions as any).derivationOrigin = derivationOrigin;
+          loginOptions.derivationOrigin = derivationOrigin;
         }
         
         await client.login(loginOptions);
@@ -45,23 +45,23 @@ async function performAuth(identityProvider: string, derivationOrigin?: string):
 }
 
 function createAuthButton(): void {
-  const existing = document.querySelector('[data-tid="ii-auth-btn"]');
+  const existing = document.querySelector('[data-tid="derive-ii-auth-btn"]');
   if (existing) {
     existing.remove();
   }
 
   const button = document.createElement('button');
-  button.setAttribute('data-tid', 'ii-auth-btn');
-  button.textContent = 'Auth with II';
+  button.setAttribute('data-tid', 'derive-ii-auth-btn');
+  button.textContent = 'Derive II Principal';
 
   const resultDiv = document.createElement('div');
-  resultDiv.setAttribute('data-tid', 'ii-auth-result');
+  resultDiv.setAttribute('data-tid', 'derive-ii-auth-result');
 
   document.body.appendChild(button);
   document.body.appendChild(resultDiv);
 }
 
-window.IIAuthBundle = {
+window.DeriveIIPrincipal = {
   performAuth,
   createAuthButton
 };

@@ -92,13 +92,3 @@ export function getDfxEnv(key: string): string {
 
   return value;
 }
-
-export async function buildIIAuthBundle(): Promise<void> {
-  const bundleDir = path.join(process.cwd(), 'tests', 'internet-identity-setup');
-  const { stderr } = await execAsync('npm run build', { cwd: bundleDir });
-  if (stderr && !stderr.includes('built in')) {
-    throw new Error(`Bundle build failed: ${stderr}`);
-  }
-}
-
-

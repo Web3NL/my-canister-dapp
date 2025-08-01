@@ -13,13 +13,14 @@ dfx canister install my-hello-world
 
 echo "Running Internet Identity setup..."
 npx playwright install 
-npx playwright test tests/internet-identity-setup/setup-ii.spec.ts
+npm run build:derive-ii-principal
+DAPP_ORIGIN=http://localhost:5173 npm run test:derive-ii-principal
 
 echo "Reading canister ID from global .env.development..."
 CANISTER_ID=$(grep VITE_MY_HELLO_WORLD_CANISTER_ID .env.development | cut -d '=' -f2)
 
 echo "Reading principal from ii-principal.txt..."
-PRINCIPAL=$(cat test-output/ii-principal.txt)
+PRINCIPAL=$(cat test-output/derived-ii-principal.txt)
 
 IDENT1=$(dfx identity get-principal)
 

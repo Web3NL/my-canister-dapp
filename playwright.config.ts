@@ -12,10 +12,6 @@ export default defineConfig({
   },
   projects: [
     {
-      name: 'setup-internet-identity',
-      testMatch: /.*internet-identity-setup.*\.spec\.ts/,
-    },
-    {
       name: 'canister-dashboard-frontend',
       testMatch: /.*canister-dashboard-frontend.*\.spec\.ts/,
     },
@@ -23,19 +19,16 @@ export default defineConfig({
       name: 'my-canister-app',
       testMatch: /.*my-canister-app.*\.spec\.ts/,
     },
-  ],
-  webServer: [
     {
-      command: 'npm run dev:dashboard',
-      url: 'http://localhost:5173',
-      reuseExistingServer: true,
-      timeout: 5000,
+      name: 'derive-ii-principal',
+      testMatch: /.*derive-ii-principal.*\.spec\.ts/,
     },
-    {
-      command: 'npm run dev:dashboard',
-      url: 'http://localhost:5173',
-      reuseExistingServer: true,
-      timeout: 5000,
-    }
   ],
+  webServer:
+  {
+    command: 'npm run dev:dashboard',
+    url: 'http://localhost:5173',
+    reuseExistingServer: true,
+    timeout: 5000,
+  }
 });

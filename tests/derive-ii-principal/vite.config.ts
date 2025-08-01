@@ -4,12 +4,12 @@ import { resolve } from 'path';
 export default defineConfig({
   build: {
     lib: {
-      entry: resolve(__dirname, 'ii-auth-bundle.ts'),
-      name: 'IIAuthBundle',
-      fileName: 'ii-auth-bundle',
+      entry: resolve(__dirname, 'derive-ii-principal.ts'),
+      name: 'DeriveIIPrincipal',
+      fileName: 'derive-ii-principal',
       formats: ['iife']
     },
-    outDir: 'dist',
+    outDir: __dirname,
     rollupOptions: {
       output: {
         inlineDynamicImports: true

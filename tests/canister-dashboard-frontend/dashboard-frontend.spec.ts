@@ -38,10 +38,10 @@ test('Canister Dashboard Frontend Suite', async ({ page }) => {
 
   const waitForListUpdate = async (listSelector: string, expectedItem: string, shouldContain: boolean = true) => {
     const listLocator = page.locator(listSelector);
-    
+
     // Wait for list to be ready (not loading)
     await expect(listLocator).not.toHaveText(/Loading\.\.\./);
-    
+
     if (shouldContain) {
       // Wait for the specific item to appear in the list
       await expect(listLocator.locator('li', { hasText: expectedItem })).toBeVisible({ timeout: 10000 });
@@ -111,7 +111,7 @@ test('Canister Dashboard Frontend Suite', async ({ page }) => {
   await page.getByRole('button', { name: 'Top-up' }).waitFor({ state: 'visible', timeout: 10000 });
 
   // Read the saved principal and transfer funds
-  const principalText = readTestData('ii-principal.txt');
+  const principalText = readTestData('derived-ii-principal.txt');
   const principal = Principal.fromText(principalText);
   const formattedAmount = formatIcpBalance(TOPUP_AMOUNT);
   await transferToPrincipal(principal, formattedAmount);
@@ -225,7 +225,7 @@ test('Canister Dashboard Frontend Suite', async ({ page }) => {
 
     // Wait for input to be cleared
     await waitForInputToClear('#alternative-origin-input');
-    
+
     // Small delay between operations for stability
     await page.waitForTimeout(200);
   }
@@ -251,7 +251,7 @@ test('Canister Dashboard Frontend Suite', async ({ page }) => {
 
     // Wait for input to be cleared
     await waitForInputToClear('#alternative-origin-input');
-    
+
     // Small delay between operations for stability
     await page.waitForTimeout(200);
   }
