@@ -111,7 +111,7 @@ test('Canister Dashboard Frontend Suite', async ({ page }) => {
   await page.getByRole('button', { name: 'Top-up' }).waitFor({ state: 'visible', timeout: 10000 });
 
   // Read the saved principal and transfer funds
-  const principalText = readTestData('derived-ii-principal.txt');
+  const principalText = readTestData('derived-ii-principal-vite.txt');
   const principal = Principal.fromText(principalText);
   const formattedAmount = formatIcpBalance(TOPUP_AMOUNT);
   await transferToPrincipal(principal, formattedAmount);
