@@ -3,10 +3,6 @@ set -e
 
 echo "Setting up dashboard development environment..."
 
-echo "Running Internet Identity setup..."
-npx playwright install 
-npx playwright test tests/internet-identity-setup/setup-ii.spec.ts
-
 echo "Using dfx identity ident-1..."
 dfx identity use ident-1
 
@@ -14,6 +10,10 @@ echo "Creating my-hello-world canister..."
 dfx canister create my-hello-world --with-cycles 900000000000
 dfx build my-hello-world
 dfx canister install my-hello-world
+
+echo "Running Internet Identity setup..."
+npx playwright install 
+npx playwright test tests/internet-identity-setup/setup-ii.spec.ts
 
 echo "Reading canister ID from global .env.development..."
 CANISTER_ID=$(grep VITE_MY_HELLO_WORLD_CANISTER_ID .env.development | cut -d '=' -f2)

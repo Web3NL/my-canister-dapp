@@ -74,7 +74,7 @@ export function myCanisterAppDfxUrl(): string {
 
 export function loadDfxEnv(): void {
   const envPath = path.join(process.cwd(), '.env.development');
-  
+
   if (!fs.existsSync(envPath)) {
     throw new Error('Global .env.development not found at monorepo root');
   }
@@ -84,13 +84,21 @@ export function loadDfxEnv(): void {
 
 export function getDfxEnv(key: string): string {
   const value = process.env[key];
-  
+
   // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
   if (!value) {
     throw new Error(`DFX environment variable ${key} not found. Make sure to call loadDfxEnv() first.`);
   }
 
   return value;
+}
+
+export async function buildIIAuthBundle(): Promise<void> {
+  const bundleDir = path.join(process.cwd(), 'tests', 'internet-identity-setup');
+  const { stderr } = await execAsync('npm run build', { cwd: bundleDir });
+  if (stderr && !stderr.includes('built in')) {
+    throw new Error(`Bundle build failed: ${stderr}`);
+  }
 }
 
 

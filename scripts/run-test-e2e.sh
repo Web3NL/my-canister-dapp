@@ -3,5 +3,7 @@
 set -e
 
 echo "Running End-to-End Tests"
-npm run test:e2e
+
+npx playwright test --project=canister-dashboard-frontend  --project=my-canister-app
+
 echo "E2E test completed successfully!"
