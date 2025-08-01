@@ -16,7 +16,7 @@ npx playwright install
 npm run test:create-ii-account
 npm run build:derive-ii-principal
 DAPP_ORIGIN=http://localhost:5173 DAPP_DEV_ENV=vite npm run test:derive-ii-principal
-DAPP_ORIGIN=http://localhost:8080 DAPP_DEV_ENV=dfx npm run test:derive-ii-principal
+DAPP_ORIGIN=http://22ajg-aqaaa-aaaap-adukq-cai.localhost:8080 DAPP_DEV_ENV=dfx npm run test:derive-ii-principal
 
 echo "Reading canister ID from global .env.development..."
 CANISTER_ID=$(grep VITE_MY_HELLO_WORLD_CANISTER_ID .env.development | cut -d '=' -f2)
