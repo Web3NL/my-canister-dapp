@@ -1,15 +1,10 @@
-import config from 'virtual:dapp-config';
+import config, { isDevMode as pluginIsDevMode } from 'virtual:dapp-config';
+import type { DappConfig } from '@web3nl/vite-plugin-dapp-config';
 
-export interface DashboardConfig {
-  identityProvider: string;
-  dfxHost: string;
-  canisterIdDev?: string;
-}
-
-let configCache: DashboardConfig | null = null;
+let configCache: DappConfig | null = null;
 let devModeCache: boolean | null = null;
 
-export async function getConfig(): Promise<DashboardConfig> {
+export async function getConfig(): Promise<DappConfig> {
   if (configCache) {
     return configCache;
   }
@@ -18,7 +13,7 @@ export async function getConfig(): Promise<DashboardConfig> {
   try {
     const response = await fetch('/dapp-config.json');
     if (response.ok) {
-      const devConfig = (await response.json()) as DashboardConfig;
+      const devConfig = (await response.json()) as DappConfig;
       configCache = devConfig;
       devModeCache = true;
       return devConfig;
@@ -28,8 +23,8 @@ export async function getConfig(): Promise<DashboardConfig> {
   }
 
   // Fallback to build-time resolved config
-  configCache = config as DashboardConfig;
-  devModeCache = false;
+  configCache = config;
+  devModeCache = Boolean(pluginIsDevMode);
   return configCache;
 }
 
@@ -38,6 +33,6 @@ export function isDevMode(): boolean {
     return devModeCache;
   }
 
-  // Synchronous check - if we haven't loaded config yet, assume prod
-  return false;
+  // Fallback to build-time dev mode detection
+  return Boolean(pluginIsDevMode);
 }

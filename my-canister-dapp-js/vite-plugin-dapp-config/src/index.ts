@@ -40,7 +40,8 @@ export function dappConfigPlugin(config: DappConfigPluginConfig): Plugin {
           currentMode === 'development' || currentMode === 'dfx_replica';
         const configValues = isDev ? dev : prod;
 
-        return `export default ${JSON.stringify(configValues, null, 2)};`;
+        return `export default ${JSON.stringify(configValues, null, 2)};
+export const isDevMode = ${isDev};`;
       }
       return null;
     },

@@ -19,6 +19,7 @@ fi
 
 # Build my-hello-world example
 echo "Building my-hello-world canister"
+./scripts/prebuild-mcd.sh
 cargo build --release --target wasm32-unknown-unknown -p my-hello-world
 
 # Process WASM with ic-wasm

@@ -8,4 +8,5 @@ declare module 'virtual:dapp-config' {
   }
   const config: DappConfig;
   export default config;
+  export const isDevMode: boolean;
 }
