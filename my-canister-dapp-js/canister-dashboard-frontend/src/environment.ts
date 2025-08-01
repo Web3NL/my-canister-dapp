@@ -69,6 +69,20 @@ function loadViteConfig(): DashboardConfig | null {
 }
 
 async function loadJsonConfig(): Promise<DashboardConfig | null> {
+  const dfxHost = import.meta.env.VITE_DFXHOST;
+  if (!isValidEnvVar(dfxHost)) {
+    return null;
+  }
+
+  const dfxHostUrl = new URL(dfxHost);
+  const currentHost = window.location.hostname;
+
+  const isLocalhost = currentHost === dfxHostUrl.hostname;
+
+  if (!isLocalhost) {
+    return null;
+  }
+
   const response = await fetch('/dashboard-config.json');
   if (response.ok) {
     return (await response.json()) as DashboardConfig;
