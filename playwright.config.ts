@@ -20,6 +20,10 @@ export default defineConfig({
       testMatch: /.*my-canister-app.*\.spec\.ts/,
     },
     {
+      name: 'create-ii-account',
+      testMatch: /.*create-ii-account.*\.spec\.ts/,
+    },
+    {
       name: 'derive-ii-principal',
       testMatch: /.*derive-ii-principal.*\.spec\.ts/,
     },

@@ -116,9 +116,7 @@ class AuthManager {
       })) as AuthorizationResult;
 
       if ('Ok' in result) {
-        const authorizedPrincipal = result.Ok.toString();
-        const currentPrincipal = this.getPrincipalText();
-        return authorizedPrincipal === currentPrincipal;
+        return true;
       } else {
         showError(`Authorization check failed: ${result.Err}`);
         return false;

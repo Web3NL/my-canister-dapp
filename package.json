@@ -19,6 +19,7 @@
     "deploy:app": "dfx deploy my-canister-app --ic",
     "dev:dashboard": "npm run dev --workspace=canister-dashboard-frontend",
     "build:derive-ii-principal": "cd tests/derive-ii-principal && vite build",
+    "test:create-ii-account": "playwright test tests/create-ii-account/create-ii-account.spec.ts",
     "test:derive-ii-principal": "npm run build:derive-ii-principal && playwright test tests/derive-ii-principal/derive-ii-principal.spec.ts",
     "test:e2e": "./scripts/run-test-e2e.sh",
     "build:docs": "npm run docs:clean --workspace=@web3nl/my-canister-dashboard && npm run docs:build --workspace=@web3nl/my-canister-dashboard",

@@ -8,41 +8,21 @@ const identityProvider = getDfxEnv('VITE_IDENTITY_PROVIDER');
 
 test.describe.only('derive ii principal', () => {
 
-  test.only('should create new internet identity account', async ({ page }) => {
-    await page.goto(identityProvider);
-
-    await page
-      .getByRole('button', { name: 'Create Internet Identity' })
-      .click();
-    await page.getByRole('button', { name: 'Create Passkey' }).click();
-
-    await page
-      .getByRole('textbox', { name: 'Type the characters you see' })
-      .fill('a');
-    await page.getByRole('button', { name: 'Next' }).click();
-    await page.getByRole('button', { name: 'I saved it, continue' }).click();
-
-    // Extract the user number from the output element
-    const userNumber = await page.getAttribute(
-      '#userNumber',
-      'data-usernumber'
-    );
-
-    // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
-    if (!userNumber) {
-      throw new Error('User number not found in data-usernumber attribute');
-    }
-
-    // Save ii anchor to disk
-    saveTestData('ii-anchor.txt', userNumber);
-  });
-
   test.only('should derive principal from II at any domain', async ({ page }) => {
     const dappOrigin = process.env.DAPP_ORIGIN;
     // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
     if (!dappOrigin) {
       throw new Error('DAPP_ORIGIN environment variable is required');
     }
+
+    const dappDevEnv = process.env.DAPP_DEV_ENV;
+    // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
+    if (!dappDevEnv) {
+      throw new Error('DAPP_DEV_ENV environment variable is required');
+    }
+
+    const envSuffix = dappDevEnv === 'vite' ? '-vite' : '-dfx';
+    const principalFilename = `derived-ii-principal${envSuffix}.txt`;
 
     const iiAnchor = readTestData('ii-anchor.txt');
 
@@ -91,6 +71,6 @@ test.describe.only('derive ii principal', () => {
     const principalText = await authPromise;
 
     // Save the principal
-    saveTestData('derived-ii-principal.txt', principalText);
+    saveTestData(principalFilename, principalText);
   });
 });
