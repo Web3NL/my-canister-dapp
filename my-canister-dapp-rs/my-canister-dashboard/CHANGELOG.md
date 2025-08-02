@@ -2,6 +2,14 @@
 
 ## [Unreleased]
 
+## [0.7.0] - 2025-08-02
+
+### Added
+
+- Vite plugin dapp config: provides dapp env and static dap config asset.
+- Dashboard infers env by fetching dapp config asset.
+- Improved testing.
+
 ## [0.6.0] - 2025-07-27
 
 ### Added
