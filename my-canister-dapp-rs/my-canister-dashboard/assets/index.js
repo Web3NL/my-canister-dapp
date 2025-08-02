@@ -18687,7 +18687,7 @@ async function getConfig() {
     return configCache;
   }
   try {
-    const response = await fetch("/dapp-config.json");
+    const response = await fetch("/canister-dapp-config.json");
     if (response.ok) {
       const devConfig = await response.json();
       configCache = devConfig;

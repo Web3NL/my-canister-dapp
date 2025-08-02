@@ -6,10 +6,10 @@ export interface CanisterDappConfig {
   canisterIdDev?: string;
 }
 
-export interface CanisterDappConfigPluginConfig {
-  prod: CanisterDappConfig;
-  dev: CanisterDappConfig;
-}
+const DEFAULT_PROD_CONFIG: CanisterDappConfig = {
+  identityProvider: 'https://identity.internetcomputer.org',
+  dfxHost: 'https://icp-api.io',
+};
 
 /**
  * Vite plugin that provides canister dapp configuration in two ways:
@@ -17,9 +17,11 @@ export interface CanisterDappConfigPluginConfig {
  * 2. Static asset 'canister-dapp-config.json' for runtime environment detection by dashboard
  */
 export function canisterDappConfigPlugin(
-  config: CanisterDappConfigPluginConfig
+  devConfig: CanisterDappConfig,
+  prodConfig?: Partial<CanisterDappConfig>
 ): Plugin {
-  const { prod, dev } = config;
+  const prod = { ...DEFAULT_PROD_CONFIG, ...prodConfig };
+  const dev = devConfig;
   let currentMode = 'production';
 
   return {
@@ -38,8 +40,7 @@ export function canisterDappConfigPlugin(
 
     load(id: string) {
       if (id === 'virtual:canister-dapp-config') {
-        const isDev =
-          currentMode === 'development' || currentMode === 'dfx_replica';
+        const isDev = currentMode === 'development';
         const configValues = isDev ? dev : prod;
 
         return `export default ${JSON.stringify(configValues, null, 2)};
@@ -62,10 +63,9 @@ export const isDevMode = ${isDev};`;
     },
 
     generateBundle() {
-      // Only generate canister-dapp-config.json for development and dfx_replica builds
+      // Always generate canister-dapp-config.json for development builds
       // This allows dashboard to detect dev environment at runtime
-      const isDev =
-        currentMode === 'development' || currentMode === 'dfx_replica';
+      const isDev = currentMode === 'development';
 
       if (isDev) {
         this.emitFile({

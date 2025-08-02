@@ -5,7 +5,7 @@ import { canisterDappConfigPlugin } from '@web3nl/vite-plugin-canister-dapp-conf
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-export default defineConfig(({ mode }) => {
+export default defineConfig(() => {
 
   return {
     root: 'src',
@@ -14,15 +14,9 @@ export default defineConfig(({ mode }) => {
     publicDir: false,
     plugins: [
       canisterDappConfigPlugin({
-        prod: {
-          identityProvider: 'https://identity.internetcomputer.org',
-          dfxHost: 'https://icp-api.io'
-        },
-        dev: {
-          identityProvider: 'http://qhbym-qaaaa-aaaaa-aaafq-cai.localhost:8080',
-          dfxHost: 'http://localhost:8080',
-          canisterIdDev: '22ajg-aqaaa-aaaap-adukq-cai'
-        }
+        identityProvider: 'http://qhbym-qaaaa-aaaaa-aaafq-cai.localhost:8080',
+        dfxHost: 'http://localhost:8080',
+        canisterIdDev: '22ajg-aqaaa-aaaap-adukq-cai'
       })
     ],
     build: {

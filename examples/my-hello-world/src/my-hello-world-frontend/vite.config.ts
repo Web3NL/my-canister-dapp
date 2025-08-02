@@ -2,7 +2,7 @@ import { defineConfig } from 'vite';
 import { fileURLToPath, URL } from 'url';
 import { canisterDappConfigPlugin } from '@web3nl/vite-plugin-canister-dapp-config';
 
-export default defineConfig(({ mode }) => {
+export default defineConfig(() => {
 
   return {
     build: {
@@ -35,15 +35,9 @@ export default defineConfig(({ mode }) => {
     },
     plugins: [
       canisterDappConfigPlugin({
-        prod: {
-          identityProvider: 'https://identity.internetcomputer.org',
-          dfxHost: 'https://icp-api.io'
-        },
-        dev: {
-          identityProvider: 'http://qhbym-qaaaa-aaaaa-aaafq-cai.localhost:8080',
-          dfxHost: 'http://localhost:8080',
-          canisterIdDev: '22ajg-aqaaa-aaaap-adukq-cai'
-        }
+        identityProvider: 'http://qhbym-qaaaa-aaaaa-aaafq-cai.localhost:8080',
+        dfxHost: 'http://localhost:8080',
+        canisterIdDev: '22ajg-aqaaa-aaaap-adukq-cai'
       })
     ],
     resolve: {
@@ -65,7 +59,6 @@ export default defineConfig(({ mode }) => {
     },
     define: {
       global: 'globalThis',
-      'process.env.DFX_NETWORK': JSON.stringify(process.env.DFX_NETWORK),
     },
   };
 });
