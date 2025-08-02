@@ -1,19 +1,33 @@
 /* eslint-disable no-console */
+/* eslint-disable @typescript-eslint/strict-boolean-expressions */
 import { test, expect } from '@playwright/test';
-import { readTestData, transferToPrincipal } from '../helpers';
+import { readTestData, transferToPrincipal, transferToPrincipalMainnet } from '../helpers';
 import { formatIcpBalance } from '../../my-canister-dapp-js/canister-dashboard-frontend/src/helpers';
 import { Principal } from '@dfinity/principal';
 
-test('Canister Dashboard Frontend Suite', async ({ page }) => {
+test('Canister Dashboard Frontend Suite', async ({ page }, testInfo) => {
   test.setTimeout(60000); // 1 minute timeout
-  const TOPUP_AMOUNT = BigInt(100_000_000);
+  const TOPUP_AMOUNT_MAINNET = BigInt(1_000_000);
+  const TOPUP_AMOUNT_LOCAL = BigInt(100_000_000);
   const TEST_CONTROLLER = 'rkp4c-7iaaa-aaaaa-aaaca-cai';
   const TEST_ORIGINS = [
     'http://localhost:9999',
-    'http://22ajg-aqaaa-aaaap-adukq-cai.localhost:8080',
-    'https://22ajg-aqaaa-aaaap-adukq-cai.icp0.io',
-    'https://my-canister.app',
+    // 'http://22ajg-aqaaa-aaaap-adukq-cai.localhost:8080',
+    // 'https://22ajg-aqaaa-aaaap-adukq-cai.icp0.io',
+    // 'https://mycanister.app',
   ];
+
+  // Get configuration from project metadata
+  const testUrl = testInfo.project.metadata.testUrl;
+  const isMainNet = testInfo.project.metadata.mainNet;
+  const principalFile = testInfo.project.metadata.principalFile;
+
+  if (!testUrl) {
+    throw new Error('testUrl not found in project metadata');
+  }
+  if (!isMainNet && !principalFile) {
+    throw new Error('principalFile not found in project metadata');
+  }
 
   // Helper functions for content-based waiting using locators
   const waitForBalanceToBeAtLeast = async (minimumBalance: string) => {
@@ -70,7 +84,6 @@ test('Canister Dashboard Frontend Suite', async ({ page }) => {
       const cyclesText = await cyclesLocator.textContent();
       const currentBalanceStr = cyclesText?.replace(/Cycles:\s*/g, '').trim();
 
-      // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
       if (!currentBalanceStr) {
         throw new Error('Current cycles balance is empty');
       }
@@ -93,34 +106,55 @@ test('Canister Dashboard Frontend Suite', async ({ page }) => {
     }).toPass({ timeout: timeoutMs, intervals: [100, 500, 1000] });
   };
 
-  // Read the saved ii anchor from the previous test
-  const iiAnchor = readTestData('ii-anchor.txt');
+  await page.goto(testUrl);
 
-  await page.goto('http://localhost:5173/canister-dashboard');
+  if (isMainNet) {
+    // In mainnet, pause for manual login
+    await page.pause();
+  } else {
+    // Automated login for testnet
+    // Read the saved ii anchor from the previous test
+    const iiAnchor = readTestData('ii-anchor.txt');
 
-  const page1Promise = page.waitForEvent('popup');
-  await page.getByRole('button', { name: 'Login' }).click();
-  const page1 = await page1Promise;
+    const page1Promise = page.waitForEvent('popup');
+    await page.getByRole('button', { name: 'Login' }).click();
+    const page1 = await page1Promise;
 
-  await page1.getByRole('button', { name: 'Use existing' }).click();
-  await page1.getByRole('textbox', { name: 'Identity Anchor' }).fill(iiAnchor);
-  await page1.getByRole('button', { name: 'Continue', exact: true }).click();
-  await page1.getByRole('button', { name: 'Remind me later' }).click();
+    await page1.getByRole('button', { name: 'Use existing' }).click();
+    await page1.getByRole('textbox', { name: 'Identity Anchor' }).fill(iiAnchor);
+    await page1.getByRole('button', { name: 'Continue', exact: true }).click();
+    await page1.getByRole('button', { name: 'Remind me later' }).click();
+  }
 
   // Wait for the top-up button to appear and be visible
   await page.getByRole('button', { name: 'Top-up' }).waitFor({ state: 'visible', timeout: 10000 });
 
-  // Read the saved principal and transfer funds
-  const principalText = readTestData('derived-ii-principal.txt');
+  // Extract principal from the page
+  const iiPrincipalElement = page.locator('#ii-principal');
+  await iiPrincipalElement.waitFor({ state: 'visible', timeout: 10000 });
+  const principalText = await iiPrincipalElement.textContent();
+
+  if (!principalText) {
+    throw new Error('Principal not found on page');
+  }
+
+  // Validate the principal
   const principal = Principal.fromText(principalText);
-  const formattedAmount = formatIcpBalance(TOPUP_AMOUNT);
-  await transferToPrincipal(principal, formattedAmount);
+  const topupAmount = isMainNet ? TOPUP_AMOUNT_MAINNET : TOPUP_AMOUNT_LOCAL;
+  const formattedAmount = formatIcpBalance(topupAmount);
+
+  // Transfer funds using appropriate method based on environment
+  if (isMainNet) {
+    await transferToPrincipalMainnet(principal, formattedAmount);
+  } else {
+    await transferToPrincipal(principal, formattedAmount);
+  }
 
   // Click refresh button to update balance
   await page.getByRole('button', { name: 'Refresh' }).click();
 
   // Calculate minimum expected balance (the amount we just transferred)
-  const transferAmount = formatIcpBalance(TOPUP_AMOUNT);
+  const transferAmount = formattedAmount;
 
   // Wait for balance to be at least the amount we transferred
   await waitForBalanceToBeAtLeast(transferAmount);
@@ -134,7 +168,6 @@ test('Canister Dashboard Frontend Suite', async ({ page }) => {
   await cyclesElement.waitFor({ timeout: 10000 });
   await expect(cyclesElement).not.toHaveText(/Loading\.\.\./);
   const cyclesTextBefore = await cyclesElement.textContent();
-  // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
   if (!cyclesTextBefore) {
     throw new Error('Cycles balance not found before top-up');
   }
@@ -203,11 +236,20 @@ test('Canister Dashboard Frontend Suite', async ({ page }) => {
   // Test alternative origins management functionality
   console.log('Testing alternative origins management...');
 
-  // Test adding each origin
+  // Test adding and removing each origin in sequence
   for (const origin of TEST_ORIGINS) {
+    // Add origin
     console.log(`Adding origin: ${origin}`);
     await page.fill('#alternative-origin-input', origin);
+
+    // Verify the input was filled correctly
+    let inputValue = await page.inputValue('#alternative-origin-input');
+    expect(inputValue).toBe(origin);
+
     await page.click('#alternative-origin-add');
+
+    // Wait for network idle after submit
+    await page.waitForLoadState('networkidle');
 
     // Wait for origin to appear in the list
     await waitForListUpdate('#alternative-origins-list', origin, true);
@@ -226,15 +268,18 @@ test('Canister Dashboard Frontend Suite', async ({ page }) => {
     // Wait for input to be cleared
     await waitForInputToClear('#alternative-origin-input');
 
-    // Small delay between operations for stability
-    await page.waitForTimeout(200);
-  }
-
-  // Test removing each origin
-  for (const origin of TEST_ORIGINS) {
+    // Remove origin
     console.log(`Removing origin: ${origin}`);
     await page.fill('#alternative-origin-input', origin);
+
+    // Verify the input was filled correctly
+    inputValue = await page.inputValue('#alternative-origin-input');
+    expect(inputValue).toBe(origin);
+
     await page.click('#alternative-origin-remove');
+
+    // Wait for network idle after submit
+    await page.waitForLoadState('networkidle');
 
     // Wait for origin to be removed from the list
     await waitForListUpdate('#alternative-origins-list', origin, false);
@@ -251,12 +296,7 @@ test('Canister Dashboard Frontend Suite', async ({ page }) => {
 
     // Wait for input to be cleared
     await waitForInputToClear('#alternative-origin-input');
-
-    // Small delay between operations for stability
-    await page.waitForTimeout(200);
   }
 
   console.log('Alternative origins management tests completed successfully');
-
-  // await page.pause();
 });

@@ -4,6 +4,7 @@
     "node": ">=18.0.0"
   },
   "workspaces": [
+    "my-canister-dapp-js/vite-plugin-dapp-config",
     "my-canister-dapp-js/my-canister-dashboard-js",
     "my-canister-dapp-js/canister-dashboard-frontend",
     "my-canister-app",
@@ -18,6 +19,7 @@
     "deploy:app": "dfx deploy my-canister-app --ic",
     "dev:dashboard": "npm run dev --workspace=canister-dashboard-frontend",
     "build:derive-ii-principal": "cd tests/derive-ii-principal && vite build",
+    "test:create-ii-account": "playwright test tests/create-ii-account/create-ii-account.spec.ts",
     "test:derive-ii-principal": "npm run build:derive-ii-principal && playwright test tests/derive-ii-principal/derive-ii-principal.spec.ts",
     "test:e2e": "./scripts/run-test-e2e.sh",
     "build:docs": "npm run docs:clean --workspace=@web3nl/my-canister-dashboard && npm run docs:build --workspace=@web3nl/my-canister-dashboard",
@@ -57,7 +59,6 @@
     "vite": "6.3.5",
     "vite-plugin-devtools-json": "0.2.0",
     "vite-plugin-dts": "4.5.4",
-    "vite-plugin-static-copy": "3.1.1",
     "vitest": "3.2.4"
   }
 }

@@ -12,7 +12,6 @@
   "include": [
     "src",
     "vite-env.d.ts",
-    "playwright.config.ts",
     "test"
   ]
 }

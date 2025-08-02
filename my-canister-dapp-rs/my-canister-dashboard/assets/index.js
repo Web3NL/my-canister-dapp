@@ -17125,12 +17125,12 @@ class Actor {
   static canisterIdOf(actor) {
     return Principal$1.from(actor[metadataSymbol].config.canisterId);
   }
-  static async install(fields, config) {
+  static async install(fields, config2) {
     const mode = fields.mode === void 0 ? { install: null } : fields.mode;
     const arg = fields.arg ? [...new Uint8Array(fields.arg)] : [];
     const wasmModule = [...new Uint8Array(fields.module)];
-    const canisterId2 = typeof config.canisterId === "string" ? Principal$1.fromText(config.canisterId) : config.canisterId;
-    await getManagementCanister(config).install_code({
+    const canisterId2 = typeof config2.canisterId === "string" ? Principal$1.fromText(config2.canisterId) : config2.canisterId;
+    await getManagementCanister(config2).install_code({
       mode,
       arg,
       wasm_module: wasmModule,
@@ -17138,7 +17138,7 @@ class Actor {
       sender_canister_version: []
     });
   }
-  static async createCanister(config, settings) {
+  static async createCanister(config2, settings) {
     function settingsToCanisterSettings(settings2) {
       return [
         {
@@ -17152,7 +17152,7 @@ class Actor {
         }
       ];
     }
-    const { canister_id: canisterId2 } = await getManagementCanister(config || {}).provisional_create_canister_with_cycles({
+    const { canister_id: canisterId2 } = await getManagementCanister(config2 || {}).provisional_create_canister_with_cycles({
       amount: [],
       settings: settingsToCanisterSettings(settings || {}),
       specified_id: [],
@@ -17160,20 +17160,20 @@ class Actor {
     });
     return canisterId2;
   }
-  static async createAndInstallCanister(interfaceFactory, fields, config) {
-    const canisterId2 = await this.createCanister(config);
-    await this.install(Object.assign({}, fields), Object.assign(Object.assign({}, config), { canisterId: canisterId2 }));
-    return this.createActor(interfaceFactory, Object.assign(Object.assign({}, config), { canisterId: canisterId2 }));
+  static async createAndInstallCanister(interfaceFactory, fields, config2) {
+    const canisterId2 = await this.createCanister(config2);
+    await this.install(Object.assign({}, fields), Object.assign(Object.assign({}, config2), { canisterId: canisterId2 }));
+    return this.createActor(interfaceFactory, Object.assign(Object.assign({}, config2), { canisterId: canisterId2 }));
   }
   static createActorClass(interfaceFactory, options) {
     const service = interfaceFactory({ IDL });
     class CanisterActor extends Actor {
-      constructor(config) {
-        if (!config.canisterId)
-          throw new AgentError(`Canister ID is required, but received ${typeof config.canisterId} instead. If you are using automatically generated declarations, this may be because your application is not setting the canister ID in process.env correctly.`);
-        const canisterId2 = typeof config.canisterId === "string" ? Principal$1.fromText(config.canisterId) : config.canisterId;
+      constructor(config2) {
+        if (!config2.canisterId)
+          throw new AgentError(`Canister ID is required, but received ${typeof config2.canisterId} instead. If you are using automatically generated declarations, this may be because your application is not setting the canister ID in process.env correctly.`);
+        const canisterId2 = typeof config2.canisterId === "string" ? Principal$1.fromText(config2.canisterId) : config2.canisterId;
         super({
-          config: Object.assign(Object.assign(Object.assign({}, DEFAULT_ACTOR_CONFIG), config), { canisterId: canisterId2 }),
+          config: Object.assign(Object.assign(Object.assign({}, DEFAULT_ACTOR_CONFIG), config2), { canisterId: canisterId2 }),
           service
         });
         for (const [methodName, func] of service._fields) {
@@ -17183,7 +17183,7 @@ class Actor {
           if (options === null || options === void 0 ? void 0 : options.certificate) {
             func.annotations.push(ACTOR_METHOD_WITH_CERTIFICATE);
           }
-          this[methodName] = _createActorMethod(this, methodName, func, config.blsVerify);
+          this[methodName] = _createActorMethod(this, methodName, func, config2.blsVerify);
         }
       }
     }
@@ -17345,10 +17345,10 @@ function _createActorMethod(actor, methodName, func, blsVerify2) {
   handler.withOptions = (options) => (...args) => caller(options, ...args);
   return handler;
 }
-function getManagementCanister(config) {
+function getManagementCanister(config2) {
   function transform(methodName, args) {
-    if (config.effectiveCanisterId) {
-      return { effectiveCanisterId: Principal$1.from(config.effectiveCanisterId) };
+    if (config2.effectiveCanisterId) {
+      return { effectiveCanisterId: Principal$1.from(config2.effectiveCanisterId) };
     }
     const first = args[0];
     let effectiveCanisterId = Principal$1.fromHex("");
@@ -17360,7 +17360,7 @@ function getManagementCanister(config) {
     }
     return { effectiveCanisterId };
   }
-  return Actor.createActor(managementCanisterIdl, Object.assign(Object.assign(Object.assign({}, config), { canisterId: Principal$1.fromHex("") }), {
+  return Actor.createActor(managementCanisterIdl, Object.assign(Object.assign(Object.assign({}, config2), { canisterId: Principal$1.fromHex("") }), {
     callTransform: transform,
     queryTransform: transform
   }));
@@ -18675,46 +18675,36 @@ async function _deleteStorage(storage) {
   await storage.remove(KEY_STORAGE_DELEGATION);
   await storage.remove(KEY_VECTOR);
 }
+const config = {
+  "identityProvider": "https://identity.internetcomputer.org",
+  "dfxHost": "https://icp-api.io"
+};
+const isDevMode$1 = false;
 let configCache = null;
+let devModeCache = null;
 async function getConfig() {
-  return loadDashboardConfig();
-}
-function isDevMode() {
-  return configCache !== null;
-}
-async function loadDashboardConfig() {
   if (configCache) {
     return configCache;
   }
-  const viteConfig = loadViteConfig();
-  if (viteConfig) {
-    configCache = viteConfig;
-    return viteConfig;
-  }
   try {
-    const jsonConfig = await loadJsonConfig();
-    if (jsonConfig) {
-      configCache = jsonConfig;
-      return jsonConfig;
+    const response = await fetch("/dapp-config.json");
+    if (response.ok) {
+      const devConfig = await response.json();
+      configCache = devConfig;
+      devModeCache = true;
+      return devConfig;
     }
   } catch {
   }
-  const config = {
-    identityProvider: "https://identity.internetcomputer.org",
-    dfxHost: "https://icp-api.io"
-  };
   configCache = config;
-  return config;
+  devModeCache = Boolean(isDevMode$1);
+  return configCache;
 }
-function loadViteConfig() {
-  return null;
-}
-async function loadJsonConfig() {
-  const response = await fetch("/dashboard-config.json");
-  if (response.ok) {
-    return await response.json();
+function isDevMode() {
+  if (devModeCache !== null) {
+    return devModeCache;
   }
-  return null;
+  return Boolean(isDevMode$1);
 }
 const MAX_TIME_TO_LIVE = BigInt(15) * BigInt(60) * BigInt(1e9);
 const CMC_CANISTER_ID = "rkp4c-7iaaa-aaaaa-aaaca-cai";
@@ -18745,10 +18735,10 @@ class AuthManager {
     if (isAuthed) {
       return;
     }
-    const config = await getConfig();
+    const config2 = await getConfig();
     return new Promise((resolve, reject) => {
       this.authClient.login({
-        identityProvider: config.identityProvider,
+        identityProvider: config2.identityProvider,
         maxTimeToLive: MAX_TIME_TO_LIVE,
         onSuccess: () => {
           resolve();
@@ -19078,9 +19068,9 @@ async function canisterId() {
   try {
     return O$2();
   } catch {
-    const config = await getConfig();
-    if (config.canisterIdDev !== void 0) {
-      return Principal$1.fromText(config.canisterIdDev);
+    const config2 = await getConfig();
+    if (config2.canisterIdDev !== void 0) {
+      return Principal$1.fromText(config2.canisterIdDev);
     }
     showError(CANISTER_ID_ERROR_MESSAGE);
     throw new Error("No canister ID available");
@@ -19089,11 +19079,11 @@ async function canisterId() {
 async function createHttpAgent() {
   try {
     const authClient = await AuthClient.create();
-    const config = await getConfig();
+    const config2 = await getConfig();
     const identity = authClient.getIdentity();
     const agent = await HttpAgent.create({
       identity,
-      host: config.dfxHost
+      host: config2.dfxHost
     });
     if (isDevMode()) {
       await agent.fetchRootKey();

@@ -1,10 +1,8 @@
-import { defineConfig, loadEnv } from 'vite';
+import { defineConfig } from 'vite';
 import { fileURLToPath, URL } from 'url';
-import { viteStaticCopy } from 'vite-plugin-static-copy';
-import { resolve } from 'path';
+import { dappConfigPlugin } from '@web3nl/vite-plugin-dapp-config';
 
 export default defineConfig(({ mode }) => {
-  const env = loadEnv(mode, '../../../..', 'VITE_');
 
   return {
     build: {
@@ -20,32 +18,33 @@ export default defineConfig(({ mode }) => {
     server: {
       proxy: {
         "/api": {
-          target: env.VITE_DFXHOST,
+          target: 'http://localhost:8080',
           changeOrigin: true,
         },
         "/canister-dashboard": {
-          target: env.VITE_DFXHOST,
+          target: 'http://localhost:8080',
           changeOrigin: true,
-          rewrite: (path) => `${path}?canisterId=${env.VITE_MY_HELLO_WORLD_CANISTER_ID}`,
+          rewrite: (path) => `${path}?canisterId=22ajg-aqaaa-aaaap-adukq-cai`,
         },
         "/.well-known/ii-alternative-origins": {
-          target: env.VITE_DFXHOST,
+          target: 'http://localhost:8080',
           changeOrigin: true,
-          rewrite: (path) => `${path}?canisterId=${env.VITE_MY_HELLO_WORLD_CANISTER_ID}`,
+          rewrite: (path) => `${path}?canisterId=22ajg-aqaaa-aaaap-adukq-cai`,
         },
       },
     },
     plugins: [
-      ...(mode === 'development' ? [
-        viteStaticCopy({
-          targets: [
-            {
-              src: 'config/*',
-              dest: '.'
-            }
-          ]
-        })
-      ] : [])
+      dappConfigPlugin({
+        prod: {
+          identityProvider: 'https://identity.internetcomputer.org',
+          dfxHost: 'https://icp-api.io'
+        },
+        dev: {
+          identityProvider: 'http://qhbym-qaaaa-aaaaa-aaafq-cai.localhost:8080',
+          dfxHost: 'http://localhost:8080',
+          canisterIdDev: '22ajg-aqaaa-aaaap-adukq-cai'
+        }
+      })
     ],
     resolve: {
       alias: [
@@ -60,10 +59,6 @@ export default defineConfig(({ mode }) => {
           replacement: fileURLToPath(
             new URL("../declarations/", import.meta.url)
           ),
-        },
-        {
-          find: "/dashboard-config.json",
-          replacement: resolve(process.cwd(), "config/dashboard-config.json"),
         },
       ],
       dedupe: ['@dfinity/agent'],

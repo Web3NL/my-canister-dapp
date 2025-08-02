@@ -8,16 +8,40 @@ export default defineConfig({
   testDir: './tests',
   use: {
     ...devices['Desktop Chrome'],
-    // headless: false
+    headless: false
   },
   projects: [
     {
-      name: 'canister-dashboard-frontend',
+      name: 'canister-dashboard-frontend-vite',
       testMatch: /.*canister-dashboard-frontend.*\.spec\.ts/,
+      metadata: {
+        testUrl: 'http://localhost:5173/canister-dashboard',
+        principalFile: 'derived-ii-principal-vite.txt'
+      }
+    },
+    {
+      name: 'canister-dashboard-frontend-dfx',
+      testMatch: /.*canister-dashboard-frontend.*\.spec\.ts/,
+      metadata: {
+        testUrl: 'http://22ajg-aqaaa-aaaap-adukq-cai.localhost:8080/canister-dashboard',
+        principalFile: 'derived-ii-principal-dfx.txt'
+      }
+    },
+    {
+      name: 'canister-dashboard-frontend-mainnet',
+      testMatch: /.*canister-dashboard-frontend.*\.spec\.ts/,
+      metadata: {
+        testUrl: 'http://qqz4n-iqaaa-aaaap-qp75q-cai.icp0.io/canister-dashboard',
+        mainNet: true,
+      }
     },
     {
       name: 'my-canister-app',
       testMatch: /.*my-canister-app.*\.spec\.ts/,
+    },
+    {
+      name: 'create-ii-account',
+      testMatch: /.*create-ii-account.*\.spec\.ts/,
     },
     {
       name: 'derive-ii-principal',

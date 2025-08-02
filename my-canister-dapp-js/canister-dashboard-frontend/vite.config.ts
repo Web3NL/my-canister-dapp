@@ -1,35 +1,30 @@
-import { defineConfig, loadEnv } from 'vite';
+import { defineConfig } from 'vite';
 import path from 'path';
 import { fileURLToPath } from 'url';
+import { dappConfigPlugin } from '@web3nl/vite-plugin-dapp-config';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 export default defineConfig(({ mode }) => {
-  const env = loadEnv(mode, '../..', 'VITE_');
-  console.log('Mode:', mode);
-  console.log('Loaded env:', env);
-
-  const dfxHost = env.VITE_DFXHOST;
-  const canisterId = env.VITE_DASHBOARD_CANISTER_ID;
-
-  if (mode === 'development') {
-    if (!dfxHost) {
-      throw new Error(
-        'VITE_DFXHOST environment variable is required in development mode'
-      );
-    }
-    if (!canisterId) {
-      throw new Error(
-        'VITE_DASHBOARD_CANISTER_ID environment variable is required in development mode'
-      );
-    }
-  }
 
   return {
     root: 'src',
     base: '/canister-dashboard',
     envDir: __dirname,
     publicDir: false,
+    plugins: [
+      dappConfigPlugin({
+        prod: {
+          identityProvider: 'https://identity.internetcomputer.org',
+          dfxHost: 'https://icp-api.io'
+        },
+        dev: {
+          identityProvider: 'http://qhbym-qaaaa-aaaaa-aaafq-cai.localhost:8080',
+          dfxHost: 'http://localhost:8080',
+          canisterIdDev: '22ajg-aqaaa-aaaap-adukq-cai'
+        }
+      })
+    ],
     build: {
       outDir: path.resolve(__dirname, 'dist'),
       emptyOutDir: true,
@@ -51,7 +46,6 @@ export default defineConfig(({ mode }) => {
     resolve: {
       alias: {
         $declarations: path.resolve(__dirname, '../../declarations'),
-        "/dashboard-config.json": path.resolve(__dirname, "config/dashboard-config.json"),
       },
 
     },
@@ -63,9 +57,9 @@ export default defineConfig(({ mode }) => {
       port: 5173,
       proxy: {
         '/.well-known/ii-alternative-origins': {
-          target: dfxHost,
+          target: 'http://localhost:8080',
           changeOrigin: true,
-          rewrite: path => `${path}?canisterId=${canisterId}`,
+          rewrite: path => `${path}?canisterId=22ajg-aqaaa-aaaap-adukq-cai`,
         },
       },
     },

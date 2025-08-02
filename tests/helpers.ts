@@ -22,6 +22,28 @@ export async function transferToPrincipal(principal: Principal, amount: string):
   }
 }
 
+export async function transferToPrincipalMainnet(principal: Principal, amount: string): Promise<void> {
+  // Switch to mcd-test-id identity
+  const { stderr: switchError } = await execAsync('dfx identity use mcd-test-id');
+  if (switchError && !switchError.includes('Using identity: "mcd-test-id"')) {
+    throw new Error(`DFX Identity Switch Error: ${switchError}`);
+  }
+
+  try {
+    const accountId = await accountIdentifierFromPrincipal(principal);
+    const accountIdHex = accountId.toHex();
+
+    // Set the warning environment variable and transfer funds
+    const { stderr } = await execAsync(`DFX_WARNING=-mainnet_plaintext_identity dfx ledger transfer ${accountIdHex} --memo 0 --amount ${amount} --network ic`);
+    if (stderr) {
+      throw new Error(`DFX Transfer Error: ${stderr}`);
+    }
+  } finally {
+    // Switch back to ident-1
+    await useDfxIdentity();
+  }
+}
+
 async function accountIdentifierFromPrincipal(principal: Principal): Promise<AccountIdentifier> {
   const principalText = principal.toText();
 
