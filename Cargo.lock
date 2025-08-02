@@ -1168,6 +1168,22 @@ dependencies = [
 ]
 
 [[package]]
+name = "my-canister-dashboard"
+version = "0.7.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "52bae984b41eb790ca17aa2fa8539d075e7474e6a2cd081bbcaec2a39daf3241"
+dependencies = [
+ "candid",
+ "ic-asset-certification",
+ "ic-cdk",
+ "ic-http-certification",
+ "include_dir",
+ "mime_guess",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
 name = "my-canister-frontend"
 version = "0.1.3"
 dependencies = [
@@ -1200,7 +1216,7 @@ dependencies = [
  "ic-cdk",
  "ic-http-certification",
  "include_dir",
- "my-canister-dashboard 0.7.0",
+ "my-canister-dashboard 0.7.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "my-canister-frontend 0.1.3 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
