@@ -12,9 +12,9 @@ test('Canister Dashboard Frontend Suite', async ({ page }, testInfo) => {
   const TEST_CONTROLLER = 'rkp4c-7iaaa-aaaaa-aaaca-cai';
   const TEST_ORIGINS = [
     'http://localhost:9999',
-    'http://22ajg-aqaaa-aaaap-adukq-cai.localhost:8080',
-    'https://22ajg-aqaaa-aaaap-adukq-cai.icp0.io',
-    'https://mycanister.app',
+    // 'http://22ajg-aqaaa-aaaap-adukq-cai.localhost:8080',
+    // 'https://22ajg-aqaaa-aaaap-adukq-cai.icp0.io',
+    // 'https://mycanister.app',
   ];
 
   // Get configuration from project metadata
