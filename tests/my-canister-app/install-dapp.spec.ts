@@ -7,7 +7,7 @@ loadDfxEnv();
 
 test('My Canister App E2E Suite', async ({ page }) => {
     test.setTimeout(60000); // 1 minute timeout
-    const TRANSFER_AMOUNT = '0.2';
+    const TRANSFER_AMOUNT = '0.25';
 
     const appUrl = myCanisterAppDfxUrl();
     await page.goto(appUrl);
