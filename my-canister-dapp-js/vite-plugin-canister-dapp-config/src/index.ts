@@ -1,41 +1,43 @@
 import type { Plugin, ViteDevServer } from 'vite';
 
-export interface DappConfig {
+export interface CanisterDappConfig {
   identityProvider: string;
   dfxHost: string;
   canisterIdDev?: string;
 }
 
-export interface DappConfigPluginConfig {
-  prod: DappConfig;
-  dev: DappConfig;
+export interface CanisterDappConfigPluginConfig {
+  prod: CanisterDappConfig;
+  dev: CanisterDappConfig;
 }
 
 /**
- * Vite plugin that provides dapp configuration in two ways:
- * 1. Virtual module 'virtual:dapp-config' for build-time config resolution
- * 2. Static asset 'dapp-config.json' for runtime environment detection by dashboard
+ * Vite plugin that provides canister dapp configuration in two ways:
+ * 1. Virtual module 'virtual:canister-dapp-config' for build-time config resolution
+ * 2. Static asset 'canister-dapp-config.json' for runtime environment detection by dashboard
  */
-export function dappConfigPlugin(config: DappConfigPluginConfig): Plugin {
+export function canisterDappConfigPlugin(
+  config: CanisterDappConfigPluginConfig
+): Plugin {
   const { prod, dev } = config;
   let currentMode = 'production';
 
   return {
-    name: 'dapp-config',
+    name: 'canister-dapp-config',
 
     configResolved(resolvedConfig) {
       currentMode = resolvedConfig.mode;
     },
 
     resolveId(id: string) {
-      if (id === 'virtual:dapp-config') {
+      if (id === 'virtual:canister-dapp-config') {
         return id;
       }
       return null;
     },
 
     load(id: string) {
-      if (id === 'virtual:dapp-config') {
+      if (id === 'virtual:canister-dapp-config') {
         const isDev =
           currentMode === 'development' || currentMode === 'dfx_replica';
         const configValues = isDev ? dev : prod;
@@ -47,8 +49,8 @@ export const isDevMode = ${isDev};`;
     },
 
     configureServer(server: ViteDevServer) {
-      // Serve dapp-config.json in dev server
-      server.middlewares.use('/dapp-config.json', (req, res, next) => {
+      // Serve canister-dapp-config.json in dev server
+      server.middlewares.use('/canister-dapp-config.json', (req, res, next) => {
         if (req.method === 'GET') {
           res.setHeader('Content-Type', 'application/json');
           res.setHeader('Cache-Control', 'no-cache');
@@ -60,7 +62,7 @@ export const isDevMode = ${isDev};`;
     },
 
     generateBundle() {
-      // Only generate dapp-config.json for development and dfx_replica builds
+      // Only generate canister-dapp-config.json for development and dfx_replica builds
       // This allows dashboard to detect dev environment at runtime
       const isDev =
         currentMode === 'development' || currentMode === 'dfx_replica';
@@ -68,7 +70,7 @@ export const isDevMode = ${isDev};`;
       if (isDev) {
         this.emitFile({
           type: 'asset',
-          fileName: 'dapp-config.json',
+          fileName: 'canister-dapp-config.json',
           source: JSON.stringify(dev, null, 2),
         });
       }
@@ -76,4 +78,4 @@ export const isDevMode = ${isDev};`;
   };
 }
 
-export default dappConfigPlugin;
+export default canisterDappConfigPlugin;

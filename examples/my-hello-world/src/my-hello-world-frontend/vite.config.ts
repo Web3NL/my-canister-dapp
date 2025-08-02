@@ -1,6 +1,6 @@
 import { defineConfig } from 'vite';
 import { fileURLToPath, URL } from 'url';
-import { dappConfigPlugin } from '@web3nl/vite-plugin-dapp-config';
+import { canisterDappConfigPlugin } from '@web3nl/vite-plugin-canister-dapp-config';
 
 export default defineConfig(({ mode }) => {
 
@@ -34,7 +34,7 @@ export default defineConfig(({ mode }) => {
       },
     },
     plugins: [
-      dappConfigPlugin({
+      canisterDappConfigPlugin({
         prod: {
           identityProvider: 'https://identity.internetcomputer.org',
           dfxHost: 'https://icp-api.io'

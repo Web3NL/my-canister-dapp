@@ -1,5 +1,5 @@
 {
-  "name": "@web3nl/vite-plugin-dapp-config",
+  "name": "@web3nl/vite-plugin-canister-dapp-config",
   "version": "0.1.0",
   "description": "Vite plugin for Canister Dapp configuration",
   "type": "module",

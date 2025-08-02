@@ -1,7 +1,9 @@
-import config, { isDevMode as pluginIsDevMode } from 'virtual:dapp-config';
-import type { DappConfig } from '@web3nl/vite-plugin-dapp-config';
+import config, {
+  isDevMode as pluginIsDevMode,
+} from 'virtual:canister-dapp-config';
+import type { CanisterDappConfig } from '@web3nl/vite-plugin-canister-dapp-config';
 
-export async function getConfig(): Promise<DappConfig> {
+export async function getConfig(): Promise<CanisterDappConfig> {
   return config;
 }
 

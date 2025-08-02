@@ -1,7 +1,7 @@
 import { defineConfig } from 'vite';
 import path from 'path';
 import { fileURLToPath } from 'url';
-import { dappConfigPlugin } from '@web3nl/vite-plugin-dapp-config';
+import { canisterDappConfigPlugin } from '@web3nl/vite-plugin-canister-dapp-config';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
@@ -13,7 +13,7 @@ export default defineConfig(({ mode }) => {
     envDir: __dirname,
     publicDir: false,
     plugins: [
-      dappConfigPlugin({
+      canisterDappConfigPlugin({
         prod: {
           identityProvider: 'https://identity.internetcomputer.org',
           dfxHost: 'https://icp-api.io'
