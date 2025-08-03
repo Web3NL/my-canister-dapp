@@ -49,11 +49,10 @@ export default defineConfig({
       testMatch: /.*derive-ii-principal.*\.spec\.ts/,
     },
   ],
-  webServer:
-  {
+  webServer: process.env.DASHBOARD_VITE_SERVER ? {
     command: 'npm run dev:dashboard',
     url: 'http://localhost:5173',
     reuseExistingServer: true,
     timeout: 5000,
-  }
+  } : undefined
 });
