@@ -38,6 +38,7 @@
     "format": "prettier --check src",
     "format:fix": "prettier --write src",
     "typecheck": "tsc --noEmit",
+    "test": "vitest --run",
     "docs:build": "typedoc",
     "docs:clean": "rm -rf docs"
   },

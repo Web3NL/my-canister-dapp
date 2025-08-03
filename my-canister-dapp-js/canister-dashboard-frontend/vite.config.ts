@@ -55,10 +55,6 @@ export default defineConfig(() => {
       },
 
     },
-    test: {
-      include: ['../test/**/*.{test,spec}.{js,ts}'],
-      environment: 'jsdom',
-    },
     server: {
       port: 5173,
       proxy: {
