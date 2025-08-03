@@ -1,6 +1,6 @@
 import { defineConfig } from 'vite';
 import { fileURLToPath, URL } from 'url';
-import { canisterDappConfigPlugin } from '@web3nl/vite-plugin-canister-dapp-config';
+import { canisterDappConfigPlugin } from '@web3nl/vite-plugin-canister-dapp';
 
 export default defineConfig(() => {
 
