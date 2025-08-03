@@ -114,3 +114,11 @@ export function getDfxEnv(key: string): string {
 
   return value;
 }
+
+export function installedCanisterDashboardUrl(): string {
+  // Get canister ID from test output and hostname from global env
+  const canisterId = readTestData('installed-canister-id');
+  const hostname = getDfxEnv('VITE_HOSTNAME');
+
+  return `http://${canisterId}.${hostname}/canister-dashboard`;
+}

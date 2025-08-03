@@ -1,30 +1,39 @@
-import config, { isDevMode as pluginIsDevMode } from 'virtual:dapp-config';
-import type { DappConfig } from '@web3nl/vite-plugin-dapp-config';
+interface CanisterDappConfig {
+  identityProvider: string;
+  dfxHost: string;
+  canisterIdDev?: string;
+}
 
-let configCache: DappConfig | null = null;
+// Hardcoded production configuration
+const PRODUCTION_CONFIG: CanisterDappConfig = {
+  identityProvider: 'https://identity.internetcomputer.org',
+  dfxHost: 'https://icp-api.io',
+};
+
+let configCache: CanisterDappConfig | null = null;
 let devModeCache: boolean | null = null;
 
-export async function getConfig(): Promise<DappConfig> {
+export async function getConfig(): Promise<CanisterDappConfig> {
   if (configCache) {
     return configCache;
   }
 
-  // Try to fetch dapp-config.json for runtime dev detection
+  // Try to fetch canister-dapp-config.json for runtime dev detection
   try {
-    const response = await fetch('/dapp-config.json');
+    const response = await fetch('/canister-dashboard-dev-env.json');
     if (response.ok) {
-      const devConfig = (await response.json()) as DappConfig;
+      const devConfig = (await response.json()) as CanisterDappConfig;
       configCache = devConfig;
       devModeCache = true;
       return devConfig;
     }
   } catch {
-    // If fetch fails, use build-time config
+    // If fetch fails, use production config
   }
 
-  // Fallback to build-time resolved config
-  configCache = config;
-  devModeCache = Boolean(pluginIsDevMode);
+  // Fallback to hardcoded production config
+  configCache = PRODUCTION_CONFIG;
+  devModeCache = false;
   return configCache;
 }
 
@@ -33,6 +42,6 @@ export function isDevMode(): boolean {
     return devModeCache;
   }
 
-  // Fallback to build-time dev mode detection
-  return Boolean(pluginIsDevMode);
+  // Fallback to false (production mode)
+  return false;
 }

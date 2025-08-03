@@ -14,13 +14,12 @@
     "lint:fix": "eslint src --fix",
     "format": "prettier --check src",
     "format:fix": "prettier --write src",
-    "typecheck": "tsc --noEmit",
-    "test": "vitest --run"
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
     "@web3nl/my-canister-dashboard": "0.5.3"
   },
   "devDependencies": {
-    "@web3nl/vite-plugin-dapp-config": "file:../vite-plugin-dapp-config"
+    "@web3nl/vite-plugin-canister-dapp-config": "file:../vite-plugin-canister-dapp-config"
   }
 }

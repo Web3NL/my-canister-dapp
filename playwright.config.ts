@@ -1,5 +1,6 @@
 import { defineConfig, devices } from '@playwright/test';
 import dotenv from 'dotenv';
+import { installedCanisterDashboardUrl } from './tests/helpers';
 
 // Load dfx environment variables from .env.development
 dotenv.config({ path: '.env.development' });
@@ -23,7 +24,7 @@ export default defineConfig({
       name: 'canister-dashboard-frontend-dfx',
       testMatch: /.*canister-dashboard-frontend.*\.spec\.ts/,
       metadata: {
-        testUrl: 'http://22ajg-aqaaa-aaaap-adukq-cai.localhost:8080/canister-dashboard',
+        testUrl: installedCanisterDashboardUrl(),
         principalFile: 'derived-ii-principal-dfx.txt'
       }
     },
@@ -48,11 +49,10 @@ export default defineConfig({
       testMatch: /.*derive-ii-principal.*\.spec\.ts/,
     },
   ],
-  webServer:
-  {
+  webServer: process.env.DASHBOARD_VITE_SERVER ? {
     command: 'npm run dev:dashboard',
     url: 'http://localhost:5173',
     reuseExistingServer: true,
     timeout: 5000,
-  }
+  } : undefined
 });

@@ -2,8 +2,8 @@
 
 set -e
 
-echo "Unit testing canister dashboard frontend"
-npm run test --workspace=canister-dashboard-frontend
+echo "Unit testing my-canister-dashboard"
+npm run test --workspace=@web3nl/my-canister-dashboard
 
 echo "🧪 Running Canister Dapp Test"
 ./scripts/build-examples.sh

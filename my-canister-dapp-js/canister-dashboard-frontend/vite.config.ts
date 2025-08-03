@@ -1,29 +1,33 @@
 import { defineConfig } from 'vite';
 import path from 'path';
-import { fileURLToPath } from 'url';
-import { dappConfigPlugin } from '@web3nl/vite-plugin-dapp-config';
 
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
-
-export default defineConfig(({ mode }) => {
+export default defineConfig(() => {
+  // Hardcoded dev environment configuration
+  const devConfig = {
+    identityProvider: "http://qhbym-qaaaa-aaaaa-aaafq-cai.localhost:8080",
+    dfxHost: "http://localhost:8080",
+    canisterIdDev: "22ajg-aqaaa-aaaap-adukq-cai"
+  };
 
   return {
     root: 'src',
     base: '/canister-dashboard',
-    envDir: __dirname,
-    publicDir: false,
+    publicDir: false as const,
     plugins: [
-      dappConfigPlugin({
-        prod: {
-          identityProvider: 'https://identity.internetcomputer.org',
-          dfxHost: 'https://icp-api.io'
-        },
-        dev: {
-          identityProvider: 'http://qhbym-qaaaa-aaaaa-aaafq-cai.localhost:8080',
-          dfxHost: 'http://localhost:8080',
-          canisterIdDev: '22ajg-aqaaa-aaaap-adukq-cai'
+      {
+        name: 'serve-config',
+        configureServer(server) {
+          server.middlewares.use('/canister-dashboard-dev-env.json', (req, res, next) => {
+            if (req.method === 'GET') {
+              res.setHeader('Content-Type', 'application/json');
+              res.setHeader('Cache-Control', 'no-cache');
+              res.end(JSON.stringify(devConfig, null, 2));
+            } else {
+              next();
+            }
+          });
         }
-      })
+      }
     ],
     build: {
       outDir: path.resolve(__dirname, 'dist'),
@@ -48,10 +52,6 @@ export default defineConfig(({ mode }) => {
         $declarations: path.resolve(__dirname, '../../declarations'),
       },
 
-    },
-    test: {
-      include: ['../test/**/*.{test,spec}.{js,ts}'],
-      environment: 'jsdom',
     },
     server: {
       port: 5173,

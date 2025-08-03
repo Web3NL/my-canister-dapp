@@ -1,5 +1,5 @@
 import { test } from '@playwright/test';
-import { myCanisterAppDfxUrl, loadDfxEnv, readTestData, transferToPrincipal } from '../helpers';
+import { myCanisterAppDfxUrl, loadDfxEnv, readTestData, transferToPrincipal, saveTestData } from '../helpers';
 import { Principal } from '@dfinity/principal';
 
 // Load global dfx environment variables
@@ -63,4 +63,25 @@ test('My Canister App E2E Suite', async ({ page }) => {
     await page.getByRole('menuitem', { name: 'My Dapps' }).click();
 
     await page.locator('article[data-tid="card"]').filter({ hasText: 'My Hello World' }).first().waitFor({ state: 'visible' });
+
+    // Extract canister ID from the card
+    const cardElement = page.locator('article[data-tid="card"]').filter({ hasText: 'My Hello World' }).first();
+    const dappFrontpageLink = cardElement.locator('a').filter({ hasText: 'Dapp frontpage' });
+    const href = await dappFrontpageLink.getAttribute('href');
+    
+    // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
+    if (!href) {
+        throw new Error('Dapp frontpage href not found');
+    }
+    
+    // Extract canister ID from URL like: http://u6s2n-gx777-77774-qaaba-cai.localhost:8080
+    const url = new URL(href);
+    const canisterId = url.hostname.split('.')[0];
+    
+    // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
+    if (!canisterId) {
+        throw new Error(`Could not extract canister ID from URL: ${href}`);
+    }
+    
+    saveTestData('installed-canister-id', canisterId);
 });

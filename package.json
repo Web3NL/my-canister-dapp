@@ -4,7 +4,7 @@
     "node": ">=18.0.0"
   },
   "workspaces": [
-    "my-canister-dapp-js/vite-plugin-dapp-config",
+    "my-canister-dapp-js/vite-plugin-canister-dapp-config",
     "my-canister-dapp-js/my-canister-dashboard-js",
     "my-canister-dapp-js/canister-dashboard-frontend",
     "my-canister-app",

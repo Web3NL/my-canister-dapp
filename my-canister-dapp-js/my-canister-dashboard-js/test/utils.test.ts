@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
-import { inferCanisterIdFromLocation } from '@web3nl/my-canister-dashboard';
+import { inferCanisterIdFromLocation } from '../src/index.js';
 import { Principal } from '@dfinity/principal';
 
 describe('inferCanisterIdFromLocation', () => {
