@@ -51,26 +51,29 @@ export const isDevMode = ${isDev};`;
 
     configureServer(server: ViteDevServer) {
       // Serve canister-dapp-config.json in dev server
-      server.middlewares.use('/canister-dapp-config.json', (req, res, next) => {
-        if (req.method === 'GET') {
-          res.setHeader('Content-Type', 'application/json');
-          res.setHeader('Cache-Control', 'no-cache');
-          res.end(JSON.stringify(dev, null, 2));
-        } else {
-          next();
+      server.middlewares.use(
+        '/canister-dapp-dev-config.json',
+        (req, res, next) => {
+          if (req.method === 'GET') {
+            res.setHeader('Content-Type', 'application/json');
+            res.setHeader('Cache-Control', 'no-cache');
+            res.end(JSON.stringify(dev, null, 2));
+          } else {
+            next();
+          }
         }
-      });
+      );
     },
 
     generateBundle() {
-      // Always generate canister-dapp-config.json for development builds
+      // Always generate canister-dapp-dev-config.json for development builds
       // This allows dashboard to detect dev environment at runtime
       const isDev = currentMode === 'development';
 
       if (isDev) {
         this.emitFile({
           type: 'asset',
-          fileName: 'canister-dapp-config.json',
+          fileName: 'canister-dapp-dev-config.json',
           source: JSON.stringify(dev, null, 2),
         });
       }

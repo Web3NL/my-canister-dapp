@@ -1,23 +1,35 @@
 import { defineConfig } from 'vite';
 import path from 'path';
-import { fileURLToPath } from 'url';
-import { canisterDappConfigPlugin } from '@web3nl/vite-plugin-canister-dapp-config';
-
-const __dirname = path.dirname(fileURLToPath(import.meta.url));
+import fs from 'fs';
 
 export default defineConfig(() => {
 
   return {
     root: 'src',
     base: '/canister-dashboard',
-    envDir: __dirname,
-    publicDir: false,
+    publicDir: false as const,
     plugins: [
-      canisterDappConfigPlugin({
-        identityProvider: 'http://qhbym-qaaaa-aaaaa-aaafq-cai.localhost:8080',
-        dfxHost: 'http://localhost:8080',
-        canisterIdDev: '22ajg-aqaaa-aaaap-adukq-cai'
-      })
+      {
+        name: 'serve-config',
+        configureServer(server) {
+          server.middlewares.use('/canister-dapp-dev-config.json', (req, res, next) => {
+            if (req.method === 'GET') {
+              try {
+                const configPath = path.resolve(__dirname, 'dev-config/canister-dapp-dev-config.json');
+                const configContent = fs.readFileSync(configPath, 'utf8');
+                res.setHeader('Content-Type', 'application/json');
+                res.setHeader('Cache-Control', 'no-cache');
+                res.end(configContent);
+              } catch (error) {
+                res.statusCode = 404;
+                res.end('Config file not found');
+              }
+            } else {
+              next();
+            }
+          });
+        }
+      }
     ],
     build: {
       outDir: path.resolve(__dirname, 'dist'),

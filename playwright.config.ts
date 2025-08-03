@@ -1,5 +1,6 @@
 import { defineConfig, devices } from '@playwright/test';
 import dotenv from 'dotenv';
+import { installedCanisterDashboardUrl } from './tests/helpers';
 
 // Load dfx environment variables from .env.development
 dotenv.config({ path: '.env.development' });
@@ -8,7 +9,7 @@ export default defineConfig({
   testDir: './tests',
   use: {
     ...devices['Desktop Chrome'],
-    // headless: false
+    headless: false
   },
   projects: [
     {
@@ -23,7 +24,7 @@ export default defineConfig({
       name: 'canister-dashboard-frontend-dfx',
       testMatch: /.*canister-dashboard-frontend.*\.spec\.ts/,
       metadata: {
-        testUrl: 'http://22ajg-aqaaa-aaaap-adukq-cai.localhost:8080/canister-dashboard',
+        testUrl: installedCanisterDashboardUrl(),
         principalFile: 'derived-ii-principal-dfx.txt'
       }
     },
