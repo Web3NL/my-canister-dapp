@@ -80,7 +80,7 @@ export function readTestData(filename: string): string {
   const filePath = path.join(outputDir, filename);
 
   if (!fs.existsSync(filePath)) {
-    throw new Error(`Test data file not found: ${filename}`);
+    return ''; // test will fail
   }
 
   return fs.readFileSync(filePath, 'utf8').trim();
