@@ -1,8 +1,13 @@
 import { defineConfig } from 'vite';
 import path from 'path';
-import fs from 'fs';
 
 export default defineConfig(() => {
+  // Hardcoded dev environment configuration
+  const devConfig = {
+    identityProvider: "http://qhbym-qaaaa-aaaaa-aaafq-cai.localhost:8080",
+    dfxHost: "http://localhost:8080",
+    canisterIdDev: "22ajg-aqaaa-aaaap-adukq-cai"
+  };
 
   return {
     root: 'src',
@@ -12,18 +17,11 @@ export default defineConfig(() => {
       {
         name: 'serve-config',
         configureServer(server) {
-          server.middlewares.use('/canister-dapp-dev-config.json', (req, res, next) => {
+          server.middlewares.use('/canister-dashboard-dev-env.json', (req, res, next) => {
             if (req.method === 'GET') {
-              try {
-                const configPath = path.resolve(__dirname, 'dev-config/canister-dapp-dev-config.json');
-                const configContent = fs.readFileSync(configPath, 'utf8');
-                res.setHeader('Content-Type', 'application/json');
-                res.setHeader('Cache-Control', 'no-cache');
-                res.end(configContent);
-              } catch (error) {
-                res.statusCode = 404;
-                res.end('Config file not found');
-              }
+              res.setHeader('Content-Type', 'application/json');
+              res.setHeader('Cache-Control', 'no-cache');
+              res.end(JSON.stringify(devConfig, null, 2));
             } else {
               next();
             }
