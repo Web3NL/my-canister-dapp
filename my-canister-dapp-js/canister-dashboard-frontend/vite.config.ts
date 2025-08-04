@@ -6,7 +6,7 @@ export default defineConfig(() => {
   const devConfig = {
     identityProvider: "http://qhbym-qaaaa-aaaaa-aaafq-cai.localhost:8080",
     dfxHost: "http://localhost:8080",
-    canisterIdDev: "22ajg-aqaaa-aaaap-adukq-cai"
+    canisterId: "22ajg-aqaaa-aaaap-adukq-cai"
   };
 
   return {
@@ -17,7 +17,7 @@ export default defineConfig(() => {
       {
         name: 'serve-config',
         configureServer(server) {
-          server.middlewares.use('/canister-dashboard-dev-env.json', (req, res, next) => {
+          server.middlewares.use('/canister-dashboard-config.json', (req, res, next) => {
             if (req.method === 'GET') {
               res.setHeader('Content-Type', 'application/json');
               res.setHeader('Cache-Control', 'no-cache');

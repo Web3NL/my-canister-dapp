@@ -1,63 +1,100 @@
+import type { Principal } from '@dfinity/principal';
 import type { Plugin, ViteDevServer } from 'vite';
+import { config } from 'dotenv';
+import { join } from 'path';
+import { existsSync } from 'fs';
 
-export interface CanisterDappConfig {
-  identityProvider: string;
+export interface CanisterDashboardDevConfig {
+  canisterId: Principal | unknown;
   dfxHost: string;
-  canisterIdDev?: string;
+  identityProvider: string;
 }
 
-const DEFAULT_PROD_CONFIG: CanisterDappConfig = {
-  identityProvider: 'https://identity.internetcomputer.org',
-  dfxHost: 'https://icp-api.io',
-};
+function loadEnvConfig(): CanisterDashboardDevConfig {
+  // Check if .env.development exists in the consuming project root
+  const envPath = join(process.cwd(), '.env.development');
+
+  if (!existsSync(envPath)) {
+    throw new Error('.env.development file not found in project root');
+  }
+
+  config({ path: envPath });
+
+  const canisterId = process.env.CANISTER_ID;
+  const iiCanisterId = process.env.II_CANISTER_ID;
+  const dfxProtocol = process.env.DFX_PROTOCOL;
+  const dfxHostname = process.env.DFX_HOSTNAME;
+  const dfxPort = process.env.DFX_PORT;
+
+  if (canisterId == null || iiCanisterId == null) {
+    throw new Error(
+      'CANISTER_ID and II_CANISTER_ID must be set in .env.development'
+    );
+  }
+
+  const identityProvider = `${dfxProtocol}://${iiCanisterId}.${dfxHostname}:${dfxPort}`;
+  const dfxHost = `${dfxProtocol}://${dfxHostname}:${dfxPort}`;
+
+  return {
+    canisterId,
+    dfxHost,
+    identityProvider,
+  };
+}
 
 /**
- * Vite plugin that provides canister dapp configuration in two ways:
- * 1. Virtual module 'virtual:canister-dapp-config' for build-time config resolution
- * 2. Static asset 'canister-dapp-config.json' for runtime environment detection by dashboard
+ * Vite plugin that provides canister dashboard configuration as a static asset
+ * for runtime environment detection by the dashboard
  */
-export function canisterDappConfigPlugin(
-  devConfig: CanisterDappConfig,
-  prodConfig?: Partial<CanisterDappConfig>
-): Plugin {
-  const prod = { ...DEFAULT_PROD_CONFIG, ...prodConfig };
-  const dev = devConfig;
+export function canisterDapp(): Plugin {
+  let dashboardConfig: CanisterDashboardDevConfig;
   let currentMode = 'production';
 
   return {
-    name: 'canister-dapp-config',
+    name: 'canister-dashboard',
+
+    config(config) {
+      // Load environment config early
+      dashboardConfig = loadEnvConfig();
+
+      const proxyTarget = dashboardConfig.dfxHost;
+      const canisterId = dashboardConfig.canisterId;
+
+      // Add proxy configuration to Vite config
+      config.server ??= {};
+      config.server.proxy ??= {};
+
+      Object.assign(config.server.proxy, {
+        '/api': {
+          target: proxyTarget,
+          changeOrigin: true,
+        },
+        '/canister-dashboard': {
+          target: proxyTarget,
+          changeOrigin: true,
+          rewrite: (path: string) => `${path}?canisterId=${String(canisterId)}`,
+        },
+        '/.well-known/ii-alternative-origins': {
+          target: proxyTarget,
+          changeOrigin: true,
+          rewrite: (path: string) => `${path}?canisterId=${String(canisterId)}`,
+        },
+      });
+    },
 
     configResolved(resolvedConfig) {
       currentMode = resolvedConfig.mode;
     },
 
-    resolveId(id: string) {
-      if (id === 'virtual:canister-dapp-config') {
-        return id;
-      }
-      return null;
-    },
-
-    load(id: string) {
-      if (id === 'virtual:canister-dapp-config') {
-        const isDev = currentMode === 'development';
-        const configValues = isDev ? dev : prod;
-
-        return `export default ${JSON.stringify(configValues, null, 2)};
-export const isDevMode = ${isDev};`;
-      }
-      return null;
-    },
-
     configureServer(server: ViteDevServer) {
-      // Serve canister-dapp-config.json in dev server
+      // Serve canister-dashboard-config.json in dev server
       server.middlewares.use(
-        '/canister-dashboard-dev-env.json',
+        '/canister-dashboard-config.json',
         (req, res, next) => {
           if (req.method === 'GET') {
             res.setHeader('Content-Type', 'application/json');
             res.setHeader('Cache-Control', 'no-cache');
-            res.end(JSON.stringify(dev, null, 2));
+            res.end(JSON.stringify(dashboardConfig, null, 2));
           } else {
             next();
           }
@@ -66,19 +103,19 @@ export const isDevMode = ${isDev};`;
     },
 
     generateBundle() {
-      // Always generate canister-dashboard-dev-env.json for development builds
+      // Generate canister-dashboard-config.json for development builds
       // This allows dashboard to detect dev environment at runtime
       const isDev = currentMode === 'development';
 
       if (isDev) {
         this.emitFile({
           type: 'asset',
-          fileName: 'canister-dashboard-dev-env.json',
-          source: JSON.stringify(dev, null, 2),
+          fileName: 'canister-dashboard-config.json',
+          source: JSON.stringify(dashboardConfig, null, 2),
         });
       }
     },
   };
 }
 
-export default canisterDappConfigPlugin;
+export default canisterDapp;

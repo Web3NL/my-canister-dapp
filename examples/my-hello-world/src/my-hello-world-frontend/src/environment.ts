@@ -1,12 +1,11 @@
-import config, {
-  isDevMode as pluginIsDevMode,
-} from 'virtual:canister-dapp-config';
-import type { CanisterDappConfig } from '@web3nl/vite-plugin-canister-dapp';
-
-export async function getConfig(): Promise<CanisterDappConfig> {
-  return config;
+export async function getConfig() {
+  return {
+    canisterId: import.meta.env.VITE_CANISTER_ID,
+    identityProvider: import.meta.env.VITE_IDENTITY_PROVIDER,
+    dfxHost: import.meta.env.VITE_DFX_HOST,
+  };
 }
 
 export function isDevMode(): boolean {
-  return pluginIsDevMode;
+  return import.meta.env.DEV;
 }

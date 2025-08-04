@@ -15,8 +15,8 @@ export async function canisterId(): Promise<Principal> {
   } catch {
     // When in dev server inference fails and we use local canister ID
     const config = await getConfig();
-    if (config.canisterIdDev !== undefined) {
-      return Principal.fromText(config.canisterIdDev);
+    if (config.canisterId !== undefined) {
+      return Principal.fromText(config.canisterId as string);
     }
 
     showError(CANISTER_ID_ERROR_MESSAGE);

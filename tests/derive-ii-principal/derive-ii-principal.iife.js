@@ -9681,9 +9681,24 @@
   /*! noble-curves - MIT License (c) 2022 Paul Miller (paulmillr.com) */
   const _0n$3 = /* @__PURE__ */ BigInt(0);
   const _1n$4 = /* @__PURE__ */ BigInt(1);
-  function abool(title, value2) {
-    if (typeof value2 !== "boolean")
-      throw new Error(title + " boolean expected, got " + value2);
+  function _abool2(value2, title = "") {
+    if (typeof value2 !== "boolean") {
+      const prefix = title && `"${title}"`;
+      throw new Error(prefix + "expected boolean, got type=" + typeof value2);
+    }
+    return value2;
+  }
+  function _abytes2(value2, length, title = "") {
+    const bytes = isBytes(value2);
+    const len = value2 == null ? void 0 : value2.length;
+    const needsLen = length !== void 0;
+    if (!bytes || needsLen && len !== length) {
+      const prefix = title && `"${title}" `;
+      const ofLen = needsLen ? ` of length ${length}` : "";
+      const got = bytes ? `length=${len}` : `type=${typeof value2}`;
+      throw new Error(prefix + "expected Uint8Array" + ofLen + ", got " + got);
+    }
+    return value2;
   }
   function hexToNumber(hex) {
     if (typeof hex !== "string")
@@ -9720,6 +9735,9 @@
     if (typeof expectedLength === "number" && len !== expectedLength)
       throw new Error(title + " of length " + expectedLength + " expected, got " + len);
     return res;
+  }
+  function copyBytes(bytes) {
+    return Uint8Array.from(bytes);
   }
   const isPosBig = (n) => typeof n === "bigint" && _0n$3 <= n;
   function inRange(n, min, max) {
@@ -9986,7 +10004,7 @@
       throw new Error("invalid field: expected ORDER > 0, got " + ORDER);
     let _nbitLength = void 0;
     let _sqrt = void 0;
-    let modOnDecode = false;
+    let modFromBytes = false;
     let allowedLengths = void 0;
     if (typeof bitLenOrOpts === "object" && bitLenOrOpts != null) {
       if (opts.sqrt || isLE)
@@ -9998,8 +10016,8 @@
         _sqrt = _opts.sqrt;
       if (typeof _opts.isLE === "boolean")
         isLE = _opts.isLE;
-      if (typeof _opts.modOnDecode === "boolean")
-        modOnDecode = _opts.modOnDecode;
+      if (typeof _opts.modFromBytes === "boolean")
+        modFromBytes = _opts.modFromBytes;
       allowedLengths = _opts.allowedLengths;
     } else {
       if (typeof bitLenOrOpts === "number")
@@ -10062,7 +10080,7 @@
         if (bytes.length !== BYTES)
           throw new Error("Field.fromBytes: expected " + BYTES + " bytes, got " + bytes.length);
         let scalar = isLE ? bytesToNumberLE(bytes) : bytesToNumberBE(bytes);
-        if (modOnDecode)
+        if (modFromBytes)
           scalar = mod(scalar, ORDER);
         if (!skipValidation) {
           if (!f.isValid(scalar))
@@ -10309,17 +10327,19 @@
     }
     return sum;
   }
-  function createField(order, field) {
+  function createField(order, field, isLE) {
     if (field) {
       if (field.ORDER !== order)
         throw new Error("Field.ORDER must match order: Fp == p, Fn == n");
       validateField(field);
       return field;
     } else {
-      return Field(order);
+      return Field(order, { isLE });
     }
   }
-  function _createCurveFields(type, CURVE, curveOpts = {}) {
+  function _createCurveFields(type, CURVE, curveOpts = {}, FpFnLE) {
+    if (FpFnLE === void 0)
+      FpFnLE = type === "edwards";
     if (!CURVE || typeof CURVE !== "object")
       throw new Error(`expected valid ${type} CURVE object`);
     for (const p of ["p", "n", "h"]) {
@@ -10327,15 +10347,16 @@
       if (!(typeof val === "bigint" && val > _0n$1))
         throw new Error(`CURVE.${p} must be positive bigint`);
     }
-    const Fp2 = createField(CURVE.p, curveOpts.Fp);
-    const Fn = createField(CURVE.n, curveOpts.Fn);
+    const Fp2 = createField(CURVE.p, curveOpts.Fp, FpFnLE);
+    const Fn = createField(CURVE.n, curveOpts.Fn, FpFnLE);
     const _b = "d";
     const params = ["Gx", "Gy", "a", _b];
     for (const p of params) {
       if (!Fp2.isValid(CURVE[p]))
         throw new Error(`CURVE.${p} must be valid field element of CURVE.Fp`);
     }
-    return { Fp: Fp2, Fn };
+    CURVE = Object.freeze(Object.assign({}, CURVE));
+    return { CURVE, Fp: Fp2, Fn };
   }
   (function(receiver, state, value2, kind, f) {
     if (kind === "m") throw new TypeError("Private method is not writable");
@@ -10377,13 +10398,15 @@
     const right = Fp2.add(Fp2.ONE, Fp2.mul(CURVE.d, Fp2.mul(x2, y2)));
     return Fp2.eql(left, right);
   }
-  function edwards(CURVE, curveOpts = {}) {
-    const { Fp: Fp2, Fn } = _createCurveFields("edwards", CURVE, curveOpts);
-    const { h: cofactor, n: CURVE_ORDER } = CURVE;
-    _validateObject(curveOpts, {}, { uvRatio: "function" });
+  function edwards(params, extraOpts = {}) {
+    const validated = _createCurveFields("edwards", params, extraOpts, extraOpts.FpFnLE);
+    const { Fp: Fp2, Fn } = validated;
+    let CURVE = validated.CURVE;
+    const { h: cofactor } = CURVE;
+    _validateObject(extraOpts, {}, { uvRatio: "function" });
     const MASK = _2n$1 << BigInt(Fn.BYTES * 8) - _1n$1;
     const modP = (n) => Fp2.create(n);
-    const uvRatio2 = curveOpts.uvRatio || ((u, v) => {
+    const uvRatio2 = extraOpts.uvRatio || ((u, v) => {
       try {
         return { isValid: true, value: Fp2.sqrt(Fp2.div(u, v)) };
       } catch (e) {
@@ -10443,33 +10466,8 @@
         this.T = acoord("t", T);
         Object.freeze(this);
       }
-      get x() {
-        return this.toAffine().x;
-      }
-      get y() {
-        return this.toAffine().y;
-      }
-      // TODO: remove
-      get ex() {
-        return this.X;
-      }
-      get ey() {
-        return this.Y;
-      }
-      get ez() {
-        return this.Z;
-      }
-      get et() {
-        return this.T;
-      }
-      static normalizeZ(points) {
-        return normalizeZ(Point, points);
-      }
-      static msm(points, scalars) {
-        return pippenger(Point, Fn, points, scalars);
-      }
-      _setWindowSize(windowSize) {
-        this.precompute(windowSize);
+      static CURVE() {
+        return CURVE;
       }
       static fromAffine(p) {
         if (p instanceof Point)
@@ -10478,6 +10476,41 @@
         acoord("x", x);
         acoord("y", y);
         return new Point(x, y, _1n$1, modP(x * y));
+      }
+      // Uses algo from RFC8032 5.1.3.
+      static fromBytes(bytes, zip215 = false) {
+        const len = Fp2.BYTES;
+        const { a, d } = CURVE;
+        bytes = copyBytes(_abytes2(bytes, len, "point"));
+        _abool2(zip215, "zip215");
+        const normed = copyBytes(bytes);
+        const lastByte = bytes[len - 1];
+        normed[len - 1] = lastByte & -129;
+        const y = bytesToNumberLE(normed);
+        const max = zip215 ? MASK : Fp2.ORDER;
+        aInRange("point.y", y, _0n, max);
+        const y2 = modP(y * y);
+        const u = modP(y2 - _1n$1);
+        const v = modP(d * y2 - a);
+        let { isValid, value: x } = uvRatio2(u, v);
+        if (!isValid)
+          throw new Error("bad point: invalid y coordinate");
+        const isXOdd = (x & _1n$1) === _1n$1;
+        const isLastByteOdd = (lastByte & 128) !== 0;
+        if (!zip215 && x === _0n && isLastByteOdd)
+          throw new Error("bad point: x=0 and x_0=1");
+        if (isLastByteOdd !== isXOdd)
+          x = modP(-x);
+        return Point.fromAffine({ x, y });
+      }
+      static fromHex(bytes, zip215 = false) {
+        return Point.fromBytes(ensureBytes("point", bytes), zip215);
+      }
+      get x() {
+        return this.toAffine().x;
+      }
+      get y() {
+        return this.toAffine().y;
       }
       precompute(windowSize = 8, isLazy = true) {
         wnaf.createCache(this, windowSize);
@@ -10554,9 +10587,9 @@
       }
       // Constant-time multiplication.
       multiply(scalar) {
-        const n = scalar;
-        aInRange("scalar", n, _1n$1, CURVE_ORDER);
-        const { p, f } = wnaf.cached(this, n, (p2) => normalizeZ(Point, p2));
+        if (!Fn.isValidNot0(scalar))
+          throw new Error("invalid scalar: expected 1 <= sc < curve.n");
+        const { p, f } = wnaf.cached(this, scalar, (p2) => normalizeZ(Point, p2));
         return normalizeZ(Point, [p, f])[0];
       }
       // Non-constant-time multiplication. Uses double-and-add algorithm.
@@ -10565,13 +10598,13 @@
       // Does NOT allow scalars higher than CURVE.n.
       // Accepts optional accumulator to merge with multiply (important for sparse scalars)
       multiplyUnsafe(scalar, acc = Point.ZERO) {
-        const n = scalar;
-        aInRange("scalar", n, _0n, CURVE_ORDER);
-        if (n === _0n)
+        if (!Fn.isValid(scalar))
+          throw new Error("invalid scalar: expected 0 <= sc < curve.n");
+        if (scalar === _0n)
           return Point.ZERO;
-        if (this.is0() || n === _1n$1)
+        if (this.is0() || scalar === _1n$1)
           return this;
-        return wnaf.unsafe(this, n, (p) => normalizeZ(Point, p), acc);
+        return wnaf.unsafe(this, scalar, (p) => normalizeZ(Point, p), acc);
       }
       // Checks if point is of small order.
       // If you add something to small order point, you will have "dirty"
@@ -10583,7 +10616,7 @@
       // Multiplies point by curve order and checks if the result is 0.
       // Returns `false` is the point is dirty.
       isTorsionFree() {
-        return wnaf.unsafe(this, CURVE_ORDER).is0();
+        return wnaf.unsafe(this, CURVE.n).is0();
       }
       // Converts Extended point to default (x, y) coordinates.
       // Can accept precomputed Z^-1 - for example, from invertBatch.
@@ -10595,46 +10628,11 @@
           return this;
         return this.multiplyUnsafe(cofactor);
       }
-      static fromBytes(bytes, zip215 = false) {
-        abytes(bytes);
-        return Point.fromHex(bytes, zip215);
-      }
-      // Converts hash string or Uint8Array to Point.
-      // Uses algo from RFC8032 5.1.3.
-      static fromHex(hex, zip215 = false) {
-        const { d, a } = CURVE;
-        const len = Fp2.BYTES;
-        hex = ensureBytes("pointHex", hex, len);
-        abool("zip215", zip215);
-        const normed = hex.slice();
-        const lastByte = hex[len - 1];
-        normed[len - 1] = lastByte & -129;
-        const y = bytesToNumberLE(normed);
-        const max = zip215 ? MASK : Fp2.ORDER;
-        aInRange("pointHex.y", y, _0n, max);
-        const y2 = modP(y * y);
-        const u = modP(y2 - _1n$1);
-        const v = modP(d * y2 - a);
-        let { isValid, value: x } = uvRatio2(u, v);
-        if (!isValid)
-          throw new Error("Point.fromHex: invalid y coordinate");
-        const isXOdd = (x & _1n$1) === _1n$1;
-        const isLastByteOdd = (lastByte & 128) !== 0;
-        if (!zip215 && x === _0n && isLastByteOdd)
-          throw new Error("Point.fromHex: x=0 and x_0=1");
-        if (isLastByteOdd !== isXOdd)
-          x = modP(-x);
-        return Point.fromAffine({ x, y });
-      }
       toBytes() {
         const { x, y } = this.toAffine();
-        const bytes = numberToBytesLE(y, Fp2.BYTES);
+        const bytes = Fp2.toBytes(y);
         bytes[bytes.length - 1] |= x & _1n$1 ? 128 : 0;
         return bytes;
-      }
-      /** @deprecated use `toBytes` */
-      toRawBytes() {
-        return this.toBytes();
       }
       toHex() {
         return bytesToHex(this.toBytes());
@@ -10642,15 +10640,41 @@
       toString() {
         return `<Point ${this.is0() ? "ZERO" : this.toHex()}>`;
       }
+      // TODO: remove
+      get ex() {
+        return this.X;
+      }
+      get ey() {
+        return this.Y;
+      }
+      get ez() {
+        return this.Z;
+      }
+      get et() {
+        return this.T;
+      }
+      static normalizeZ(points) {
+        return normalizeZ(Point, points);
+      }
+      static msm(points, scalars) {
+        return pippenger(Point, Fn, points, scalars);
+      }
+      _setWindowSize(windowSize) {
+        this.precompute(windowSize);
+      }
+      toRawBytes() {
+        return this.toBytes();
+      }
     }
     Point.BASE = new Point(CURVE.Gx, CURVE.Gy, _1n$1, modP(CURVE.Gx * CURVE.Gy));
     Point.ZERO = new Point(_0n, _1n$1, _1n$1, _0n);
     Point.Fp = Fp2;
     Point.Fn = Fn;
-    const wnaf = new wNAF(Point, Fn.BYTES * 8);
+    const wnaf = new wNAF(Point, Fn.BITS);
+    Point.BASE.precompute(8);
     return Point;
   }
-  function eddsa(Point, cHash, eddsaOpts) {
+  function eddsa(Point, cHash, eddsaOpts = {}) {
     if (typeof cHash !== "function")
       throw new Error('"hash" function param is required');
     _validateObject(eddsaOpts, {}, {
@@ -10661,24 +10685,20 @@
       mapToCurve: "function"
     });
     const { prehash } = eddsaOpts;
-    const { BASE: G, Fp: Fp2, Fn } = Point;
-    const CURVE_ORDER = Fn.ORDER;
-    const randomBytes_ = eddsaOpts.randomBytes || randomBytes;
+    const { BASE, Fp: Fp2, Fn } = Point;
+    const randomBytes$1 = eddsaOpts.randomBytes || randomBytes;
     const adjustScalarBytes2 = eddsaOpts.adjustScalarBytes || ((bytes) => bytes);
     const domain = eddsaOpts.domain || ((data, ctx, phflag) => {
-      abool("phflag", phflag);
+      _abool2(phflag, "phflag");
       if (ctx.length || phflag)
         throw new Error("Contexts/pre-hash are not supported");
       return data;
     });
-    function modN(a) {
-      return Fn.create(a);
-    }
     function modN_LE(hash2) {
-      return modN(bytesToNumberLE(hash2));
+      return Fn.create(bytesToNumberLE(hash2));
     }
     function getPrivateScalar(key) {
-      const len = Fp2.BYTES;
+      const len = lengths.secretKey;
       key = ensureBytes("private key", key, len);
       const hashed = ensureBytes("hashed private key", cHash(key), 2 * len);
       const head = adjustScalarBytes2(hashed.slice(0, len));
@@ -10688,7 +10708,7 @@
     }
     function getExtendedPublicKey(secretKey) {
       const { head, prefix, scalar } = getPrivateScalar(secretKey);
-      const point = G.multiply(scalar);
+      const point = BASE.multiply(scalar);
       const pointBytes = point.toBytes();
       return { head, prefix, scalar, point, pointBytes };
     }
@@ -10705,31 +10725,33 @@
         msg = prehash(msg);
       const { prefix, scalar, pointBytes } = getExtendedPublicKey(secretKey);
       const r = hashDomainToScalar(options.context, prefix, msg);
-      const R = G.multiply(r).toBytes();
+      const R = BASE.multiply(r).toBytes();
       const k = hashDomainToScalar(options.context, R, pointBytes, msg);
-      const s = modN(r + k * scalar);
-      aInRange("signature.s", s, _0n, CURVE_ORDER);
-      const L = Fp2.BYTES;
-      const res = concatBytes(R, numberToBytesLE(s, L));
-      return ensureBytes("result", res, L * 2);
+      const s = Fn.create(r + k * scalar);
+      if (!Fn.isValid(s))
+        throw new Error("sign failed: invalid s");
+      const rs = concatBytes(R, Fn.toBytes(s));
+      return _abytes2(rs, lengths.signature, "result");
     }
     const verifyOpts = { zip215: true };
     function verify(sig, msg, publicKey, options = verifyOpts) {
       const { context, zip215 } = options;
-      const len = Fp2.BYTES;
-      sig = ensureBytes("signature", sig, 2 * len);
+      const len = lengths.signature;
+      sig = ensureBytes("signature", sig, len);
       msg = ensureBytes("message", msg);
-      publicKey = ensureBytes("publicKey", publicKey, len);
+      publicKey = ensureBytes("publicKey", publicKey, lengths.publicKey);
       if (zip215 !== void 0)
-        abool("zip215", zip215);
+        _abool2(zip215, "zip215");
       if (prehash)
         msg = prehash(msg);
-      const s = bytesToNumberLE(sig.slice(len, 2 * len));
+      const mid = len / 2;
+      const r = sig.subarray(0, mid);
+      const s = bytesToNumberLE(sig.subarray(mid, len));
       let A, R, SB;
       try {
-        A = Point.fromHex(publicKey, zip215);
-        R = Point.fromHex(sig.slice(0, len), zip215);
-        SB = G.multiplyUnsafe(s);
+        A = Point.fromBytes(publicKey, zip215);
+        R = Point.fromBytes(r, zip215);
+        SB = BASE.multiplyUnsafe(s);
       } catch (error) {
         return false;
       }
@@ -10739,71 +10761,22 @@
       const RkA = R.add(A.multiplyUnsafe(k));
       return RkA.subtract(SB).clearCofactor().is0();
     }
-    G.precompute(8);
-    const size = Fp2.BYTES;
+    const _size = Fp2.BYTES;
     const lengths = {
-      secret: size,
-      public: size,
-      signature: 2 * size,
-      seed: size
+      secretKey: _size,
+      publicKey: _size,
+      signature: 2 * _size,
+      seed: _size
     };
-    function randomSecretKey(seed = randomBytes_(lengths.seed)) {
-      return seed;
+    function randomSecretKey(seed = randomBytes$1(lengths.seed)) {
+      return _abytes2(seed, lengths.seed, "seed");
     }
-    const utils2 = {
-      getExtendedPublicKey,
-      /** ed25519 priv keys are uniform 32b. No need to check for modulo bias, like in secp256k1. */
-      randomSecretKey,
-      isValidSecretKey,
-      isValidPublicKey,
-      randomPrivateKey: randomSecretKey,
-      /**
-       * Converts ed public key to x public key. Uses formula:
-       * - ed25519:
-       *   - `(u, v) = ((1+y)/(1-y), sqrt(-486664)*u/x)`
-       *   - `(x, y) = (sqrt(-486664)*u/v, (u-1)/(u+1))`
-       * - ed448:
-       *   - `(u, v) = ((y-1)/(y+1), sqrt(156324)*u/x)`
-       *   - `(x, y) = (sqrt(156324)*u/v, (1+u)/(1-u))`
-       *
-       * There is NO `fromMontgomery`:
-       * - There are 2 valid ed25519 points for every x25519, with flipped coordinate
-       * - Sometimes there are 0 valid ed25519 points, because x25519 *additionally*
-       *   accepts inputs on the quadratic twist, which can't be moved to ed25519
-       */
-      toMontgomery(publicKey) {
-        const { y } = Point.fromBytes(publicKey);
-        const is25519 = size === 32;
-        if (!is25519 && size !== 57)
-          throw new Error("only defined for 25519 and 448");
-        const u = is25519 ? Fp2.div(_1n$1 + y, _1n$1 - y) : Fp2.div(y - _1n$1, y + _1n$1);
-        return Fp2.toBytes(u);
-      },
-      toMontgomeryPriv(privateKey) {
-        abytes(privateKey, size);
-        const hashed = cHash(privateKey.subarray(0, size));
-        return adjustScalarBytes2(hashed).subarray(0, size);
-      },
-      /**
-       * We're doing scalar multiplication (used in getPublicKey etc) with precomputed BASE_POINT
-       * values. This slows down first getPublicKey() by milliseconds (see Speed section),
-       * but allows to speed-up subsequent getPublicKey() calls up to 20x.
-       * @param windowSize 2, 4, 8, 16
-       */
-      precompute(windowSize = 8, point = Point.BASE) {
-        return point.precompute(windowSize, false);
-      }
-    };
     function keygen(seed) {
       const secretKey = utils2.randomSecretKey(seed);
       return { secretKey, publicKey: getPublicKey(secretKey) };
     }
     function isValidSecretKey(key) {
-      try {
-        return !!Fn.fromBytes(key, false);
-      } catch (error) {
-        return false;
-      }
+      return isBytes(key) && key.length === Fn.BYTES;
     }
     function isValidPublicKey(key, zip215) {
       try {
@@ -10812,6 +10785,42 @@
         return false;
       }
     }
+    const utils2 = {
+      getExtendedPublicKey,
+      randomSecretKey,
+      isValidSecretKey,
+      isValidPublicKey,
+      /**
+       * Converts ed public key to x public key. Uses formula:
+       * - ed25519:
+       *   - `(u, v) = ((1+y)/(1-y), sqrt(-486664)*u/x)`
+       *   - `(x, y) = (sqrt(-486664)*u/v, (u-1)/(u+1))`
+       * - ed448:
+       *   - `(u, v) = ((y-1)/(y+1), sqrt(156324)*u/x)`
+       *   - `(x, y) = (sqrt(156324)*u/v, (1+u)/(1-u))`
+       */
+      toMontgomery(publicKey) {
+        const { y } = Point.fromBytes(publicKey);
+        const size = lengths.publicKey;
+        const is25519 = size === 32;
+        if (!is25519 && size !== 57)
+          throw new Error("only defined for 25519 and 448");
+        const u = is25519 ? Fp2.div(_1n$1 + y, _1n$1 - y) : Fp2.div(y - _1n$1, y + _1n$1);
+        return Fp2.toBytes(u);
+      },
+      toMontgomeryPriv(secretKey) {
+        const size = lengths.secretKey;
+        _abytes2(secretKey, size);
+        const hashed = cHash(secretKey.subarray(0, size));
+        return adjustScalarBytes2(hashed).subarray(0, size);
+      },
+      /** @deprecated */
+      randomPrivateKey: randomSecretKey,
+      /** @deprecated */
+      precompute(windowSize = 8, point = Point.BASE) {
+        return point.precompute(windowSize, false);
+      }
+    };
     return Object.freeze({
       keygen,
       getPublicKey,
@@ -10819,7 +10828,7 @@
       verify,
       utils: utils2,
       Point,
-      info: { type: "edwards", lengths }
+      lengths
     });
   }
   function _eddsa_legacy_opts_to_new(c) {
@@ -10845,7 +10854,13 @@
     return { CURVE, curveOpts, hash: c.hash, eddsaOpts };
   }
   function _eddsa_new_output_to_legacy(c, eddsa2) {
-    const legacy = Object.assign({}, eddsa2, { ExtendedPoint: eddsa2.Point, CURVE: c });
+    const Point = eddsa2.Point;
+    const legacy = Object.assign({}, eddsa2, {
+      ExtendedPoint: Point,
+      CURVE: c,
+      nBitLength: Point.Fn.BITS,
+      nByteLength: Point.Fn.BYTES
+    });
     return legacy;
   }
   function twistedEdwards(c) {
@@ -10855,22 +10870,22 @@
     return _eddsa_new_output_to_legacy(c, EDDSA);
   }
   /*! noble-curves - MIT License (c) 2022 Paul Miller (paulmillr.com) */
-  BigInt(0);
   const _1n = BigInt(1), _2n = BigInt(2);
   BigInt(3);
   const _5n = BigInt(5), _8n = BigInt(8);
-  const ed25519_CURVE = {
-    p: BigInt("0x7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffed"),
+  const ed25519_CURVE_p = BigInt("0x7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffed");
+  const ed25519_CURVE = /* @__PURE__ */ (() => ({
+    p: ed25519_CURVE_p,
     n: BigInt("0x1000000000000000000000000000000014def9dea2f79cd65812631a5cf5d3ed"),
     h: _8n,
     a: BigInt("0x7fffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffec"),
     d: BigInt("0x52036cee2b6ffe738cc740797779e89800700a4d4141d8ab75eb4dca135978a3"),
     Gx: BigInt("0x216936d3cd6e53fec0a4e231fdd6dc5c692cc7609525a7b2c9562d608f25d51a"),
     Gy: BigInt("0x6666666666666666666666666666666666666666666666666666666666666658")
-  };
+  }))();
   function ed25519_pow_2_252_3(x) {
     const _10n = BigInt(10), _20n = BigInt(20), _40n = BigInt(40), _80n = BigInt(80);
-    const P = ed25519_CURVE.p;
+    const P = ed25519_CURVE_p;
     const x2 = x * x % P;
     const b2 = x2 * x % P;
     const b4 = pow2(b2, _2n, P) * b2 % P;
@@ -10893,7 +10908,7 @@
   }
   const ED25519_SQRT_M1 = /* @__PURE__ */ BigInt("19681161376707505956807079304988542015446066515923890162744021073123829784752");
   function uvRatio(u, v) {
-    const P = ed25519_CURVE.p;
+    const P = ed25519_CURVE_p;
     const v3 = mod(v * v * v, P);
     const v7 = mod(v3 * v3 * v, P);
     const pow = ed25519_pow_2_252_3(u * v7).pow_p_5_8;

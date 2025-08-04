@@ -34,5 +34,8 @@
     "web3"
   ],
   "author": "Samer",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "dotenv": "^16.4.5"
+  }
 }

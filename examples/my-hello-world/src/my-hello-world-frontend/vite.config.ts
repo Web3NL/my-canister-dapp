@@ -1,13 +1,12 @@
 import { defineConfig } from 'vite';
 import { fileURLToPath, URL } from 'url';
-import { canisterDappConfigPlugin } from '@web3nl/vite-plugin-canister-dapp';
+import canisterDapp from '@web3nl/vite-plugin-canister-dapp';
 
 export default defineConfig(() => {
-
   return {
-    build: {
-      emptyOutDir: true,
-    },
+    plugins: [
+      canisterDapp()
+    ],
     optimizeDeps: {
       esbuildOptions: {
         define: {
@@ -15,50 +14,18 @@ export default defineConfig(() => {
         },
       },
     },
-    server: {
-      proxy: {
-        "/api": {
-          target: 'http://localhost:8080',
-          changeOrigin: true,
-        },
-        "/canister-dashboard": {
-          target: 'http://localhost:8080',
-          changeOrigin: true,
-          rewrite: (path) => `${path}?canisterId=22ajg-aqaaa-aaaap-adukq-cai`,
-        },
-        "/.well-known/ii-alternative-origins": {
-          target: 'http://localhost:8080',
-          changeOrigin: true,
-          rewrite: (path) => `${path}?canisterId=22ajg-aqaaa-aaaap-adukq-cai`,
-        },
-      },
+    define: {
+      global: 'globalThis',
     },
-    plugins: [
-      canisterDappConfigPlugin({
-        identityProvider: 'http://qhbym-qaaaa-aaaaa-aaafq-cai.localhost:8080',
-        dfxHost: 'http://localhost:8080',
-        canisterIdDev: '22ajg-aqaaa-aaaap-adukq-cai'
-      })
-    ],
     resolve: {
       alias: [
-        {
-          find: "declarations",
-          replacement: fileURLToPath(
-            new URL("../declarations/", import.meta.url)
-          ),
-        },
         {
           find: "$declarations",
           replacement: fileURLToPath(
             new URL("../declarations/", import.meta.url)
           ),
         },
-      ],
-      dedupe: ['@dfinity/agent'],
-    },
-    define: {
-      global: 'globalThis',
+      ]
     },
   };
 });
