@@ -18,6 +18,6 @@
   "devDependencies": {},
   "dependencies": {
     "@web3nl/my-canister-dashboard": "0.5.2",
-    "@dfinity/gix-components": "6.0.0"
+    "@dfinity/gix-components": "7.0.0"
   }
 }
