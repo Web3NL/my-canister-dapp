@@ -1,6 +1,6 @@
 import { defineConfig } from 'vite';
 import path from 'path';
-import canisterDapp from '@web3nl/vite-plugin-canister-dapp';
+import { canisterDashboardDevConfig } from '@web3nl/vite-plugin-canister-dapp';
 
 export default defineConfig(() => {
   return {
@@ -8,7 +8,7 @@ export default defineConfig(() => {
     base: '/canister-dashboard',
     publicDir: false as const,
     plugins: [
-      canisterDapp()
+      canisterDashboardDevConfig()
     ],
     build: {
       outDir: path.resolve(__dirname, 'dist'),

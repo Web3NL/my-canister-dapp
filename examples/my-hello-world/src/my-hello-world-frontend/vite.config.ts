@@ -1,11 +1,11 @@
 import { defineConfig } from 'vite';
 import { fileURLToPath, URL } from 'url';
-import canisterDapp from '@web3nl/vite-plugin-canister-dapp';
+import { canisterDashboardDevConfig } from '@web3nl/vite-plugin-canister-dapp';
 
 export default defineConfig(() => {
   return {
     plugins: [
-      canisterDapp()
+      canisterDashboardDevConfig()
     ],
     optimizeDeps: {
       esbuildOptions: {

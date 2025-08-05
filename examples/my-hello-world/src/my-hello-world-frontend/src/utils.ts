@@ -9,7 +9,7 @@ export async function getCanisterId(): Promise<Principal> {
     // When in dev server inference fails and we use local canister ID
     const config = await getConfig();
     if (config.canisterId !== undefined) {
-      return Principal.fromText(config.canisterId as string);
+      return Principal.fromText(config.canisterId);
     }
 
     throw new Error(

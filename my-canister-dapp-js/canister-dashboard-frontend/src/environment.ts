@@ -15,9 +15,9 @@ export async function getConfig(): Promise<CanisterDashboardDevConfig> {
     return configCache;
   }
 
-  // Try to fetch canister-dashboard-config.json for runtime dev detection
+  // Try to fetch canister-dashboard-dev-config.json for runtime dev detection
   try {
-    const response = await fetch('/canister-dashboard-config.json');
+    const response = await fetch('/canister-dashboard-dev-config.json');
     if (response.ok) {
       const devConfig = (await response.json()) as CanisterDashboardDevConfig;
       configCache = devConfig;

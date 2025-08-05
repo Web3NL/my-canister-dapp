@@ -18891,11 +18891,11 @@ const PRODUCTION_CONFIG = {
 let configCache = null;
 let devModeCache = null;
 async function getConfig() {
-  if (configCache) {
+  if (configCache !== null) {
     return configCache;
   }
   try {
-    const response = await fetch("/canister-dashboard-config.json");
+    const response = await fetch("/canister-dashboard-dev-config.json");
     if (response.ok) {
       const devConfig = await response.json();
       configCache = devConfig;

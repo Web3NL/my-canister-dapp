@@ -1,10 +1,17 @@
-import type { CanisterDashboardDevConfig } from '@web3nl/vite-plugin-canister-dapp';
+// import type { CanisterDashboardDevConfig } from '@web3nl/vite-plugin-canister-dapp';
+import { notEmptyString } from '@dfinity/utils';
 
-export async function getConfig(): Promise<CanisterDashboardDevConfig> {
+export async function getConfig() {
+  const canisterId = import.meta.env.VITE_CANISTER_ID;
+  const iiCanisterId = import.meta.env.VITE_II_CANISTER_ID;
+  const dfxProtocol = import.meta.env.VITE_DFX_PROTOCOL;
+  const dfxHostname = import.meta.env.VITE_DFX_HOSTNAME;
+  const dfxPort = import.meta.env.VITE_DFX_PORT;
+
   return {
-    canisterId: import.meta.env.VITE_CANISTER_ID,
-    identityProvider: import.meta.env.VITE_IDENTITY_PROVIDER,
-    dfxHost: import.meta.env.VITE_DFX_HOST,
+    canisterId: notEmptyString(canisterId) ? canisterId : undefined,
+    identityProvider: `${dfxProtocol}://${iiCanisterId}.${dfxHostname}:${dfxPort}`,
+    dfxHost: `${dfxProtocol}://${dfxHostname}:${dfxPort}`,
   };
 }
 

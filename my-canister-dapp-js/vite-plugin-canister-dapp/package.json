@@ -5,15 +5,15 @@
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
-  "exports": {
-    ".": {
-      "import": "./dist/index.js",
-      "types": "./dist/index.d.ts"
-    }
-  },
   "files": [
     "dist"
   ],
+  "dependencies": {
+    "@dfinity/utils": "^2.4.1"
+  },
+  "peerDependencies": {
+    "@dfinity/principal": "^2.4.0"
+  },
   "scripts": {
     "build": "tsc",
     "clean": "rm -rf dist",
@@ -24,6 +24,8 @@
     "format:fix": "prettier --write src",
     "typecheck": "tsc --noEmit"
   },
+  "author": "Samer",
+  "license": "MIT",
   "keywords": [
     "vite",
     "plugin",
@@ -32,10 +34,5 @@
     "internet computer",
     "canister",
     "web3"
-  ],
-  "author": "Samer",
-  "license": "MIT",
-  "dependencies": {
-    "dotenv": "^16.4.5"
-  }
+  ]
 }

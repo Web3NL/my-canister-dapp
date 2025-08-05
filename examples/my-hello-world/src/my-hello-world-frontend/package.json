@@ -17,6 +17,7 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@dfinity/utils": "^2.4.0",
     "@web3nl/my-canister-dashboard": "0.5.2",
     "lit-html": "2.8.0"
   },
