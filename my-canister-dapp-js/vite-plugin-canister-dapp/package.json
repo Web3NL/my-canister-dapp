@@ -1,12 +1,19 @@
 {
   "name": "@web3nl/vite-plugin-canister-dapp",
   "version": "0.1.0",
-  "description": "Vite plugin for Canister Dapp configuration",
+  "description": "Vite plugin for Internet Computer canister dapp development configuration",
   "type": "module",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
   "files": [
-    "dist"
+    "dist",
+    "README.md"
   ],
   "dependencies": {
     "@dfinity/utils": "^2.4.1"
@@ -24,15 +31,27 @@
     "format:fix": "prettier --write src",
     "typecheck": "tsc --noEmit"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Web3NL/my-canister-dapp.git",
+    "directory": "my-canister-dapp-js/vite-plugin-canister-dapp"
+  },
+  "homepage": "https://github.com/Web3NL/my-canister-dapp/tree/main/my-canister-dapp-js/vite-plugin-canister-dapp",
+  "bugs": {
+    "url": "https://github.com/Web3NL/my-canister-dapp/issues"
+  },
   "author": "Samer",
   "license": "MIT",
   "keywords": [
     "vite",
     "plugin",
-    "dapp",
-    "configuration",
-    "internet computer",
+    "internet-computer",
+    "dfinity",
+    "ic",
     "canister",
-    "web3"
+    "dapp",
+    "web3",
+    "development",
+    "configuration"
   ]
 }
