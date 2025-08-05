@@ -1,8 +1,4 @@
-interface CanisterDashboardDevConfig {
-  canisterId: unknown;
-  dfxHost: string;
-  identityProvider: string;
-}
+import type { CanisterDashboardDevConfig } from '@web3nl/vite-plugin-canister-dapp';
 
 // Hardcoded production configuration
 const PRODUCTION_CONFIG: CanisterDashboardDevConfig = {
@@ -15,7 +11,7 @@ let configCache: CanisterDashboardDevConfig | null = null;
 let devModeCache: boolean | null = null;
 
 export async function getConfig(): Promise<CanisterDashboardDevConfig> {
-  if (configCache) {
+  if (configCache !== null) {
     return configCache;
   }
 
