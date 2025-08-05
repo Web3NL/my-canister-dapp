@@ -76,23 +76,23 @@ function loadEnvConfig(
 
 /**
  * Vite plugin that provides Internet Computer Canister Dapp configuration for development
- * 
+ *
  * Features:
  * - Development-only operation (does nothing in production)
  * - Environment-based configuration using VITE_ prefixed variables
  * - Serves configuration at `/canister-dashboard-dev-config.json` during development
  * - Emits `canister-dashboard-dev-config.json` during development builds
  * - Automatic server proxy setup for IC development
- * 
+ *
  * Required environment variables:
  * - VITE_II_CANISTER_ID // Internet Identity canister ID in dfx
  * - VITE_DFX_PROTOCOL
  * - VITE_DFX_HOSTNAME
  * - VITE_DFX_PORT
- * 
+ *
  * Optional environment variables:
  * - VITE_CANISTER_ID: Your canister ID
- * 
+ *
  * @returns Vite plugin instance
  */
 export function canisterDashboardDevConfig(): Plugin {
