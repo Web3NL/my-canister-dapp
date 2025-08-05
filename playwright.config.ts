@@ -9,7 +9,7 @@ export default defineConfig({
   testDir: './tests',
   use: {
     ...devices['Desktop Chrome'],
-    // headless: false
+    headless: false
   },
   projects: [
     {

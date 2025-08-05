@@ -19,6 +19,40 @@
         "output": "examples/my-hello-world/src/declarations/"
       }
     },
+    "icp_ledger": {
+      "type": "custom",
+      "candid": "https://raw.githubusercontent.com/dfinity/ic/5ba1412f9175d987661ae3c0d8dbd1ac3e092b7d/rs/rosetta-api/icp_ledger/ledger.did",
+      "wasm": "https://download.dfinity.systems/ic/5ba1412f9175d987661ae3c0d8dbd1ac3e092b7d/canisters/ledger-canister.wasm.gz",
+      "specified_id": "ryjl3-tyaaa-aaaaa-aaaba-cai",
+      "remote": {
+        "id": {
+          "ic": "ryjl3-tyaaa-aaaaa-aaaba-cai"
+        }
+      }
+    },
+    "cycle_minting_canister": {
+      "type": "custom",
+      "candid": "https://raw.githubusercontent.com/dfinity/ic/21a02f483fa8028568f4c2c5920ec960c87269c0/rs/nns/cmc/cmc.did",
+      "wasm": "https://download.dfinity.systems/ic/21a02f483fa8028568f4c2c5920ec960c87269c0/canisters/cycles-minting-canister.wasm.gz",
+      "specified_id": "rkp4c-7iaaa-aaaaa-aaaca-cai",
+      "remote": {
+        "id": {
+          "ic": "rkp4c-7iaaa-aaaaa-aaaca-cai"
+        }
+      }
+    },
+    "exchange_rate_canister": {
+      "type": "custom",
+      "candid": "https://raw.githubusercontent.com/dfinity/exchange-rate-canister/6dc4a6eb450bc477d6ea09597c992a3ef31d0d88/src/xrc/xrc.did",
+      "wasm": "https://github.com/dfinity/exchange-rate-canister/releases/download/2024.07.12/xrc.wasm.gz",
+      "specified_id": "uf6dk-hyaaa-aaaaq-qaaaq-cai"
+    },
+    "cycles_ledger": {
+      "type": "custom",
+      "wasm": "https://github.com/dfinity/cycles-ledger/releases/download/cycles-ledger-v1.0.5/cycles-ledger.wasm.gz",
+      "candid": "https://github.com/dfinity/cycles-ledger/releases/download/cycles-ledger-v1.0.5/cycles-ledger.did",
+      "specified_id": "um5iw-rqaaa-aaaaq-qaaba-cai"
+    },
     "icp-index": {
       "type": "custom",
       "candid": "https://github.com/dfinity/ic/releases/download/ledger-suite-icp-2025-05-15/index.did",
@@ -28,15 +62,24 @@
       "declarations": {
         "output": "declarations/icp-index/"
       }
+    },
+    "internet_identity": {
+      "type": "custom",
+      "candid": "https://github.com/dfinity/internet-identity/releases/download/release-2024-05-13/internet_identity.did",
+      "wasm": "https://github.com/dfinity/internet-identity/releases/download/release-2024-05-13/internet_identity_dev.wasm.gz",
+      "remote": {
+        "id": {
+          "ic": "qhbym-qaaaa-aaaaa-aaafq-cai"
+        }
+      },
+      "frontend": {},
+      "specified_id": "qhbym-qaaaa-aaaaa-aaafq-cai"
     }
   },
   "networks": {
     "local": {
       "bind": "127.0.0.1:8080",
-      "type": "ephemeral",
-      "replica": {
-        "subnet_type": "system"
-      }
+      "type": "ephemeral"
     }
   }
 }

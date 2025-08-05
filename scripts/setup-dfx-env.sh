@@ -14,11 +14,13 @@ echo "Starting dfx..."
 dfx start --clean --background > dfx.log 2>&1
 
 echo "Installing NNS extension..."
-dfx extension install nns
-dfx nns install
+# dfx extension install nns
+# dfx nns install
 
 echo "Deploying icp-index canister..."
-dfx deploy icp-index
+# dfx deploy icp-index
+
+./scripts/deploy-system-canisters.sh
 
 echo "Setting up dashboard dev environment..."
 ./scripts/setup-dashboard-dev-env.sh
