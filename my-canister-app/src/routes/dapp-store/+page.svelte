@@ -35,6 +35,10 @@
   });
 </script>
 
+<svelte:head>
+  <title>Dapp Store - My Canister Dapp</title>
+</svelte:head>
+
 <h1>Dapp Store</h1>
 
 {#if loading}

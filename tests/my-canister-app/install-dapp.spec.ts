@@ -46,11 +46,11 @@ test('My Canister App E2E Suite', async ({ page }) => {
     const principal = Principal.fromText(principalText.trim());
     await transferToPrincipal(principal, TRANSFER_AMOUNT);
 
-    await page.getByRole('button', { name: 'Create dApp' }).waitFor({ state: 'visible' });
-    await page.getByRole('button', { name: 'Create dApp' }).click();
+    await page.getByRole('button', { name: 'Create Dapp' }).waitFor({ state: 'visible' });
+    await page.getByRole('button', { name: 'Create Dapp' }).click();
 
-    await page.getByRole('button', { name: 'Connect II to dApp' }).waitFor({ state: 'visible' });
-    await page.getByRole('button', { name: 'Connect II to dApp' }).click();
+    await page.getByRole('button', { name: 'Connect II to Dapp' }).waitFor({ state: 'visible' });
+    await page.getByRole('button', { name: 'Connect II to Dapp' }).click();
 
     const page2Promise = page.waitForEvent('popup');
     const page2 = await page2Promise;
@@ -68,20 +68,20 @@ test('My Canister App E2E Suite', async ({ page }) => {
     const cardElement = page.locator('article[data-tid="card"]').filter({ hasText: 'My Hello World' }).first();
     const dappFrontpageLink = cardElement.locator('a').filter({ hasText: 'Dapp frontpage' });
     const href = await dappFrontpageLink.getAttribute('href');
-    
+
     // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
     if (!href) {
         throw new Error('Dapp frontpage href not found');
     }
-    
+
     // Extract canister ID from URL like: http://u6s2n-gx777-77774-qaaba-cai.localhost:8080
     const url = new URL(href);
     const canisterId = url.hostname.split('.')[0];
-    
+
     // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
     if (!canisterId) {
         throw new Error(`Could not extract canister ID from URL: ${href}`);
     }
-    
+
     saveTestData('installed-canister-id', canisterId);
 });

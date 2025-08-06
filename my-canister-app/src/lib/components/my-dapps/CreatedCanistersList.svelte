@@ -32,7 +32,7 @@
         .sort((a, b) => Number(b.blockId - a.blockId));
     } catch {
       toastsStore.show({
-        text: 'Failed to load installed dApps',
+        text: 'Failed to load installed Dapps',
         level: 'error',
       });
     }
@@ -65,7 +65,7 @@
     </div>
   {:else}
     <Card>
-      <p>No installed dApps found from transactions</p>
+      <p>No installed Dapps found from transactions</p>
     </Card>
   {/if}
 </div>

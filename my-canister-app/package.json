@@ -1,6 +1,6 @@
 {
   "name": "my-canister-app",
-  "version": "0.2.0",
+  "version": "0.2.5",
   "type": "module",
   "engines": {
     "node": ">=18.0.0"
@@ -15,9 +15,9 @@
     "format:fix": "prettier --write src",
     "typecheck": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json"
   },
-  "devDependencies": {},
   "dependencies": {
-    "@web3nl/my-canister-dashboard": "0.5.2",
-    "@dfinity/gix-components": "6.0.0"
-  }
+    "@dfinity/gix-components": "6.0.0",
+    "@web3nl/my-canister-dashboard": "0.5.2"
+  },
+  "deployedAtCommit": "5320e3e453a0d8788e61abbb5732c46e61e06ca2"
 }
