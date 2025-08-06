@@ -1,4 +1,4 @@
-name: Publish Dashboard Package
+name: Publish My Canister Dashboard JS Docs to GitHub Pages
 
 on:
   push:
@@ -6,8 +6,8 @@ on:
       - 'web3nl/my-canister-dashboard-v*'
 
 jobs:
-  publish:
-    name: Publish to NPM and GitHub Pages
+  publish-docs:
+    name: Publish My Canister Dashboard JS Docs to GitHub Pages
     runs-on: ubuntu-latest
     permissions:
       contents: write
