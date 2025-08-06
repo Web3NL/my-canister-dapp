@@ -48,11 +48,9 @@ npm run deploy:app
 # Bump version and commit if deploy succeeded
 echo "📈 Bumping $VERSION_TYPE version..."
 cd my-canister-app
-NEW_VERSION=$(npm version "$VERSION_TYPE" --no-git-tag-version)
-echo "🔍 Raw version from npm: $NEW_VERSION"
-# Remove the 'v' prefix from the version
-NEW_VERSION=${NEW_VERSION#v}
-echo "🔍 Clean version: $NEW_VERSION"
+npm version "$VERSION_TYPE" --no-git-tag-version > /dev/null 2>&1
+NEW_VERSION=$(node -p "require('./package.json').version")
+echo "🔍 New version: $NEW_VERSION"
 
 # Commit the changes (from within my-canister-app directory)
 echo "💾 Committing version bump..."
