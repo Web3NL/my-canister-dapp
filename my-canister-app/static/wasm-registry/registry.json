@@ -3,7 +3,7 @@
     {
       "id": 1,
       "name": "My Hello World",
-      "version": 3,
+      "version": 4,
       "wasm_url": "https://raw.githubusercontent.com/Web3NL/my-canister-dapp/dae31b3c84041351551fd6c87148bfb883b17195/wasm/my-hello-world.wasm.gz",
       "memo": "The Internet Computer Hello World Dapp"
     }
