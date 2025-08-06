@@ -46,7 +46,7 @@ cd ..
 
 # Commit the changes
 echo "💾 Committing version bump..."
-git add my-canister-app/package.json
+git add my-canister-app/
 git commit -m "chore: bump my-canister-app version ($VERSION_TYPE)"
 
 # Create git tag
