@@ -50,7 +50,6 @@ echo "📈 Bumping $VERSION_TYPE version..."
 cd my-canister-app
 npm version "$VERSION_TYPE" --no-git-tag-version > /dev/null 2>&1
 NEW_VERSION=$(node -p "require('./package.json').version")
-echo "🔍 New version: $NEW_VERSION"
 
 # Commit the changes (from within my-canister-app directory)
 echo "💾 Committing version bump..."
@@ -61,14 +60,11 @@ git commit -m "chore: bump my-canister-app version ($VERSION_TYPE)"
 # Create git tag
 echo "🏷️  Creating git tag: my-canister-app-v$NEW_VERSION"
 git tag "my-canister-app-v$NEW_VERSION"
-echo "✅ Tag created successfully"
 
 # Push changes and tag to remote
 echo "⬆️  Pushing changes to remote..."
 git push
-echo "✅ Changes pushed successfully"
 echo "⬆️  Pushing tags to remote..."
 git push --tags
-echo "✅ Tags pushed successfully"
 
 echo "✅ Deploy complete! Tagged as my-canister-app-v$NEW_VERSION"
