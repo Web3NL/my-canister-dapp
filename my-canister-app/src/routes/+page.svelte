@@ -9,6 +9,10 @@
   import { goto } from '$app/navigation';
 </script>
 
+<svelte:head>
+  <title>My Canister Dapp - Fully owned decentralized apps</title>
+</svelte:head>
+
 <PageBanner>
   <IconCanistersPage slot="image" />
   <span slot="title">My Canister Dapp</span>

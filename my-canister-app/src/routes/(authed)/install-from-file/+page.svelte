@@ -210,6 +210,10 @@
   });
 </script>
 
+<svelte:head>
+  <title>Install from File - My Canister Dapp</title>
+</svelte:head>
+
 <h1>Install Dapp</h1>
 <!-- <h3>{dappNameText}</h3> -->
 

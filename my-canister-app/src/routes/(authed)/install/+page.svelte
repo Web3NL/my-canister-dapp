@@ -177,6 +177,10 @@
   });
 </script>
 
+<svelte:head>
+  <title>Install Dapp - My Canister Dapp</title>
+</svelte:head>
+
 <h1>Install Dapp</h1>
 <h3>{dappNameText}</h3>
 <div id="progress-steps">
