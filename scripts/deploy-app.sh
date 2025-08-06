@@ -27,16 +27,6 @@ if [[ -n $(git status --porcelain) ]]; then
     exit 1
 fi
 
-# Get current commit hash
-COMMIT_HASH=$(git rev-parse HEAD)
-echo "📝 Current commit: $COMMIT_HASH"
-
-# Add deployedAtCommit to package.json
-echo "📦 Updating package.json with deployedAtCommit..."
-cd my-canister-app
-npm pkg set deployedAtCommit="$COMMIT_HASH"
-cd ..
-
 # Set dfx identity
 echo "🔑 Setting dfx identity to web3nl..."
 dfx identity use web3nl
@@ -44,6 +34,15 @@ dfx identity use web3nl
 # Deploy the app
 echo "🚢 Deploying to IC..."
 npm run deploy:app
+
+# Get current commit hash after successful deploy
+COMMIT_HASH=$(git rev-parse HEAD)
+echo "📝 Current commit: $COMMIT_HASH"
+
+# Add deployedAtCommit to package.json
+echo "📦 Updating package.json with deployedAtCommit..."
+cd my-canister-app
+npm pkg set deployedAtCommit="$COMMIT_HASH"
 
 # Bump version and commit if deploy succeeded
 echo "📈 Bumping $VERSION_TYPE version..."
