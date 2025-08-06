@@ -7,7 +7,7 @@ on:
 
 jobs:
   publish:
-    name: Publish to GitHub Pages
+    name: Publish Vite Plugin Docs to GitHub Pages
     runs-on: ubuntu-latest
     permissions:
       contents: write
