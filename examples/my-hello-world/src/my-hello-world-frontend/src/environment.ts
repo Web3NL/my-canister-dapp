@@ -8,10 +8,32 @@ export async function getConfig() {
   const dfxHostname = import.meta.env.VITE_DFX_HOSTNAME;
   const dfxPort = import.meta.env.VITE_DFX_PORT;
 
+  // Provide fallbacks similar to the working v3 version
+  const isDevMode = import.meta.env.DEV;
+
+  let identityProvider: string;
+  let dfxHost: string;
+
+  if (
+    isDevMode &&
+    notEmptyString(dfxProtocol) &&
+    notEmptyString(iiCanisterId) &&
+    notEmptyString(dfxHostname) &&
+    notEmptyString(dfxPort)
+  ) {
+    // Development mode with full env vars
+    identityProvider = `${dfxProtocol}://${iiCanisterId}.${dfxHostname}:${dfxPort}`;
+    dfxHost = `${dfxProtocol}://${dfxHostname}:${dfxPort}`;
+  } else {
+    // Production fallbacks
+    identityProvider = 'https://identity.internetcomputer.org';
+    dfxHost = 'https://icp-api.io';
+  }
+
   return {
     canisterId: notEmptyString(canisterId) ? canisterId : undefined,
-    identityProvider: `${dfxProtocol}://${iiCanisterId}.${dfxHostname}:${dfxPort}`,
-    dfxHost: `${dfxProtocol}://${dfxHostname}:${dfxPort}`,
+    identityProvider,
+    dfxHost,
   };
 }
 
