@@ -1,6 +1,6 @@
 {
   "name": "@web3nl/vite-plugin-canister-dapp",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Vite plugin for Internet Computer canister dapp development configuration",
   "type": "module",
   "main": "dist/index.js",
