@@ -1,4 +1,4 @@
-name: Publish Vite Plugin Package
+name: Publish Vite Plugin Docs to GitHub Pages
 
 on:
   push:
@@ -7,7 +7,7 @@ on:
 
 jobs:
   publish:
-    name: Publish to NPM and GitHub Pages
+    name: Publish to GitHub Pages
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -34,7 +34,7 @@ jobs:
         run: npm run build --workspace=@web3nl/vite-plugin-canister-dapp
 
       - name: Build documentation
-        run: npm run build:docs
+        run: npm run docs:build --workspace=@web3nl/vite-plugin-canister-dapp
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
