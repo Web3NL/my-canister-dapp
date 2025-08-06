@@ -1,0 +1,11 @@
+{
+    "$schema": "https://typedoc.org/schema.json",
+    "entryPoints": [
+        "./src/index.ts"
+    ],
+    "out": "./docs",
+    "name": "@web3nl/vite-plugin-canister-dapp",
+    "excludeExternals": false,
+    "includeVersion": true,
+    "readme": "README.md"
+}

@@ -20,6 +20,6 @@
     "@web3nl/my-canister-dashboard": "0.5.3"
   },
   "devDependencies": {
-    "@web3nl/vite-plugin-canister-dapp-config": "file:../vite-plugin-canister-dapp-config"
+    "@web3nl/vite-plugin-canister-dapp": "file:../vite-plugin-canister-dapp"
   }
 }

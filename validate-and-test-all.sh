@@ -20,6 +20,9 @@ if [ "$CLEAN_FLAG" = "true" ]; then
     ./scripts/clean.sh
 fi
 
+./scripts/create-canister-dapp-dev-env.sh my-canister-dapp-js/canister-dashboard-frontend
+./scripts/create-canister-dapp-dev-env.sh examples/my-hello-world/src/my-hello-world-frontend
+
 ./scripts/check.sh
 ./scripts/setup-dfx-env.sh
 ./scripts/run-test.sh

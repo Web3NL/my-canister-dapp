@@ -8,12 +8,12 @@ export async function getCanisterId(): Promise<Principal> {
   } catch {
     // When in dev server inference fails and we use local canister ID
     const config = await getConfig();
-    if (config.canisterIdDev !== undefined) {
-      return Principal.fromText(config.canisterIdDev);
+    if (config.canisterId !== undefined) {
+      return Principal.fromText(config.canisterId);
     }
 
     throw new Error(
-      'No canister ID available - please configure canisterIdDev in vite.config.js dappConfigPlugin'
+      'No canister ID available - please configure VITE_CANISTER_ID in .env.development'
     );
   }
 }

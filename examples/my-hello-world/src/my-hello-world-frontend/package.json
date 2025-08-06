@@ -17,10 +17,11 @@
     "typecheck": "tsc --noEmit"
   },
   "dependencies": {
+    "@dfinity/utils": "^2.4.0",
     "@web3nl/my-canister-dashboard": "0.5.2",
     "lit-html": "2.8.0"
   },
   "devDependencies": {
-    "@web3nl/vite-plugin-canister-dapp-config": "file:../../../../../my-canister-dapp-js/vite-plugin-canister-dapp-config"
+    "@web3nl/vite-plugin-canister-dapp": "file:../../../../../my-canister-dapp-js/vite-plugin-canister-dapp"
   }
 }

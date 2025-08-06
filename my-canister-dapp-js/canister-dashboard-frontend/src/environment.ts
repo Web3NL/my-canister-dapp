@@ -1,28 +1,25 @@
-interface CanisterDappConfig {
-  identityProvider: string;
-  dfxHost: string;
-  canisterIdDev?: string;
-}
+import type { CanisterDashboardDevConfig } from '@web3nl/vite-plugin-canister-dapp';
 
 // Hardcoded production configuration
-const PRODUCTION_CONFIG: CanisterDappConfig = {
+const PRODUCTION_CONFIG: CanisterDashboardDevConfig = {
+  canisterId: undefined,
   identityProvider: 'https://identity.internetcomputer.org',
   dfxHost: 'https://icp-api.io',
 };
 
-let configCache: CanisterDappConfig | null = null;
+let configCache: CanisterDashboardDevConfig | null = null;
 let devModeCache: boolean | null = null;
 
-export async function getConfig(): Promise<CanisterDappConfig> {
-  if (configCache) {
+export async function getConfig(): Promise<CanisterDashboardDevConfig> {
+  if (configCache !== null) {
     return configCache;
   }
 
-  // Try to fetch canister-dapp-config.json for runtime dev detection
+  // Try to fetch canister-dashboard-dev-config.json for runtime dev detection
   try {
-    const response = await fetch('/canister-dashboard-dev-env.json');
+    const response = await fetch('/canister-dashboard-dev-config.json');
     if (response.ok) {
-      const devConfig = (await response.json()) as CanisterDappConfig;
+      const devConfig = (await response.json()) as CanisterDashboardDevConfig;
       configCache = devConfig;
       devModeCache = true;
       return devConfig;
