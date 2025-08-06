@@ -15,11 +15,8 @@
     "dist",
     "README.md"
   ],
-  "dependencies": {
-    "@dfinity/utils": "^2.4.1"
-  },
   "peerDependencies": {
-    "@dfinity/principal": "^2.4.0"
+    "vite": "^6.0.0"
   },
   "scripts": {
     "build": "tsc",
@@ -29,7 +26,10 @@
     "lint:fix": "eslint src --fix",
     "format": "prettier --check src",
     "format:fix": "prettier --write src",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "docs:build": "typedoc",
+    "docs:clean": "rm -rf docs",
+    "prepublishOnly": "npm run clean && npm run build"
   },
   "repository": {
     "type": "git",
@@ -42,6 +42,13 @@
   },
   "author": "Samer",
   "license": "MIT",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "devDependencies": {
+    "release-it": "^17.0.0",
+    "typedoc": "^0.26.0"
+  },
   "keywords": [
     "vite",
     "plugin",

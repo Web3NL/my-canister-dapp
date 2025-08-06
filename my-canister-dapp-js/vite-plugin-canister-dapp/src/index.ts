@@ -1,5 +1,3 @@
-import { Principal } from '@dfinity/principal';
-import { notEmptyString } from '@dfinity/utils';
 import type { Plugin, ViteDevServer } from 'vite';
 import { loadEnv } from 'vite';
 
@@ -9,22 +7,13 @@ import { loadEnv } from 'vite';
 export interface CanisterDashboardDevConfig {
   /** Canister ID (optional) */
   canisterId: string | undefined;
-  /** DFX host URL */
+  /** DFX host URL for example http://localhost:8080 */
   dfxHost: string;
-  /** Internet Identity provider URL */
+  /** Internet Identity provider URL for example http://iiCanisterId.localhost:8080 */
   identityProvider: string;
 }
 
-function validatePrincipal(value: string): boolean {
-  try {
-    Principal.fromText(value);
-    return true;
-  } catch {
-    return false;
-  }
-}
-
-function loadEnvConfig(
+function loadCanisterDappDevEnv(
   mode: string,
   root: string
 ): CanisterDashboardDevConfig | null {
@@ -48,19 +37,8 @@ function loadEnvConfig(
     console.warn(
       'Warning: Required VITE_ environment variables not set (VITE_II_CANISTER_ID, VITE_DFX_PROTOCOL, VITE_DFX_HOSTNAME, VITE_DFX_PORT).'
     );
-    return null;
-  }
-
-  // Validate that canister IDs are valid principals when provided
-  if (notEmptyString(canisterId) && !validatePrincipal(canisterId)) {
     // eslint-disable-next-line no-console
-    console.warn('Warning: VITE_CANISTER_ID is not a valid Principal.');
-    return null;
-  }
-
-  if (!validatePrincipal(iiCanisterId)) {
-    // eslint-disable-next-line no-console
-    console.warn('Warning: VITE_II_CANISTER_ID is not a valid Principal.');
+    console.warn('Skipping canister dashboard development configuration.');
     return null;
   }
 
@@ -79,10 +57,15 @@ function loadEnvConfig(
  *
  * Features:
  * - Development-only operation (does nothing in production)
- * - Environment-based configuration using VITE_ prefixed variables
+ * - Loads configuration from VITE_ prefixed environment variables
  * - Serves configuration at `/canister-dashboard-dev-config.json` during development
- * - Emits `canister-dashboard-dev-config.json` during development builds
+ * - Emits `canister-dashboard-dev-config.json` as static asset during development builds
  * - Automatic server proxy setup for IC development
+ *   - `/api` -> proxied to `${VITE_DFX_PROTOCOL}://${VITE_DFX_HOSTNAME}:${VITE_DFX_PORT}`
+ *   - `/canister-dashboard` -> proxied to `${VITE_DFX_PROTOCOL}://${VITE_DFX_HOSTNAME}:${VITE_DFX_PORT}/canister-dashboard?canisterId=${VITE_CANISTER_ID}`
+ *   - `/.well-known/ii-alternative-origins` -> proxied to `${VITE_DFX_PROTOCOL}://${VITE_DFX_HOSTNAME}:${VITE_DFX_PORT}/.well-known/ii-alternative-origins?canisterId=${VITE_CANISTER_ID}`
+ *   Note: The last two proxy rules are only set if VITE_CANISTER_ID is provided
+ *   Note: Existing user-defined proxy rules for these paths will not be overwritten
  *
  * Required environment variables:
  * - VITE_II_CANISTER_ID // Internet Identity canister ID in dfx
@@ -100,8 +83,11 @@ export function canisterDashboardDevConfig(): Plugin {
   let currentMode = 'production';
 
   return {
-    name: 'canister-dapp',
+    name: 'canister-dashboard-dev-config',
 
+    // Configure Vite server proxy for development
+    // This sets up the necessary proxy rules for development
+    // based on the loaded dashboardConfig
     config(config, { mode }) {
       currentMode = mode;
 
@@ -110,10 +96,9 @@ export function canisterDashboardDevConfig(): Plugin {
         return;
       }
 
-      // Load environment config only in development
       // Use root from config or current working directory
       const root = config.root ?? process.cwd();
-      dashboardConfig = loadEnvConfig(mode, root);
+      dashboardConfig = loadCanisterDappDevEnv(mode, root);
 
       // If config failed to load, skip proxy configuration
       if (dashboardConfig === null) {
@@ -209,6 +194,7 @@ export function canisterDashboardDevConfig(): Plugin {
       currentMode = resolvedConfig.mode;
     },
 
+    // Serve `canister-dashboard-dev-config.json` in dev server
     configureServer(server: ViteDevServer) {
       // Skip entirely if not in development mode
       if (currentMode !== 'development') {
@@ -220,7 +206,6 @@ export function canisterDashboardDevConfig(): Plugin {
         return;
       }
 
-      // Serve canister-dashboard-dev-config.json in dev server
       server.middlewares.use(
         '/canister-dashboard-dev-config.json',
         (req, res, next) => {
@@ -235,6 +220,7 @@ export function canisterDashboardDevConfig(): Plugin {
       );
     },
 
+    // Only generate `canister-dashboard-dev-config.json` static asset in development builds
     generateBundle() {
       // Skip entirely if not in development mode
       if (currentMode !== 'development') {
@@ -255,4 +241,8 @@ export function canisterDashboardDevConfig(): Plugin {
       });
     },
   };
+}
+
+function notEmptyString(value: unknown): value is string {
+  return typeof value === 'string' && value.length > 0;
 }
