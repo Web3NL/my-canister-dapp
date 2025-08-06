@@ -16,6 +16,7 @@ export default defineConfig(() => {
     },
     define: {
       global: 'globalThis',
+      'process.env.DFX_NETWORK': JSON.stringify(process.env.DFX_NETWORK),
     },
     resolve: {
       alias: [
