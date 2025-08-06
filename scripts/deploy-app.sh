@@ -42,11 +42,11 @@ npm run deploy:app
 echo "📈 Bumping $VERSION_TYPE version..."
 cd my-canister-app
 NEW_VERSION=$(npm version "$VERSION_TYPE" --no-git-tag-version)
-cd ..
 
-# Commit the changes
+# Commit the changes (from within my-canister-app directory)
 echo "💾 Committing version bump..."
-git add my-canister-app/
+cd ..
+git add .
 git commit -m "chore: bump my-canister-app version ($VERSION_TYPE)"
 
 # Create git tag
