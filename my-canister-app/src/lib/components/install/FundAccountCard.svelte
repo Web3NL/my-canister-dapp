@@ -39,7 +39,7 @@
     </KeyValuePair>
   </div>
 
-  <button class="primary" on:click={onCreate} {disabled}>Create dApp</button>
+  <button class="primary" on:click={onCreate} {disabled}>Create Dapp</button>
 </Card>
 
 <style>

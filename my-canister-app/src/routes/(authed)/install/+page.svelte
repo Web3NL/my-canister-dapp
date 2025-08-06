@@ -72,12 +72,12 @@
     },
     {
       step: 'create',
-      text: 'Create dApp on ICP',
+      text: 'Create Dapp on ICP',
       state: 'next',
     },
     {
       step: 'connect-ii',
-      text: 'Connect II to dApp',
+      text: 'Connect II to Dapp',
       state: 'next',
     },
     {
@@ -124,7 +124,7 @@
 
     busyStore.startBusy({
       initiator: 'create-canister',
-      text: 'Keep window open. Creating dApp...',
+      text: 'Keep window open. Creating Dapp...',
     });
 
     canisterPrincipal = await createNewCanister(wasmIdNumber);
@@ -140,7 +140,7 @@
   async function takeControlOfCanister() {
     busyStore.startBusy({
       initiator: 'connect-ii',
-      text: 'Keep window open. Installing and connecting II to dApp...',
+      text: 'Keep window open. Installing and connecting II to Dapp...',
     });
 
     await installAndTakeControl(canisterPrincipal!);
