@@ -22,6 +22,6 @@
     "lit-html": "2.8.0"
   },
   "devDependencies": {
-    "@web3nl/vite-plugin-canister-dapp": "file:../../../../../my-canister-dapp-js/vite-plugin-canister-dapp"
+    "@web3nl/vite-plugin-canister-dapp": "0.1.1"
   }
 }
