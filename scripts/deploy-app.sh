@@ -53,4 +53,8 @@ git commit -m "chore: bump my-canister-app version ($VERSION_TYPE)"
 echo "🏷️  Creating git tag..."
 git tag "my-canister-app-v$NEW_VERSION"
 
+# Push changes and tag to remote
+echo "⬆️  Pushing to remote..."
+git push && git push --tags
+
 echo "✅ Deploy complete! Tagged as my-canister-app-v$NEW_VERSION"
