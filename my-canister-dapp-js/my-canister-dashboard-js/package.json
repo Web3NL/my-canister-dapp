@@ -42,8 +42,18 @@
     "docs:build": "typedoc",
     "docs:clean": "rm -rf docs"
   },
-  "dependencies": {},
-  "devDependencies": {},
+  "dependencies": {
+    "@dfinity/ic-management": "^6.2.0"
+  },
+  "peerDependencies": {
+    "@dfinity/agent": "^2.4.1",
+    "@dfinity/principal": "^2.4.1"
+  },
+  "devDependencies": {
+    "@dfinity/agent": "^2.4.1",
+    "@dfinity/candid": "^2.4.1",
+    "@dfinity/principal": "^2.4.1"
+  },
   "engines": {
     "node": ">=18.0.0"
   }
