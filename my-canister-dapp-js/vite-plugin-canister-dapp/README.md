@@ -31,16 +31,16 @@ export default defineConfig({
 Create a `.env.development` file with the following required variables:
 
 ```env
-VITE_II_CANISTER_ID=qhbym-qaaaa-aaaaa-aaafq-cai
-VITE_DFX_PROTOCOL=http
-VITE_DFX_HOSTNAME=localhost
-VITE_DFX_PORT=8080
+VITE_II_CANISTER_ID=
+VITE_DFX_PROTOCOL=
+VITE_DFX_HOSTNAME=
+VITE_DFX_PORT=
 ```
 
 Optional variables:
 
 ```env
-VITE_CANISTER_ID=your-canister-id
+VITE_CANISTER_ID=
 ```
 
 ## API Documentation
