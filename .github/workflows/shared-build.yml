@@ -7,6 +7,9 @@ jobs:
   build-and-test:
     name: Build and Test
     runs-on: ubuntu-latest
+    env:
+      # Prefer IPv4 DNS results in Node (affects dev servers, tooling, etc.)
+      NODE_OPTIONS: --dns-result-order=ipv4first
 
     steps:
       - name: Checkout code
@@ -23,5 +26,12 @@ jobs:
         with:
           dfx-version: 0.28.0
 
-      - name: Run checks
-        run: ./validate-and-test-all.sh
+      - name: Prefer IPv4 for localhost on runner
+        run: |
+          set -euxo pipefail
+          echo '127.0.0.1 localhost' | sudo tee -a /etc/hosts
+          echo 'precedence ::ffff:0:0/96  100' | sudo tee -a /etc/gai.conf
+          getent hosts localhost || true
+
+      - name: Build, validate and run tests (E2E)
+        run: ./validate-and-test-all.sh --e2e
