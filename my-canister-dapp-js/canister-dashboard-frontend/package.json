@@ -5,10 +5,10 @@
   "private": true,
   "license": "MIT",
   "dependencies": {
-    "@web3nl/my-canister-dashboard": "0.5.3"
+    "@web3nl/my-canister-dashboard": "0.5.4"
   },
   "devDependencies": {
-    "@web3nl/vite-plugin-canister-dapp": "0.1.1"
+    "@web3nl/vite-plugin-canister-dapp": "0.1.2"
   },
   "engines": {
     "node": ">=18.0.0"
