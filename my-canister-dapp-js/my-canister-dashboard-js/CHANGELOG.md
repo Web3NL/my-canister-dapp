@@ -1,5 +1,11 @@
 # @web3nl/my-canister-dashboard
 
+## 0.5.5
+
+### Patch Changes
+
+- [#88](https://github.com/Web3NL/my-canister-dapp/pull/88) [`48b1fca`](https://github.com/Web3NL/my-canister-dapp/commit/48b1fca2696642141d1f6cd9416f2eb3afdb310b) Thanks [@Web3NL](https://github.com/Web3NL)! - Fix docs publishing: consolidate to a single Pages workflow and ensure dashboard docs are included under /web3nl-my-canister-dashboard-js/ with .nojekyll.
+
 ## 0.5.4
 
 ### Patch Changes
