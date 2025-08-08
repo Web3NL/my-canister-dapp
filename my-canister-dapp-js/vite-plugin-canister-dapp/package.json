@@ -1,10 +1,16 @@
 {
   "name": "@web3nl/vite-plugin-canister-dapp",
-  "version": "0.1.1",
   "description": "Vite plugin for Internet Computer canister dapp development configuration",
-  "type": "module",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "version": "0.1.1",
+  "author": "Web3NL",
+  "bugs": "https://github.com/Web3NL/my-canister-dapp/issues",
+  "devDependencies": {
+    "typedoc": "0.28.7",
+    "typescript": "5.8.3"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -13,52 +19,49 @@
   },
   "files": [
     "dist",
-    "README.md"
+    "README.md",
+    "LICENSE"
   ],
-  "peerDependencies": {
-    "vite": "^6.0.0"
+  "homepage": "https://github.com/Web3NL/my-canister-dapp/tree/main/my-canister-dapp-js/vite-plugin-canister-dapp",
+  "keywords": [
+    "canister",
+    "configuration",
+    "dapp",
+    "development",
+    "dfinity",
+    "ic",
+    "internet-computer",
+    "plugin",
+    "vite",
+    "web3"
+  ],
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
   },
-  "scripts": {
-    "build": "tsc",
-    "clean": "rm -rf dist",
-    "dev": "tsc --watch",
-    "lint": "eslint src",
-    "lint:fix": "eslint src --fix",
-    "format": "prettier --check src",
-    "format:fix": "prettier --write src",
-    "typecheck": "tsc --noEmit",
-    "docs:build": "typedoc",
-    "docs:clean": "rm -rf docs",
-    "prepublishOnly": "npm run clean && npm run build"
+  "main": "dist/index.js",
+  "peerDependencies": {
+    "vite": "^6.3.5"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Web3NL/my-canister-dapp.git",
     "directory": "my-canister-dapp-js/vite-plugin-canister-dapp"
   },
-  "homepage": "https://github.com/Web3NL/my-canister-dapp/tree/main/my-canister-dapp-js/vite-plugin-canister-dapp",
-  "bugs": {
-    "url": "https://github.com/Web3NL/my-canister-dapp/issues"
+  "scripts": {
+    "build": "tsc",
+    "clean": "rm -rf dist",
+    "dev": "tsc --watch",
+    "docs:build": "typedoc",
+    "docs:clean": "rm -rf docs",
+    "format": "prettier --check src",
+    "format:fix": "prettier --write src",
+    "lint": "eslint src",
+    "lint:fix": "eslint src --fix",
+    "prepublishOnly": "npm run clean && npm run build",
+    "typecheck": "tsc --noEmit"
   },
-  "author": "Samer",
-  "license": "MIT",
-  "engines": {
-    "node": ">=18.0.0"
-  },
-  "devDependencies": {
-    "release-it": "^17.0.0",
-    "typedoc": "^0.26.0"
-  },
-  "keywords": [
-    "vite",
-    "plugin",
-    "internet-computer",
-    "dfinity",
-    "ic",
-    "canister",
-    "dapp",
-    "web3",
-    "development",
-    "configuration"
-  ]
+  "type": "module",
+  "types": "dist/index.d.ts",
+  "sideEffects": false
 }

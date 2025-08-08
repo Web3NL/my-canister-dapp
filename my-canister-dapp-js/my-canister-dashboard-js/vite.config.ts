@@ -16,17 +16,12 @@ export default defineConfig({
         '@dfinity/ic-management',
         '@dfinity/principal',
         '@dfinity/candid',
-        '@web3nl/my-canister-dashboard',
       ],
     },
     outDir: 'dist',
     sourcemap: true,
   },
-  resolve: {
-    alias: {
-      '$declarations': resolve(__dirname, '../../declarations'),
-    },
-  },
+  resolve: {},
   plugins: [
     dts({
       outDir: 'dist',

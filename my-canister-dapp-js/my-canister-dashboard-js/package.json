@@ -1,26 +1,19 @@
 {
   "name": "@web3nl/my-canister-dashboard",
-  "version": "0.5.3",
   "description": "Utility functions for canisters using My Canister Dashboard",
-  "keywords": [
-    "internet-computer",
-    "canister",
-    "dfinity",
-    "ic",
-    "utilities"
-  ],
+  "version": "0.5.3",
   "author": "Web3NL",
-  "license": "MIT",
-  "homepage": "",
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/Web3NL/my-canister-dashboard.git",
-    "directory": "my-canister-dapp-js/my-canister-dashboard-js"
+  "dependencies": {
+    "@dfinity/ic-management": "^6.2.0"
   },
-  "type": "module",
-  "main": "dist/index.js",
-  "module": "dist/index.js",
-  "types": "dist/index.d.ts",
+  "devDependencies": {
+    "@dfinity/agent": "^2.4.1",
+    "@dfinity/candid": "^2.4.1",
+    "@dfinity/principal": "^2.4.1"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "exports": {
     ".": {
       "types": "./dist/index.d.ts",
@@ -29,22 +22,44 @@
   },
   "files": [
     "dist",
-    "README.md"
+    "README.md",
+    "LICENSE"
   ],
+  "homepage": "https://github.com/Web3NL/my-canister-dapp/tree/main/my-canister-dapp-js/my-canister-dashboard-js",
+  "keywords": [
+    "canister",
+    "dfinity",
+    "ic",
+    "internet-computer",
+    "utilities"
+  ],
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
+  "main": "dist/index.js",
+  "module": "dist/index.js",
+  "peerDependencies": {
+    "@dfinity/agent": "^2.4.1",
+    "@dfinity/principal": "^2.4.1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Web3NL/my-canister-dapp.git",
+    "directory": "my-canister-dapp-js/my-canister-dashboard-js"
+  },
   "scripts": {
     "build": "vite build",
-    "lint": "eslint src",
-    "lint:fix": "eslint src --fix",
+    "docs:build": "typedoc",
+    "docs:clean": "rm -rf docs",
     "format": "prettier --check src",
     "format:fix": "prettier --write src",
-    "typecheck": "tsc --noEmit",
+    "lint": "eslint src",
+    "lint:fix": "eslint src --fix",
     "test": "vitest --run",
-    "docs:build": "typedoc",
-    "docs:clean": "rm -rf docs"
+    "typecheck": "tsc --noEmit"
   },
-  "dependencies": {},
-  "devDependencies": {},
-  "engines": {
-    "node": ">=18.0.0"
-  }
+  "type": "module",
+  "types": "dist/index.d.ts",
+  "sideEffects": false
 }

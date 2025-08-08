@@ -1,7 +1,7 @@
 import type { HttpAgent, ActorSubclass } from '@dfinity/agent';
 import { Actor } from '@dfinity/agent';
 import type { Principal } from '@dfinity/principal';
-import { idlFactory } from '$declarations/my-canister/my-canister.did.js';
+import { idlFactory } from './idl/my-canister.did';
 import type {
   _SERVICE as MyDashboardService,
   HttpRequest,
@@ -11,7 +11,7 @@ import type {
   ManageIIPrincipalArg,
   ManageIIPrincipalResult,
   WasmStatus,
-} from '$declarations/my-canister/my-canister.did.d';
+} from './idl/my-canister.did';
 
 export type {
   _SERVICE as MyDashboardService,
@@ -22,7 +22,7 @@ export type {
   ManageIIPrincipalArg,
   ManageIIPrincipalResult,
   WasmStatus,
-} from '$declarations/my-canister/my-canister.did.d';
+} from './idl/my-canister.did';
 
 /**
  * Configuration for MyDashboardBackend
