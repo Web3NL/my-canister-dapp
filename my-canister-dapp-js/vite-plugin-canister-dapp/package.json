@@ -2,7 +2,7 @@
   "name": "@web3nl/vite-plugin-canister-dapp",
   "description": "Vite plugin for Internet Computer canister dapp development configuration",
   "version": "0.1.1",
-  "author": "Samer",
+  "author": "Web3NL",
   "bugs": "https://github.com/Web3NL/my-canister-dapp/issues",
   "devDependencies": {
     "typedoc": "0.28.7",
@@ -19,7 +19,8 @@
   },
   "files": [
     "dist",
-    "README.md"
+    "README.md",
+    "LICENSE"
   ],
   "homepage": "https://github.com/Web3NL/my-canister-dapp/tree/main/my-canister-dapp-js/vite-plugin-canister-dapp",
   "keywords": [
@@ -35,6 +36,9 @@
     "web3"
   ],
   "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
   "main": "dist/index.js",
   "peerDependencies": {
     "vite": "^6.3.5"
@@ -58,5 +62,6 @@
     "typecheck": "tsc --noEmit"
   },
   "type": "module",
-  "types": "dist/index.d.ts"
+  "types": "dist/index.d.ts",
+  "sideEffects": false
 }

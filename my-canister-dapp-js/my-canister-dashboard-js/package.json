@@ -22,9 +22,10 @@
   },
   "files": [
     "dist",
-    "README.md"
+    "README.md",
+    "LICENSE"
   ],
-  "homepage": "",
+  "homepage": "https://github.com/Web3NL/my-canister-dapp/tree/main/my-canister-dapp-js/my-canister-dashboard-js",
   "keywords": [
     "canister",
     "dfinity",
@@ -33,6 +34,9 @@
     "utilities"
   ],
   "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
   "main": "dist/index.js",
   "module": "dist/index.js",
   "peerDependencies": {
@@ -41,7 +45,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Web3NL/my-canister-dashboard.git",
+    "url": "git+https://github.com/Web3NL/my-canister-dapp.git",
     "directory": "my-canister-dapp-js/my-canister-dashboard-js"
   },
   "scripts": {
@@ -56,5 +60,6 @@
     "typecheck": "tsc --noEmit"
   },
   "type": "module",
-  "types": "dist/index.d.ts"
+  "types": "dist/index.d.ts",
+  "sideEffects": false
 }

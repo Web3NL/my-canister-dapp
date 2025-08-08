@@ -1,6 +1,7 @@
 {
   "name": "my-canister-app",
   "version": "0.2.10",
+  "private": true,
   "dependencies": {
     "@dfinity/gix-components": "6.0.0",
     "@web3nl/my-canister-dashboard": "0.5.3"
@@ -19,5 +20,6 @@
     "sync": "svelte-kit sync",
     "typecheck": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json"
   },
-  "type": "module"
+  "type": "module",
+  "license": "MIT"
 }

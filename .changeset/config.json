@@ -12,5 +12,9 @@
   "access": "public",
   "baseBranch": "main",
   "updateInternalDependencies": "patch",
-  "ignore": []
+  "ignore": [
+    "canister-dashboard-frontend",
+    "my-hello-world-frontend",
+    "my-canister-app"
+  ]
 }
