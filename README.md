@@ -25,8 +25,7 @@ Provides client-side utilities for interacting with canister dashboards and mana
 
 ## ⚡ Vite Plugin Canister Dapp
 
-Vite plugin for Internet Computer canister dapp development configuration.
-Provides automatic proxy setup, environment-based configuration, and development utilities for building canister dapps with Vite.
+Vite plugin for Internet Computer Canister Dapp development configuration.
 
 **Package:** [npm](https://www.npmjs.com/package/@web3nl/vite-plugin-canister-dapp) | [Repository](https://github.com/Web3NL/my-canister-dapp/tree/main/my-canister-dapp-js/vite-plugin-canister-dapp) | [Documentation](https://web3nl.github.io/my-canister-dapp/web3nl-vite-plugin-canister-dapp/)
 
