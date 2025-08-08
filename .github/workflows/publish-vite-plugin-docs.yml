@@ -3,7 +3,8 @@ name: Publish Vite Plugin Docs to GitHub Pages
 on:
   push:
     tags:
-      - 'web3nl/vite-plugin-canister-dapp-v*'
+      - '@web3nl/vite-plugin-canister-dapp@*'
+  workflow_dispatch:
 
 jobs:
   publish:

@@ -59,7 +59,7 @@
     "dev:app": "npm run dev --workspace=my-canister-app",
     "dev:dashboard": "npm run dev --workspace=canister-dashboard-frontend",
     "fix": "npm run lint:fix --workspaces && npm run format:fix --workspaces && npm run typecheck --workspaces",
-    "release:publish": "changeset publish",
+    "release:publish": "changeset publish && git push && git push --tags",
     "release:version": "changeset version",
     "test:create-ii-account": "playwright test tests/create-ii-account/create-ii-account.spec.ts",
     "test:derive-ii-principal": "npm run build:derive-ii-principal && playwright test tests/derive-ii-principal/derive-ii-principal.spec.ts",

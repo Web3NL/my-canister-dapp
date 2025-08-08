@@ -3,7 +3,8 @@ name: Publish My Canister Dashboard JS Docs to GitHub Pages
 on:
   push:
     tags:
-      - 'web3nl/my-canister-dashboard-v*'
+      - '@web3nl/my-canister-dashboard@*'
+  workflow_dispatch:
 
 jobs:
   publish-docs:
