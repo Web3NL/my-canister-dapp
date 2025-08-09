@@ -18,6 +18,7 @@ fn canister_dapp_test() {
     let user_option = Some(user);
     let owner = ii_principal_at_user_controlled_dapp();
     let _owner_option = Some(owner);
+    let stranger = stranger_principal();
 
     println!("\nUser principal: \n {user} \n");
     println!("Owner principal: \n {owner} \n");
@@ -403,4 +404,63 @@ fn canister_dapp_test() {
         ManageAlternativeOriginsResult::Err(_)
     ));
     println!("Invalid origin rejected \n {invalid_origin} \n");
+
+    // As stranger: Attempting to Get II principal -> expect guard error
+    let manage_as_stranger = update_candid_as::<(ManageIIPrincipalArg,), (ManageIIPrincipalResult,)>(
+        &pic,
+        canister_id,
+        stranger,
+        "manage_ii_principal",
+        (ManageIIPrincipalArg::Get,),
+    );
+    assert!(
+        manage_as_stranger.is_err(),
+        "Non-controller should be rejected by guard"
+    );
+
+    // As stranger: attempt to Set II principal -> expect guard error
+    let manage_set_as_stranger =
+        update_candid_as::<(ManageIIPrincipalArg,), (ManageIIPrincipalResult,)>(
+            &pic,
+            canister_id,
+            stranger,
+            "manage_ii_principal",
+            (ManageIIPrincipalArg::Set(owner),),
+        );
+    assert!(
+        manage_set_as_stranger.is_err(),
+        "Non-controller should be rejected by guard when setting II principal"
+    );
+
+    // As stranger: attempt to Add alternative origin -> expect guard error
+    let add_origin_as_stranger =
+        update_candid_as::<(ManageAlternativeOriginsArg,), (ManageAlternativeOriginsResult,)>(
+            &pic,
+            canister_id,
+            stranger,
+            "manage_alternative_origins",
+            (ManageAlternativeOriginsArg::Add(
+                test_origin_localhost.clone(),
+            ),),
+        );
+    assert!(
+        add_origin_as_stranger.is_err(),
+        "Non-controller should be rejected by guard when adding alternative origin"
+    );
+
+    // As stranger: attempt to Remove alternative origin -> expect guard error
+    let remove_origin_as_stranger =
+        update_candid_as::<(ManageAlternativeOriginsArg,), (ManageAlternativeOriginsResult,)>(
+            &pic,
+            canister_id,
+            stranger,
+            "manage_alternative_origins",
+            (ManageAlternativeOriginsArg::Remove(
+                test_origin_localhost.clone(),
+            ),),
+        );
+    assert!(
+        remove_origin_as_stranger.is_err(),
+        "Non-controller should be rejected by guard when removing alternative origin"
+    );
 }
