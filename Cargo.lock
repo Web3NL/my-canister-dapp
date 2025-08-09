@@ -1156,6 +1156,8 @@ dependencies = [
 [[package]]
 name = "my-canister-dashboard"
 version = "0.8.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "bfddda7682610d8910cd354a4ad1f28910e0947e4e8c7d7e72a5e43e6c1582fd"
 dependencies = [
  "candid",
  "ic-asset-certification",
@@ -1169,9 +1171,7 @@ dependencies = [
 
 [[package]]
 name = "my-canister-dashboard"
-version = "0.8.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bfddda7682610d8910cd354a4ad1f28910e0947e4e8c7d7e72a5e43e6c1582fd"
+version = "0.8.1"
 dependencies = [
  "candid",
  "ic-asset-certification",
@@ -1216,7 +1216,7 @@ dependencies = [
  "ic-cdk",
  "ic-http-certification",
  "include_dir",
- "my-canister-dashboard 0.8.0 (registry+https://github.com/rust-lang/crates.io-index)",
+ "my-canister-dashboard 0.8.0",
  "my-canister-frontend 0.1.3 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
