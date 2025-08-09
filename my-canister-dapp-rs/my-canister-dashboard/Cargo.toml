@@ -25,6 +25,13 @@ serde_json = { workspace = true }
 
 [package.metadata.release]
 pre-release-replacements = [
+  # Replace the "Unreleased" header with the new version and date
+  { file = "CHANGELOG.md", search = "## \\[Unreleased\\]", replace = "## [{{version}}] - {{date}}", exactly = 1 },
+
+  # Optional: keep an "Unreleased" section at the top after tagging
+  { file = "CHANGELOG.md", search = "(?m)^# Changelog\\n", replace = "# Changelog\n\n## [Unreleased]\n", exactly = 1 },
+
+  # Update the version in package.json for My Canister Dashboard
   { file = "../../my-canister-dapp-js/canister-dashboard-frontend/package.json", search = "\"version\": \".*\"", replace = "\"version\": \"{{version}}\"", exactly = 1 },
 ]
 
@@ -32,6 +39,3 @@ pre-release-hook = [
   "../../scripts/prebuild-mcd.sh",
   "../../scripts/rust-lint-format.sh",
 ]
-
-# changelog = "CHANGELOG.md"
-# changelog-sections = ["Added", "Changed"]

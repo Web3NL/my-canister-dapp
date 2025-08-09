@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+- Test: verify cargo-release changelog handling.
+
 ## [0.7.0] - 2025-08-02
 
 ### Added
