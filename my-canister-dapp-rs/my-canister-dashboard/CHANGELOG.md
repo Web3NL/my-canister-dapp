@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.9.1] - 2025-08-10
+
 ### Changed
 
 - Update repository URL from `https://github.com/Web3NL/my-canister-dashboard` to `https://github.com/Web3NL/my-canister-dapp`
