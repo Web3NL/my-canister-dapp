@@ -2,6 +2,18 @@
 
 ## [Unreleased]
 
+### Added
+
+Canister dashboard frontend:
+
+- Canister Logs section to the dashboard and component
+- API call to fetch canister logs from management canister
+- data-testid attributes to Refresh buttons: `refresh-balance-btn`, `refresh-logs-btn` to avoid conflicts
+
+### Changed
+
+- Update E2E canister dashboard frontend test to use data-testid for balance refresh button
+
 ## [0.8.1] - 2025-08-09
 
 - Test: verify cargo-release changelog handling.
