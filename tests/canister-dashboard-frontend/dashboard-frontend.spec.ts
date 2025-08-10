@@ -151,7 +151,7 @@ test('Canister Dashboard Frontend Suite', async ({ page }, testInfo) => {
   }
 
   // Click refresh button to update balance
-  await page.getByRole('button', { name: 'Refresh' }).click();
+  await page.getByTestId('refresh-balance-btn').click();
 
   // Calculate minimum expected balance (the amount we just transferred)
   const transferAmount = formattedAmount;

@@ -3,6 +3,7 @@ import { StatusManager } from './components/status';
 import { TopupManager } from './components/top-up';
 import { ControllersManager } from './components/controllers';
 import { AlternativeOriginsManager } from './components/alternativeOrigins';
+import { CanisterLogsManager } from './components/canisterLogs';
 import { canisterId } from './utils';
 import { DASHBOARD_INIT_ERROR_MESSAGE } from './error';
 import { getConfig } from './environment';
@@ -50,11 +51,13 @@ class Dashboard {
         iiPrincipal
       );
       const alternativeOriginsManager = new AlternativeOriginsManager();
+      const canisterLogsManager = new CanisterLogsManager();
 
       await topupManager.create();
       await statusManager.create();
       await controllersManager.create();
       await alternativeOriginsManager.create();
+      await canisterLogsManager.create();
     } else {
       this.setLoggedOutState();
     }
