@@ -8,7 +8,11 @@ export default defineConfig(() => {
     base: '/canister-dashboard',
     publicDir: false as const,
     plugins: [
-      canisterDashboardDevConfig()
+      canisterDashboardDevConfig({
+        serverProxies: {
+          canisterDashboard: false,
+        }
+      })
     ],
     build: {
       outDir: path.resolve(__dirname, 'dist'),

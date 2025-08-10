@@ -37,7 +37,13 @@
               <span id="balance-value">Loading...</span> ICP
             </p>
             <p>
-              <button id="refresh-balance-btn" class="btn">Refresh</button>
+              <button
+                id="refresh-balance-btn"
+                class="btn"
+                data-testid="refresh-balance-btn"
+              >
+                Refresh
+              </button>
               <button id="top-up-btn" class="btn">Top-up</button>
             </p>
           </div>
@@ -119,6 +125,27 @@
                 </div>
               </div>
               <ul id="alternative-origins-list">
+                <li class="data-display">Loading...</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+
+        <div id="canister-logs-section" class="card">
+          <h3>Canister Logs</h3>
+          <div id="canister-logs-content">
+            <div class="logs-info">
+              <div class="button-group">
+                <button
+                  type="button"
+                  id="refresh-logs-btn"
+                  class="btn"
+                  data-testid="refresh-logs-btn"
+                >
+                  Refresh
+                </button>
+              </div>
+              <ul id="logs-list">
                 <li class="data-display">Loading...</li>
               </ul>
             </div>

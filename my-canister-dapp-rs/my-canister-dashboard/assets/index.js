@@ -19334,6 +19334,16 @@ class ManagementApi {
       throw error;
     }
   }
+  async getCanisterLogs() {
+    try {
+      const icManagement = await this.managmentApi();
+      const canisterIdPrincipal = await canisterId();
+      return await icManagement.fetchCanisterLogs(canisterIdPrincipal);
+    } catch (error) {
+      showError(NETWORK_ERROR_MESSAGE);
+      throw error;
+    }
+  }
 }
 function principalToSubaccount(principal) {
   const principalBytes = principal.toUint8Array();
@@ -21017,6 +21027,55 @@ class AlternativeOriginsManager {
     hideLoading();
   }
 }
+class CanisterLogsManager {
+  async create() {
+    await this.renderLogs();
+    this.attachEventListeners();
+  }
+  attachEventListeners() {
+    addEventListener("refresh-logs-btn", "click", () => this.refreshLogs());
+  }
+  async refreshLogs() {
+    showLoading();
+    await this.renderLogs();
+    hideLoading();
+  }
+  async renderLogs() {
+    const managementApi = new ManagementApi();
+    const { canister_log_records } = await managementApi.getCanisterLogs();
+    const logsList = getElement("logs-list");
+    if (canister_log_records.length === 0) {
+      logsList.innerHTML = '<li class="data-display">No logs found.</li>';
+      return;
+    }
+    const items = canister_log_records.map((record) => {
+      const contentBytes = record.content instanceof Uint8Array ? record.content : Uint8Array.from(record.content);
+      const rawMessage = new TextDecoder().decode(contentBytes);
+      const timestampMs = Number(record.timestamp_nanos / 1000000n);
+      const date = new Date(timestampMs);
+      const ts = isNaN(date.getTime()) ? "Unknown time" : formatSimpleDateTime(date);
+      const idx = record.idx.toString();
+      const message = escapeHtml(rawMessage).replace(/\r\n|\n|\r/g, "<br>");
+      return `<li class="data-display">[${ts}] (#${idx})<br>${message}</li>`;
+    }).join("");
+    logsList.innerHTML = items;
+  }
+}
+function pad2(n2) {
+  return n2.toString().padStart(2, "0");
+}
+function formatSimpleDateTime(d2) {
+  const yyyy = d2.getFullYear();
+  const mm = pad2(d2.getMonth() + 1);
+  const dd = pad2(d2.getDate());
+  const hh = pad2(d2.getHours());
+  const mi = pad2(d2.getMinutes());
+  const ss = pad2(d2.getSeconds());
+  return `${yyyy}-${mm}-${dd} ${hh}:${mi}:${ss}`;
+}
+function escapeHtml(str) {
+  return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
+}
 class Dashboard {
   constructor() {
     __publicField(this, "authManager", null);
@@ -21050,10 +21109,12 @@ class Dashboard {
         iiPrincipal
       );
       const alternativeOriginsManager = new AlternativeOriginsManager();
+      const canisterLogsManager = new CanisterLogsManager();
       await topupManager.create();
       await statusManager.create();
       await controllersManager.create();
       await alternativeOriginsManager.create();
+      await canisterLogsManager.create();
     } else {
       this.setLoggedOutState();
     }
