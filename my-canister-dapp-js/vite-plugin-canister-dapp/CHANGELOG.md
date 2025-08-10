@@ -1,5 +1,11 @@
 # @web3nl/vite-plugin-canister-dapp
 
+## 0.2.0
+
+### Minor Changes
+
+- [#95](https://github.com/Web3NL/my-canister-dapp/pull/95) [`e07d119`](https://github.com/Web3NL/my-canister-dapp/commit/e07d11984d62d7cb83bec69c233120a38923b7fe) Thanks [@Web3NL](https://github.com/Web3NL)! - Add configuration options to enable/disable plugin features
+
 ## 0.1.3
 
 ### Patch Changes

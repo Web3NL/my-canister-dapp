@@ -13,6 +13,25 @@ export interface CanisterDashboardDevConfig {
   identityProvider: string;
 }
 
+/**
+ * Plugin configuration interface for enabling/disabling features
+ */
+export interface CanisterDashboardPluginConfig {
+  /** Whether to serve the canister dashboard dev config endpoint in dev server (default: true) */
+  serveCanisterDashboardDevEnv?: boolean;
+  /** Whether to emit the canister dashboard dev config during dev build as a static asset (default: true) */
+  emitCanisterDashboardDevConfig?: boolean;
+  /** Server proxy to dfx configuration (default: all enabled) */
+  serverProxies?: {
+    /** Enable /api proxy (default: true) */
+    api?: boolean;
+    /** Enable /canister-dashboard proxy (default: true) */
+    canisterDashboard?: boolean;
+    /** Enable /.well-known/ii-alternative-origins proxy (default: true) */
+    iiAlternativeOrigins?: boolean;
+  };
+}
+
 function loadCanisterDappDevEnv(
   mode: string,
   root: string
@@ -76,9 +95,25 @@ function loadCanisterDappDevEnv(
  * Optional environment variables:
  * - VITE_CANISTER_ID: Your canister ID
  *
+ * @param config Optional configuration to enable/disable plugin features
  * @returns Vite plugin instance
  */
-export function canisterDashboardDevConfig(): Plugin {
+export function canisterDashboardDevConfig(
+  config: CanisterDashboardPluginConfig = {}
+): Plugin {
+  // Set default configuration values
+  const {
+    serveCanisterDashboardDevEnv = true,
+    emitCanisterDashboardDevConfig = true,
+    serverProxies = {},
+  } = config;
+
+  const {
+    api: enableApiProxy = true,
+    canisterDashboard: enableCanisterDashboardProxy = true,
+    iiAlternativeOrigins: enableIiAlternativeOriginsProxy = true,
+  } = serverProxies;
+
   let dashboardConfig: CanisterDashboardDevConfig | null = null;
   let currentMode = 'production';
 
@@ -121,11 +156,19 @@ export function canisterDashboardDevConfig(): Plugin {
       config.server.proxy ??= {};
 
       const existingProxy = config.server.proxy;
-      const baseProxyKeys = ['/api'];
-      const canisterProxyKeys = [
-        '/canister-dashboard',
-        '/.well-known/ii-alternative-origins',
-      ];
+      const baseProxyKeys: string[] = [];
+      const canisterProxyKeys: string[] = [];
+
+      // Only include enabled proxy keys
+      if (enableApiProxy) {
+        baseProxyKeys.push('/api');
+      }
+      if (enableCanisterDashboardProxy) {
+        canisterProxyKeys.push('/canister-dashboard');
+      }
+      if (enableIiAlternativeOriginsProxy) {
+        canisterProxyKeys.push('/.well-known/ii-alternative-origins');
+      }
 
       // Only include canister-specific proxies if canisterId is defined
       const proxyKeys = notEmptyString(canisterId)
@@ -157,7 +200,7 @@ export function canisterDashboardDevConfig(): Plugin {
         }
       > = {};
 
-      if (!('/api' in existingProxy)) {
+      if (enableApiProxy && !('/api' in existingProxy)) {
         newProxyConfig['/api'] = {
           target: proxyTarget,
           changeOrigin: true,
@@ -166,7 +209,10 @@ export function canisterDashboardDevConfig(): Plugin {
 
       // Only add canister-specific proxies if canisterId is defined
       if (notEmptyString(canisterId)) {
-        if (!('/canister-dashboard' in existingProxy)) {
+        if (
+          enableCanisterDashboardProxy &&
+          !('/canister-dashboard' in existingProxy)
+        ) {
           newProxyConfig['/canister-dashboard'] = {
             target: proxyTarget,
             changeOrigin: true,
@@ -174,7 +220,10 @@ export function canisterDashboardDevConfig(): Plugin {
           };
         }
 
-        if (!('/.well-known/ii-alternative-origins' in existingProxy)) {
+        if (
+          enableIiAlternativeOriginsProxy &&
+          !('/.well-known/ii-alternative-origins' in existingProxy)
+        ) {
           newProxyConfig['/.well-known/ii-alternative-origins'] = {
             target: proxyTarget,
             changeOrigin: true,
@@ -201,6 +250,11 @@ export function canisterDashboardDevConfig(): Plugin {
         return;
       }
 
+      // Skip if feature is disabled
+      if (!serveCanisterDashboardDevEnv) {
+        return;
+      }
+
       // Only serve config if dashboardConfig is available
       if (dashboardConfig === null) {
         return;
@@ -224,6 +278,11 @@ export function canisterDashboardDevConfig(): Plugin {
     generateBundle() {
       // Skip entirely if not in development mode
       if (currentMode !== 'development') {
+        return;
+      }
+
+      // Skip if feature is disabled
+      if (!emitCanisterDashboardDevConfig) {
         return;
       }
 
