@@ -2,6 +2,15 @@
 
 ## [Unreleased]
 
+### Added
+
+- Manage top-up rule module with single-rule semantics (Hourly/Daily/Weekly/Monthly) and periodic timer.
+- Exchange-rate fetch via CMC and ICRC-1 transfer+notify flow with minimal idempotency.
+- Logging (println) at key steps of the top-up lifecycle.
+- Extend example DID to include `manage_top_up_rule` and associated types.
+
+### Changed
+
 ## [0.9.1] - 2025-08-10
 
 ### Changed
