@@ -35,7 +35,7 @@ type ManageAlternativeOriginsArg = variant {
 type ManageAlternativeOriginsResult = variant {
   Ok;
   Err : text
-}
+};
 
 type ManageTopUpRuleArg = variant {
   Get;

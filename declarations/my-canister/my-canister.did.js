@@ -26,6 +26,26 @@ export const idlFactory = ({ IDL }) => {
     'Ok' : IDL.Principal,
     'Err' : IDL.Text,
   });
+  const TopUpInterval = IDL.Variant({
+    'Hourly' : IDL.Null,
+    'Weekly' : IDL.Null,
+    'Daily' : IDL.Null,
+    'Monthly' : IDL.Null,
+  });
+  const TopUpRule = IDL.Record({
+    'interval' : TopUpInterval,
+    'cycles_amount' : IDL.Nat,
+    'cycles_threshold' : IDL.Nat,
+  });
+  const ManageTopUpRuleArg = IDL.Variant({
+    'Add' : TopUpRule,
+    'Get' : IDL.Null,
+    'Clear' : IDL.Null,
+  });
+  const ManageTopUpRuleResult = IDL.Variant({
+    'Ok' : IDL.Opt(TopUpRule),
+    'Err' : IDL.Text,
+  });
   const WasmStatus = IDL.Record({
     'memo' : IDL.Opt(IDL.Text),
     'name' : IDL.Text,
@@ -41,6 +61,11 @@ export const idlFactory = ({ IDL }) => {
     'manage_ii_principal' : IDL.Func(
         [ManageIIPrincipalArg],
         [ManageIIPrincipalResult],
+        [],
+      ),
+    'manage_top_up_rule' : IDL.Func(
+        [ManageTopUpRuleArg],
+        [ManageTopUpRuleResult],
         [],
       ),
     'wasm_status' : IDL.Func([], [WasmStatus], ['query']),

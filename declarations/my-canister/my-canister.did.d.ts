@@ -21,6 +21,20 @@ export type ManageIIPrincipalArg = { 'Get' : null } |
   { 'Set' : Principal };
 export type ManageIIPrincipalResult = { 'Ok' : Principal } |
   { 'Err' : string };
+export type ManageTopUpRuleArg = { 'Add' : TopUpRule } |
+  { 'Get' : null } |
+  { 'Clear' : null };
+export type ManageTopUpRuleResult = { 'Ok' : [] | [TopUpRule] } |
+  { 'Err' : string };
+export type TopUpInterval = { 'Hourly' : null } |
+  { 'Weekly' : null } |
+  { 'Daily' : null } |
+  { 'Monthly' : null };
+export interface TopUpRule {
+  'interval' : TopUpInterval,
+  'cycles_amount' : bigint,
+  'cycles_threshold' : bigint,
+}
 export interface WasmStatus {
   'memo' : [] | [string],
   'name' : string,
@@ -35,6 +49,10 @@ export interface _SERVICE {
   'manage_ii_principal' : ActorMethod<
     [ManageIIPrincipalArg],
     ManageIIPrincipalResult
+  >,
+  'manage_top_up_rule' : ActorMethod<
+    [ManageTopUpRuleArg],
+    ManageTopUpRuleResult
   >,
   'wasm_status' : ActorMethod<[], WasmStatus>,
 }
