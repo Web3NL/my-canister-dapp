@@ -7,8 +7,8 @@ import { Principal } from '@dfinity/principal';
 
 test('Canister Dashboard Frontend Suite', async ({ page }, testInfo) => {
   test.setTimeout(60000); // 1 minute timeout
-  const TOPUP_AMOUNT_MAINNET = BigInt(1_000_000);
-  const TOPUP_AMOUNT_LOCAL = BigInt(100_000_000);
+  const TOPUP_AMOUNT_MAINNET = BigInt(100_000);
+  const TOPUP_AMOUNT_LOCAL = BigInt(100_000);
   const TEST_CONTROLLER = 'rkp4c-7iaaa-aaaaa-aaaca-cai';
   const TEST_ORIGINS = [
     'http://localhost:9999',

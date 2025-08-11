@@ -2,14 +2,13 @@
 import { notEmptyString } from '@dfinity/utils';
 
 export async function getConfig() {
+  const isDevMode = import.meta.env.MODE === 'development';
+
   const canisterId = import.meta.env.VITE_CANISTER_ID;
   const iiCanisterId = import.meta.env.VITE_II_CANISTER_ID;
   const dfxProtocol = import.meta.env.VITE_DFX_PROTOCOL;
   const dfxHostname = import.meta.env.VITE_DFX_HOSTNAME;
   const dfxPort = import.meta.env.VITE_DFX_PORT;
-
-  // Provide fallbacks similar to the working v3 version
-  const isDevMode = import.meta.env.DEV;
 
   let identityProvider: string;
   let dfxHost: string;
@@ -38,5 +37,5 @@ export async function getConfig() {
 }
 
 export function isDevMode(): boolean {
-  return import.meta.env.DEV;
+  return import.meta.env.MODE === 'development';
 }
