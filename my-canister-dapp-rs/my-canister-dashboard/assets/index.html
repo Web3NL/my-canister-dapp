@@ -50,6 +50,56 @@
           </div>
         </div>
 
+        <div id="top-up-rule-section" class="card">
+          <h3>Top Up Rule</h3>
+          <div id="top-up-rule-content">
+            <div class="form-group">
+              <div>
+                <label for="top-up-rule-interval">Interval:</label>
+                <select id="top-up-rule-interval">
+                  <option value="Hourly">Hourly</option>
+                  <option value="Daily">Daily</option>
+                  <option value="Weekly">Weekly</option>
+                  <option value="Monthly">Monthly</option>
+                </select>
+              </div>
+
+              <div>
+                <label for="top-up-rule-threshold">Threshold (cycles):</label>
+                <input
+                  type="number"
+                  id="top-up-rule-threshold"
+                  min="0"
+                  placeholder="Threshold cycles"
+                />
+              </div>
+
+              <div>
+                <label for="top-up-rule-amount">Amount (cycles):</label>
+                <input
+                  type="number"
+                  id="top-up-rule-amount"
+                  min="0"
+                  placeholder="Amount cycles"
+                />
+              </div>
+
+              <div class="button-group">
+                <button type="button" id="top-up-rule-set" class="btn">
+                  Set Rule
+                </button>
+                <button type="button" id="top-up-rule-clear" class="btn">
+                  Clear Rule
+                </button>
+              </div>
+            </div>
+            <div>
+              <strong>Current Rule:</strong>
+              <span id="top-up-rule-display">Loading...</span>
+            </div>
+          </div>
+        </div>
+
         <div id="status-section" class="card">
           <h3>Canister Status</h3>
           <div id="status-content">

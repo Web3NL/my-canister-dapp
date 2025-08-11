@@ -18994,9 +18994,9 @@ var w$2 = class w {
   }
 };
 var b$2 = (e5) => e5 == null, s$1 = (e5) => !b$2(e5);
-var O$3 = () => HttpAgent.createSync({ host: "https://icp-api.io", identity: new AnonymousIdentity() });
+var O$2 = () => HttpAgent.createSync({ host: "https://icp-api.io", identity: new AnonymousIdentity() });
 var lt = ({ options: { canisterId: e5, serviceOverride: t3, certifiedServiceOverride: r2, agent: n2, callTransform: o2, queryTransform: i3 }, idlFactory: c, certifiedIdlFactory: a }) => {
-  let d2 = n2 ?? O$3(), m2 = t3 ?? Actor.createActor(c, { agent: d2, canisterId: e5, callTransform: o2, queryTransform: i3 }), x2 = r2 ?? Actor.createActor(a, { agent: d2, canisterId: e5, callTransform: o2, queryTransform: i3 });
+  let d2 = n2 ?? O$2(), m2 = t3 ?? Actor.createActor(c, { agent: d2, canisterId: e5, callTransform: o2, queryTransform: i3 }), x2 = r2 ?? Actor.createActor(a, { agent: d2, canisterId: e5, callTransform: o2, queryTransform: i3 });
   return { service: m2, certifiedService: x2, agent: d2, canisterId: e5 };
 };
 var A$2 = class A extends Error {
@@ -19140,20 +19140,20 @@ var Qt = class t {
     return new t(n2);
   }
 };
-function O$2() {
-  const t3 = window.location.hostname, r2 = window.location.protocol, e5 = /^([a-z0-9-]+)\.localhost$/.exec(t3);
-  if ((e5 == null ? void 0 : e5[1]) != null) {
-    if (r2 !== "http:")
+function V$2() {
+  const t3 = window.location.hostname, e5 = window.location.protocol, r2 = /^([a-z0-9-]+)\.localhost$/.exec(t3);
+  if ((r2 == null ? void 0 : r2[1]) != null) {
+    if (e5 !== "http:")
       throw new Error(
-        `Invalid protocol for localhost: ${r2}. Only http: is allowed for localhost.`
+        `Invalid protocol for localhost: ${e5}. Only http: is allowed for localhost.`
       );
-    return Principal$1.fromText(e5[1]);
+    return Principal$1.fromText(r2[1]);
   }
   const a = /^([a-z0-9-]+)\.icp0\.io$/.exec(t3);
   if ((a == null ? void 0 : a[1]) != null) {
-    if (r2 !== "https:")
+    if (e5 !== "https:")
       throw new Error(
-        `Invalid protocol for production: ${r2}. Only https: is allowed for icp0.io.`
+        `Invalid protocol for production: ${e5}. Only https: is allowed for icp0.io.`
       );
     return Principal$1.fromText(a[1]);
   }
@@ -19274,7 +19274,7 @@ function isValidOrigin(text) {
 }
 async function canisterId() {
   try {
-    return O$2();
+    return V$2();
   } catch {
     const config = await getConfig();
     if (config.canisterId !== void 0) {
@@ -20902,6 +20902,26 @@ const idlFactory = ({ IDL: IDL2 }) => {
     "Ok": IDL2.Principal,
     "Err": IDL2.Text
   });
+  const TopUpInterval = IDL2.Variant({
+    "Hourly": IDL2.Null,
+    "Weekly": IDL2.Null,
+    "Daily": IDL2.Null,
+    "Monthly": IDL2.Null
+  });
+  const TopUpRule = IDL2.Record({
+    "interval": TopUpInterval,
+    "cycles_amount": IDL2.Nat,
+    "cycles_threshold": IDL2.Nat
+  });
+  const ManageTopUpRuleArg = IDL2.Variant({
+    "Add": TopUpRule,
+    "Get": IDL2.Null,
+    "Clear": IDL2.Null
+  });
+  const ManageTopUpRuleResult = IDL2.Variant({
+    "Ok": IDL2.Opt(TopUpRule),
+    "Err": IDL2.Text
+  });
   const WasmStatus = IDL2.Record({
     "memo": IDL2.Opt(IDL2.Text),
     "name": IDL2.Text,
@@ -20917,6 +20937,11 @@ const idlFactory = ({ IDL: IDL2 }) => {
     "manage_ii_principal": IDL2.Func(
       [ManageIIPrincipalArg],
       [ManageIIPrincipalResult],
+      []
+    ),
+    "manage_top_up_rule": IDL2.Func(
+      [ManageTopUpRuleArg],
+      [ManageTopUpRuleResult],
       []
     ),
     "wasm_status": IDL2.Func([], [WasmStatus], ["query"])
@@ -20938,6 +20963,14 @@ class CanisterApi {
   async manageAlternativeOrigins(arg) {
     try {
       return await this.canisterApi.manage_alternative_origins(arg);
+    } catch (error) {
+      showError(NETWORK_ERROR_MESSAGE);
+      throw error;
+    }
+  }
+  async manageTopUpRule(arg) {
+    try {
+      return await this.canisterApi.manage_top_up_rule(arg);
     } catch (error) {
       showError(NETWORK_ERROR_MESSAGE);
       throw error;
@@ -20996,9 +21029,13 @@ class AlternativeOriginsManager {
       await new Promise((resolve) => setTimeout(resolve, IC_UPDATE_CALL_DELAY));
       await this.create();
       clearInput("alternative-origin-input");
-    } else {
+    } else if ("Err" in result) {
+      const err = result.Err;
       showError(NETWORK_ERROR_MESSAGE);
-      throw new Error(`Failed to add alternative origin: ${result.Err}`);
+      throw new Error(`Failed to add alternative origin: ${err}`);
+    } else {
+      showError("Unknown error");
+      throw new Error("Unknown error adding alternative origin");
     }
     hideLoading();
   }
@@ -21020,9 +21057,13 @@ class AlternativeOriginsManager {
       await new Promise((resolve) => setTimeout(resolve, IC_UPDATE_CALL_DELAY));
       await this.create();
       clearInput("alternative-origin-input");
-    } else {
+    } else if ("Err" in result) {
+      const err = result.Err;
       showError(NETWORK_ERROR_MESSAGE);
-      throw new Error(`Failed to remove alternative origin: ${result.Err}`);
+      throw new Error(`Failed to remove alternative origin: ${err}`);
+    } else {
+      showError("Unknown error");
+      throw new Error("Unknown error removing alternative origin");
     }
     hideLoading();
   }
@@ -21076,6 +21117,132 @@ function formatSimpleDateTime(d2) {
 function escapeHtml(str) {
   return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
 }
+function formatRule(rule) {
+  let interval = "Unknown";
+  const intervalObj = rule.interval;
+  if (intervalObj !== null && typeof intervalObj === "object" && !Array.isArray(intervalObj)) {
+    if ("Hourly" in intervalObj) interval = "Hourly";
+    else if ("Daily" in intervalObj) interval = "Daily";
+    else if ("Weekly" in intervalObj) interval = "Weekly";
+    else if ("Monthly" in intervalObj) interval = "Monthly";
+  }
+  return `Interval: ${interval}, Threshold: ${rule.cycles_threshold} cycles, Amount: ${rule.cycles_amount} cycles`;
+}
+class TopUpRuleManager {
+  constructor() {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    __publicField(this, "canisterApi");
+    this.canisterApi = new CanisterApi();
+  }
+  async create() {
+    await this.fetchAndRender();
+    this.attachEventListeners();
+  }
+  attachEventListeners() {
+    addEventListener("top-up-rule-set", "click", () => this.handleSet());
+    addEventListener("top-up-rule-clear", "click", () => this.handleClear());
+  }
+  async fetchAndRender() {
+    try {
+      const res = await this.canisterApi.manageTopUpRule({ Get: null });
+      this.render(res);
+    } catch {
+      showError(NETWORK_ERROR_MESSAGE);
+    }
+  }
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  render(result) {
+    const display = getElement("top-up-rule-display");
+    if (result && typeof result === "object") {
+      if ("Ok" in result && Array.isArray(result.Ok)) {
+        if (result.Ok.length === 0) {
+          display.textContent = "No rule set";
+        } else {
+          display.textContent = formatRule(result.Ok[0]);
+        }
+      } else if ("Err" in result && typeof result.Err === "string") {
+        showError(result.Err);
+      } else {
+        display.textContent = "Unknown result";
+      }
+    } else {
+      display.textContent = "Unknown result";
+    }
+  }
+  async handleSet() {
+    const intervalElem = getElement("top-up-rule-interval");
+    let intervalValue = "";
+    if (intervalElem instanceof HTMLSelectElement) {
+      intervalValue = intervalElem.value;
+    }
+    const thresholdStr = getInputValue("top-up-rule-threshold");
+    const amountStr = getInputValue("top-up-rule-amount");
+    if (!thresholdStr || !amountStr) {
+      showError("Please provide threshold and amount.");
+      return;
+    }
+    let threshold, amount;
+    try {
+      threshold = BigInt(thresholdStr);
+      amount = BigInt(amountStr);
+      if (threshold < 0n || amount < 0n) throw new Error("negative");
+    } catch {
+      showError("Threshold and amount must be non-negative integers.");
+      return;
+    }
+    let interval;
+    if (intervalValue === "Hourly") interval = { Hourly: null };
+    else if (intervalValue === "Daily") interval = { Daily: null };
+    else if (intervalValue === "Weekly") interval = { Weekly: null };
+    else interval = { Monthly: null };
+    showLoading();
+    try {
+      const result = await this.canisterApi.manageTopUpRule({
+        Add: {
+          interval,
+          cycles_threshold: threshold,
+          cycles_amount: amount
+        }
+      });
+      if (result && typeof result === "object") {
+        if ("Ok" in result) {
+          await this.fetchAndRender();
+        } else if ("Err" in result && typeof result.Err === "string") {
+          showError(result.Err);
+        } else {
+          showError("Unknown error");
+        }
+      } else {
+        showError("Unknown error");
+      }
+    } catch {
+      showError(NETWORK_ERROR_MESSAGE);
+    } finally {
+      hideLoading();
+    }
+  }
+  async handleClear() {
+    showLoading();
+    try {
+      const result = await this.canisterApi.manageTopUpRule({ Clear: null });
+      if (result && typeof result === "object") {
+        if ("Ok" in result) {
+          await this.fetchAndRender();
+        } else if ("Err" in result && typeof result.Err === "string") {
+          showError(result.Err);
+        } else {
+          showError("Unknown error");
+        }
+      } else {
+        showError("Unknown error");
+      }
+    } catch {
+      showError(NETWORK_ERROR_MESSAGE);
+    } finally {
+      hideLoading();
+    }
+  }
+}
 class Dashboard {
   constructor() {
     __publicField(this, "authManager", null);
@@ -21103,6 +21270,7 @@ class Dashboard {
       this.setLoggedInState(principalText);
       const canisterIdPrincipal = await canisterId();
       const topupManager = new TopupManager();
+      const topUpRuleManager = new TopUpRuleManager();
       const statusManager = new StatusManager();
       const controllersManager = new ControllersManager(
         canisterIdPrincipal,
@@ -21111,6 +21279,7 @@ class Dashboard {
       const alternativeOriginsManager = new AlternativeOriginsManager();
       const canisterLogsManager = new CanisterLogsManager();
       await topupManager.create();
+      await topUpRuleManager.create();
       await statusManager.create();
       await controllersManager.create();
       await alternativeOriginsManager.create();

@@ -5,7 +5,7 @@
     "baseUrl": ".",
     "paths": {
       "$declarations/*": [
-        "../../declarations/*"
+        "../my-canister-dashboard-js/declarations/*"
       ]
     }
   },
