@@ -5,10 +5,10 @@ set -euo pipefail
 # Ensure we're in the project root directory
 cd "$(dirname "$0")/.."
 
-INPUT_DID="candid/my-canister.did"
-OUT_DIR="declarations/my-canister"
-TS_OUT="$OUT_DIR/my-canister.did.d.ts"
-JS_OUT="$OUT_DIR/my-canister.did.js"
+INPUT_DID="my-canister-dapp-js/my-canister-dashboard-js/candid/my-canister-dashboard.did"
+OUT_DIR="my-canister-dapp-js/my-canister-dashboard-js/declarations"
+TS_OUT="$OUT_DIR/my-canister-dashboard.did.d.ts"
+JS_OUT="$OUT_DIR/my-canister-dashboard.did.js"
 
 if ! command -v didc >/dev/null 2>&1; then
   echo "Error: didc is not installed or not in PATH." >&2
