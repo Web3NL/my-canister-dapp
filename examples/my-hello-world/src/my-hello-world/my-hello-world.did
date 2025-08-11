@@ -35,7 +35,31 @@ type ManageAlternativeOriginsArg = variant {
 type ManageAlternativeOriginsResult = variant {
   Ok;
   Err : text
-}
+};
+
+type ManageTopUpRuleArg = variant {
+  Get;
+  Add : TopUpRule;
+  Clear
+};
+
+type ManageTopUpRuleResult = variant {
+  Ok : opt TopUpRule;
+  Err : text
+};
+
+type TopUpRule = record {
+  interval : TopUpInterval;
+  cycles_threshold : nat;
+  cycles_amount : nat
+};
+
+type TopUpInterval = variant {
+  Hourly;
+  Daily;
+  Weekly;
+  Monthly
+};
 
 service : {
   "greet" : (text) -> (text) query;
@@ -44,5 +68,6 @@ service : {
   "http_request" : (HttpRequest) -> (HttpResponse) query;
   "wasm_status" : () -> (WasmStatus) query;
   "manage_ii_principal" : (ManageIIPrincipalArg) -> (ManageIIPrincipalResult);
-  "manage_alternative_origins" : (ManageAlternativeOriginsArg) -> (ManageAlternativeOriginsResult)
+  "manage_alternative_origins" : (ManageAlternativeOriginsArg) -> (ManageAlternativeOriginsResult);
+  "manage_top_up_rule" : (ManageTopUpRuleArg) -> (ManageTopUpRuleResult)
 }
