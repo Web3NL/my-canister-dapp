@@ -19140,7 +19140,7 @@ var Qt = class t {
     return new t(n2);
   }
 };
-function V$2() {
+function C$1() {
   const t3 = window.location.hostname, e5 = window.location.protocol, r2 = /^([a-z0-9-]+)\.localhost$/.exec(t3);
   if ((r2 == null ? void 0 : r2[1]) != null) {
     if (e5 !== "http:")
@@ -19274,7 +19274,7 @@ function isValidOrigin(text) {
 }
 async function canisterId() {
   try {
-    return V$2();
+    return C$1();
   } catch {
     const config = await getConfig();
     if (config.canisterId !== void 0) {
@@ -20908,10 +20908,20 @@ const idlFactory = ({ IDL: IDL2 }) => {
     "Daily": IDL2.Null,
     "Monthly": IDL2.Null
   });
+  const CyclesAmount = IDL2.Variant({
+    "_1T": IDL2.Null,
+    "_2T": IDL2.Null,
+    "_5T": IDL2.Null,
+    "_10T": IDL2.Null,
+    "_50T": IDL2.Null,
+    "_0_5T": IDL2.Null,
+    "_100T": IDL2.Null,
+    "_0_25T": IDL2.Null
+  });
   const TopUpRule = IDL2.Record({
     "interval": TopUpInterval,
-    "cycles_amount": IDL2.Nat,
-    "cycles_threshold": IDL2.Nat
+    "cycles_amount": CyclesAmount,
+    "cycles_threshold": CyclesAmount
   });
   const ManageTopUpRuleArg = IDL2.Variant({
     "Add": TopUpRule,
@@ -21117,16 +21127,46 @@ function formatSimpleDateTime(d2) {
 function escapeHtml(str) {
   return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
 }
+function isErrorResult(obj) {
+  return typeof obj === "object" && obj !== null && "Err" in obj && typeof obj.Err === "string";
+}
+function isTopUpRule(obj) {
+  return typeof obj === "object" && obj !== null && !("error" in obj) && "cycles_threshold" in obj && "cycles_amount" in obj && typeof obj.cycles_threshold !== "undefined" && typeof obj.cycles_amount !== "undefined";
+}
 function formatRule(rule) {
   let interval = "Unknown";
   const intervalObj = rule.interval;
-  if (intervalObj !== null && typeof intervalObj === "object" && !Array.isArray(intervalObj)) {
+  if (typeof intervalObj === "object" && intervalObj !== null && !Array.isArray(intervalObj)) {
     if ("Hourly" in intervalObj) interval = "Hourly";
     else if ("Daily" in intervalObj) interval = "Daily";
     else if ("Weekly" in intervalObj) interval = "Weekly";
     else if ("Monthly" in intervalObj) interval = "Monthly";
   }
-  return `Interval: ${interval}, Threshold: ${rule.cycles_threshold} cycles, Amount: ${rule.cycles_amount} cycles`;
+  function cyclesAmountToString(val) {
+    if (typeof val === "object" && val !== null) {
+      const keys = Object.keys(val);
+      if (keys.length > 0 && typeof keys[0] === "string" && keys[0] !== "") {
+        const key = keys[0];
+        return key.replace(/^_/, "").replace("_", ".").replace("T", "T");
+      }
+    }
+    return String(val);
+  }
+  if (isTopUpRule(rule)) {
+    const thresholdStr = cyclesAmountToString(
+      rule.cycles_threshold
+    );
+    const amountStr = cyclesAmountToString(
+      rule.cycles_amount
+    );
+    return `Interval: ${interval}
+Threshold: ${thresholdStr} cycles
+Amount: ${amountStr} cycles`;
+  }
+  if (typeof rule === "object" && "error" in rule && typeof rule.error === "string") {
+    return `Error: ${rule.error}`;
+  }
+  return "Invalid rule";
 }
 class TopUpRuleManager {
   constructor() {
@@ -21150,21 +21190,19 @@ class TopUpRuleManager {
       showError(NETWORK_ERROR_MESSAGE);
     }
   }
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   render(result) {
     const display = getElement("top-up-rule-display");
-    if (result && typeof result === "object") {
-      if ("Ok" in result && Array.isArray(result.Ok)) {
-        if (result.Ok.length === 0) {
-          display.textContent = "No rule set";
-        } else {
-          display.textContent = formatRule(result.Ok[0]);
-        }
-      } else if ("Err" in result && typeof result.Err === "string") {
-        showError(result.Err);
+    if ("Ok" in result && Array.isArray(result.Ok)) {
+      if (result.Ok.length === 0 || result.Ok[0] === void 0) {
+        display.textContent = "No rule set";
       } else {
-        display.textContent = "Unknown result";
+        display.textContent = "";
+        const pre = document.createElement("pre");
+        pre.textContent = formatRule(result.Ok[0]);
+        display.appendChild(pre);
       }
+    } else if (isErrorResult(result)) {
+      showError(result.Err);
     } else {
       display.textContent = "Unknown result";
     }
@@ -21175,19 +21213,12 @@ class TopUpRuleManager {
     if (intervalElem instanceof HTMLSelectElement) {
       intervalValue = intervalElem.value;
     }
-    const thresholdStr = getInputValue("top-up-rule-threshold");
-    const amountStr = getInputValue("top-up-rule-amount");
-    if (!thresholdStr || !amountStr) {
-      showError("Please provide threshold and amount.");
-      return;
-    }
-    let threshold, amount;
-    try {
-      threshold = BigInt(thresholdStr);
-      amount = BigInt(amountStr);
-      if (threshold < 0n || amount < 0n) throw new Error("negative");
-    } catch {
-      showError("Threshold and amount must be non-negative integers.");
+    const thresholdSelect = getElement("top-up-rule-threshold");
+    const amountSelect = getElement("top-up-rule-amount");
+    const thresholdValue = thresholdSelect instanceof HTMLSelectElement ? thresholdSelect.value : "";
+    const amountValue = amountSelect instanceof HTMLSelectElement ? amountSelect.value : "";
+    if (!thresholdValue || !amountValue) {
+      showError("Please select threshold and amount.");
       return;
     }
     let interval;
@@ -21195,6 +21226,8 @@ class TopUpRuleManager {
     else if (intervalValue === "Daily") interval = { Daily: null };
     else if (intervalValue === "Weekly") interval = { Weekly: null };
     else interval = { Monthly: null };
+    const threshold = { [thresholdValue]: null };
+    const amount = { [amountValue]: null };
     showLoading();
     try {
       const result = await this.canisterApi.manageTopUpRule({
@@ -21207,7 +21240,7 @@ class TopUpRuleManager {
       if (result && typeof result === "object") {
         if ("Ok" in result) {
           await this.fetchAndRender();
-        } else if ("Err" in result && typeof result.Err === "string") {
+        } else if (isErrorResult(result)) {
           showError(result.Err);
         } else {
           showError("Unknown error");

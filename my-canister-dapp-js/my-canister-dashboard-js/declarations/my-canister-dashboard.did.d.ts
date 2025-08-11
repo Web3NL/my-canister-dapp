@@ -2,6 +2,14 @@ import type { Principal } from '@dfinity/principal';
 import type { ActorMethod } from '@dfinity/agent';
 import type { IDL } from '@dfinity/candid';
 
+export type CyclesAmount = { '_1T' : null } |
+  { '_2T' : null } |
+  { '_5T' : null } |
+  { '_10T' : null } |
+  { '_50T' : null } |
+  { '_0_5T' : null } |
+  { '_100T' : null } |
+  { '_0_25T' : null };
 export interface HttpRequest {
   'url' : string,
   'method' : string,
@@ -32,8 +40,8 @@ export type TopUpInterval = { 'Hourly' : null } |
   { 'Monthly' : null };
 export interface TopUpRule {
   'interval' : TopUpInterval,
-  'cycles_amount' : bigint,
-  'cycles_threshold' : bigint,
+  'cycles_amount' : CyclesAmount,
+  'cycles_threshold' : CyclesAmount,
 }
 export interface WasmStatus {
   'memo' : [] | [string],

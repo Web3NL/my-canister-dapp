@@ -32,10 +32,20 @@ export const idlFactory = ({ IDL }) => {
     'Daily' : IDL.Null,
     'Monthly' : IDL.Null,
   });
+  const CyclesAmount = IDL.Variant({
+    '_1T' : IDL.Null,
+    '_2T' : IDL.Null,
+    '_5T' : IDL.Null,
+    '_10T' : IDL.Null,
+    '_50T' : IDL.Null,
+    '_0_5T' : IDL.Null,
+    '_100T' : IDL.Null,
+    '_0_25T' : IDL.Null,
+  });
   const TopUpRule = IDL.Record({
     'interval' : TopUpInterval,
-    'cycles_amount' : IDL.Nat,
-    'cycles_threshold' : IDL.Nat,
+    'cycles_amount' : CyclesAmount,
+    'cycles_threshold' : CyclesAmount,
   });
   const ManageTopUpRuleArg = IDL.Variant({
     'Add' : TopUpRule,

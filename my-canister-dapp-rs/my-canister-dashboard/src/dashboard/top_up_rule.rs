@@ -34,10 +34,37 @@ pub enum TopUpInterval {
 }
 
 #[derive(CandidType, Serialize, Deserialize, Clone, Debug, PartialEq, Eq)]
+pub enum CyclesAmount {
+    _0_25T,
+    _0_5T,
+    _1T,
+    _2T,
+    _5T,
+    _10T,
+    _50T,
+    _100T,
+}
+
+impl CyclesAmount {
+    pub fn as_cycles(&self) -> u64 {
+        match self {
+            CyclesAmount::_0_25T => 250_000_000_000,
+            CyclesAmount::_0_5T => 500_000_000_000,
+            CyclesAmount::_1T => 1_000_000_000_000,
+            CyclesAmount::_2T => 2_000_000_000_000,
+            CyclesAmount::_5T => 5_000_000_000_000,
+            CyclesAmount::_10T => 10_000_000_000_000,
+            CyclesAmount::_50T => 50_000_000_000_000,
+            CyclesAmount::_100T => 100_000_000_000_000,
+        }
+    }
+}
+
+#[derive(CandidType, Serialize, Deserialize, Clone, Debug, PartialEq, Eq)]
 pub struct TopUpRule {
     pub interval: TopUpInterval,
-    pub cycles_threshold: Nat, // top up when canister's cycles below this
-    pub cycles_amount: Nat,    // cycles (nat)
+    pub cycles_threshold: CyclesAmount, // top up when canister's cycles below this
+    pub cycles_amount: CyclesAmount,    // cycles amount
 }
 
 thread_local! {
@@ -60,8 +87,8 @@ pub fn manage_top_up_rule(arg: ManageTopUpRuleArg) -> ManageTopUpRuleResult {
             });
             ic_cdk::println!(
                 "top-up: rule set amount={} threshold={} interval={:?}",
-                rule.cycles_amount,
-                rule.cycles_threshold,
+                rule.cycles_amount.as_cycles(),
+                rule.cycles_threshold.as_cycles(),
                 rule.interval
             );
 
@@ -107,26 +134,26 @@ fn on_top_up_interval_tick() {
             let every = interval_duration(&rule.interval).as_secs();
             ic_cdk::println!(
                 "top-up: active rule amount={} threshold={} interval={:?} every={}s",
-                rule.cycles_amount,
-                rule.cycles_threshold,
+                rule.cycles_amount.as_cycles(),
+                rule.cycles_threshold.as_cycles(),
                 rule.interval,
                 every
             );
             // Hysteresis: only top up if cycles are below threshold minus 10% buffer
-            let threshold = rule.cycles_threshold.clone();
-            let hysteresis = threshold.clone() / Nat::from(10u32); // 10%
+            let threshold = rule.cycles_threshold.as_cycles() as u128;
+            let hysteresis = threshold / 10; // 10%
             let activate_below = threshold - hysteresis;
 
-            let current_cycles_nat = Nat::from(ic_cdk::api::canister_cycle_balance());
+            let current_cycles = ic_cdk::api::canister_cycle_balance();
 
-            if current_cycles_nat < activate_below {
+            if current_cycles < activate_below {
                 ic_cdk::println!(
                     "top-up: below threshold current={} activate_below={}",
-                    current_cycles_nat,
+                    current_cycles,
                     activate_below
                 );
-                let needed_cycles = rule.cycles_amount.clone();
-                if let Ok(needed_icp_e8s) = compute_icp_needed_e8s(&needed_cycles).await {
+                let needed_cycles = rule.cycles_amount.as_cycles();
+                if let Ok(needed_icp_e8s) = compute_icp_needed_e8s(&needed_cycles.into()).await {
                     ic_cdk::println!(
                         "top-up: convert cycles={} -> icp_e8s={}",
                         needed_cycles,

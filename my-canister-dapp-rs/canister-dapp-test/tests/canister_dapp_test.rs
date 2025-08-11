@@ -1,7 +1,7 @@
-use candid::Nat;
 use canister_dapp_test::*;
 use ic_cdk::management_canister::CanisterSettings;
 use ic_http_certification::{HttpRequest, HttpResponse};
+use my_canister_dashboard::CyclesAmount;
 use my_canister_dashboard::{
     ALTERNATIVE_ORIGINS_PATH, CANISTER_DASHBOARD_CSS_PATH, CANISTER_DASHBOARD_HTML_PATH,
     CANISTER_DASHBOARD_JS_PATH, ManageAlternativeOriginsArg, ManageAlternativeOriginsResult,
@@ -481,8 +481,8 @@ fn canister_dapp_test() {
     // 2) Add rule -> Ok(Some(rule)) and Get -> Ok(Some(rule))
     let rule = TopUpRule {
         interval: TopUpInterval::Hourly,
-        cycles_threshold: Nat::from(500_000_000_000u64),
-        cycles_amount: Nat::from(1_000_000_000_000u64),
+        cycles_threshold: CyclesAmount::_0_5T,
+        cycles_amount: CyclesAmount::_1T,
     };
     let add_res = update_candid_as::<(ManageTopUpRuleArg,), (ManageTopUpRuleResult,)>(
         &pic,

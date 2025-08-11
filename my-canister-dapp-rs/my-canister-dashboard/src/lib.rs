@@ -11,7 +11,8 @@ pub use dashboard::ii_principal::{
     ManageIIPrincipalArg, ManageIIPrincipalResult, manage_ii_principal,
 };
 pub use dashboard::top_up_rule::{
-    ManageTopUpRuleArg, ManageTopUpRuleResult, TopUpInterval, TopUpRule, manage_top_up_rule,
+    CyclesAmount, ManageTopUpRuleArg, ManageTopUpRuleResult, TopUpInterval, TopUpRule,
+    manage_top_up_rule,
 };
 pub use dashboard::wasm_status::WasmStatus;
 pub use dashboard::{

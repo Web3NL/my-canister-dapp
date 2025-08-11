@@ -1,22 +1,45 @@
+function isErrorResult(obj: unknown): obj is { Err: string } {
+  return (
+    typeof obj === 'object' &&
+    obj !== null &&
+    'Err' in obj &&
+    typeof (obj as { Err?: unknown }).Err === 'string'
+  );
+}
+function isTopUpRule(obj: unknown): obj is TopUpRule {
+  return (
+    typeof obj === 'object' &&
+    obj !== null &&
+    !('error' in obj) &&
+    'cycles_threshold' in obj &&
+    'cycles_amount' in obj &&
+    typeof (obj as { cycles_threshold?: unknown }).cycles_threshold !==
+      'undefined' &&
+    typeof (obj as { cycles_amount?: unknown }).cycles_amount !== 'undefined'
+  );
+}
 import { CanisterApi } from '../api/canister';
 import {
   addEventListener,
   getElement,
-  getInputValue,
   hideLoading,
   showError,
   showLoading,
 } from '../dom';
 import { NETWORK_ERROR_MESSAGE } from '../error';
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function formatRule(rule: any) {
+import type {
+  TopUpRule,
+  CyclesAmount,
+} from '$declarations/my-canister-dashboard.did.d.ts';
+
+function formatRule(rule: TopUpRule) {
   let interval = 'Unknown';
   // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
   const intervalObj = rule.interval;
   if (
-    intervalObj !== null &&
     typeof intervalObj === 'object' &&
+    intervalObj !== null &&
     !Array.isArray(intervalObj)
   ) {
     if ('Hourly' in intervalObj) interval = 'Hourly';
@@ -24,8 +47,34 @@ function formatRule(rule: any) {
     else if ('Weekly' in intervalObj) interval = 'Weekly';
     else if ('Monthly' in intervalObj) interval = 'Monthly';
   }
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-  return `Interval: ${interval}, Threshold: ${rule.cycles_threshold} cycles, Amount: ${rule.cycles_amount} cycles`;
+  // Convert CyclesAmount variant to string
+  function cyclesAmountToString(val: CyclesAmount): string {
+    if (typeof val === 'object' && val !== null) {
+      const keys = Object.keys(val);
+      if (keys.length > 0 && typeof keys[0] === 'string' && keys[0] !== '') {
+        const key = keys[0];
+        return key.replace(/^_/, '').replace('_', '.').replace('T', 'T');
+      }
+    }
+    return String(val);
+  }
+  if (isTopUpRule(rule)) {
+    const thresholdStr = cyclesAmountToString(
+      (rule as { cycles_threshold: CyclesAmount }).cycles_threshold
+    );
+    const amountStr = cyclesAmountToString(
+      (rule as { cycles_amount: CyclesAmount }).cycles_amount
+    );
+    return `Interval: ${interval}\nThreshold: ${thresholdStr} cycles\nAmount: ${amountStr} cycles`;
+  }
+  if (
+    typeof rule === 'object' &&
+    'error' in rule &&
+    typeof (rule as { error: string }).error === 'string'
+  ) {
+    return `Error: ${(rule as { error: string }).error}`;
+  }
+  return 'Invalid rule';
 }
 
 export class TopUpRuleManager {
@@ -55,27 +104,19 @@ export class TopUpRuleManager {
     }
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  render(result: any) {
+  render(result: { Ok?: TopUpRule[]; Err?: string }) {
     const display = getElement('top-up-rule-display');
-    // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
-    if (result && typeof result === 'object') {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      if ('Ok' in result && Array.isArray(result.Ok)) {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        if (result.Ok.length === 0) {
-          display.textContent = 'No rule set';
-        } else {
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-          display.textContent = formatRule(result.Ok[0]);
-        }
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      } else if ('Err' in result && typeof result.Err === 'string') {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        showError(result.Err);
+    if ('Ok' in result && Array.isArray(result.Ok)) {
+      if (result.Ok.length === 0 || result.Ok[0] === undefined) {
+        display.textContent = 'No rule set';
       } else {
-        display.textContent = 'Unknown result';
+        display.textContent = '';
+        const pre = document.createElement('pre');
+        pre.textContent = formatRule(result.Ok[0] as TopUpRule);
+        display.appendChild(pre);
       }
+    } else if (isErrorResult(result)) {
+      showError(result.Err);
     } else {
       display.textContent = 'Unknown result';
     }
@@ -87,21 +128,16 @@ export class TopUpRuleManager {
     if (intervalElem instanceof HTMLSelectElement) {
       intervalValue = intervalElem.value;
     }
-    const thresholdStr = getInputValue('top-up-rule-threshold');
-    const amountStr = getInputValue('top-up-rule-amount');
 
-    if (!thresholdStr || !amountStr) {
-      showError('Please provide threshold and amount.');
-      return;
-    }
+    const thresholdSelect = getElement('top-up-rule-threshold');
+    const amountSelect = getElement('top-up-rule-amount');
+    const thresholdValue =
+      thresholdSelect instanceof HTMLSelectElement ? thresholdSelect.value : '';
+    const amountValue =
+      amountSelect instanceof HTMLSelectElement ? amountSelect.value : '';
 
-    let threshold, amount;
-    try {
-      threshold = BigInt(thresholdStr);
-      amount = BigInt(amountStr);
-      if (threshold < 0n || amount < 0n) throw new Error('negative');
-    } catch {
-      showError('Threshold and amount must be non-negative integers.');
+    if (!thresholdValue || !amountValue) {
+      showError('Please select threshold and amount.');
       return;
     }
 
@@ -110,6 +146,10 @@ export class TopUpRuleManager {
     else if (intervalValue === 'Daily') interval = { Daily: null };
     else if (intervalValue === 'Weekly') interval = { Weekly: null };
     else interval = { Monthly: null };
+
+    // Build CyclesAmount variant
+    const threshold = { [thresholdValue]: null } as CyclesAmount;
+    const amount = { [amountValue]: null } as CyclesAmount;
 
     showLoading();
     try {
@@ -125,9 +165,7 @@ export class TopUpRuleManager {
       if (result && typeof result === 'object') {
         if ('Ok' in result) {
           await this.fetchAndRender();
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        } else if ('Err' in result && typeof result.Err === 'string') {
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        } else if (isErrorResult(result)) {
           showError(result.Err);
         } else {
           showError('Unknown error');

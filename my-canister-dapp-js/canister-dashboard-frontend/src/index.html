@@ -65,22 +65,30 @@
 
               <div>
                 <label for="top-up-rule-threshold">Threshold (cycles):</label>
-                <input
-                  type="number"
-                  id="top-up-rule-threshold"
-                  min="0"
-                  placeholder="Threshold cycles"
-                />
+                <select id="top-up-rule-threshold">
+                  <option value="_0_25T">0.25T</option>
+                  <option value="_0_5T">0.5T</option>
+                  <option value="_1T">1T</option>
+                  <option value="_2T">2T</option>
+                  <option value="_5T">5T</option>
+                  <option value="_10T">10T</option>
+                  <option value="_50T">50T</option>
+                  <option value="_100T">100T</option>
+                </select>
               </div>
 
               <div>
                 <label for="top-up-rule-amount">Amount (cycles):</label>
-                <input
-                  type="number"
-                  id="top-up-rule-amount"
-                  min="0"
-                  placeholder="Amount cycles"
-                />
+                <select id="top-up-rule-amount">
+                  <option value="_0_25T">0.25T</option>
+                  <option value="_0_5T">0.5T</option>
+                  <option value="_1T">1T</option>
+                  <option value="_2T">2T</option>
+                  <option value="_5T">5T</option>
+                  <option value="_10T">10T</option>
+                  <option value="_50T">50T</option>
+                  <option value="_100T">100T</option>
+                </select>
               </div>
 
               <div class="button-group">
