@@ -1,7 +1,7 @@
 import type { HttpAgent, ActorSubclass } from '@dfinity/agent';
 import { Actor } from '@dfinity/agent';
 import type { Principal } from '@dfinity/principal';
-import { idlFactory } from './idl/my-canister.did';
+import { idlFactory } from '../declarations/my-canister-dashboard.did.js';
 import type {
   _SERVICE as MyDashboardService,
   HttpRequest,
@@ -10,8 +10,10 @@ import type {
   ManageAlternativeOriginsResult,
   ManageIIPrincipalArg,
   ManageIIPrincipalResult,
+  ManageTopUpRuleArg,
+  ManageTopUpRuleResult,
   WasmStatus,
-} from './idl/my-canister.did';
+} from '../declarations/my-canister-dashboard.did.d.ts';
 
 export type {
   _SERVICE as MyDashboardService,
@@ -21,8 +23,10 @@ export type {
   ManageAlternativeOriginsResult,
   ManageIIPrincipalArg,
   ManageIIPrincipalResult,
+  ManageTopUpRuleArg,
+  ManageTopUpRuleResult,
   WasmStatus,
-} from './idl/my-canister.did';
+} from '../declarations/my-canister-dashboard.did.d.ts';
 
 /**
  * Configuration for MyDashboardBackend
@@ -106,5 +110,18 @@ export class MyDashboardBackend {
    */
   async wasmStatus(): Promise<WasmStatus> {
     return await (this.actor.wasm_status as () => Promise<WasmStatus>)();
+  }
+
+  /**
+   * Manage the Top-Up Rule for the Canister Dapp
+   */
+  async manageTopUpRule(
+    arg: ManageTopUpRuleArg
+  ): Promise<ManageTopUpRuleResult> {
+    return await (
+      this.actor.manage_top_up_rule as (
+        arg: ManageTopUpRuleArg
+      ) => Promise<ManageTopUpRuleResult>
+    )(arg);
   }
 }
