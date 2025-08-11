@@ -1,3 +1,4 @@
+use candid::Nat;
 use canister_dapp_test::*;
 use ic_cdk::management_canister::CanisterSettings;
 use ic_http_certification::{HttpRequest, HttpResponse};
@@ -6,6 +7,7 @@ use my_canister_dashboard::{
     CANISTER_DASHBOARD_JS_PATH, ManageAlternativeOriginsArg, ManageAlternativeOriginsResult,
     ManageIIPrincipalArg, ManageIIPrincipalResult, WasmStatus,
 };
+use my_canister_dashboard::{ManageTopUpRuleArg, ManageTopUpRuleResult, TopUpInterval, TopUpRule};
 use pocket_ic::{PocketIc, query_candid, update_candid_as};
 use std::fs;
 
@@ -463,4 +465,79 @@ fn canister_dapp_test() {
         remove_origin_as_stranger.is_err(),
         "Non-controller should be rejected by guard when removing alternative origin"
     );
+
+    // ---- Top-up rule CRUD ----
+    // 1) Get when empty -> Ok(None)
+    let get_empty = update_candid_as::<(ManageTopUpRuleArg,), (ManageTopUpRuleResult,)>(
+        &pic,
+        canister_id,
+        owner,
+        "manage_top_up_rule",
+        (ManageTopUpRuleArg::Get,),
+    )
+    .expect("manage_top_up_rule Get failed");
+    assert!(matches!(get_empty.0, ManageTopUpRuleResult::Ok(None)));
+
+    // 2) Add rule -> Ok(Some(rule)) and Get -> Ok(Some(rule))
+    let rule = TopUpRule {
+        interval: TopUpInterval::Hourly,
+        cycles_threshold: Nat::from(500_000_000_000u64),
+        cycles_amount: Nat::from(1_000_000_000_000u64),
+    };
+    let add_res = update_candid_as::<(ManageTopUpRuleArg,), (ManageTopUpRuleResult,)>(
+        &pic,
+        canister_id,
+        owner,
+        "manage_top_up_rule",
+        (ManageTopUpRuleArg::Add(rule.clone()),),
+    )
+    .expect("manage_top_up_rule Add failed");
+    match add_res.0 {
+        ManageTopUpRuleResult::Ok(Some(r)) => {
+            assert!(matches!(r.interval, TopUpInterval::Hourly));
+            assert_eq!(r.cycles_threshold, rule.cycles_threshold);
+            assert_eq!(r.cycles_amount, rule.cycles_amount);
+        }
+        other => panic!("unexpected add result: {other:?}"),
+    }
+
+    let get_after_add = update_candid_as::<(ManageTopUpRuleArg,), (ManageTopUpRuleResult,)>(
+        &pic,
+        canister_id,
+        owner,
+        "manage_top_up_rule",
+        (ManageTopUpRuleArg::Get,),
+    )
+    .expect("manage_top_up_rule Get after Add failed");
+    match get_after_add.0 {
+        ManageTopUpRuleResult::Ok(Some(r)) => {
+            assert!(matches!(r.interval, TopUpInterval::Hourly));
+            assert_eq!(r.cycles_threshold, rule.cycles_threshold);
+            assert_eq!(r.cycles_amount, rule.cycles_amount);
+        }
+        other => panic!("unexpected get-after-add result: {other:?}"),
+    }
+
+    // 3) Clear -> Ok(None) and Get -> Ok(None)
+    let clear_res = update_candid_as::<(ManageTopUpRuleArg,), (ManageTopUpRuleResult,)>(
+        &pic,
+        canister_id,
+        owner,
+        "manage_top_up_rule",
+        (ManageTopUpRuleArg::Clear,),
+    )
+    .expect("manage_top_up_rule Clear failed");
+    assert!(matches!(clear_res.0, ManageTopUpRuleResult::Ok(None)));
+
+    let get_after_clear = update_candid_as::<(ManageTopUpRuleArg,), (ManageTopUpRuleResult,)>(
+        &pic,
+        canister_id,
+        owner,
+        "manage_top_up_rule",
+        (ManageTopUpRuleArg::Get,),
+    )
+    .expect("manage_top_up_rule Get after Clear failed");
+    assert!(matches!(get_after_clear.0, ManageTopUpRuleResult::Ok(None)));
 }
+
+// Top-up rule CRUD coverage appended at end of the main test
