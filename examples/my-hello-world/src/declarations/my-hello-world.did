@@ -1,3 +1,73 @@
+type HttpRequest = record {
+  method : text;
+  url : text;
+  headers : vec record { text; text };
+  body : vec nat8
+};
+
+type HttpResponse = record {
+  status_code : nat16;
+  headers : vec record { text; text };
+  body : vec nat8
+};
+
+type WasmStatus = record {
+  name : text;
+  version : nat16;
+  memo : opt text
+};
+
+type ManageIIPrincipalArg = variant {
+  Set : principal;
+  Get
+};
+
+type ManageIIPrincipalResult = variant {
+  Ok : principal;
+  Err : text
+};
+
+type ManageAlternativeOriginsArg = variant {
+  Add : text;
+  Remove : text
+};
+
+type ManageAlternativeOriginsResult = variant {
+  Ok;
+  Err : text
+};
+
+type ManageTopUpRuleArg = variant {
+  Get;
+  Add : TopUpRule;
+  Clear
+};
+
+type ManageTopUpRuleResult = variant {
+  Ok : opt TopUpRule;
+  Err : text
+};
+
+type TopUpRule = record {
+  interval : TopUpInterval;
+  cycles_threshold : nat;
+  cycles_amount : nat
+};
+
+type TopUpInterval = variant {
+  Hourly;
+  Daily;
+  Weekly;
+  Monthly
+};
+
 service : {
-    "greet": (text) -> (text) query;
+  "greet" : (text) -> (text) query;
+
+  // Required for the dashboard
+  "http_request" : (HttpRequest) -> (HttpResponse) query;
+  "wasm_status" : () -> (WasmStatus) query;
+  "manage_ii_principal" : (ManageIIPrincipalArg) -> (ManageIIPrincipalResult);
+  "manage_alternative_origins" : (ManageAlternativeOriginsArg) -> (ManageAlternativeOriginsResult);
+  "manage_top_up_rule" : (ManageTopUpRuleArg) -> (ManageTopUpRuleResult)
 }
