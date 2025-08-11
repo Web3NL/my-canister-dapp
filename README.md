@@ -7,6 +7,8 @@ This project provides libraries and tools to build Canister Dapps on the [Intern
 
 Canister Dapps are developed as single canister applications that include both backend logic and frontend assets. Users can create, manage, and be the sole controller of these canisters without relying on any third-party services.
 
+Visit the [FAQ](https://mycanister.app/faq) for more info on Canister Dapps.
+
 > **Warning:** This project is in development.  
 > For a DEMO visit [mycanister.app](https://mycanister.app) to create and manage your canister dapps.
 
