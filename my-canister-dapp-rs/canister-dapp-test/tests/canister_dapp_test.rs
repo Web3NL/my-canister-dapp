@@ -564,6 +564,24 @@ fn canister_dapp_test() {
         ManageTopUpRuleResult::Ok(Some(_))
     ));
 
+    // An immediate tick is triggered right after setting the rule.
+    // Tick once to allow the spawned task to run and emit logs, then assert we see it.
+    pic.tick();
+    let logs_immediate = pic
+        .fetch_canister_logs(canister_id, owner)
+        .expect("failed to fetch canister logs (immediate)");
+    let mut body_immediate = String::new();
+    for rec in logs_immediate {
+        if let Ok(s) = String::from_utf8(rec.content) {
+            body_immediate.push_str(&s);
+            body_immediate.push('\n');
+        }
+    }
+    assert!(
+        body_immediate.contains("top-up: tick"),
+        "missing immediate tick log after Add; logs were: {body_immediate}",
+    );
+
     // Sanity: current cycles should be below the activation threshold with hysteresis (90% of threshold).
     let current_cycles = pic.cycle_balance(canister_id);
     let threshold_cycles = trigger_rule.cycles_threshold.as_cycles() as u128;
