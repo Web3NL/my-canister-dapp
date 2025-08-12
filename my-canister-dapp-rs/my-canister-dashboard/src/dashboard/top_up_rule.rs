@@ -99,6 +99,9 @@ pub fn manage_top_up_rule(arg: ManageTopUpRuleArg) -> ManageTopUpRuleResult {
                 *cell.borrow_mut() = Some(timer_id);
             });
             ic_cdk::println!("top-up: timer set every {}s", interval.as_secs());
+            // set_timer_interval schedules the first tick after the interval elapses.
+            // Trigger once immediately so the first check happens right away.
+            on_top_up_interval_tick();
             ManageTopUpRuleResult::Ok(current_rule())
         }
         ManageTopUpRuleArg::Clear => {
