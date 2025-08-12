@@ -1,6 +1,6 @@
 import { defineConfig, devices } from '@playwright/test';
 import dotenv from 'dotenv';
-import { installedCanisterDashboardUrl } from './tests/helpers';
+import { installedHelloWorldExampleCanisterDashboardUrl } from './tests/helpers';
 
 // Load dfx environment variables from .env.development
 dotenv.config({ path: '.env.development' });
@@ -24,7 +24,7 @@ export default defineConfig({
       name: 'canister-dashboard-frontend-dfx',
       testMatch: /.*canister-dashboard-frontend.*\.spec\.ts/,
       metadata: {
-        testUrl: installedCanisterDashboardUrl(),
+        testUrl: installedHelloWorldExampleCanisterDashboardUrl(),
         principalFile: 'derived-ii-principal-dfx.txt'
       }
     },
@@ -37,7 +37,11 @@ export default defineConfig({
       }
     },
     {
-      name: 'my-canister-app',
+      name: 'my-hello-world-frontend-dfx',
+      testMatch: /.*my-hello-world-frontend.*\.spec\.ts/,
+    },
+    {
+      name: 'my-canister-app-dfx',
       testMatch: /.*my-canister-app.*\.spec\.ts/,
     },
     {

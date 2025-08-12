@@ -82,9 +82,13 @@ export class AlternativeOriginsManager {
       await new Promise(resolve => setTimeout(resolve, IC_UPDATE_CALL_DELAY));
       await this.create();
       clearInput('alternative-origin-input');
-    } else {
+    } else if ('Err' in result) {
+      const err = (result as { Err: string }).Err;
       showError(NETWORK_ERROR_MESSAGE);
-      throw new Error(`Failed to add alternative origin: ${result.Err}`);
+      throw new Error(`Failed to add alternative origin: ${err}`);
+    } else {
+      showError('Unknown error');
+      throw new Error('Unknown error adding alternative origin');
     }
 
     hideLoading();
@@ -112,9 +116,13 @@ export class AlternativeOriginsManager {
       await new Promise(resolve => setTimeout(resolve, IC_UPDATE_CALL_DELAY));
       await this.create();
       clearInput('alternative-origin-input');
-    } else {
+    } else if ('Err' in result) {
+      const err = (result as { Err: string }).Err;
       showError(NETWORK_ERROR_MESSAGE);
-      throw new Error(`Failed to remove alternative origin: ${result.Err}`);
+      throw new Error(`Failed to remove alternative origin: ${err}`);
+    } else {
+      showError('Unknown error');
+      throw new Error('Unknown error removing alternative origin');
     }
 
     hideLoading();

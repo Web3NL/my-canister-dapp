@@ -115,7 +115,15 @@ export function getDfxEnv(key: string): string {
   return value;
 }
 
-export function installedCanisterDashboardUrl(): string {
+export function installedHelloWorldExampleCanisterFrontendUrl(): string {
+  // Get canister ID from test output and hostname from global env
+  const canisterId = readTestData('installed-canister-id');
+  const hostname = getDfxEnv('VITE_HOSTNAME');
+
+  return `http://${canisterId}.${hostname}`;
+}
+
+export function installedHelloWorldExampleCanisterDashboardUrl(): string {
   // Get canister ID from test output and hostname from global env
   const canisterId = readTestData('installed-canister-id');
   const hostname = getDfxEnv('VITE_HOSTNAME');

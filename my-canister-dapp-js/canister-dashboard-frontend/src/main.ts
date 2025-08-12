@@ -8,6 +8,7 @@ import { canisterId } from './utils';
 import { DASHBOARD_INIT_ERROR_MESSAGE } from './error';
 import { getConfig } from './environment';
 import { setLoggedInState, setLoggedOutState, showError } from './dom';
+import { TopUpRuleManager } from './components/top-up-rule';
 
 class Dashboard {
   private authManager: AuthManager | null = null;
@@ -45,6 +46,7 @@ class Dashboard {
       const canisterIdPrincipal = await canisterId();
 
       const topupManager = new TopupManager();
+      const topUpRuleManager = new TopUpRuleManager();
       const statusManager = new StatusManager();
       const controllersManager = new ControllersManager(
         canisterIdPrincipal,
@@ -54,6 +56,7 @@ class Dashboard {
       const canisterLogsManager = new CanisterLogsManager();
 
       await topupManager.create();
+      await topUpRuleManager.create();
       await statusManager.create();
       await controllersManager.create();
       await alternativeOriginsManager.create();

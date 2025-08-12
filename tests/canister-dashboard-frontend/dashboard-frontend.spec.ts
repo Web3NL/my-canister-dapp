@@ -7,8 +7,8 @@ import { Principal } from '@dfinity/principal';
 
 test('Canister Dashboard Frontend Suite', async ({ page }, testInfo) => {
   test.setTimeout(60000); // 1 minute timeout
-  const TOPUP_AMOUNT_MAINNET = BigInt(1_000_000);
-  const TOPUP_AMOUNT_LOCAL = BigInt(100_000_000);
+  const TOPUP_AMOUNT_MAINNET = BigInt(100_000);
+  const TOPUP_AMOUNT_LOCAL = BigInt(100_000);
   const TEST_CONTROLLER = 'rkp4c-7iaaa-aaaaa-aaaca-cai';
   const TEST_ORIGINS = [
     'http://localhost:9999',
@@ -299,4 +299,44 @@ test('Canister Dashboard Frontend Suite', async ({ page }, testInfo) => {
   }
 
   console.log('Alternative origins management tests completed successfully');
+
+  // Top-up rule management tests
+  console.log('Testing top-up rule management...');
+  // Ensure section loaded
+  await expect(page.locator('#top-up-rule-display')).not.toHaveText(/Loading/);
+
+  // Set selections (pick smallest values for speed/determinism)
+  await page.selectOption('#top-up-rule-interval', 'Hourly');
+  await page.selectOption('#top-up-rule-threshold', '_0_25T');
+  await page.selectOption('#top-up-rule-amount', '_0_5T');
+
+  // Set rule
+  await page.click('#top-up-rule-set');
+
+  // Expect rule display to show the exact formatted rule
+  const ruleDisplay = page.locator('#top-up-rule-display');
+  const expectedRule = 'Interval: Hourly\nThreshold: 0.25T cycles\nAmount: 0.5T cycles';
+  await expect(async () => {
+    const txt = (await ruleDisplay.textContent())?.trim();
+    expect(txt).toBe(expectedRule);
+  }).toPass({ timeout: 10000 });
+  console.log('Top-up rule set and displayed');
+
+  // Clear rule
+  await page.click('#top-up-rule-clear');
+  await expect(ruleDisplay).toHaveText(/No rule set/, { timeout: 10000 });
+  console.log('Top-up rule cleared');
+
+  // Refresh logs and look for evidence of actions (either set or cleared messages)
+  await page.click('#refresh-logs-btn');
+  const logsList = page.locator('#logs-list');
+  await expect(logsList.locator('li').first()).not.toHaveText(/Loading/);
+
+  // Retry search for one of the log substrings
+  await expect(async () => {
+    const logTexts = await logsList.locator('li').allTextContents();
+    const found = logTexts.some(t => /top-up: rule (set|cleared)/.test(t));
+    expect(found).toBeTruthy();
+  }).toPass({ timeout: 15000, intervals: [500, 1000, 2000] });
+  console.log('Found top-up rule action in logs');
 });

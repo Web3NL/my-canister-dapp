@@ -50,6 +50,74 @@
           </div>
         </div>
 
+        <div id="top-up-rule-section" class="card">
+          <h3>Top Up Rule</h3>
+          <div id="top-up-rule-content">
+            <div style="margin-bottom: 0.5rem">
+              <p>
+                <strong>Canister ICP Balance:</strong>
+                <span id="canister-icp-balance">Loading...</span> ICP
+              </p>
+              <p>
+                <strong>Canister ID:</strong>
+                <span id="canister-id" class="data-display">Loading...</span>
+              </p>
+            </div>
+            <div class="form-group">
+              <div>
+                <label for="top-up-rule-interval">Interval:</label>
+                <select id="top-up-rule-interval">
+                  <option value="Hourly">Hourly</option>
+                  <option value="Daily">Daily</option>
+                  <option value="Weekly">Weekly</option>
+                  <option value="Monthly">Monthly</option>
+                </select>
+              </div>
+
+              <div>
+                <label for="top-up-rule-threshold">Threshold (cycles):</label>
+                <select id="top-up-rule-threshold">
+                  <option value="_0_25T">0.25T</option>
+                  <option value="_0_5T">0.5T</option>
+                  <option value="_1T">1T</option>
+                  <option value="_2T">2T</option>
+                  <option value="_5T">5T</option>
+                  <option value="_10T">10T</option>
+                  <option value="_50T">50T</option>
+                  <option value="_100T">100T</option>
+                </select>
+              </div>
+
+              <div>
+                <label for="top-up-rule-amount">Amount (cycles):</label>
+                <select id="top-up-rule-amount">
+                  <option value="_0_25T">0.25T</option>
+                  <option value="_0_5T">0.5T</option>
+                  <option value="_1T">1T</option>
+                  <option value="_2T">2T</option>
+                  <option value="_5T">5T</option>
+                  <option value="_10T">10T</option>
+                  <option value="_50T">50T</option>
+                  <option value="_100T">100T</option>
+                </select>
+              </div>
+
+              <div class="button-group">
+                <button type="button" id="top-up-rule-set" class="btn">
+                  Set Rule
+                </button>
+                <button type="button" id="top-up-rule-clear" class="btn">
+                  Clear Rule
+                </button>
+              </div>
+            </div>
+            <div>
+              <strong>Current Rule:</strong>
+              <span id="top-up-rule-display">Loading...</span>
+            </div>
+          </div>
+        </div>
+
         <div id="status-section" class="card">
           <h3>Canister Status</h3>
           <div id="status-content">

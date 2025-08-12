@@ -7,7 +7,7 @@ use include_dir::{include_dir, Dir};
 use my_canister_dashboard::{
     guards::{only_canister_controllers_guard, only_ii_principal_guard},
     ManageAlternativeOriginsArg, ManageAlternativeOriginsResult, ManageIIPrincipalArg,
-    ManageIIPrincipalResult, WasmStatus,
+    ManageIIPrincipalResult, ManageTopUpRuleArg, ManageTopUpRuleResult, WasmStatus,
 };
 use my_canister_frontend::asset_router_configs;
 use std::borrow::Cow;
@@ -81,6 +81,11 @@ fn manage_alternative_origins(arg: ManageAlternativeOriginsArg) -> ManageAlterna
         let mut router = router.borrow_mut();
         my_canister_dashboard::manage_alternative_origins(&mut router, arg)
     })
+}
+
+#[update(guard = "only_canister_controllers_guard")]
+fn manage_top_up_rule(arg: ManageTopUpRuleArg) -> ManageTopUpRuleResult {
+    my_canister_dashboard::manage_top_up_rule(arg)
 }
 
 #[query(guard = "only_ii_principal_guard")]

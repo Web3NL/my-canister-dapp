@@ -1,6 +1,6 @@
 import { LedgerCanister, AccountIdentifier } from '@dfinity/ledger-icp';
 import type { Principal } from '@dfinity/principal';
-import { createHttpAgent } from '../utils';
+import { createHttpAgent, canisterId } from '../utils';
 import { showError, NETWORK_ERROR_MESSAGE } from '../error';
 
 export class LedgerApi {
@@ -17,6 +17,22 @@ export class LedgerApi {
       const principal = await agent.getPrincipal();
       const accountIdentifier = AccountIdentifier.fromPrincipal({
         principal,
+      });
+      const ledger = await this.ledgerApi();
+      return await ledger.accountBalance({
+        accountIdentifier,
+      });
+    } catch (error) {
+      showError(NETWORK_ERROR_MESSAGE);
+      throw error;
+    }
+  }
+
+  async canisterBalance(): Promise<bigint> {
+    try {
+      const canister = await canisterId();
+      const accountIdentifier = AccountIdentifier.fromPrincipal({
+        principal: canister,
       });
       const ledger = await this.ledgerApi();
       return await ledger.accountBalance({

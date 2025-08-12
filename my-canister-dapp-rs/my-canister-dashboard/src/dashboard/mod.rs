@@ -1,5 +1,6 @@
 pub mod alternative_origins;
 pub mod ii_principal;
+pub mod top_up_rule;
 pub mod wasm_status;
 
 use ic_asset_certification::{Asset, AssetConfig, AssetEncoding, AssetRouter};

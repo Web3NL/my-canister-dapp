@@ -33,7 +33,7 @@ export default defineConfig(() => {
     },
     resolve: {
       alias: {
-        $declarations: path.resolve(__dirname, '../../declarations'),
+        $declarations: path.resolve(__dirname, '../my-canister-dashboard-js/declarations'),
       },
     },
   };
