@@ -538,6 +538,71 @@ fn canister_dapp_test() {
     )
     .expect("manage_top_up_rule Get after Clear failed");
     assert!(matches!(get_after_clear.0, ManageTopUpRuleResult::Ok(None)));
-}
 
-// Top-up rule CRUD coverage appended at end of the main test
+    // ---- Top-up timer trigger (advance time) ----
+    // Goal: set a rule, ensure balance is below threshold, fast-forward time so the timer ticks,
+    //       then verify logs show the timer fired and a top-up attempt started.
+    // Note: We don't require a full successful mint (ledger/CMC not provisioned in tests);
+    //       we only assert the essential log lines proving the rule fired and evaluated.
+
+    // Set a rule with threshold above current cycles so it will trigger on first tick.
+    let trigger_rule = TopUpRule {
+        interval: TopUpInterval::Hourly,     // 3600s
+        cycles_threshold: CyclesAmount::_1T, // threshold 1T
+        cycles_amount: CyclesAmount::_1T,    // desired amount (value not important here)
+    };
+    let add_trigger_rule = update_candid_as::<(ManageTopUpRuleArg,), (ManageTopUpRuleResult,)>(
+        &pic,
+        canister_id,
+        owner,
+        "manage_top_up_rule",
+        (ManageTopUpRuleArg::Add(trigger_rule.clone()),),
+    )
+    .expect("manage_top_up_rule Add (trigger) failed");
+    assert!(matches!(
+        add_trigger_rule.0,
+        ManageTopUpRuleResult::Ok(Some(_))
+    ));
+
+    // Sanity: current cycles should be below the activation threshold with hysteresis (90% of threshold).
+    let current_cycles = pic.cycle_balance(canister_id);
+    let threshold_cycles = trigger_rule.cycles_threshold.as_cycles() as u128;
+    let activate_below = threshold_cycles - (threshold_cycles / 10);
+    assert!(
+        current_cycles < activate_below,
+        "precondition failed: current_cycles ({current_cycles}) >= activate_below ({activate_below})"
+    );
+
+    // Fast-forward time beyond the interval and tick the IC so the timer fires.
+    use std::time::Duration;
+    pic.advance_time(Duration::from_secs(60 * 60 + 5));
+    // One or two ticks may be needed to process timers and spawned tasks.
+    pic.tick();
+    pic.tick();
+
+    // Fetch canister logs and look for evidence of timer firing and rule evaluation.
+    let logs = pic
+        .fetch_canister_logs(canister_id, owner)
+        .expect("failed to fetch canister logs");
+    let mut body = String::new();
+    for rec in logs {
+        if let Ok(s) = String::from_utf8(rec.content) {
+            body.push_str(&s);
+            body.push('\n');
+        }
+    }
+
+    // Must contain timer set log (from Add), a tick, and below-threshold evaluation.
+    assert!(
+        body.contains("top-up: timer set every 3600s"),
+        "missing timer set log; logs were: {body}",
+    );
+    assert!(
+        body.contains("top-up: tick"),
+        "missing tick log after advancing time; logs were: {body}",
+    );
+    assert!(
+        body.contains("top-up: active rule") || body.contains("top-up: below threshold"),
+        "missing rule evaluation logs; logs were: {body}",
+    );
+}
