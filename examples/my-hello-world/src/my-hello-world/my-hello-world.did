@@ -50,8 +50,8 @@ type ManageTopUpRuleResult = variant {
 
 type TopUpRule = record {
   interval : TopUpInterval;
-  cycles_threshold : nat;
-  cycles_amount : nat
+  cycles_threshold : CyclesAmount;
+  cycles_amount : CyclesAmount
 };
 
 type TopUpInterval = variant {
@@ -59,6 +59,17 @@ type TopUpInterval = variant {
   Daily;
   Weekly;
   Monthly
+};
+
+type CyclesAmount = variant {
+  _0_25T;
+  _0_5T;
+  _1T;
+  _2T;
+  _5T;
+  _10T;
+  _50T;
+  _100T
 };
 
 service : {
