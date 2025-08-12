@@ -20613,6 +20613,21 @@ class LedgerApi {
       throw error;
     }
   }
+  async canisterBalance() {
+    try {
+      const canister = await canisterId();
+      const accountIdentifier = D.fromPrincipal({
+        principal: canister
+      });
+      const ledger = await this.ledgerApi();
+      return await ledger.accountBalance({
+        accountIdentifier
+      });
+    } catch (error) {
+      showError(NETWORK_ERROR_MESSAGE);
+      throw error;
+    }
+  }
   async transfer(to, subAccount, amount, memo, fee) {
     try {
       const ledger = await this.ledgerApi();
@@ -21176,7 +21191,23 @@ class TopUpRuleManager {
   }
   async create() {
     await this.fetchAndRender();
+    await this.renderCanisterInfo();
     this.attachEventListeners();
+  }
+  async renderCanisterInfo() {
+    try {
+      const [cid, bal] = await Promise.all([
+        canisterId(),
+        new LedgerApi().canisterBalance()
+      ]);
+      const cidText = cid.toString();
+      const formatted = formatIcpBalance(bal);
+      const idEl = getElement("canister-id");
+      idEl.textContent = cidText;
+      const balEl = getElement("canister-icp-balance");
+      balEl.textContent = formatted;
+    } catch {
+    }
   }
   attachEventListeners() {
     addEventListener("top-up-rule-set", "click", () => this.handleSet());

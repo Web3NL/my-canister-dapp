@@ -1,3 +1,20 @@
+import { CanisterApi } from '../api/canister';
+import { LedgerApi } from '../api/ledger';
+import { canisterId } from '../utils';
+import { formatIcpBalance } from '../helpers';
+import {
+  addEventListener,
+  getElement,
+  hideLoading,
+  showError,
+  showLoading,
+} from '../dom';
+import { NETWORK_ERROR_MESSAGE } from '../error';
+import type {
+  TopUpRule,
+  CyclesAmount,
+} from '$declarations/my-canister-dashboard.did.d.ts';
+
 function isErrorResult(obj: unknown): obj is { Err: string } {
   return (
     typeof obj === 'object' &&
@@ -18,21 +35,6 @@ function isTopUpRule(obj: unknown): obj is TopUpRule {
     typeof (obj as { cycles_amount?: unknown }).cycles_amount !== 'undefined'
   );
 }
-import { CanisterApi } from '../api/canister';
-import {
-  addEventListener,
-  getElement,
-  hideLoading,
-  showError,
-  showLoading,
-} from '../dom';
-import { NETWORK_ERROR_MESSAGE } from '../error';
-
-import type {
-  TopUpRule,
-  CyclesAmount,
-} from '$declarations/my-canister-dashboard.did.d.ts';
-
 function formatRule(rule: TopUpRule) {
   let interval = 'Unknown';
   // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
@@ -86,7 +88,26 @@ export class TopUpRuleManager {
 
   async create() {
     await this.fetchAndRender();
+    // Minimal inline extra: show canister ICP balance and canister ID
+    await this.renderCanisterInfo();
     this.attachEventListeners();
+  }
+
+  private async renderCanisterInfo(): Promise<void> {
+    try {
+      const [cid, bal] = await Promise.all([
+        canisterId(),
+        new LedgerApi().canisterBalance(),
+      ]);
+      const cidText = cid.toString();
+      const formatted = formatIcpBalance(bal);
+      const idEl = getElement('canister-id');
+      idEl.textContent = cidText;
+      const balEl = getElement('canister-icp-balance');
+      balEl.textContent = formatted;
+    } catch {
+      // Non-fatal for dashboard; keep silent to avoid duplicate error banners
+    }
   }
 
   attachEventListeners() {
