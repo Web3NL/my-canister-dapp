@@ -156,39 +156,56 @@ fn on_top_up_interval_tick() {
                     activate_below
                 );
                 let needed_cycles = rule.cycles_amount.as_cycles();
-                if let Ok(needed_icp_e8s) = compute_icp_needed_e8s(&needed_cycles.into()).await {
-                    ic_cdk::println!(
-                        "top-up: convert cycles={} -> icp_e8s={}",
-                        needed_cycles,
-                        needed_icp_e8s
-                    );
-                    match icrc1_balance_of_e8s(ic_cdk::api::canister_self()).await {
-                        Ok(balance_e8s) if balance_e8s >= needed_icp_e8s => {
-                            // Idempotency: skip if previous mint is still in flight
-                            let busy = TOP_UP_MINT_INFLIGHT.with(|f| *f.borrow());
-                            if busy {
-                                ic_cdk::println!("Mint in-flight; skipping this tick");
-                            } else {
-                                TOP_UP_MINT_INFLIGHT.with(|f| *f.borrow_mut() = true);
-                                ic_cdk::println!("top-up: starting transfer + notify flow");
-                                let res = cmc_deposit_and_mint(needed_icp_e8s).await;
-                                if let Err(e) = res {
-                                    ic_cdk::println!("CMC mint error: {}", e);
-                                } else {
-                                    ic_cdk::println!("top-up: flow completed");
-                                }
-                                TOP_UP_MINT_INFLIGHT.with(|f| *f.borrow_mut() = false);
-                            }
-                        }
-                        Ok(balance_e8s) => ic_cdk::println!(
-                            "Insufficient ICP balance: have {}, need {}",
-                            balance_e8s,
+                match compute_icp_needed_e8s(&needed_cycles.into()).await {
+                    Ok(needed_icp_e8s) => {
+                        ic_cdk::println!(
+                            "top-up: convert cycles={} -> icp_e8s={}",
+                            needed_cycles,
                             needed_icp_e8s
-                        ),
-                        Err(e) => ic_cdk::println!("Ledger balance error: {}", e),
+                        );
+                        match icrc1_balance_of_e8s(ic_cdk::api::canister_self()).await {
+                            Ok(balance_e8s) if balance_e8s >= needed_icp_e8s => {
+                                // Idempotency: skip if previous mint is still in flight
+                                let busy = TOP_UP_MINT_INFLIGHT.with(|f| *f.borrow());
+                                if busy {
+                                    ic_cdk::println!("Mint in-flight; skipping this tick");
+                                } else {
+                                    TOP_UP_MINT_INFLIGHT.with(|f| *f.borrow_mut() = true);
+                                    ic_cdk::println!("top-up: starting transfer + notify flow");
+                                    let res = cmc_deposit_and_mint(needed_icp_e8s).await;
+                                    if let Err(e) = res {
+                                        ic_cdk::println!("CMC mint error: {}", e);
+                                    } else {
+                                        ic_cdk::println!("top-up: flow completed");
+                                    }
+                                    TOP_UP_MINT_INFLIGHT.with(|f| *f.borrow_mut() = false);
+                                }
+                            }
+                            Ok(balance_e8s) => ic_cdk::println!(
+                                "Insufficient ICP balance: have {}, need {}",
+                                balance_e8s,
+                                needed_icp_e8s
+                            ),
+                            Err(e) => ic_cdk::println!("Ledger balance error: {}", e),
+                        }
+                    }
+                    Err(e) => {
+                        ic_cdk::println!(
+                            "top-up: failed to compute needed ICP for cycles={}: {}",
+                            needed_cycles,
+                            e
+                        );
                     }
                 }
+            } else {
+                ic_cdk::println!(
+                    "top-up: cycles above threshold; skipping current={} activate_below={}",
+                    current_cycles,
+                    activate_below
+                );
             }
+        } else {
+            ic_cdk::println!("top-up: no rule set; skipping");
         }
     });
 }
