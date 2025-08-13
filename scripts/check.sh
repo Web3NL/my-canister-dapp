@@ -14,7 +14,7 @@ echo "🔍 Running lint, format, and typecheck..."
 npm run check
 
 echo "🔗 Checking dependency consistency and usage..."
-# npm run deps:check
+npm run deps:check
 
 echo "Rust lint and format..."
 ./scripts/rust-lint-format.sh
