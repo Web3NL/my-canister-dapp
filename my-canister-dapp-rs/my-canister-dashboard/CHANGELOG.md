@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.10.0] - 2025-08-13
+
 ### Added
 
 - Manage top-up rule module with single-rule semantics (Hourly/Daily/Weekly/Monthly) and periodic timer.
