@@ -1,7 +1,7 @@
 {
   "name": "@web3nl/my-canister-dashboard",
   "description": "Utility functions for canisters using My Canister Dashboard",
-  "version": "0.5.5",
+  "version": "0.6.0",
   "author": "Web3NL",
   "dependencies": {
     "@dfinity/ic-management": "^6.2.0"

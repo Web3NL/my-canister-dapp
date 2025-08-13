@@ -1,5 +1,16 @@
 # @web3nl/my-canister-dashboard
 
+## 0.6.0
+
+### Minor Changes
+
+- [#101](https://github.com/Web3NL/my-canister-dapp/pull/101) [`4fd77dd`](https://github.com/Web3NL/my-canister-dapp/commit/4fd77dd3b97405e4e83402fe63b438a446ad0883) Thanks [@Web3NL](https://github.com/Web3NL)! - Add manageTopUpRule to API and switch to generated declarations
+
+  - New method: `manageTopUpRule(arg)` on `MyDashboardBackend` to manage cycles top-up rules in the dashboard canister.
+  - New exported types: `ManageTopUpRuleArg`, `ManageTopUpRuleResult`.
+  - Internal: declarations are now generated from `my-canister-dashboard.did` and live under
+    `my-canister-dapp-js/my-canister-dashboard-js/declarations/` (replacing the previously copied IDL file).
+
 ## 0.5.5
 
 ### Patch Changes
