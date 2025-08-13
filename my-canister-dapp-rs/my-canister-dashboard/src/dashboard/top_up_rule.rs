@@ -13,7 +13,7 @@ use std::cell::RefCell;
 const ICP_LEDGER_ID_TEXT: &str = "ryjl3-tyaaa-aaaaa-aaaba-cai";
 const CMC_CANISTER_ID_TEXT: &str = "rkp4c-7iaaa-aaaaa-aaaca-cai";
 const ICRC1_FEE_E8S: u64 = 10_000;
-// TPUP memo required by CMC for top-up transfers: ASCII "TPUP" + 4 zero bytes
+// TPUP memo required by CMC for top-up transfers
 const TPUP_MEMO: [u8; 8] = [0x54, 0x50, 0x55, 0x50, 0x00, 0x00, 0x00, 0x00];
 
 #[derive(CandidType, Serialize, Deserialize, Clone, Debug, PartialEq, Eq)]
@@ -67,8 +67,8 @@ impl CyclesAmount {
 #[derive(CandidType, Serialize, Deserialize, Clone, Debug, PartialEq, Eq)]
 pub struct TopUpRule {
     pub interval: TopUpInterval,
-    pub cycles_threshold: CyclesAmount, // top up when canister's cycles below this
-    pub cycles_amount: CyclesAmount,    // cycles amount
+    pub cycles_threshold: CyclesAmount,
+    pub cycles_amount: CyclesAmount,
 }
 
 thread_local! {
@@ -82,10 +82,8 @@ pub fn manage_top_up_rule(arg: ManageTopUpRuleArg) -> ManageTopUpRuleResult {
     match arg {
         ManageTopUpRuleArg::Get => ManageTopUpRuleResult::Ok(current_rule()),
         ManageTopUpRuleArg::Add(rule) => {
-            // Clear any existing timer first
             clear_existing_timer();
 
-            // Store rule
             TOP_UP_RULE.with(|cell| {
                 *cell.borrow_mut() = Some(rule.clone());
             });
@@ -96,20 +94,17 @@ pub fn manage_top_up_rule(arg: ManageTopUpRuleArg) -> ManageTopUpRuleResult {
                 rule.interval
             );
 
-            // Set new interval timer and store its id
             let interval = interval_duration(&rule.interval);
             let timer_id = set_timer_interval(interval, on_top_up_interval_tick);
             TOP_UP_TIMER_ID.with(|cell| {
                 *cell.borrow_mut() = Some(timer_id);
             });
             ic_cdk::println!("top-up: timer set every {}s", interval.as_secs());
-            // set_timer_interval schedules the first tick after the interval elapses.
-            // Trigger once immediately so the first check happens right away.
+            // Trigger immediately for instant feedback
             on_top_up_interval_tick();
             ManageTopUpRuleResult::Ok(current_rule())
         }
         ManageTopUpRuleArg::Clear => {
-            // Clear any active timer and the stored rule, unconditionally
             clear_existing_timer();
             TOP_UP_RULE.with(|cell| {
                 *cell.borrow_mut() = None;
@@ -137,7 +132,6 @@ fn on_top_up_interval_tick() {
     spawn(async move {
         ic_cdk::println!("top-up: tick");
         if let Some(rule) = current_rule() {
-            // Log the active rule and its interval duration for traceability
             let every = interval_duration(&rule.interval).as_secs();
             ic_cdk::println!(
                 "top-up: active rule amount={} threshold={} interval={:?} every={}s",
@@ -164,7 +158,7 @@ fn on_top_up_interval_tick() {
                             needed_cycles,
                             needed_icp_e8s
                         );
-                        // Idempotency: skip if previous mint is still in flight
+                        // Skip if previous mint is still in flight
                         let busy = TOP_UP_MINT_INFLIGHT.with(|f| *f.borrow());
                         if busy {
                             ic_cdk::println!("Mint in-flight; skipping this tick");
@@ -211,6 +205,8 @@ fn interval_duration(interval: &TopUpInterval) -> std::time::Duration {
     }
 }
 
+// --- ICP ledger and exchange rate helpers ---
+
 // Compute ICP needed (e8s) from cycles needed.
 async fn compute_icp_needed_e8s(cycles: &Nat) -> Result<u64, String> {
     match fetch_cycles_per_icp().await {
@@ -231,11 +227,11 @@ async fn compute_icp_needed_e8s(cycles: &Nat) -> Result<u64, String> {
             Ok(icp_e8s as u64)
         }
         Ok(_) => Err("CMC returned invalid exchange rate (zero cycles per ICP)".to_string()),
-        Err(e) => Err(format!("CMC exchange rate unavailable: {}", e)),
+        Err(e) => Err(format!("CMC exchange rate unavailable: {e}")),
     }
 }
 
-// Exchange rate fetch (stub): returns cycles per ICP as u64
+// Exchange rate fetch: returns cycles per ICP as u64
 async fn fetch_cycles_per_icp() -> Result<u64, String> {
     // Query CMC's get_icp_xdr_conversion_rate and convert XDR→cycles using 1 XDR = 1e12 cycles.
     let cmc = Principal::from_text(CMC_CANISTER_ID_TEXT)
@@ -272,9 +268,8 @@ async fn fetch_cycles_per_icp() -> Result<u64, String> {
     Ok(cycles_per_icp as u64)
 }
 
-// Deposit ICP and mint cycles via CMC: minimal idempotency using last block index.
+// Deposit ICP and mint cycles via CMC with idempotency using last block index.
 async fn cmc_deposit_and_mint(amount_e8s: u64) -> Result<(), String> {
-    // Always use standard ICP ledger fee and deduct it from the transfer amount
     let cmc = Principal::from_text(CMC_CANISTER_ID_TEXT)
         .map_err(|e| format!("CMC principal parse error: {e}"))?;
     let this_canister = ic_cdk::api::canister_self();
@@ -337,10 +332,9 @@ async fn cmc_deposit_and_mint(amount_e8s: u64) -> Result<(), String> {
     }
 }
 
-// Compute the CMC top-up destination account for a target canister: CMC as owner, subaccount derived from canister id
-// (legacy path no longer uses ICRC-1 Account; destination is AccountIdentifier derived on-ledger)
+// Compute the CMC top-up destination account for a target canister
 
-// Perform a legacy ledger `transfer` to the CMC minting account (AccountIdentifier) for this canister and return the ledger block index (BlockIndex)
+// Perform a legacy ledger `transfer` to the CMC minting account and return the ledger block index
 async fn ledger_transfer_to_cmc_topup(
     cmc: Principal,
     target_canister: Principal,
@@ -348,8 +342,7 @@ async fn ledger_transfer_to_cmc_topup(
 ) -> Result<BlockIndex, String> {
     let ledger = Principal::from_text(ICP_LEDGER_ID_TEXT)
         .map_err(|e| format!("ledger principal parse error: {e}"))?;
-    // 1) Derive destination AccountIdentifier locally exactly like JS principalToSubaccount:
-    // subaccount[0] = len(principal bytes), subaccount[1..] = principal bytes, rest zero
+    // Derive destination AccountIdentifier: subaccount[0] = len(principal), subaccount[1..] = principal bytes
     let pb = target_canister.as_slice();
     if pb.len() > 31 {
         return Err("principal bytes too long for subaccount".into());
@@ -360,19 +353,19 @@ async fn ledger_transfer_to_cmc_topup(
     let subaccount = Subaccount(sub);
     let to = AccountIdentifier::new(&cmc, &subaccount);
 
-    // 2) Build legacy TransferArgs using ic-ledger-types struct with exact field order
-    let memo_bytes = TPUP_MEMO; // Use raw bytes for Memo
+    // Build legacy TransferArgs using ic-ledger-types struct
+    let memo_bytes = TPUP_MEMO;
 
     let arg = TransferArgs {
         memo: Memo(u64::from_le_bytes(memo_bytes)),
         amount: Tokens::from_e8s(amount_e8s),
         fee: Tokens::from_e8s(ICRC1_FEE_E8S),
         from_subaccount: None,
-        to, // AccountIdentifier directly
+        to,
         created_at_time: None,
     };
 
-    // 3) Call ledger.transfer and decode Result<BlockIndex, TransferError>
+    // Call ledger.transfer and decode Result<BlockIndex, TransferError>
     let res = Call::unbounded_wait(ledger, "transfer")
         .with_arg(arg)
         .await
