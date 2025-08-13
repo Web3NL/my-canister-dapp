@@ -211,32 +211,8 @@ fn interval_duration(interval: &TopUpInterval) -> std::time::Duration {
     }
 }
 
-// --- ICP ledger and exchange rate helpers (stubs/minimal impls) ---
-
 // Compute ICP needed (e8s) from cycles needed.
-// Tries an exchange rate canister; falls back to a sanity ratio if unavailable.
 async fn compute_icp_needed_e8s(cycles: &Nat) -> Result<u64, String> {
-    // Fallback sanity ratio: 1 ICP (1e8 e8s) per 1e12 cycles
-    let fallback_cycles_per_icp = Nat::from(1_000_000_000_000u64);
-    let fallback = || -> Result<u64, String> {
-        let cycles_u128 = cycles
-            .0
-            .to_u128()
-            .ok_or_else(|| "cycles too large".to_string())?;
-        let denom = fallback_cycles_per_icp
-            .0
-            .to_u128()
-            .ok_or_else(|| "invalid denom".to_string())?;
-        if denom == 0 {
-            return Err("invalid denom".to_string());
-        }
-        // Fix: multiply by e8s first to preserve precision, then divide
-        let icp_e8s = cycles_u128
-            .saturating_mul(100_000_000u128)
-            .saturating_div(denom);
-        Ok(icp_e8s as u64)
-    };
-
     match fetch_cycles_per_icp().await {
         Ok(cycles_per_icp) if cycles_per_icp > 0 => {
             ic_cdk::println!("top-up: xrc cycles_per_icp={}", cycles_per_icp);
@@ -248,16 +224,14 @@ async fn compute_icp_needed_e8s(cycles: &Nat) -> Result<u64, String> {
             if denom == 0 {
                 return Err("invalid denom".to_string());
             }
-            // Fix: multiply by e8s first to preserve precision, then divide
+            // Multiply by e8s first to preserve precision, then divide
             let icp_e8s = cycles_u128
                 .saturating_mul(100_000_000u128)
                 .saturating_div(denom);
             Ok(icp_e8s as u64)
         }
-        _ => {
-            ic_cdk::println!("top-up: xrc unavailable; using fallback ratio");
-            fallback()
-        }
+        Ok(_) => Err("CMC returned invalid exchange rate (zero cycles per ICP)".to_string()),
+        Err(e) => Err(format!("CMC exchange rate unavailable: {}", e)),
     }
 }
 
