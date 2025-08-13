@@ -1344,7 +1344,7 @@ dependencies = [
 
 [[package]]
 name = "my-hello-world"
-version = "4.0.0"
+version = "5.0.0"
 dependencies = [
  "candid",
  "ic-asset-certification",
