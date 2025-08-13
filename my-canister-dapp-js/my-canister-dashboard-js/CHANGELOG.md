@@ -1,5 +1,11 @@
 # @web3nl/my-canister-dashboard
 
+## 0.6.1
+
+### Patch Changes
+
+- failed to commit files before publish
+
 ## 0.6.0
 
 ### Minor Changes

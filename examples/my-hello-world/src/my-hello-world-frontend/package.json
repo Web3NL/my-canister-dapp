@@ -3,7 +3,7 @@
   "version": "4.0.0",
   "dependencies": {
     "@dfinity/utils": "^2.13.0",
-    "@web3nl/my-canister-dashboard": "0.6.0",
+    "@web3nl/my-canister-dashboard": "0.6.1",
     "lit-html": "2.8.0"
   },
   "devDependencies": {
