@@ -3,7 +3,9 @@ use candid::{CandidType, Nat};
 use ic_cdk::call::Call;
 use ic_cdk::futures::spawn;
 use ic_cdk_timers::{TimerId, clear_timer, set_timer_interval};
-use icrc_ledger_types::icrc1::account::Account as Icrc1Account;
+use ic_ledger_types::{
+    AccountIdentifier, BlockIndex, Memo, Subaccount, Tokens, TransferArgs, TransferError,
+};
 use num_traits::ToPrimitive;
 use serde::{Deserialize, Serialize};
 use std::cell::RefCell;
@@ -11,6 +13,8 @@ use std::cell::RefCell;
 const ICP_LEDGER_ID_TEXT: &str = "ryjl3-tyaaa-aaaaa-aaaba-cai";
 const CMC_CANISTER_ID_TEXT: &str = "rkp4c-7iaaa-aaaaa-aaaca-cai";
 const ICRC1_FEE_E8S: u64 = 10_000;
+// TPUP memo required by CMC for top-up transfers: ASCII "TPUP" + 4 zero bytes
+const TPUP_MEMO: [u8; 8] = [0x54, 0x50, 0x55, 0x50, 0x00, 0x00, 0x00, 0x00];
 
 #[derive(CandidType, Serialize, Deserialize, Clone, Debug, PartialEq, Eq)]
 pub enum ManageTopUpRuleArg {
@@ -142,18 +146,15 @@ fn on_top_up_interval_tick() {
                 rule.interval,
                 every
             );
-            // Hysteresis: only top up if cycles are below threshold minus 10% buffer
-            let threshold = rule.cycles_threshold.as_cycles() as u128;
-            let hysteresis = threshold / 10; // 10%
-            let activate_below = threshold - hysteresis;
 
+            let threshold = rule.cycles_threshold.as_cycles() as u128;
             let current_cycles = ic_cdk::api::canister_cycle_balance();
 
-            if current_cycles < activate_below {
+            if current_cycles < threshold {
                 ic_cdk::println!(
-                    "top-up: below threshold current={} activate_below={}",
+                    "top-up: below threshold current={} threshold={}",
                     current_cycles,
-                    activate_below
+                    threshold
                 );
                 let needed_cycles = rule.cycles_amount.as_cycles();
                 match compute_icp_needed_e8s(&needed_cycles.into()).await {
@@ -163,30 +164,20 @@ fn on_top_up_interval_tick() {
                             needed_cycles,
                             needed_icp_e8s
                         );
-                        match icrc1_balance_of_e8s(ic_cdk::api::canister_self()).await {
-                            Ok(balance_e8s) if balance_e8s >= needed_icp_e8s => {
-                                // Idempotency: skip if previous mint is still in flight
-                                let busy = TOP_UP_MINT_INFLIGHT.with(|f| *f.borrow());
-                                if busy {
-                                    ic_cdk::println!("Mint in-flight; skipping this tick");
-                                } else {
-                                    TOP_UP_MINT_INFLIGHT.with(|f| *f.borrow_mut() = true);
-                                    ic_cdk::println!("top-up: starting transfer + notify flow");
-                                    let res = cmc_deposit_and_mint(needed_icp_e8s).await;
-                                    if let Err(e) = res {
-                                        ic_cdk::println!("CMC mint error: {}", e);
-                                    } else {
-                                        ic_cdk::println!("top-up: flow completed");
-                                    }
-                                    TOP_UP_MINT_INFLIGHT.with(|f| *f.borrow_mut() = false);
-                                }
+                        // Idempotency: skip if previous mint is still in flight
+                        let busy = TOP_UP_MINT_INFLIGHT.with(|f| *f.borrow());
+                        if busy {
+                            ic_cdk::println!("Mint in-flight; skipping this tick");
+                        } else {
+                            TOP_UP_MINT_INFLIGHT.with(|f| *f.borrow_mut() = true);
+                            ic_cdk::println!("top-up: starting transfer + notify flow");
+                            let res = cmc_deposit_and_mint(needed_icp_e8s).await;
+                            if let Err(e) = res {
+                                ic_cdk::println!("CMC mint error: {}", e);
+                            } else {
+                                ic_cdk::println!("top-up: flow completed");
                             }
-                            Ok(balance_e8s) => ic_cdk::println!(
-                                "Insufficient ICP balance: have {}, need {}",
-                                balance_e8s,
-                                needed_icp_e8s
-                            ),
-                            Err(e) => ic_cdk::println!("Ledger balance error: {}", e),
+                            TOP_UP_MINT_INFLIGHT.with(|f| *f.borrow_mut() = false);
                         }
                     }
                     Err(e) => {
@@ -199,9 +190,9 @@ fn on_top_up_interval_tick() {
                 }
             } else {
                 ic_cdk::println!(
-                    "top-up: cycles above threshold; skipping current={} activate_below={}",
+                    "top-up: cycles above threshold; skipping current={} threshold={}",
                     current_cycles,
-                    activate_below
+                    threshold
                 );
             }
         } else {
@@ -222,31 +213,6 @@ fn interval_duration(interval: &TopUpInterval) -> std::time::Duration {
 
 // --- ICP ledger and exchange rate helpers (stubs/minimal impls) ---
 
-// Get this canister's ICP balance by calling the ICRC-1 ledger balance_of
-async fn icrc1_balance_of_e8s(owner: Principal) -> Result<u64, String> {
-    // Mainnet ICP ICRC-1 ledger canister
-    let ledger = Principal::from_text(ICP_LEDGER_ID_TEXT)
-        .map_err(|e| format!("ledger principal parse error: {e}"))?;
-    let account = Icrc1Account {
-        owner,
-        subaccount: None,
-    };
-    let res = Call::unbounded_wait(ledger, "icrc1_balance_of")
-        .with_arg((account,))
-        .await
-        .map_err(|e| format!("icrc1_balance_of failed: {e:?}"))?;
-    let (balance_nat,): (Nat,) = res
-        .candid_tuple()
-        .map_err(|e| format!("icrc1_balance_of candid decode failed: {e:?}"))?;
-    let bal_u128 = balance_nat
-        .0
-        .to_u128()
-        .ok_or_else(|| "balance too large".to_string())?;
-    let bal = bal_u128 as u64;
-    ic_cdk::println!("top-up: icp balance e8s={}", bal);
-    Ok(bal)
-}
-
 // Compute ICP needed (e8s) from cycles needed.
 // Tries an exchange rate canister; falls back to a sanity ratio if unavailable.
 async fn compute_icp_needed_e8s(cycles: &Nat) -> Result<u64, String> {
@@ -264,8 +230,11 @@ async fn compute_icp_needed_e8s(cycles: &Nat) -> Result<u64, String> {
         if denom == 0 {
             return Err("invalid denom".to_string());
         }
-        let icp = (cycles_u128 / denom).saturating_mul(100_000_000u128);
-        Ok(icp as u64)
+        // Fix: multiply by e8s first to preserve precision, then divide
+        let icp_e8s = cycles_u128
+            .saturating_mul(100_000_000u128)
+            .saturating_div(denom);
+        Ok(icp_e8s as u64)
     };
 
     match fetch_cycles_per_icp().await {
@@ -279,8 +248,11 @@ async fn compute_icp_needed_e8s(cycles: &Nat) -> Result<u64, String> {
             if denom == 0 {
                 return Err("invalid denom".to_string());
             }
-            let icp = (cycles_u128 / denom).saturating_mul(100_000_000u128);
-            Ok(icp as u64)
+            // Fix: multiply by e8s first to preserve precision, then divide
+            let icp_e8s = cycles_u128
+                .saturating_mul(100_000_000u128)
+                .saturating_div(denom);
+            Ok(icp_e8s as u64)
         }
         _ => {
             ic_cdk::println!("top-up: xrc unavailable; using fallback ratio");
@@ -366,7 +338,7 @@ async fn cmc_deposit_and_mint(amount_e8s: u64) -> Result<(), String> {
         ICRC1_FEE_E8S,
         amount_e8s
     );
-    let block_index = icrc1_transfer_to_cmc_topup(cmc, this_canister, transfer_amount_e8s).await?;
+    let block_index = ledger_transfer_to_cmc_topup(cmc, this_canister, transfer_amount_e8s).await?;
     ic_cdk::println!("top-up: transfer ok, block_index={}", block_index);
     TOP_UP_LAST_BLOCK_INDEX.with(|c| *c.borrow_mut() = Some(block_index));
 
@@ -392,63 +364,51 @@ async fn cmc_deposit_and_mint(amount_e8s: u64) -> Result<(), String> {
 }
 
 // Compute the CMC top-up destination account for a target canister: CMC as owner, subaccount derived from canister id
-fn cmc_topup_account_for(cmc: Principal, target: Principal) -> Icrc1Account {
-    // Official CMC top-up subaccount derivation:
-    // subaccount[0] = len(principal_bytes); subaccount[1..1+len] = principal_bytes; rest zeroed
-    let mut sub = [0u8; 32];
-    let bytes = target.as_slice();
-    let len = bytes.len().min(31); // reserve sub[0] for the length
-    sub[0] = len as u8;
-    sub[1..1 + len].copy_from_slice(&bytes[..len]);
-    Icrc1Account {
-        owner: cmc,
-        subaccount: Some(sub),
-    }
-}
+// (legacy path no longer uses ICRC-1 Account; destination is AccountIdentifier derived on-ledger)
 
-// Perform an ICRC-1 transfer to the CMC minting account for this canister and return the ledger block index (u64)
-async fn icrc1_transfer_to_cmc_topup(
+// Perform a legacy ledger `transfer` to the CMC minting account (AccountIdentifier) for this canister and return the ledger block index (BlockIndex)
+async fn ledger_transfer_to_cmc_topup(
     cmc: Principal,
     target_canister: Principal,
     amount_e8s: u64,
-) -> Result<u64, String> {
-    use icrc_ledger_types::icrc1::transfer::{TransferArg, TransferError};
-
+) -> Result<BlockIndex, String> {
     let ledger = Principal::from_text(ICP_LEDGER_ID_TEXT)
         .map_err(|e| format!("ledger principal parse error: {e}"))?;
+    // 1) Derive destination AccountIdentifier locally exactly like JS principalToSubaccount:
+    // subaccount[0] = len(principal bytes), subaccount[1..] = principal bytes, rest zero
+    let pb = target_canister.as_slice();
+    if pb.len() > 31 {
+        return Err("principal bytes too long for subaccount".into());
+    }
+    let mut sub = [0u8; 32];
+    sub[0] = pb.len() as u8;
+    sub[1..1 + pb.len()].copy_from_slice(pb);
+    let subaccount = Subaccount(sub);
+    let to = AccountIdentifier::new(&cmc, &subaccount);
 
-    let to = cmc_topup_account_for(cmc, target_canister);
-    let arg = TransferArg {
+    // 2) Build legacy TransferArgs using ic-ledger-types struct with exact field order
+    let memo_bytes = TPUP_MEMO; // Use raw bytes for Memo
+
+    let arg = TransferArgs {
+        memo: Memo(u64::from_le_bytes(memo_bytes)),
+        amount: Tokens::from_e8s(amount_e8s),
+        fee: Tokens::from_e8s(ICRC1_FEE_E8S),
         from_subaccount: None,
-        to,
-        amount: Nat::from(amount_e8s),
-        fee: Some(Nat::from(ICRC1_FEE_E8S)),
-        memo: None,
+        to, // AccountIdentifier directly
         created_at_time: None,
     };
 
-    // icrc1_transfer returns Result<Nat, TransferError>
-    let res = Call::unbounded_wait(ledger, "icrc1_transfer")
-        .with_arg((arg,))
+    // 3) Call ledger.transfer and decode Result<BlockIndex, TransferError>
+    let res = Call::unbounded_wait(ledger, "transfer")
+        .with_arg(arg)
         .await
-        .map_err(|e| format!("icrc1_transfer failed: {e:?}"))?;
-    let result: Result<Nat, TransferError> = res
-        .candid()
-        .map_err(|e| format!("icrc1_transfer candid decode failed: {e:?}"))?;
+        .map_err(|e| format!("transfer failed: {e:?}"))?;
 
-    match result {
-        Ok(block_index_nat) => {
-            let bi = block_index_nat
-                .0
-                .to_u128()
-                .ok_or_else(|| "block index too large".to_string())?;
-            if bi > u64::MAX as u128 {
-                return Err("block index does not fit u64".into());
-            }
-            Ok(bi as u64)
-        }
-        Err(e) => Err(format!("icrc1_transfer error: {e:?}")),
-    }
+    let result: Result<BlockIndex, TransferError> = res
+        .candid()
+        .map_err(|e| format!("transfer candid decode failed: {e:?}"))?;
+
+    result.map_err(|e| format!("transfer error: {e:?}"))
 }
 
 // notify_top_up definitions and call
@@ -486,10 +446,10 @@ async fn cmc_notify_top_up(block_index: u64, canister_id: Principal) -> Result<N
     })?;
 
     let res = Call::unbounded_wait(cmc, "notify_top_up")
-        .with_arg((NotifyTopUpArg {
+        .with_arg(NotifyTopUpArg {
             block_index,
             canister_id,
-        },))
+        })
         .await
         .map_err(|e| NotifyError::Other {
             error_code: 1,
