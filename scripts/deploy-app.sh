@@ -46,7 +46,6 @@ npm pkg set deployedAtCommit="$COMMIT_HASH"
 
 # Bump version and commit if deploy succeeded
 echo "📈 Bumping $VERSION_TYPE version..."
-cd my-canister-app
 npm version "$VERSION_TYPE" --no-git-tag-version > /dev/null 2>&1
 NEW_VERSION=$(node -p "require('./package.json').version")
 
