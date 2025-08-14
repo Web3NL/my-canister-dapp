@@ -1,3 +1,5 @@
-# My Canister Wasm
+# mycanister.app
 
-User controlled canister creation tool and Wasm repository for canister using [My Canister Dashboard](https://github.com/Web3NL/my-canister-dapp)
+User controlled Canister Dapp creation tool and Wasm repository for examples canisters using [My Canister Dapp](https://github.com/Web3NL/my-canister-dapp).
+
+See [FAQ](https://mycanister.app/faq).

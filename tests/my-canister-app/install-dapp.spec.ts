@@ -1,4 +1,4 @@
-import { test } from '@playwright/test';
+import { test, expect } from '@playwright/test';
 import { myCanisterAppDfxUrl, loadDfxEnv, readTestData, transferToPrincipal, saveTestData } from '../helpers';
 import { Principal } from '@dfinity/principal';
 
@@ -7,7 +7,6 @@ loadDfxEnv();
 
 test('My Canister App E2E Suite', async ({ page }) => {
     test.setTimeout(60000); // 1 minute timeout
-    const TRANSFER_AMOUNT = '0.25';
 
     const appUrl = myCanisterAppDfxUrl();
     await page.goto(appUrl);
@@ -36,6 +35,20 @@ test('My Canister App E2E Suite', async ({ page }) => {
     await page.getByRole('link').filter({ hasText: 'Install a Dapp +' }).click();
     await page.getByRole('button', { name: 'Install' }).waitFor({ state: 'visible' });
     await page.getByRole('button', { name: 'Install' }).click();
+
+    // Wait until minimum deposit amount (number) is loaded instead of placeholder '...'
+    const depositLocator = page.locator('p').filter({ hasText: 'Deposit' }).first();
+    await expect(depositLocator).toHaveText(/Deposit\s+\d/, { timeout: 30000 });
+    const depositTextRaw = await depositLocator.textContent();
+    // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
+    if (!depositTextRaw) {
+        throw new Error('Could not read deposit text');
+    }
+    const match = depositTextRaw.match(/Deposit\s+([0-9]+(?:\.[0-9]+)?)\s+ICP/);
+    if (!match) {
+        throw new Error(`Unexpected deposit text format: ${depositTextRaw}`);
+    }
+    const TRANSFER_AMOUNT: string = match[1]!;
 
     // Read the principal from the page and transfer funds
     const principalText = await page.locator('#principal .value').first().textContent();
