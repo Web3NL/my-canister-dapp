@@ -194,7 +194,7 @@
     requiredBalanceE8s = await calculateIcpNeededForCanisterCreation();
     minimumBalance = (
       Number(requiredBalanceE8s) / Number(E8S_PER_TOKEN)
-    ).toFixed(4);
+    ).toFixed(8);
 
     if (browser) {
       const storedCanisterId = localStorage.getItem(CANISTER_STORAGE_KEY);
