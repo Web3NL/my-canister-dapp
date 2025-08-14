@@ -33,4 +33,10 @@ export class CmcApi {
       subnet_type: [],
     });
   }
+
+  async getIcpToCyclesConversionRate(
+    params: { certified?: boolean } = {}
+  ): Promise<bigint> {
+    return this.cmc.getIcpToCyclesConversionRate(params);
+  }
 }

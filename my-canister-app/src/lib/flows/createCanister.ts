@@ -17,7 +17,7 @@ export async function createNewCanister(wasmId: number): Promise<Principal> {
   const ledgerApi = await LedgerApi.create();
   const balance = await ledgerApi.balance();
 
-  if (!hasSufficientBalanceForCanisterCreation(balance)) {
+  if (!(await hasSufficientBalanceForCanisterCreation(balance))) {
     throw new Error('Insufficient balance for canister creation');
   }
 
