@@ -34,4 +34,4 @@ export const CREATE_CANISTER_MEMO = new Uint8Array([
 ]); // 'CREA' in little-endian with padding
 export const TRANSACTION_FEE = BigInt(10_000);
 export const E8S_PER_TOKEN = BigInt(100000000);
-export const CANISTER_CREATION_CYCLES_AMOUNT = BigInt(800_000_000_000);
+export const CANISTER_CREATION_CYCLES_AMOUNT = BigInt(1_000_000_000_000);
