@@ -19,7 +19,7 @@
   <h3>Fund account</h3>
 
   <p>
-    Deposit {minimumBalance} ICP to cover
+    Deposit at least {minimumBalance} ICP to cover
     <a
       href="https://internetcomputer.org/docs/defi/token-ledgers/cycles-ledger#fees"
       target="_blank"
