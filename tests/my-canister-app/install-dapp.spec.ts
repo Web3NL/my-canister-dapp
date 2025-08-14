@@ -38,13 +38,15 @@ test('My Canister App E2E Suite', async ({ page }) => {
 
     // Wait until minimum deposit amount (number) is loaded instead of placeholder '...'
     const depositLocator = page.locator('p').filter({ hasText: 'Deposit' }).first();
-    await expect(depositLocator).toHaveText(/Deposit\s+\d/, { timeout: 30000 });
+    // Wait until the minimum balance number is loaded in the new text format
+    await expect(depositLocator).toHaveText(/Deposit\s+at\s+least\s+\d/, { timeout: 30000 });
     const depositTextRaw = await depositLocator.textContent();
     // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
     if (!depositTextRaw) {
         throw new Error('Could not read deposit text');
     }
-    const match = depositTextRaw.match(/Deposit\s+([0-9]+(?:\.[0-9]+)?)\s+ICP/);
+    // Capture number after 'at least'
+    const match = depositTextRaw.match(/Deposit\s+at\s+least\s+([0-9]+(?:\.[0-9]+)?)\s+ICP/);
     if (!match) {
         throw new Error(`Unexpected deposit text format: ${depositTextRaw}`);
     }
