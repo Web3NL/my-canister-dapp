@@ -109,15 +109,15 @@ fn create_asset_config(path: &str) -> AssetConfig {
     } else {
         (vec![], vec![])
     };
-    let config = AssetConfig::File {
+
+    AssetConfig::File {
         path: path.to_string(),
         content_type: Some(content_type.clone()),
         headers,
         fallback_for,
         aliased_by,
         encodings: vec![(AssetEncoding::Identity, "".to_string())],
-    };
-    config
+    }
 }
 
 fn infer_content_type(path: &str) -> String {
