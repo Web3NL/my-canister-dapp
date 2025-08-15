@@ -6,14 +6,14 @@ use my_canister_dashboard::{
     ManageAlternativeOriginsArg, ManageAlternativeOriginsResult, ManageIIPrincipalArg,
     ManageIIPrincipalResult, ManageTopUpRuleArg, ManageTopUpRuleResult, WasmStatus,
 };
-use my_canister_frontend::{setup_frontend, with_asset_router_mut};
+use my_canister_frontend::setup_frontend;
 
 static FRONTEND_DIR: Dir = include_dir!("$CARGO_MANIFEST_DIR/../my-hello-world-frontend/dist");
 
 #[init]
 fn init() {
     setup_frontend(&FRONTEND_DIR);
-    with_asset_router_mut(|router| {
+    my_canister_frontend::asset_router::with_asset_router_mut(|router| {
         setup_dashboard_assets(
             router,
             Some(vec![
@@ -48,7 +48,7 @@ fn manage_ii_principal(arg: ManageIIPrincipalArg) -> ManageIIPrincipalResult {
 
 #[update(guard = "only_canister_controllers_guard")]
 fn manage_alternative_origins(arg: ManageAlternativeOriginsArg) -> ManageAlternativeOriginsResult {
-    my_canister_frontend::with_asset_router_mut(|router| {
+    my_canister_frontend::asset_router::with_asset_router_mut(|router| {
         my_canister_dashboard::manage_alternative_origins(router, arg)
     })
 }
