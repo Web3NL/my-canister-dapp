@@ -1,5 +1,10 @@
 #![doc = include_str!("../README.md")]
 
+mod asset_router;
+pub use asset_router::{
+    http_request, root_hash, setup_frontend, with_asset_router, with_asset_router_mut,
+};
+
 use ic_asset_certification::{Asset, AssetConfig, AssetEncoding, AssetFallbackConfig};
 use ic_http_certification::StatusCode;
 use include_dir::Dir;
