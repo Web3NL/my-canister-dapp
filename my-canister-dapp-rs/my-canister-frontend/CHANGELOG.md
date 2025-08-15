@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.2.0] - 2025-08-15
+
 ### Added
 
 - `setup_frontend` function to initialize frontend assets into the internal router
