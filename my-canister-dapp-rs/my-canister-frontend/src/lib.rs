@@ -9,7 +9,7 @@ use std::borrow::Cow;
 
 /// Initialize and certify your Canister Dapp frontend assets.
 ///
-/// Embeds files from an `include_dir` `Dir` into the internal
+/// Embeds files from an [`include_dir`](https://docs.rs/include_dir/latest/include_dir/) `Dir` into the internal
 /// [`AssetRouter`](https://docs.rs/ic-asset-certification/latest/ic_asset_certification/struct.AssetRouter.html)
 /// and certifies them.
 ///

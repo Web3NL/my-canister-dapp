@@ -8,7 +8,7 @@ thread_local! {
     static ASSET_ROUTER: RefCell<AssetRouter<'static>> = RefCell::new(AssetRouter::new());
 }
 
-/// Run a closure with a read‑only reference to the shared internal `AssetRouter`.
+/// Run a closure with a read‑only reference to the internal `AssetRouter`.
 pub fn with_asset_router<F, R>(f: F) -> R
 where
     F: FnOnce(&AssetRouter<'static>) -> R,
@@ -19,7 +19,7 @@ where
     })
 }
 
-/// Run a closure with a mutable reference to the shared internal `AssetRouter`.
+/// Run a closure with a mutable reference to the internal `AssetRouter`.
 pub fn with_asset_router_mut<F, R>(f: F) -> R
 where
     F: FnOnce(&mut AssetRouter<'static>) -> R,
@@ -30,8 +30,33 @@ where
     })
 }
 
-/// Process a [`Dir`](https://docs.rs/include_dir/latest/include_dir/struct.Dir.html) of frontend assets and create [`Asset`](https://docs.rs/ic-asset-certification/latest/ic_asset_certification/struct.Asset.html)
-/// and [`AssetConfig`](https://docs.rs/ic-asset-certification/latest/ic_asset_certification/enum.AssetConfig.html) vectors.
+/// Process a [`Dir`](https://docs.rs/include_dir/latest/include_dir/struct.Dir.html) of frontend assets and create [`Asset`](https://docs.rs/ic-asset-certification/latest/ic_asset_certification/struct.Asset.html) and [`AssetConfig`](https://docs.rs/ic-asset-certification/latest/ic_asset_certification/enum.AssetConfig.html) vectors
+/// suitable for use with [`AssetRouter.certify_assets()`](https://docs.rs/ic-asset-certification/latest/ic_asset_certification/struct.AssetRouter.html).
+///
+/// All assets are configured as `AssetConfig::File` with automatic MIME type detection using [`mime_guess`](https://docs.rs/mime_guess/latest/mime_guess/).
+/// The `index.html` file, if present, is configured as a fallback for `/` route.
+///
+/// # Arguments
+///
+/// * `assets_dir` - A static directory containing the assets to process
+///
+/// # Returns
+///
+/// A tuple containing:
+/// * `Vec<`[`Asset`](https://docs.rs/ic-asset-certification/latest/ic_asset_certification/struct.Asset.html)`>` - Vector of assets with their content
+/// * `Vec<`[`AssetConfig`](https://docs.rs/ic-asset-certification/latest/ic_asset_certification/enum.AssetConfig.html)`>` - Vector of asset configurations for routing
+///
+/// # Example
+///
+/// ```rust,ignore
+/// use include_dir::{include_dir, Dir};
+/// use my_canister_frontend::asset_router_configs;
+///
+/// static ASSETS: Dir = include_dir!("$CARGO_MANIFEST_DIR/assets");
+///
+/// let (assets, configs) = asset_router_configs(&ASSETS);
+/// // Use with AssetRouter.certify_assets(assets, configs)
+/// ```
 pub fn asset_router_configs(
     assets_dir: &Dir<'static>,
 ) -> (Vec<Asset<'static, 'static>>, Vec<AssetConfig>) {

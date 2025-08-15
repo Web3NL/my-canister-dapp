@@ -9,21 +9,34 @@ Frontend asset processing library for Internet Computer Canister Dapps.
 
 ## Usage
 
-```rust
+Single canister example (init + query):
+
+```rust,ignore
+use ic_cdk::{init, query};
+use ic_http_certification::{HttpRequest, HttpResponse};
 use include_dir::{include_dir, Dir};
-use my_canister_frontend::asset_router_configs;
+use my_canister_frontend::setup_frontend;
 
-static ASSETS: Dir = include_dir!("$CARGO_MANIFEST_DIR/assets");
+// Embed built frontend (e.g. dist/)
+static ASSETS: Dir = include_dir!("$CARGO_MANIFEST_DIR/../my-hello-world-frontend/dist");
 
-let (assets, configs) = asset_router_configs(&ASSETS);
-// Use with AssetRouter.certify_assets(assets, configs)
+#[init]
+fn init() {
+	setup_frontend(&ASSETS);
+}
+
+#[query]
+fn http_request(req: HttpRequest) -> HttpResponse {
+	my_canister_frontend::http_request(req)
+}
 ```
 
 ## Features
 
+- Embedded assets via `include_dir`
 - Automatic MIME type detection using `mime_guess`
-- Configures `index.html` as fallback for `/` route
-- Returns `AssetConfig::File` configurations for all assets
+- `index.html` auto-configured as fallback for `/`
+- Certification using `ic-asset-certification`
 
 ## License
 
