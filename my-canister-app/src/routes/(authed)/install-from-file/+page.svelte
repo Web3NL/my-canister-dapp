@@ -12,7 +12,7 @@
   import { onMount, onDestroy } from 'svelte';
   import { browser } from '$app/environment';
   // import { page } from '$app/stores';
-  import { E8S_PER_TOKEN, MIN_CANISTER_CREATION_BALANCE } from '$lib/constants';
+  import { E8S_PER_TOKEN } from '$lib/constants';
   import {
     createFrontpageUrl,
     createDashboardUrl,
@@ -21,7 +21,7 @@
   import ConnectIICard from '$lib/components/install/ConnectIICard.svelte';
   import FundAccountCard from '$lib/components/install/FundAccountCard.svelte';
   // import { goto } from '$app/navigation';
-  import { hasSufficientBalanceForCanisterCreation } from '$lib/utils/balance';
+  import { calculateIcpNeededForCanisterCreation } from '$lib/utils/balance';
   import {
     sendToCmc,
     createCanister as createCanisterHelper,
@@ -29,9 +29,8 @@
   } from '$lib/flows/createCanister';
 
   const principalText = $authStore ? $authStore.toText() : '';
-  const minimumBalance = (
-    Number(MIN_CANISTER_CREATION_BALANCE) / Number(E8S_PER_TOKEN)
-  ).toFixed(2);
+  let requiredBalanceE8s: bigint = 0n;
+  let minimumBalance = '...';
 
   let formattedBalance = '0.00000000 ICP';
   let canisterPrincipal: Principal | null = null;
@@ -62,7 +61,7 @@
     currentBalance = await ledgerApi.balance();
     formattedBalance = formatIcpBalance(currentBalance);
 
-    if (currentBalance >= MIN_CANISTER_CREATION_BALANCE) {
+    if (requiredBalanceE8s > 0n && currentBalance >= requiredBalanceE8s) {
       if (balanceTimer) {
         clearInterval(balanceTimer);
         balanceTimer = null;
@@ -88,12 +87,12 @@
     },
     {
       step: 'create',
-      text: 'Create dApp on ICP',
+      text: 'Create Dapp on ICP',
       state: 'next',
     },
     {
       step: 'connect-ii',
-      text: 'Connect II to dApp',
+      text: 'Connect II to Dapp',
       state: 'next',
     },
     {
@@ -140,7 +139,7 @@
 
     busyStore.startBusy({
       initiator: 'create-canister',
-      text: 'Keep window open. Creating dApp...',
+      text: 'Keep window open. Creating Dapp...',
     });
 
     canisterPrincipal = await createNewCanister();
@@ -156,7 +155,7 @@
   async function takeControlOfCanister() {
     busyStore.startBusy({
       initiator: 'connect-ii',
-      text: 'Keep window open. Installing and connecting II to dApp...',
+      text: 'Keep window open. Installing and connecting II to Dapp...',
     });
 
     await installAndTakeControl(canisterPrincipal!);
@@ -173,7 +172,7 @@
     const ledgerApi = await LedgerApi.create();
     const balance = await ledgerApi.balance();
 
-    if (!hasSufficientBalanceForCanisterCreation(balance)) {
+    if (requiredBalanceE8s === 0n || balance < requiredBalanceE8s) {
       throw new Error('Insufficient balance for canister creation');
     }
 
@@ -186,11 +185,16 @@
     return canisterId;
   }
 
-  onMount(() => {
+  onMount(async () => {
     // if (!wasmIdNumber || !dappNameText) {
     //   goto('/dapp-store');
     //   return;
     // }
+
+    requiredBalanceE8s = await calculateIcpNeededForCanisterCreation();
+    minimumBalance = (
+      Number(requiredBalanceE8s) / Number(E8S_PER_TOKEN)
+    ).toFixed(8);
 
     if (browser) {
       const storedCanisterId = localStorage.getItem(CANISTER_STORAGE_KEY);
@@ -209,6 +213,10 @@
     }
   });
 </script>
+
+<svelte:head>
+  <title>Install from File - My Canister Dapp</title>
+</svelte:head>
 
 <h1>Install Dapp</h1>
 <!-- <h3>{dappNameText}</h3> -->
@@ -233,7 +241,7 @@
     {minimumBalance}
     {formattedBalance}
     showSpinner={balanceTimer !== null}
-    disabled={currentBalance < MIN_CANISTER_CREATION_BALANCE}
+    disabled={requiredBalanceE8s === 0n || currentBalance < requiredBalanceE8s}
     onCreate={createCanister}
   />
 {:else if currentStep === 3}

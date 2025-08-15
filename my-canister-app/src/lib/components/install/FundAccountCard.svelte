@@ -18,7 +18,14 @@
 <Card>
   <h3>Fund account</h3>
 
-  <p>Deposit {minimumBalance} ICP to create your Dapp</p>
+  <p>
+    Deposit at least {minimumBalance} ICP to cover
+    <a
+      href="https://internetcomputer.org/docs/defi/token-ledgers/cycles-ledger#fees"
+      target="_blank"
+      rel="noopener noreferrer">canister creation fee</a
+    >
+  </p>
 
   <div class="keyVal" id="principal">
     <KeyValuePair>
@@ -39,7 +46,7 @@
     </KeyValuePair>
   </div>
 
-  <button class="primary" on:click={onCreate} {disabled}>Create dApp</button>
+  <button class="primary" on:click={onCreate} {disabled}>Create Dapp</button>
 </Card>
 
 <style>

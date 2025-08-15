@@ -2,6 +2,40 @@
 
 ## [Unreleased]
 
+## [0.10.0] - 2025-08-13
+
+### Added
+
+- Manage top-up rule module with single-rule semantics (Hourly/Daily/Weekly/Monthly) and periodic timer.
+- Exchange-rate fetch via CMC, ledger transfer and CMC notify flow with minimal idempotency.
+- Logging (println) at key steps of the top-up lifecycle.
+
+### Changed
+
+## [0.9.1] - 2025-08-10
+
+### Changed
+
+- Update repository URL from `https://github.com/Web3NL/my-canister-dashboard` to `https://github.com/Web3NL/my-canister-dapp`
+
+## [0.9.0] - 2025-08-10
+
+### Added
+
+Canister dashboard frontend:
+
+- Canister Logs section to the dashboard and component
+- API call to fetch canister logs from management canister
+- data-testid attributes to Refresh buttons: `refresh-balance-btn`, `refresh-logs-btn` to avoid conflicts
+
+### Changed
+
+- Update E2E canister dashboard frontend test to use data-testid for balance refresh button
+
+## [0.8.1] - 2025-08-09
+
+- Test: verify cargo-release changelog handling.
+
 ## [0.7.0] - 2025-08-02
 
 ### Added

@@ -1,8 +1,10 @@
-import { defineConfig } from 'vite';
+import { defineConfig, loadEnv } from 'vite';
 import { fileURLToPath, URL } from 'url';
 import { canisterDashboardDevConfig } from '@web3nl/vite-plugin-canister-dapp';
 
-export default defineConfig(() => {
+export default defineConfig(({ mode }) => {
+  loadEnv(mode, process.cwd(), '');
+
   return {
     plugins: [
       canisterDashboardDevConfig()
@@ -16,6 +18,7 @@ export default defineConfig(() => {
     },
     define: {
       global: 'globalThis',
+      'process.env.DFX_NETWORK': JSON.stringify(process.env.DFX_NETWORK),
     },
     resolve: {
       alias: [

@@ -3,10 +3,12 @@ import { StatusManager } from './components/status';
 import { TopupManager } from './components/top-up';
 import { ControllersManager } from './components/controllers';
 import { AlternativeOriginsManager } from './components/alternativeOrigins';
+import { CanisterLogsManager } from './components/canisterLogs';
 import { canisterId } from './utils';
 import { DASHBOARD_INIT_ERROR_MESSAGE } from './error';
 import { getConfig } from './environment';
 import { setLoggedInState, setLoggedOutState, showError } from './dom';
+import { TopUpRuleManager } from './components/top-up-rule';
 
 class Dashboard {
   private authManager: AuthManager | null = null;
@@ -44,17 +46,21 @@ class Dashboard {
       const canisterIdPrincipal = await canisterId();
 
       const topupManager = new TopupManager();
+      const topUpRuleManager = new TopUpRuleManager();
       const statusManager = new StatusManager();
       const controllersManager = new ControllersManager(
         canisterIdPrincipal,
         iiPrincipal
       );
       const alternativeOriginsManager = new AlternativeOriginsManager();
+      const canisterLogsManager = new CanisterLogsManager();
 
       await topupManager.create();
+      await topUpRuleManager.create();
       await statusManager.create();
       await controllersManager.create();
       await alternativeOriginsManager.create();
+      await canisterLogsManager.create();
     } else {
       this.setLoggedOutState();
     }

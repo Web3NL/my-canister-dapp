@@ -4,6 +4,8 @@ set -e
 
 E2E_FLAG=""
 CLEAN_FLAG=""
+SKIP_DFX_BOOTSTRAP_FLAG=""
+SKIP_CHECKS_FLAG=""
 
 for arg in "$@"; do
     case $arg in
@@ -13,6 +15,12 @@ for arg in "$@"; do
         --clean)
             CLEAN_FLAG="true"
             ;;
+        --skip-dfx-bootstrap)
+            SKIP_DFX_BOOTSTRAP_FLAG="true"
+            ;;
+        --skip-checks)
+            SKIP_CHECKS_FLAG="true"
+            ;;
     esac
 done
 
@@ -20,15 +28,43 @@ if [ "$CLEAN_FLAG" = "true" ]; then
     ./scripts/clean.sh
 fi
 
-./scripts/create-canister-dapp-dev-env.sh my-canister-dapp-js/canister-dashboard-frontend
-./scripts/create-canister-dapp-dev-env.sh examples/my-hello-world/src/my-hello-world-frontend
+# Generate the .env files upfront
+./scripts/generate-env.sh
 
-./scripts/check.sh
-./scripts/setup-dfx-env.sh
+# Format, lint, typecheck, build
+if [ "$SKIP_CHECKS_FLAG" != "true" ]; then
+    ./scripts/check.sh
+fi
+
+if [ "$SKIP_DFX_BOOTSTRAP_FLAG" != "true" ]; then
+    echo "Starting DFX bootstrap"
+
+    dfxvm install 0.28.0
+    dfxvm default 0.28.0
+
+    ./scripts/setup-dfx-identity.sh
+
+    dfx killall
+    dfx start --clean --background > dfx.log 2>&1
+
+    dfx extension install nns
+    dfx nns install
+
+    dfx deploy icp-index
+fi
+
+echo "Setting up dashboard dev environment..."
+./scripts/setup-dashboard-dev-env.sh
+
+echo "Setup my-canister-app canister..."
+./scripts/generate-registry-dev.sh
+dfx deploy my-canister-app
+
+echo "Running tests..."
 ./scripts/run-test.sh
 
 if [ "$E2E_FLAG" = "true" ]; then
     ./scripts/run-test-e2e.sh
 fi
 
-echo "All tests passed successfully!"
+echo "Validation finished correctly!"

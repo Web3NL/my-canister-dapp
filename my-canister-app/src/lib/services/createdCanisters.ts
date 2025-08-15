@@ -47,7 +47,7 @@ export async function getCreatedCanister(
 
   const canisterId = await cmc.notifyCreateCanister(blockId, principal);
 
-  let name = 'Private dApp';
+  let name = 'Private Dapp';
   let version = 1;
   let memo: string | undefined;
 

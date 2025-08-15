@@ -1,24 +1,38 @@
-import { Principal } from '@dfinity/principal';
-import { notEmptyString } from '@dfinity/utils';
 import type { Plugin, ViteDevServer } from 'vite';
 import { loadEnv } from 'vite';
 
+/**
+ * Configuration interface for My Canister Dashboard in development
+ */
 export interface CanisterDashboardDevConfig {
+  /** Canister ID (optional) */
   canisterId: string | undefined;
+  /** DFX host URL for example http://localhost:8080 */
   dfxHost: string;
+  /** Internet Identity provider URL for example http://iiCanisterId.localhost:8080 */
   identityProvider: string;
 }
 
-function validatePrincipal(value: string): boolean {
-  try {
-    Principal.fromText(value);
-    return true;
-  } catch {
-    return false;
-  }
+/**
+ * Plugin configuration interface for enabling/disabling features
+ */
+export interface CanisterDashboardPluginConfig {
+  /** Whether to serve the canister dashboard dev config endpoint in dev server (default: true) */
+  serveCanisterDashboardDevEnv?: boolean;
+  /** Whether to emit the canister dashboard dev config during dev build as a static asset (default: true) */
+  emitCanisterDashboardDevConfig?: boolean;
+  /** Server proxy to dfx configuration (default: all enabled) */
+  serverProxies?: {
+    /** Enable /api proxy (default: true) */
+    api?: boolean;
+    /** Enable /canister-dashboard proxy (default: true) */
+    canisterDashboard?: boolean;
+    /** Enable /.well-known/ii-alternative-origins proxy (default: true) */
+    iiAlternativeOrigins?: boolean;
+  };
 }
 
-function loadEnvConfig(
+function loadCanisterDappDevEnv(
   mode: string,
   root: string
 ): CanisterDashboardDevConfig | null {
@@ -42,19 +56,8 @@ function loadEnvConfig(
     console.warn(
       'Warning: Required VITE_ environment variables not set (VITE_II_CANISTER_ID, VITE_DFX_PROTOCOL, VITE_DFX_HOSTNAME, VITE_DFX_PORT).'
     );
-    return null;
-  }
-
-  // Validate that canister IDs are valid principals when provided
-  if (notEmptyString(canisterId) && !validatePrincipal(canisterId)) {
     // eslint-disable-next-line no-console
-    console.warn('Warning: VITE_CANISTER_ID is not a valid Principal.');
-    return null;
-  }
-
-  if (!validatePrincipal(iiCanisterId)) {
-    // eslint-disable-next-line no-console
-    console.warn('Warning: VITE_II_CANISTER_ID is not a valid Principal.');
+    console.warn('Skipping canister dashboard development configuration.');
     return null;
   }
 
@@ -69,16 +72,57 @@ function loadEnvConfig(
 }
 
 /**
- * Vite plugin that provides canister dapp configuration
- * Only works in development mode - skips entirely in production
+ * Vite plugin that provides Internet Computer Canister Dapp configuration for development
+ *
+ * Features:
+ * - Development-only operation (does nothing in production)
+ * - Loads configuration from VITE_ prefixed environment variables
+ * - Serves configuration at `/canister-dashboard-dev-config.json` during development
+ * - Emits `canister-dashboard-dev-config.json` as static asset during development builds
+ * - Automatic server proxy setup for IC development
+ *   - `/api` -> proxied to `${VITE_DFX_PROTOCOL}://${VITE_DFX_HOSTNAME}:${VITE_DFX_PORT}`
+ *   - `/canister-dashboard` -> proxied to `${VITE_DFX_PROTOCOL}://${VITE_DFX_HOSTNAME}:${VITE_DFX_PORT}/canister-dashboard?canisterId=${VITE_CANISTER_ID}`
+ *   - `/.well-known/ii-alternative-origins` -> proxied to `${VITE_DFX_PROTOCOL}://${VITE_DFX_HOSTNAME}:${VITE_DFX_PORT}/.well-known/ii-alternative-origins?canisterId=${VITE_CANISTER_ID}`
+ *   Note: The last two proxy rules are only set if VITE_CANISTER_ID is provided
+ *   Note: Existing user-defined proxy rules for these paths will not be overwritten
+ *
+ * Required environment variables:
+ * - VITE_II_CANISTER_ID // Internet Identity canister ID in dfx
+ * - VITE_DFX_PROTOCOL
+ * - VITE_DFX_HOSTNAME
+ * - VITE_DFX_PORT
+ *
+ * Optional environment variables:
+ * - VITE_CANISTER_ID: Your canister ID
+ *
+ * @param config Optional configuration to enable/disable plugin features
+ * @returns Vite plugin instance
  */
-export function canisterDashboardDevConfig(): Plugin {
+export function canisterDashboardDevConfig(
+  config: CanisterDashboardPluginConfig = {}
+): Plugin {
+  // Set default configuration values
+  const {
+    serveCanisterDashboardDevEnv = true,
+    emitCanisterDashboardDevConfig = true,
+    serverProxies = {},
+  } = config;
+
+  const {
+    api: enableApiProxy = true,
+    canisterDashboard: enableCanisterDashboardProxy = true,
+    iiAlternativeOrigins: enableIiAlternativeOriginsProxy = true,
+  } = serverProxies;
+
   let dashboardConfig: CanisterDashboardDevConfig | null = null;
   let currentMode = 'production';
 
   return {
-    name: 'canister-dapp',
+    name: 'canister-dashboard-dev-config',
 
+    // Configure Vite server proxy for development
+    // This sets up the necessary proxy rules for development
+    // based on the loaded dashboardConfig
     config(config, { mode }) {
       currentMode = mode;
 
@@ -87,10 +131,9 @@ export function canisterDashboardDevConfig(): Plugin {
         return;
       }
 
-      // Load environment config only in development
       // Use root from config or current working directory
       const root = config.root ?? process.cwd();
-      dashboardConfig = loadEnvConfig(mode, root);
+      dashboardConfig = loadCanisterDappDevEnv(mode, root);
 
       // If config failed to load, skip proxy configuration
       if (dashboardConfig === null) {
@@ -113,11 +156,19 @@ export function canisterDashboardDevConfig(): Plugin {
       config.server.proxy ??= {};
 
       const existingProxy = config.server.proxy;
-      const baseProxyKeys = ['/api'];
-      const canisterProxyKeys = [
-        '/canister-dashboard',
-        '/.well-known/ii-alternative-origins',
-      ];
+      const baseProxyKeys: string[] = [];
+      const canisterProxyKeys: string[] = [];
+
+      // Only include enabled proxy keys
+      if (enableApiProxy) {
+        baseProxyKeys.push('/api');
+      }
+      if (enableCanisterDashboardProxy) {
+        canisterProxyKeys.push('/canister-dashboard');
+      }
+      if (enableIiAlternativeOriginsProxy) {
+        canisterProxyKeys.push('/.well-known/ii-alternative-origins');
+      }
 
       // Only include canister-specific proxies if canisterId is defined
       const proxyKeys = notEmptyString(canisterId)
@@ -149,7 +200,7 @@ export function canisterDashboardDevConfig(): Plugin {
         }
       > = {};
 
-      if (!('/api' in existingProxy)) {
+      if (enableApiProxy && !('/api' in existingProxy)) {
         newProxyConfig['/api'] = {
           target: proxyTarget,
           changeOrigin: true,
@@ -158,7 +209,10 @@ export function canisterDashboardDevConfig(): Plugin {
 
       // Only add canister-specific proxies if canisterId is defined
       if (notEmptyString(canisterId)) {
-        if (!('/canister-dashboard' in existingProxy)) {
+        if (
+          enableCanisterDashboardProxy &&
+          !('/canister-dashboard' in existingProxy)
+        ) {
           newProxyConfig['/canister-dashboard'] = {
             target: proxyTarget,
             changeOrigin: true,
@@ -166,7 +220,10 @@ export function canisterDashboardDevConfig(): Plugin {
           };
         }
 
-        if (!('/.well-known/ii-alternative-origins' in existingProxy)) {
+        if (
+          enableIiAlternativeOriginsProxy &&
+          !('/.well-known/ii-alternative-origins' in existingProxy)
+        ) {
           newProxyConfig['/.well-known/ii-alternative-origins'] = {
             target: proxyTarget,
             changeOrigin: true,
@@ -186,9 +243,15 @@ export function canisterDashboardDevConfig(): Plugin {
       currentMode = resolvedConfig.mode;
     },
 
+    // Serve `canister-dashboard-dev-config.json` in dev server
     configureServer(server: ViteDevServer) {
       // Skip entirely if not in development mode
       if (currentMode !== 'development') {
+        return;
+      }
+
+      // Skip if feature is disabled
+      if (!serveCanisterDashboardDevEnv) {
         return;
       }
 
@@ -197,7 +260,6 @@ export function canisterDashboardDevConfig(): Plugin {
         return;
       }
 
-      // Serve canister-dashboard-dev-config.json in dev server
       server.middlewares.use(
         '/canister-dashboard-dev-config.json',
         (req, res, next) => {
@@ -212,9 +274,15 @@ export function canisterDashboardDevConfig(): Plugin {
       );
     },
 
+    // Only generate `canister-dashboard-dev-config.json` static asset in development builds
     generateBundle() {
       // Skip entirely if not in development mode
       if (currentMode !== 'development') {
+        return;
+      }
+
+      // Skip if feature is disabled
+      if (!emitCanisterDashboardDevConfig) {
         return;
       }
 
@@ -232,4 +300,8 @@ export function canisterDashboardDevConfig(): Plugin {
       });
     },
   };
+}
+
+function notEmptyString(value: unknown): value is string {
+  return typeof value === 'string' && value.length > 0;
 }

@@ -15,5 +15,15 @@ hex = { workspace = true }
 ic-cdk = { workspace = true }
 pocket-ic = { workspace = true }
 ic-http-certification = { workspace = true }
+# my-canister-dashboard = "=0.5.1"
+my-canister-dashboard = { path = "../my-canister-dashboard" }
 
-my-canister-dashboard = "=0.5.1"
+
+[package.metadata.release]
+pre-release-replacements = [
+    # Replace the "Unreleased" header with the new version and date
+    { file = "CHANGELOG.md", search = "## \\[Unreleased\\]", replace = "## [{{version}}] - {{date}}", exactly = 1 },
+
+    # Optional: keep an "Unreleased" section at the top after tagging
+    { file = "CHANGELOG.md", search = "(?m)^# Changelog\\n", replace = "# Changelog\n\n## [Unreleased]\n", exactly = 1 },
+]

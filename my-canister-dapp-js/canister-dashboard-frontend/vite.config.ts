@@ -8,7 +8,11 @@ export default defineConfig(() => {
     base: '/canister-dashboard',
     publicDir: false as const,
     plugins: [
-      canisterDashboardDevConfig()
+      canisterDashboardDevConfig({
+        serverProxies: {
+          canisterDashboard: false,
+        }
+      })
     ],
     build: {
       outDir: path.resolve(__dirname, 'dist'),
@@ -29,7 +33,7 @@ export default defineConfig(() => {
     },
     resolve: {
       alias: {
-        $declarations: path.resolve(__dirname, '../../declarations'),
+        $declarations: path.resolve(__dirname, '../my-canister-dashboard-js/declarations'),
       },
     },
   };

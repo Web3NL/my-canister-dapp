@@ -1,0 +1,67 @@
+name: Publish package docs to GitHub Pages
+
+on:
+  push:
+    tags:
+      - '@web3nl/my-canister-dashboard@*'
+      - '@web3nl/vite-plugin-canister-dapp@*'
+  workflow_dispatch:
+
+jobs:
+  publish-docs:
+    name: Build and publish docs for both packages
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pages: write
+      id-token: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+          cache: 'npm'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Build packages (both)
+        run: |
+          npm run build --workspace=@web3nl/my-canister-dashboard
+          npm run build --workspace=@web3nl/vite-plugin-canister-dapp
+
+      - name: Build documentation (both)
+        run: npm run build:docs
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Prepare Pages artifact
+        run: |
+          # Ensure Pages deploy root exists and Jekyll is disabled
+          mkdir -p ./pages-deploy
+          touch ./pages-deploy/.nojekyll
+
+          # Copy My Canister Dashboard JS docs
+          mkdir -p ./pages-deploy/web3nl-my-canister-dashboard-js
+          cp -r ./my-canister-dapp-js/my-canister-dashboard-js/docs/* ./pages-deploy/web3nl-my-canister-dashboard-js/
+
+          # Copy Vite Plugin docs
+          mkdir -p ./pages-deploy/web3nl-vite-plugin-canister-dapp
+          cp -r ./my-canister-dapp-js/vite-plugin-canister-dapp/docs/* ./pages-deploy/web3nl-vite-plugin-canister-dapp/
+
+      - name: Upload docs to Pages
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./pages-deploy
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

@@ -12,6 +12,7 @@ const TARGET_WASM_DIR: &str = "../../wasm";
 
 const II_PRINCIPAL_AT_INSTALLER_APP_BYTE: u8 = 255;
 const II_PRINCIPAL_AT_USER_CONTROLLED_DAPP_BYTE: u8 = 254;
+const STRANGER_PRINCIPAL_BYTE: u8 = 253;
 
 pub const MIN_CANISTER_CREATION_BALANCE: u128 = 500_000_000_000;
 
@@ -51,6 +52,10 @@ pub fn ii_principal_at_installer_app() -> Principal {
 
 pub fn ii_principal_at_user_controlled_dapp() -> Principal {
     Principal::from_slice(&[II_PRINCIPAL_AT_USER_CONTROLLED_DAPP_BYTE; 29])
+}
+
+pub fn stranger_principal() -> Principal {
+    Principal::from_slice(&[STRANGER_PRINCIPAL_BYTE; 29])
 }
 
 #[derive(Serialize, Deserialize, Debug)]

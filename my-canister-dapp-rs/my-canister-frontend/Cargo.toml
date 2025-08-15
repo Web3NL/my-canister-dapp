@@ -1,6 +1,6 @@
 [package]
 name = "my-canister-frontend"
-version = "0.1.3"
+version = "0.2.0"
 description = "Frontend asset utilities Canister Dapps"
 documentation = "https://docs.rs/my-canister-frontend"
 readme = "README.md"
@@ -15,8 +15,20 @@ repository = "https://github.com/Web3NL/my-canister-dapp/tree/main/my-canister-d
 crate-type = ["rlib"]
 
 [dependencies]
+candid = { workspace = true }
 ic-asset-certification = { workspace = true }
 ic-http-certification = { workspace = true }
 ic-cdk = { workspace = true }
 include_dir = { workspace = true }
 mime_guess = { workspace = true }
+
+my-canister-dashboard = "0.10.0"
+
+[package.metadata.release]
+pre-release-replacements = [
+    # Replace the "Unreleased" header with the new version and date
+    { file = "CHANGELOG.md", search = "## \\[Unreleased\\]", replace = "## [{{version}}] - {{date}}", exactly = 1 },
+
+    # Optional: keep an "Unreleased" section at the top after tagging
+    { file = "CHANGELOG.md", search = "(?m)^# Changelog\\n", replace = "# Changelog\n\n## [Unreleased]\n", exactly = 1 },
+]

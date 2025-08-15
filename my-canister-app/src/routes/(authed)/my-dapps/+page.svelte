@@ -3,6 +3,10 @@
   import { Card } from '@dfinity/gix-components';
 </script>
 
+<svelte:head>
+  <title>My Dapps - My Canister Dapp</title>
+</svelte:head>
+
 <a href="/install" class="install-link">
   <Card>
     <h3>Install a Dapp</h3>

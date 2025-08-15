@@ -3,8 +3,10 @@ import type {
   _SERVICE,
   ManageAlternativeOriginsArg,
   ManageAlternativeOriginsResult,
-} from '$declarations/my-canister/my-canister.did.d.ts';
-import { idlFactory } from '$declarations/my-canister/my-canister.did.js';
+  ManageTopUpRuleArg,
+  ManageTopUpRuleResult,
+} from '$declarations/my-canister-dashboard.did.d.ts';
+import { idlFactory } from '$declarations/my-canister-dashboard.did.js';
 
 type CanisterApiService = _SERVICE;
 import { createHttpAgent, canisterId } from '../utils';
@@ -31,7 +33,20 @@ export class CanisterApi {
     arg: ManageAlternativeOriginsArg
   ): Promise<ManageAlternativeOriginsResult> {
     try {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
       return await this.canisterApi.manage_alternative_origins(arg);
+    } catch (error) {
+      showError(NETWORK_ERROR_MESSAGE);
+      throw error;
+    }
+  }
+
+  async manageTopUpRule(
+    arg: ManageTopUpRuleArg
+  ): Promise<ManageTopUpRuleResult> {
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+      return await this.canisterApi.manage_top_up_rule(arg);
     } catch (error) {
       showError(NETWORK_ERROR_MESSAGE);
       throw error;

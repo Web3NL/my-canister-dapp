@@ -1,11 +1,11 @@
 [package]
 name = "my-canister-dashboard"
-version = "0.7.0"
+version = "0.10.0"
 description = "Dashboard assets and management utilities for Internet Computer Canister Dapps"
 edition = { workspace = true }
 license = { workspace = true }
 authors = { workspace = true }
-repository = "https://github.com/Web3NL/my-canister-dashboard/tree/main/my-canister-dapp-rs/my-canister-dashboard"
+repository = "https://github.com/Web3NL/my-canister-dapp/tree/main/my-canister-dapp-rs/my-canister-dashboard"
 keywords = ["internet-computer", "canister", "dashboard", "ic", "dfinity"]
 categories = ["web-programming", "development-tools"]
 readme = "README.md"
@@ -18,13 +18,24 @@ candid = { workspace = true }
 ic-asset-certification = { workspace = true }
 ic-http-certification = { workspace = true }
 ic-cdk = { workspace = true }
+ic-cdk-timers = { workspace = true }
+ic-ledger-types = { workspace = true }
+icrc-ledger-types = { workspace = true }
 include_dir = { workspace = true }
 mime_guess = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
+num-traits = { workspace = true }
 
 [package.metadata.release]
 pre-release-replacements = [
+  # Replace the "Unreleased" header with the new version and date
+  { file = "CHANGELOG.md", search = "## \\[Unreleased\\]", replace = "## [{{version}}] - {{date}}", exactly = 1 },
+
+  # Optional: keep an "Unreleased" section at the top after tagging
+  { file = "CHANGELOG.md", search = "(?m)^# Changelog\\n", replace = "# Changelog\n\n## [Unreleased]\n", exactly = 1 },
+
+  # Update the version in package.json for My Canister Dashboard
   { file = "../../my-canister-dapp-js/canister-dashboard-frontend/package.json", search = "\"version\": \".*\"", replace = "\"version\": \"{{version}}\"", exactly = 1 },
 ]
 
@@ -32,6 +43,3 @@ pre-release-hook = [
   "../../scripts/prebuild-mcd.sh",
   "../../scripts/rust-lint-format.sh",
 ]
-
-# changelog = "CHANGELOG.md"
-# changelog-sections = ["Added", "Changed"]

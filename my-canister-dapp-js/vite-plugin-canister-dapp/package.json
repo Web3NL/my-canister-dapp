@@ -1,38 +1,67 @@
 {
   "name": "@web3nl/vite-plugin-canister-dapp",
-  "version": "0.1.0",
-  "description": "Vite plugin for Canister Dapp configuration",
-  "type": "module",
-  "main": "dist/index.js",
-  "types": "dist/index.d.ts",
-  "files": [
-    "dist"
-  ],
-  "dependencies": {
-    "@dfinity/utils": "^2.4.1"
+  "description": "Vite plugin for Internet Computer canister dapp development configuration",
+  "version": "0.2.0",
+  "author": "Web3NL",
+  "bugs": "https://github.com/Web3NL/my-canister-dapp/issues",
+  "devDependencies": {
+    "typedoc": "0.28.7",
+    "typescript": "5.8.3"
   },
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "homepage": "https://github.com/Web3NL/my-canister-dapp/tree/main/my-canister-dapp-js/vite-plugin-canister-dapp",
+  "keywords": [
+    "canister",
+    "configuration",
+    "dapp",
+    "development",
+    "dfinity",
+    "ic",
+    "internet-computer",
+    "plugin",
+    "vite",
+    "web3"
+  ],
+  "license": "MIT",
+  "publishConfig": {
+    "access": "public"
+  },
+  "main": "dist/index.js",
   "peerDependencies": {
-    "@dfinity/principal": "^2.4.0"
+    "vite": "^6.3.5"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Web3NL/my-canister-dapp.git",
+    "directory": "my-canister-dapp-js/vite-plugin-canister-dapp"
   },
   "scripts": {
     "build": "tsc",
     "clean": "rm -rf dist",
     "dev": "tsc --watch",
-    "lint": "eslint src",
-    "lint:fix": "eslint src --fix",
+    "docs:build": "typedoc",
+    "docs:clean": "rm -rf docs",
     "format": "prettier --check src",
     "format:fix": "prettier --write src",
+    "lint": "eslint src",
+    "lint:fix": "eslint src --fix",
+    "prepublishOnly": "npm run clean && npm run build",
     "typecheck": "tsc --noEmit"
   },
-  "author": "Samer",
-  "license": "MIT",
-  "keywords": [
-    "vite",
-    "plugin",
-    "dapp",
-    "configuration",
-    "internet computer",
-    "canister",
-    "web3"
-  ]
+  "type": "module",
+  "types": "dist/index.d.ts",
+  "sideEffects": false
 }
