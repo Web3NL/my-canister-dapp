@@ -117,7 +117,6 @@ fn create_asset_config(path: &str) -> AssetConfig {
         aliased_by,
         encodings: vec![(AssetEncoding::Identity, "".to_string())],
     };
-    ic_cdk::println!("AssetConfig created for path: {}", path);
     config
 }
 
