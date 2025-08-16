@@ -5,7 +5,7 @@
   "private": true,
   "license": "MIT",
   "dependencies": {
-    "@web3nl/my-canister-dashboard": "0.6.1"
+    "@web3nl/my-canister-dashboard": "0.6.2"
   },
   "devDependencies": {
     "@web3nl/vite-plugin-canister-dapp": "0.2.0"
