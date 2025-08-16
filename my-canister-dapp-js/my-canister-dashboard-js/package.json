@@ -4,7 +4,7 @@
   "version": "0.6.2",
   "author": "Web3NL",
   "dependencies": {
-    "@dfinity/ic-management": "^6.2.0"
+    "@dfinity/ic-management": "^6.2.2"
   },
   "devDependencies": {
     "@dfinity/agent": "^2.4.1",
