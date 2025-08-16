@@ -7,7 +7,7 @@
   },
   "deployedAtCommit": "608cca79ed68c4bfbbcdc497a8a3bf905a4603e3",
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=22.0.0"
   },
   "license": "MIT",
   "private": true,
