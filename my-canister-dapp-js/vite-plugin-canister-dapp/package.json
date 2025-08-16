@@ -5,8 +5,8 @@
   "author": "Web3NL",
   "bugs": "https://github.com/Web3NL/my-canister-dapp/issues",
   "devDependencies": {
-    "typedoc": "0.28.7",
-    "typescript": "5.8.3"
+    "typedoc": "^0.28.10",
+    "typescript": "^5.9.2"
   },
   "engines": {
     "node": ">=18.0.0"
@@ -36,12 +36,12 @@
     "web3"
   ],
   "license": "MIT",
-  "publishConfig": {
-    "access": "public"
-  },
   "main": "dist/index.js",
   "peerDependencies": {
     "vite": "^6.3.5"
+  },
+  "publishConfig": {
+    "access": "public"
   },
   "repository": {
     "type": "git",
@@ -61,7 +61,7 @@
     "prepublishOnly": "npm run clean && npm run build",
     "typecheck": "tsc --noEmit"
   },
+  "sideEffects": false,
   "type": "module",
-  "types": "dist/index.d.ts",
-  "sideEffects": false
+  "types": "dist/index.d.ts"
 }

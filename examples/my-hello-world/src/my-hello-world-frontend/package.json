@@ -12,8 +12,8 @@
   "engines": {
     "node": ">=18.0.0"
   },
-  "private": true,
   "license": "MIT",
+  "private": true,
   "repository": "https://github.com/Web3NL/my-canister-dapp/tree/main/examples/my-hello-world/src/my-hello-world-frontend",
   "scripts": {
     "build": "vite build",

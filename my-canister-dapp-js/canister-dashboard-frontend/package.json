@@ -2,8 +2,6 @@
   "name": "canister-dashboard-frontend",
   "description": "Dashboard frontend assets for Internet Computer Canister Dapps",
   "version": "0.10.0",
-  "private": true,
-  "license": "MIT",
   "dependencies": {
     "@web3nl/my-canister-dashboard": "0.6.2"
   },
@@ -13,6 +11,8 @@
   "engines": {
     "node": ">=18.0.0"
   },
+  "license": "MIT",
+  "private": true,
   "repository": "https://github.com/Web3NL/my-canister-dapp/tree/main/my-canister-dapp-js/canister-dashboard-frontend",
   "scripts": {
     "build": "vite build",
