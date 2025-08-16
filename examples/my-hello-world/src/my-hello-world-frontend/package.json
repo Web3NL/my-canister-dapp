@@ -2,7 +2,7 @@
   "name": "my-hello-world-frontend",
   "version": "5.0.0",
   "dependencies": {
-    "@dfinity/utils": "^2.13.0",
+    "@dfinity/utils": "^2.14.0",
     "@web3nl/my-canister-dashboard": "0.6.2",
     "lit-html": "2.8.0"
   },
@@ -10,10 +10,10 @@
     "@web3nl/vite-plugin-canister-dapp": "0.2.0"
   },
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=22.0.0"
   },
-  "private": true,
   "license": "MIT",
+  "private": true,
   "repository": "https://github.com/Web3NL/my-canister-dapp/tree/main/examples/my-hello-world/src/my-hello-world-frontend",
   "scripts": {
     "build": "vite build",

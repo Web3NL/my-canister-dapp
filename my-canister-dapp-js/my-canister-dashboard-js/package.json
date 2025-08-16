@@ -4,7 +4,7 @@
   "version": "0.6.2",
   "author": "Web3NL",
   "dependencies": {
-    "@dfinity/ic-management": "^6.2.0"
+    "@dfinity/ic-management": "^6.2.2"
   },
   "devDependencies": {
     "@dfinity/agent": "^2.4.1",
@@ -12,7 +12,7 @@
     "@dfinity/principal": "^2.4.1"
   },
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=22.0.0"
   },
   "exports": {
     ".": {
@@ -35,14 +35,14 @@
     "utilities"
   ],
   "license": "MIT",
-  "publishConfig": {
-    "access": "public"
-  },
   "main": "dist/index.js",
   "module": "dist/index.js",
   "peerDependencies": {
     "@dfinity/agent": "^2.4.1",
     "@dfinity/principal": "^2.4.1"
+  },
+  "publishConfig": {
+    "access": "public"
   },
   "repository": {
     "type": "git",
@@ -50,7 +50,6 @@
     "directory": "my-canister-dapp-js/my-canister-dashboard-js"
   },
   "scripts": {
-    "prebuild": "../../scripts/generate-declarations.sh",
     "build": "vite build",
     "docs:build": "typedoc",
     "docs:clean": "rm -rf docs",
@@ -58,10 +57,11 @@
     "format:fix": "prettier --write src",
     "lint": "eslint src",
     "lint:fix": "eslint src --fix",
+    "prebuild": "../../scripts/generate-declarations.sh",
     "test": "vitest --run",
     "typecheck": "tsc --noEmit"
   },
+  "sideEffects": false,
   "type": "module",
-  "types": "dist/index.d.ts",
-  "sideEffects": false
+  "types": "dist/index.d.ts"
 }
