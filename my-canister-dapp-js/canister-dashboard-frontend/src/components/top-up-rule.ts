@@ -37,7 +37,7 @@ function isTopUpRule(obj: unknown): obj is TopUpRule {
 }
 function formatRule(rule: TopUpRule) {
   let interval = 'Unknown';
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+
   const intervalObj = rule.interval;
   if (
     typeof intervalObj === 'object' &&
@@ -117,7 +117,6 @@ export class TopUpRuleManager {
 
   async fetchAndRender() {
     try {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
       const res = await this.canisterApi.manageTopUpRule({ Get: null });
       this.render(res);
     } catch {
@@ -174,7 +173,6 @@ export class TopUpRuleManager {
 
     showLoading();
     try {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
       const result = await this.canisterApi.manageTopUpRule({
         Add: {
           interval,
@@ -182,7 +180,7 @@ export class TopUpRuleManager {
           cycles_amount: amount,
         },
       });
-      // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
+
       if (result && typeof result === 'object') {
         if ('Ok' in result) {
           await this.fetchAndRender();
@@ -204,15 +202,12 @@ export class TopUpRuleManager {
   async handleClear() {
     showLoading();
     try {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
       const result = await this.canisterApi.manageTopUpRule({ Clear: null });
-      // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
+
       if (result && typeof result === 'object') {
         if ('Ok' in result) {
           await this.fetchAndRender();
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         } else if ('Err' in result && typeof result.Err === 'string') {
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
           showError(result.Err);
         } else {
           showError('Unknown error');
