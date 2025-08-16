@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.10.1] - 2025-08-16
+
 ### Changed
 
 - Version bumps, new build files
