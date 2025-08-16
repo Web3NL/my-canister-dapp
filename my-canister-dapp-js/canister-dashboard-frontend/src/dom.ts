@@ -92,16 +92,6 @@ export function updateBalanceDisplay(formattedBalance: string): void {
   setText('balance-value', formattedBalance);
 }
 
-export function updateCanisterIcpBalanceDisplay(
-  formattedBalance: string
-): void {
-  setText('canister-icp-balance', formattedBalance);
-}
-
-export function updateCanisterIdDisplay(idText: string): void {
-  setText('canister-id', idText);
-}
-
 export function showLoading(): void {
   toggleVisibility('loading-overlay', true);
 }

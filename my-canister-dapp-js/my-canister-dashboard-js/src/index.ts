@@ -18,6 +18,8 @@ export type {
   ManageAlternativeOriginsResult,
   ManageIIPrincipalArg,
   ManageIIPrincipalResult,
+  ManageTopUpRuleArg,
+  ManageTopUpRuleResult,
   WasmStatus,
 } from './actor';
 
