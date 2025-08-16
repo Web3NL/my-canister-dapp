@@ -1,5 +1,11 @@
 # @web3nl/my-canister-dashboard
 
+## 0.6.2
+
+### Patch Changes
+
+- [#126](https://github.com/Web3NL/my-canister-dapp/pull/126) [`00fe509`](https://github.com/Web3NL/my-canister-dapp/commit/00fe50986bc9ad39abdc27155a3bd647bdf0e940) Thanks [@Web3NL](https://github.com/Web3NL)! - export essential currently unexported types
+
 ## 0.6.1
 
 ### Patch Changes

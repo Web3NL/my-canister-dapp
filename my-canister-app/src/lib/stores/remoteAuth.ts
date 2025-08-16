@@ -6,7 +6,7 @@ import {
   type RemoteAuthClient,
 } from '$lib/remoteAuthentication/remoteAuthClient';
 
-export interface RemoteAuthStore
+interface RemoteAuthStore
   extends Readable<Principal | null | undefined>,
     RemoteAuthClient {}
 

@@ -1,15 +1,16 @@
 {
   "name": "my-canister-app",
   "version": "0.3.4",
-  "private": true,
   "dependencies": {
     "@dfinity/gix-components": "6.0.0",
-    "@web3nl/my-canister-dashboard": "0.6.1"
+    "@web3nl/my-canister-dashboard": "0.6.2"
   },
   "deployedAtCommit": "608cca79ed68c4bfbbcdc497a8a3bf905a4603e3",
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=22.0.0"
   },
+  "license": "MIT",
+  "private": true,
   "scripts": {
     "build": "svelte-kit sync && vite build",
     "dev": "vite dev",
@@ -20,6 +21,5 @@
     "sync": "svelte-kit sync",
     "typecheck": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json"
   },
-  "type": "module",
-  "license": "MIT"
+  "type": "module"
 }

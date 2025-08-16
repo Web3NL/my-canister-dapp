@@ -5,7 +5,7 @@ import { writable } from 'svelte/store';
 import { AuthClient } from '@dfinity/auth-client';
 import { IDENTITY_PROVIDER, MAX_TIME_TO_LIVE } from '$lib/constants';
 
-export interface AuthStore extends Readable<Principal | null | undefined> {
+interface AuthStore extends Readable<Principal | null | undefined> {
   login: () => Promise<void>;
   logout: () => Promise<void>;
   getIdentity: () => Promise<Identity>;

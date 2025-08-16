@@ -33,7 +33,7 @@ dfx identity use web3nl
 
 # Deploy the app
 echo "🚢 Deploying to IC..."
-npm run deploy:app
+dfx deploy my-canister-app --ic
 
 # Get current commit hash after successful deploy
 COMMIT_HASH=$(git rev-parse HEAD)
