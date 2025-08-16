@@ -9690,7 +9690,7 @@
   }
   function _abytes2(value2, length, title = "") {
     const bytes = isBytes(value2);
-    const len = value2 == null ? void 0 : value2.length;
+    const len = value2?.length;
     const needsLen = length !== void 0;
     if (!bytes || needsLen && len !== length) {
       const prefix = title && `"${title}" `;
