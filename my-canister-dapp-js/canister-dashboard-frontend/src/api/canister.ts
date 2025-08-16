@@ -33,7 +33,6 @@ export class CanisterApi {
     arg: ManageAlternativeOriginsArg
   ): Promise<ManageAlternativeOriginsResult> {
     try {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
       return await this.canisterApi.manage_alternative_origins(arg);
     } catch (error) {
       showError(NETWORK_ERROR_MESSAGE);
@@ -45,7 +44,6 @@ export class CanisterApi {
     arg: ManageTopUpRuleArg
   ): Promise<ManageTopUpRuleResult> {
     try {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
       return await this.canisterApi.manage_top_up_rule(arg);
     } catch (error) {
       showError(NETWORK_ERROR_MESSAGE);

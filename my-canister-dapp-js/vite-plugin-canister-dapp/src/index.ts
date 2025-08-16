@@ -52,11 +52,10 @@ function loadCanisterDappDevEnv(
     !notEmptyString(dfxHostname) ||
     !notEmptyString(dfxPort)
   ) {
-    // eslint-disable-next-line no-console
     console.warn(
       'Warning: Required VITE_ environment variables not set (VITE_II_CANISTER_ID, VITE_DFX_PROTOCOL, VITE_DFX_HOSTNAME, VITE_DFX_PORT).'
     );
-    // eslint-disable-next-line no-console
+
     console.warn('Skipping canister dashboard development configuration.');
     return null;
   }
@@ -145,7 +144,6 @@ export function canisterDashboardDevConfig(
 
       // Warn if canisterId is undefined and skip canister-specific proxies
       if (!notEmptyString(canisterId)) {
-        // eslint-disable-next-line no-console
         console.warn(
           'Warning: VITE_CANISTER_ID is undefined. Skipping canister-specific proxy setup for "/canister-dashboard" and "/.well-known/ii-alternative-origins".'
         );
@@ -184,7 +182,6 @@ export function canisterDashboardDevConfig(
       }
 
       if (conflictingKeys.length > 0) {
-        // eslint-disable-next-line no-console
         console.warn(
           `Warning: Existing proxy configurations found for [${conflictingKeys.join(', ')}]. Skipping canister-dapp proxy setup for these paths to avoid conflicts.`
         );
