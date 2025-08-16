@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Changed
+
+- Version bumps, new build files
+
 ## [0.10.0] - 2025-08-13
 
 ### Added
