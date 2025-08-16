@@ -1,6 +1,10 @@
 <script lang="ts">
   import { authStore } from '$lib/stores/auth';
-  import { ProgressSteps, busyStore } from '@dfinity/gix-components';
+  import {
+    ProgressSteps,
+    busyStore,
+    toastsStore,
+  } from '@dfinity/gix-components';
   import type { ProgressStep } from '@dfinity/gix-components';
   import { LedgerApi } from '$lib/api/ledgerIcp';
   import { formatIcpBalance } from '$lib/utils/format';
@@ -31,6 +35,8 @@
   let canisterPrincipal: Principal | null = null;
   let balanceTimer: ReturnType<typeof setInterval> | null = null;
   let currentBalance = BigInt(0);
+  let balanceFetchFailedToastShown = false;
+  let lowDepositWarnShown = false;
 
   $: wasmId = $page.url.searchParams.get('id');
   $: wasmIdNumber = wasmId != null ? parseInt(wasmId, 10) : null;
@@ -42,17 +48,34 @@
   const CANISTER_STORAGE_KEY = 'pendingCanisterId';
 
   async function loadBalance() {
-    const ledgerApi = await LedgerApi.create();
-    currentBalance = await ledgerApi.balance();
-    formattedBalance = formatIcpBalance(currentBalance);
-
-    if (requiredBalanceE8s > 0n && currentBalance >= requiredBalanceE8s) {
-      if (balanceTimer) {
-        clearInterval(balanceTimer);
-        balanceTimer = null;
+    try {
+      const ledgerApi = await LedgerApi.create();
+      currentBalance = await ledgerApi.balance();
+      formattedBalance = formatIcpBalance(currentBalance);
+      if (requiredBalanceE8s > 0n) {
+        if (currentBalance >= requiredBalanceE8s) {
+          if (balanceTimer) {
+            clearInterval(balanceTimer);
+            balanceTimer = null;
+          }
+          advanceToStep(2);
+        } else if (!lowDepositWarnShown) {
+          toastsStore.show({
+            text: 'Balance too low.',
+            level: 'warn',
+          });
+          lowDepositWarnShown = true;
+        }
       }
-
-      advanceToStep(2);
+    } catch (err) {
+      console.error('Failed to fetch balance', err);
+      if (!balanceFetchFailedToastShown) {
+        toastsStore.show({
+          text: 'Failed to fetch balance. Please file issue in GitHub.',
+          level: 'error',
+        });
+        balanceFetchFailedToastShown = true;
+      }
     }
   }
 
@@ -127,14 +150,23 @@
       text: 'Keep window open. Creating Dapp...',
     });
 
-    canisterPrincipal = await createNewCanister(wasmIdNumber);
+    try {
+      canisterPrincipal = await createNewCanister(wasmIdNumber);
 
-    if (browser) {
-      localStorage.setItem(CANISTER_STORAGE_KEY, canisterPrincipal.toText());
+      if (browser) {
+        localStorage.setItem(CANISTER_STORAGE_KEY, canisterPrincipal.toText());
+      }
+
+      advanceToStep(3);
+    } catch (err) {
+      console.error('Failed to create canister', err);
+      toastsStore.show({
+        text: `Failed to create Dapp: Please file issue on GitHub`,
+        level: 'error',
+      });
+    } finally {
+      busyStore.stopBusy('create-canister');
     }
-
-    advanceToStep(3);
-    busyStore.stopBusy('create-canister');
   }
 
   async function takeControlOfCanister() {
@@ -143,14 +175,23 @@
       text: 'Keep window open. Installing and connecting II to Dapp...',
     });
 
-    await installAndTakeControl(canisterPrincipal!);
+    try {
+      await installAndTakeControl(canisterPrincipal!);
 
-    if (browser) {
-      localStorage.removeItem(CANISTER_STORAGE_KEY);
+      if (browser) {
+        localStorage.removeItem(CANISTER_STORAGE_KEY);
+      }
+
+      advanceToStep(4);
+    } catch (err) {
+      console.error('Failed to install code / connect II', err);
+      toastsStore.show({
+        text: `Failed to create Dapp: Please file issue on GitHub`,
+        level: 'error',
+      });
+    } finally {
+      busyStore.stopBusy('connect-ii');
     }
-
-    advanceToStep(4);
-    busyStore.stopBusy('connect-ii');
   }
 
   onMount(async () => {
