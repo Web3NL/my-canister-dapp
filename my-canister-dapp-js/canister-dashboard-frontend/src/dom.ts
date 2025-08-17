@@ -124,3 +124,35 @@ export function clearInput(id: string): void {
 }
 
 // List Management Helpers
+
+// Extended Helpers (component-specific abstractions)
+
+// Update the displayed canister id and its ICP balance
+export function updateCanisterInfo(
+  canisterId: string,
+  icpBalance: string
+): void {
+  const idEl = getElement('canister-id');
+  idEl.textContent = canisterId;
+  const balEl = getElement('canister-icp-balance');
+  balEl.textContent = icpBalance;
+}
+
+// Update the Top Up Rule section. Pass null when no rule is set.
+export function updateTopUpRuleDisplay(formattedRule: string | null): void {
+  const container = getElement('top-up-rule-display');
+  container.textContent = '';
+  if (!formattedRule) {
+    container.textContent = 'No rule set';
+    return;
+  }
+  const pre = document.createElement('pre');
+  pre.textContent = formattedRule;
+  container.appendChild(pre);
+}
+
+// Retrieve value from a <select> element
+export function getSelectValue(id: string): string {
+  const select = getElement<HTMLSelectElement>(id);
+  return select.value;
+}
