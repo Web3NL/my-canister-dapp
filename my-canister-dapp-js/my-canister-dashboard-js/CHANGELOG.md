@@ -1,5 +1,11 @@
 # @web3nl/my-canister-dashboard
 
+## 0.6.4
+
+### Patch Changes
+
+- [#131](https://github.com/Web3NL/my-canister-dapp/pull/131) [`65fc597`](https://github.com/Web3NL/my-canister-dapp/commit/65fc597c7b843c38fee9770e32b2ddc26408b78f) Thanks [@Web3NL](https://github.com/Web3NL)! - Export all types needed to work with TopUpRule feature
+
 ## 0.6.3
 
 ### Patch Changes
