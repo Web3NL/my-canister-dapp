@@ -21,6 +21,9 @@ export type {
   ManageTopUpRuleArg,
   ManageTopUpRuleResult,
   WasmStatus,
+  CyclesAmount,
+  TopUpInterval,
+  TopUpRule,
 } from './actor';
 
-export { inferCanisterIdFromLocation } from './canister-id';
+export { inferCanisterIdFromLocation } from './canisterId';
