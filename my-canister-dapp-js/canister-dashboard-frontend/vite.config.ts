@@ -31,10 +31,9 @@ export default defineConfig(() => {
     define: {
       global: 'globalThis',
     },
+    // Removed $declarations alias; all functionality now sourced from @web3nl/my-canister-dashboard package
     resolve: {
-      alias: {
-        $declarations: path.resolve(__dirname, '../my-canister-dashboard-js/declarations'),
-      },
+      alias: {},
     },
   };
 });
