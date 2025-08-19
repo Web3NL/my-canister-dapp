@@ -1,14 +1,13 @@
-import { Actor, type ActorSubclass } from '@dfinity/agent';
-import type {
-  _SERVICE,
-  ManageAlternativeOriginsArg,
-  ManageAlternativeOriginsResult,
-  ManageTopUpRuleArg,
-  ManageTopUpRuleResult,
-} from '$declarations/my-canister-dashboard.did.d.ts';
-import { idlFactory } from '$declarations/my-canister-dashboard.did.js';
+import type { ActorSubclass, HttpAgent } from '@dfinity/agent';
+import {
+  createMyCanisterActor,
+  type MyDashboardService as CanisterApiService,
+  type ManageAlternativeOriginsArg,
+  type ManageAlternativeOriginsResult,
+  type ManageTopUpRuleArg,
+  type ManageTopUpRuleResult,
+} from '@web3nl/my-canister-dashboard';
 
-type CanisterApiService = _SERVICE;
 import { createHttpAgent, canisterId } from '../utils';
 import { showError, NETWORK_ERROR_MESSAGE } from '../error';
 
@@ -23,8 +22,8 @@ export class CanisterApi {
     const agent = await createHttpAgent();
     const canisterIdPrincipal = await canisterId();
 
-    this.canisterApi = Actor.createActor(idlFactory, {
-      agent,
+    this.canisterApi = createMyCanisterActor({
+      agent: agent as HttpAgent,
       canisterId: canisterIdPrincipal,
     });
   }
@@ -33,7 +32,6 @@ export class CanisterApi {
     arg: ManageAlternativeOriginsArg
   ): Promise<ManageAlternativeOriginsResult> {
     try {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
       return await this.canisterApi.manage_alternative_origins(arg);
     } catch (error) {
       showError(NETWORK_ERROR_MESSAGE);
@@ -45,7 +43,6 @@ export class CanisterApi {
     arg: ManageTopUpRuleArg
   ): Promise<ManageTopUpRuleResult> {
     try {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
       return await this.canisterApi.manage_top_up_rule(arg);
     } catch (error) {
       showError(NETWORK_ERROR_MESSAGE);

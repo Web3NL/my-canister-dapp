@@ -52,6 +52,7 @@ export function setLoggedInState(
   };
 
   toggleVisibility('ii-principal', true);
+  toggleVisibility('ii-principal-label', true);
   setText('ii-principal', principalText);
   toggleVisibility('authenticated-content', true);
 }
@@ -69,6 +70,7 @@ export function setLoggedOutState(onLogin: () => void | Promise<void>): void {
   };
 
   toggleVisibility('ii-principal', false);
+  toggleVisibility('ii-principal-label', false);
   setText('ii-principal', '');
   toggleVisibility('authenticated-content', false);
   toggleVisibility('error-section', false);
@@ -90,6 +92,10 @@ export function updateStatusDisplay(
 
 export function updateBalanceDisplay(formattedBalance: string): void {
   setText('balance-value', formattedBalance);
+}
+
+export function updateIcrc1AccountDisplay(principalText: string): void {
+  setText('icrc1-account', principalText);
 }
 
 export function showLoading(): void {
@@ -124,3 +130,35 @@ export function clearInput(id: string): void {
 }
 
 // List Management Helpers
+
+// Extended Helpers (component-specific abstractions)
+
+// Update the displayed canister id and its ICP balance
+export function updateCanisterInfo(
+  canisterId: string,
+  icpBalance: string
+): void {
+  const idEl = getElement('canister-id');
+  idEl.textContent = canisterId;
+  const balEl = getElement('canister-icp-balance');
+  balEl.textContent = icpBalance;
+}
+
+// Update the Top Up Rule section. Pass null when no rule is set.
+export function updateTopUpRuleDisplay(formattedRule: string | null): void {
+  const container = getElement('top-up-rule-display');
+  container.textContent = '';
+  if (!formattedRule) {
+    container.textContent = 'No rule set';
+    return;
+  }
+  const pre = document.createElement('pre');
+  pre.textContent = formattedRule;
+  container.appendChild(pre);
+}
+
+// Retrieve value from a <select> element
+export function getSelectValue(id: string): string {
+  const select = getElement<HTMLSelectElement>(id);
+  return select.value;
+}

@@ -111,15 +111,14 @@ export default class App {
       if (!agent) {
         throw new Error('No authenticated agent available');
       }
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+
       const my_hello_world_backend = createActor(canisterId, { agent });
 
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
       this.greeting = (await my_hello_world_backend.greet(name)) as string;
       this.render();
     } catch (error) {
       showError('Failed to call backend service. Please try again.');
-      // eslint-disable-next-line no-console
+
       console.error('Backend call failed:', error);
     }
   };

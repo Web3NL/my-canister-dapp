@@ -1,12 +1,12 @@
 {
   "name": "canister-dashboard-frontend",
   "description": "Dashboard frontend assets for Internet Computer Canister Dapps",
-  "version": "0.10.0",
+  "version": "0.10.2",
   "dependencies": {
-    "@web3nl/my-canister-dashboard": "0.6.2"
+    "@web3nl/my-canister-dashboard": "0.6.4"
   },
   "devDependencies": {
-    "@web3nl/vite-plugin-canister-dapp": "0.2.0"
+    "@web3nl/vite-plugin-canister-dapp": "0.2.1"
   },
   "engines": {
     "node": ">=22.0.0"

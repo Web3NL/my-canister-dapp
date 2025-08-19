@@ -1,32 +1,37 @@
 import rootConfig from '../eslint.config.js';
+import svelte from 'eslint-plugin-svelte';
+import tseslint from 'typescript-eslint';
+import globals from 'globals';
+import svelteConfig from './svelte.config.js';
 
 export default [
   ...rootConfig,
+  // Svelte-specific setup lives only here (app is sole Svelte code owner)
+  ...svelte.configs['flat/recommended'],
+  ...svelte.configs['flat/prettier'],
   {
-    files: ['**/*.svelte'],
+    files: ['**/*.svelte', '**/*.svelte.ts', '**/*.svelte.js'],
     languageOptions: {
+      globals: {
+        ...globals.browser,
+        $Generic: 'readonly',
+        $Props: 'readonly',
+        $Events: 'readonly',
+        $Slots: 'readonly',
+      },
       parserOptions: {
-        // Don't use project-based type-aware linting for Svelte files
-        // as they can have complex import/export patterns
-        project: null,
+        parser: tseslint.parser,
+        extraFileExtensions: ['.svelte'],
+        // Provide Svelte config for rules that auto-adjust (per official docs)
+        svelteConfig,
+        // Avoid project-wide type service for speed; rely on tsc/svelte-check instead.
       },
     },
     rules: {
-      // Disable type-aware rules for Svelte files to avoid parsing issues
-      '@typescript-eslint/no-unsafe-assignment': 'off',
-      '@typescript-eslint/no-unsafe-member-access': 'off',
-      '@typescript-eslint/no-unsafe-call': 'off',
-      '@typescript-eslint/no-unsafe-argument': 'off',
-      '@typescript-eslint/no-unsafe-return': 'off',
-      '@typescript-eslint/no-unnecessary-condition': 'off',
-      '@typescript-eslint/no-unnecessary-type-assertion': 'off',
-      '@typescript-eslint/strict-boolean-expressions': 'off',
-      '@typescript-eslint/restrict-template-expressions': 'off',
-      '@typescript-eslint/no-floating-promises': 'off',
-      '@typescript-eslint/await-thenable': 'off',
-      '@typescript-eslint/prefer-nullish-coalescing': 'off',
-      '@typescript-eslint/prefer-optional-chain': 'off',
-      '@typescript-eslint/consistent-type-imports': 'off',
+      '@typescript-eslint/no-unused-vars': [
+        'warn',
+        { args: 'none', ignoreRestSiblings: true },
+      ],
     },
   },
 ];

@@ -26,6 +26,9 @@ export type {
   ManageTopUpRuleArg,
   ManageTopUpRuleResult,
   WasmStatus,
+  CyclesAmount,
+  TopUpInterval,
+  TopUpRule,
 } from '../declarations/my-canister-dashboard.did.d.ts';
 
 /**

@@ -1,5 +1,3 @@
-/* eslint-disable no-console */
-/* eslint-disable @typescript-eslint/strict-boolean-expressions */
 import { test, expect } from '@playwright/test';
 import { readTestData, transferToPrincipal, transferToPrincipalMainnet } from '../helpers';
 import { formatIcpBalance } from '../../my-canister-dapp-js/canister-dashboard-frontend/src/helpers';
@@ -140,6 +138,15 @@ test('Canister Dashboard Frontend Suite', async ({ page }, testInfo) => {
 
   // Validate the principal
   const principal = Principal.fromText(principalText);
+  // Verify ICRC1 account element mirrors principal
+  const icrc1AccountLocator = page.locator('#icrc1-account');
+  await icrc1AccountLocator.waitFor({ state: 'visible', timeout: 10000 });
+  await expect(icrc1AccountLocator).not.toHaveText(/Loading\.\.\./);
+  await expect(async () => {
+    const icrc1AccountText = (await icrc1AccountLocator.textContent())?.trim();
+    expect(icrc1AccountText).toBe(principalText.trim());
+  }).toPass({ timeout: 10000, intervals: [250, 500, 1000] });
+  console.log('Verified ii-principal and icrc1-account match');
   const topupAmount = isMainNet ? TOPUP_AMOUNT_MAINNET : TOPUP_AMOUNT_LOCAL;
   const formattedAmount = formatIcpBalance(topupAmount);
 

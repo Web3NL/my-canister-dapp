@@ -1,5 +1,11 @@
 # @web3nl/vite-plugin-canister-dapp
 
+## 0.2.1
+
+### Patch Changes
+
+- [`6c9e5ae`](https://github.com/Web3NL/my-canister-dapp/commit/6c9e5ae7346a62dec6292fb646b80ce8f86e6635) Thanks [@Web3NL](https://github.com/Web3NL)! - version bumps
+
 ## 0.2.0
 
 ### Minor Changes
