@@ -19108,6 +19108,86 @@ var Qt = class t {
     await c({ canister_id: e5, snapshot_id: b$1(n2) });
   };
 };
+const y$1 = ({ IDL: t3 }) => {
+  const e5 = t3.Record({
+    url: t3.Text,
+    method: t3.Text,
+    body: t3.Vec(t3.Nat8),
+    headers: t3.Vec(t3.Tuple(t3.Text, t3.Text))
+  }), r2 = t3.Record({
+    body: t3.Vec(t3.Nat8),
+    headers: t3.Vec(t3.Tuple(t3.Text, t3.Text)),
+    status_code: t3.Nat16
+  }), a = t3.Variant({
+    Add: t3.Text,
+    Remove: t3.Text
+  }), n2 = t3.Variant({
+    Ok: t3.Null,
+    Err: t3.Text
+  }), u2 = t3.Variant({
+    Get: t3.Null,
+    Set: t3.Principal
+  }), p = t3.Variant({
+    Ok: t3.Principal,
+    Err: t3.Text
+  }), h2 = t3.Variant({
+    Hourly: t3.Null,
+    Weekly: t3.Null,
+    Daily: t3.Null,
+    Monthly: t3.Null
+  }), o2 = t3.Variant({
+    _1T: t3.Null,
+    _2T: t3.Null,
+    _5T: t3.Null,
+    _10T: t3.Null,
+    _50T: t3.Null,
+    _0_5T: t3.Null,
+    _100T: t3.Null,
+    _0_25T: t3.Null
+  }), c = t3.Record({
+    interval: h2,
+    cycles_amount: o2,
+    cycles_threshold: o2
+  }), m2 = t3.Variant({
+    Add: c,
+    Get: t3.Null,
+    Clear: t3.Null
+  }), d = t3.Variant({
+    Ok: t3.Opt(c),
+    Err: t3.Text
+  }), g2 = t3.Record({
+    memo: t3.Opt(t3.Text),
+    name: t3.Text,
+    version: t3.Nat16
+  });
+  return t3.Service({
+    http_request: t3.Func([e5], [r2], ["query"]),
+    manage_alternative_origins: t3.Func(
+      [a],
+      [n2],
+      []
+    ),
+    manage_ii_principal: t3.Func(
+      [u2],
+      [p],
+      []
+    ),
+    manage_top_up_rule: t3.Func(
+      [m2],
+      [d],
+      []
+    ),
+    wasm_status: t3.Func([], [g2], ["query"])
+  });
+};
+function N$2(t3) {
+  if (t3.canisterId === "")
+    throw new Error("canisterId is required");
+  return Actor.createActor(y$1, {
+    agent: t3.agent,
+    canisterId: t3.canisterId
+  });
+}
 function M() {
   const t3 = window.location.hostname, e5 = window.location.protocol, r2 = /^([a-z0-9-]+)\.localhost$/.exec(t3);
   if (r2?.[1] != null) {
@@ -19163,6 +19243,7 @@ function setLoggedInState(principalText, onLogout) {
     }
   };
   toggleVisibility("ii-principal", true);
+  toggleVisibility("ii-principal-label", true);
   setText("ii-principal", principalText);
   toggleVisibility("authenticated-content", true);
 }
@@ -19177,6 +19258,7 @@ function setLoggedOutState(onLogin) {
     }
   };
   toggleVisibility("ii-principal", false);
+  toggleVisibility("ii-principal-label", false);
   setText("ii-principal", "");
   toggleVisibility("authenticated-content", false);
   toggleVisibility("error-section", false);
@@ -19191,6 +19273,9 @@ function updateStatusDisplay(statusText, memorySizeFormatted, cyclesFormatted, m
 }
 function updateBalanceDisplay(formattedBalance) {
   setText("balance-value", formattedBalance);
+}
+function updateIcrc1AccountDisplay(principalText) {
+  setText("icrc1-account", principalText);
 }
 function showLoading() {
   toggleVisibility("loading-overlay", true);
@@ -19213,6 +19298,27 @@ function getInputValue(id) {
 function clearInput(id) {
   const input = getElement(id);
   input.value = "";
+}
+function updateCanisterInfo(canisterId2, icpBalance) {
+  const idEl = getElement("canister-id");
+  idEl.textContent = canisterId2;
+  const balEl = getElement("canister-icp-balance");
+  balEl.textContent = icpBalance;
+}
+function updateTopUpRuleDisplay(formattedRule) {
+  const container = getElement("top-up-rule-display");
+  container.textContent = "";
+  if (!formattedRule) {
+    container.textContent = "No rule set";
+    return;
+  }
+  const pre = document.createElement("pre");
+  pre.textContent = formattedRule;
+  container.appendChild(pre);
+}
+function getSelectValue(id) {
+  const select = getElement(id);
+  return select.value;
 }
 const NETWORK_ERROR_MESSAGE = "Network error occurred. Please try again.";
 const INVALID_PRINCIPAL_MESSAGE = "Invalid principal format.";
@@ -19790,6 +19896,10 @@ class TopupManager {
     const balance = await ledgerApi.balance();
     const formattedBalance = formatIcpBalance(balance);
     updateBalanceDisplay(formattedBalance);
+    const authManager = new AuthManager();
+    await authManager.create();
+    const principal = await authManager.getPrincipal();
+    updateIcrc1AccountDisplay(principal.toText());
   }
   attachEventListeners() {
     addEventListener("top-up-btn", "click", () => this.performTopUp());
@@ -19951,89 +20061,6 @@ class ControllersManager {
     return hasCanisterId && hasIIPrincipal;
   }
 }
-const idlFactory = ({ IDL: IDL2 }) => {
-  const HttpRequest = IDL2.Record({
-    "url": IDL2.Text,
-    "method": IDL2.Text,
-    "body": IDL2.Vec(IDL2.Nat8),
-    "headers": IDL2.Vec(IDL2.Tuple(IDL2.Text, IDL2.Text))
-  });
-  const HttpResponse = IDL2.Record({
-    "body": IDL2.Vec(IDL2.Nat8),
-    "headers": IDL2.Vec(IDL2.Tuple(IDL2.Text, IDL2.Text)),
-    "status_code": IDL2.Nat16
-  });
-  const ManageAlternativeOriginsArg = IDL2.Variant({
-    "Add": IDL2.Text,
-    "Remove": IDL2.Text
-  });
-  const ManageAlternativeOriginsResult = IDL2.Variant({
-    "Ok": IDL2.Null,
-    "Err": IDL2.Text
-  });
-  const ManageIIPrincipalArg = IDL2.Variant({
-    "Get": IDL2.Null,
-    "Set": IDL2.Principal
-  });
-  const ManageIIPrincipalResult = IDL2.Variant({
-    "Ok": IDL2.Principal,
-    "Err": IDL2.Text
-  });
-  const TopUpInterval = IDL2.Variant({
-    "Hourly": IDL2.Null,
-    "Weekly": IDL2.Null,
-    "Daily": IDL2.Null,
-    "Monthly": IDL2.Null
-  });
-  const CyclesAmount = IDL2.Variant({
-    "_1T": IDL2.Null,
-    "_2T": IDL2.Null,
-    "_5T": IDL2.Null,
-    "_10T": IDL2.Null,
-    "_50T": IDL2.Null,
-    "_0_5T": IDL2.Null,
-    "_100T": IDL2.Null,
-    "_0_25T": IDL2.Null
-  });
-  const TopUpRule = IDL2.Record({
-    "interval": TopUpInterval,
-    "cycles_amount": CyclesAmount,
-    "cycles_threshold": CyclesAmount
-  });
-  const ManageTopUpRuleArg = IDL2.Variant({
-    "Add": TopUpRule,
-    "Get": IDL2.Null,
-    "Clear": IDL2.Null
-  });
-  const ManageTopUpRuleResult = IDL2.Variant({
-    "Ok": IDL2.Opt(TopUpRule),
-    "Err": IDL2.Text
-  });
-  const WasmStatus = IDL2.Record({
-    "memo": IDL2.Opt(IDL2.Text),
-    "name": IDL2.Text,
-    "version": IDL2.Nat16
-  });
-  return IDL2.Service({
-    "http_request": IDL2.Func([HttpRequest], [HttpResponse], ["query"]),
-    "manage_alternative_origins": IDL2.Func(
-      [ManageAlternativeOriginsArg],
-      [ManageAlternativeOriginsResult],
-      []
-    ),
-    "manage_ii_principal": IDL2.Func(
-      [ManageIIPrincipalArg],
-      [ManageIIPrincipalResult],
-      []
-    ),
-    "manage_top_up_rule": IDL2.Func(
-      [ManageTopUpRuleArg],
-      [ManageTopUpRuleResult],
-      []
-    ),
-    "wasm_status": IDL2.Func([], [WasmStatus], ["query"])
-  });
-};
 class CanisterApi {
   canisterApi;
   constructor() {
@@ -20042,7 +20069,7 @@ class CanisterApi {
   async create() {
     const agent = await createHttpAgent();
     const canisterIdPrincipal = await canisterId();
-    this.canisterApi = Actor.createActor(idlFactory, {
+    this.canisterApi = N$2({
       agent,
       canisterId: canisterIdPrincipal
     });
@@ -20204,72 +20231,18 @@ function formatSimpleDateTime(d) {
 function escapeHtml(str) {
   return str.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#39;");
 }
-function isErrorResult(obj) {
-  return typeof obj === "object" && obj !== null && "Err" in obj && typeof obj.Err === "string";
-}
-function isTopUpRule(obj) {
-  return typeof obj === "object" && obj !== null && !("error" in obj) && "cycles_threshold" in obj && "cycles_amount" in obj && typeof obj.cycles_threshold !== "undefined" && typeof obj.cycles_amount !== "undefined";
-}
-function formatRule(rule) {
-  let interval = "Unknown";
-  const intervalObj = rule.interval;
-  if (typeof intervalObj === "object" && intervalObj !== null && !Array.isArray(intervalObj)) {
-    if ("Hourly" in intervalObj) interval = "Hourly";
-    else if ("Daily" in intervalObj) interval = "Daily";
-    else if ("Weekly" in intervalObj) interval = "Weekly";
-    else if ("Monthly" in intervalObj) interval = "Monthly";
-  }
-  function cyclesAmountToString(val) {
-    if (typeof val === "object" && val !== null) {
-      const keys = Object.keys(val);
-      if (keys.length > 0 && typeof keys[0] === "string" && keys[0] !== "") {
-        const key = keys[0];
-        return key.replace(/^_/, "").replace("_", ".").replace("T", "T");
-      }
-    }
-    return String(val);
-  }
-  if (isTopUpRule(rule)) {
-    const thresholdStr = cyclesAmountToString(
-      rule.cycles_threshold
-    );
-    const amountStr = cyclesAmountToString(
-      rule.cycles_amount
-    );
-    return `Interval: ${interval}
-Threshold: ${thresholdStr} cycles
-Amount: ${amountStr} cycles`;
-  }
-  if (typeof rule === "object" && "error" in rule && typeof rule.error === "string") {
-    return `Error: ${rule.error}`;
-  }
-  return "Invalid rule";
-}
 class TopUpRuleManager {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  canisterApi;
-  constructor() {
-    this.canisterApi = new CanisterApi();
-  }
+  api = new CanisterApi();
   async create() {
-    await this.fetchAndRender();
-    await this.renderCanisterInfo();
+    await Promise.all([this.fetchAndRender(), this.renderCanisterInfo()]);
     this.attachEventListeners();
   }
   async renderCanisterInfo() {
-    try {
-      const [cid, bal] = await Promise.all([
-        canisterId(),
-        new LedgerApi().canisterBalance()
-      ]);
-      const cidText = cid.toString();
-      const formatted = formatIcpBalance(bal);
-      const idEl = getElement("canister-id");
-      idEl.textContent = cidText;
-      const balEl = getElement("canister-icp-balance");
-      balEl.textContent = formatted;
-    } catch {
-    }
+    const canisterIdPrincipal = await canisterId();
+    const canisterBalance = await new LedgerApi().canisterBalance();
+    const canisterIdText = canisterIdPrincipal.toString();
+    const formattedCanisterBalance = formatIcpBalance(canisterBalance);
+    updateCanisterInfo(canisterIdText, formattedCanisterBalance);
   }
   attachEventListeners() {
     addEventListener("top-up-rule-set", "click", () => this.handleSet());
@@ -20277,72 +20250,37 @@ class TopUpRuleManager {
   }
   async fetchAndRender() {
     try {
-      const res = await this.canisterApi.manageTopUpRule({ Get: null });
-      this.render(res);
+      this.render(await this.api.manageTopUpRule({ Get: null }));
     } catch {
-      showError(NETWORK_ERROR_MESSAGE);
+      showError("TopUp" + NETWORK_ERROR_MESSAGE);
     }
   }
   render(result) {
-    const display = getElement("top-up-rule-display");
-    if ("Ok" in result && Array.isArray(result.Ok)) {
-      if (result.Ok.length === 0 || result.Ok[0] === void 0) {
-        display.textContent = "No rule set";
-      } else {
-        display.textContent = "";
-        const pre = document.createElement("pre");
-        pre.textContent = formatRule(result.Ok[0]);
-        display.appendChild(pre);
-      }
-    } else if (isErrorResult(result)) {
-      showError(result.Err);
-    } else {
-      display.textContent = "Unknown result";
+    if ("Err" in result) return showError("TopUpRule Error: " + result.Err);
+    if ("Ok" in result) {
+      const rule = result.Ok[0];
+      updateTopUpRuleDisplay(rule ? formatRule(rule) : null);
     }
   }
   async handleSet() {
-    const intervalElem = getElement("top-up-rule-interval");
-    let intervalValue = "";
-    if (intervalElem instanceof HTMLSelectElement) {
-      intervalValue = intervalElem.value;
-    }
-    const thresholdSelect = getElement("top-up-rule-threshold");
-    const amountSelect = getElement("top-up-rule-amount");
-    const thresholdValue = thresholdSelect instanceof HTMLSelectElement ? thresholdSelect.value : "";
-    const amountValue = amountSelect instanceof HTMLSelectElement ? amountSelect.value : "";
-    if (!thresholdValue || !amountValue) {
-      showError("Please select threshold and amount.");
-      return;
-    }
-    let interval;
-    if (intervalValue === "Hourly") interval = { Hourly: null };
-    else if (intervalValue === "Daily") interval = { Daily: null };
-    else if (intervalValue === "Weekly") interval = { Weekly: null };
-    else interval = { Monthly: null };
-    const threshold = { [thresholdValue]: null };
-    const amount = { [amountValue]: null };
+    const intervalValue = getSelectValue("top-up-rule-interval");
+    const thresholdValue = getSelectValue("top-up-rule-threshold");
+    const amountValue = getSelectValue("top-up-rule-amount");
+    if (!thresholdValue || !amountValue)
+      return showError("Please select threshold and amount.");
     showLoading();
     try {
-      const result = await this.canisterApi.manageTopUpRule({
+      const res = await this.api.manageTopUpRule({
         Add: {
-          interval,
-          cycles_threshold: threshold,
-          cycles_amount: amount
+          interval: buildInterval(intervalValue),
+          cycles_threshold: buildCyclesAmount(thresholdValue),
+          cycles_amount: buildCyclesAmount(amountValue)
         }
       });
-      if (result && typeof result === "object") {
-        if ("Ok" in result) {
-          await this.fetchAndRender();
-        } else if (isErrorResult(result)) {
-          showError(result.Err);
-        } else {
-          showError("Unknown error");
-        }
-      } else {
-        showError("Unknown error");
-      }
+      if ("Err" in res) return showError(res.Err);
+      await this.fetchAndRender();
     } catch {
-      showError(NETWORK_ERROR_MESSAGE);
+      showError("TopUpError: " + NETWORK_ERROR_MESSAGE);
     } finally {
       hideLoading();
     }
@@ -20350,24 +20288,42 @@ class TopUpRuleManager {
   async handleClear() {
     showLoading();
     try {
-      const result = await this.canisterApi.manageTopUpRule({ Clear: null });
-      if (result && typeof result === "object") {
-        if ("Ok" in result) {
-          await this.fetchAndRender();
-        } else if ("Err" in result && typeof result.Err === "string") {
-          showError(result.Err);
-        } else {
-          showError("Unknown error");
-        }
-      } else {
-        showError("Unknown error");
-      }
+      const res = await this.api.manageTopUpRule({ Clear: null });
+      if ("Err" in res) return showError("TopUpRule Error: " + res.Err);
+      await this.fetchAndRender();
     } catch {
-      showError(NETWORK_ERROR_MESSAGE);
+      showError("TopUpError: " + NETWORK_ERROR_MESSAGE);
     } finally {
       hideLoading();
     }
   }
+}
+function firstKey(obj) {
+  if (!obj) return void 0;
+  return Object.keys(obj)[0];
+}
+function formatCyclesAmount(ca) {
+  const key = firstKey(ca);
+  if (!key) return "Unknown";
+  return key.replace(/^_/, "").replace("_", ".");
+}
+function formatInterval(interval) {
+  return firstKey(interval) || "Unknown";
+}
+function formatRule(rule) {
+  return [
+    `Interval: ${formatInterval(rule.interval)}`,
+    `Threshold: ${formatCyclesAmount(rule.cycles_threshold)} cycles`,
+    `Amount: ${formatCyclesAmount(rule.cycles_amount)} cycles`
+  ].join("\n");
+}
+function buildCyclesAmount(variantKey) {
+  return { [variantKey]: null };
+}
+function buildInterval(key) {
+  const allowed = /* @__PURE__ */ new Set(["Hourly", "Daily", "Weekly", "Monthly"]);
+  const safe = allowed.has(key) ? key : "Monthly";
+  return { [safe]: null };
 }
 class Dashboard {
   authManager = null;

@@ -124,6 +124,16 @@ body {
   display: block;
 }
 
+/* Principal label styling */
+.principal-label {
+  font-size: 11px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: #9aa0a6;
+  margin-top: 4px;
+  margin-bottom: 2px;
+}
+
 /* Card styling */
 .card {
   background-color: #1e1e1e;

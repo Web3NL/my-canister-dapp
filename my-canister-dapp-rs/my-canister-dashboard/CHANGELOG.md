@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Fixed
+
+- Canister dashboard frontend: improved Top Up UX
+
 ## [0.10.1] - 2025-08-16
 
 ### Changed
