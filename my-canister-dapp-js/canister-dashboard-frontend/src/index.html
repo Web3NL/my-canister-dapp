@@ -23,8 +23,9 @@
 
       <div id="auth-section" class="card">
         <div class="auth-section">
-          <button id="auth-btn" class="btn"></button>
+          <div id="ii-principal-label" class="principal-label hidden">Logged in as</div>
           <div id="ii-principal" class="data-display hidden"></div>
+          <button id="auth-btn" class="btn"></button>
         </div>
       </div>
 
@@ -35,6 +36,12 @@
             <p>
               <strong>Balance:</strong>
               <span id="balance-value">Loading...</span> ICP
+            </p>
+            <p>
+              <strong>ICRC1 Account:</strong>
+            </p>
+            <p>
+              <div id="icrc1-account" class="data-display">Loading...</div>
             </p>
             <p>
               <button
@@ -58,7 +65,7 @@
                 <span id="canister-icp-balance">Loading...</span> ICP
               </p>
               <p>
-                <strong>Canister ID:</strong>
+                <strong>Canister ICRC1 Account:</strong>
                 <span id="canister-id" class="data-display">Loading...</span>
               </p>
             </div>
