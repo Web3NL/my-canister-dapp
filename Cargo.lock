@@ -1340,7 +1340,7 @@ dependencies = [
  "ic-cdk",
  "ic-http-certification",
  "include_dir",
- "my-canister-dashboard 0.10.0",
+ "my-canister-dashboard 0.10.1",
  "my-canister-frontend",
 ]
 

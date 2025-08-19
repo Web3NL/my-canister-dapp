@@ -140,7 +140,7 @@ test('Canister Dashboard Frontend Suite', async ({ page }, testInfo) => {
   const principal = Principal.fromText(principalText);
   // Verify ICRC1 account element mirrors principal
   const icrc1AccountLocator = page.locator('#icrc1-account');
-  await expect(icrc1AccountLocator).toBeVisible({ timeout: 10000 });
+  await icrc1AccountLocator.waitFor({ state: 'visible', timeout: 10000 });
   await expect(icrc1AccountLocator).not.toHaveText(/Loading\.\.\./);
   await expect(async () => {
     const icrc1AccountText = (await icrc1AccountLocator.textContent())?.trim();
