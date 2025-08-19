@@ -17,4 +17,5 @@ ic-http-certification = "=3.0.3"
 include_dir = "=0.7.4"
 
 my-canister-frontend = { path = "../../../../my-canister-dapp-rs/my-canister-frontend" }
-my-canister-dashboard = "0.10.0"
+my-canister-dashboard = { path = "../../../../my-canister-dapp-rs/my-canister-dashboard" }
+# my-canister-dashboard = "0.10.0"

@@ -12,7 +12,9 @@ import {
   hideLoading,
   showError,
   addEventListener,
+  updateIcrc1AccountDisplay,
 } from '../dom';
+import { AuthManager } from './auth';
 
 export class TopupManager {
   async create(): Promise<void> {
@@ -26,6 +28,11 @@ export class TopupManager {
     const formattedBalance = formatIcpBalance(balance);
 
     updateBalanceDisplay(formattedBalance);
+
+    const authManager = new AuthManager();
+    await authManager.create();
+    const principal = await authManager.getPrincipal();
+    updateIcrc1AccountDisplay(principal.toText());
   }
 
   private attachEventListeners(): void {

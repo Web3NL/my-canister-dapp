@@ -52,6 +52,7 @@ export function setLoggedInState(
   };
 
   toggleVisibility('ii-principal', true);
+  toggleVisibility('ii-principal-label', true);
   setText('ii-principal', principalText);
   toggleVisibility('authenticated-content', true);
 }
@@ -69,6 +70,7 @@ export function setLoggedOutState(onLogin: () => void | Promise<void>): void {
   };
 
   toggleVisibility('ii-principal', false);
+  toggleVisibility('ii-principal-label', false);
   setText('ii-principal', '');
   toggleVisibility('authenticated-content', false);
   toggleVisibility('error-section', false);
@@ -90,6 +92,10 @@ export function updateStatusDisplay(
 
 export function updateBalanceDisplay(formattedBalance: string): void {
   setText('balance-value', formattedBalance);
+}
+
+export function updateIcrc1AccountDisplay(principalText: string): void {
+  setText('icrc1-account', principalText);
 }
 
 export function showLoading(): void {
