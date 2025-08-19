@@ -5,14 +5,14 @@
     return x && x.__esModule && Object.prototype.hasOwnProperty.call(x, "default") ? x["default"] : x;
   }
   var buffer$1 = {};
-  var base64Js = {};
-  var hasRequiredBase64Js;
-  function requireBase64Js() {
-    if (hasRequiredBase64Js) return base64Js;
-    hasRequiredBase64Js = 1;
-    base64Js.byteLength = byteLength;
-    base64Js.toByteArray = toByteArray;
-    base64Js.fromByteArray = fromByteArray;
+  var base64Js$1 = {};
+  var hasRequiredBase64Js$1;
+  function requireBase64Js$1() {
+    if (hasRequiredBase64Js$1) return base64Js$1;
+    hasRequiredBase64Js$1 = 1;
+    base64Js$1.byteLength = byteLength;
+    base64Js$1.toByteArray = toByteArray;
+    base64Js$1.fromByteArray = fromByteArray;
     var lookup = [];
     var revLookup = [];
     var Arr = typeof Uint8Array !== "undefined" ? Uint8Array : Array;
@@ -102,15 +102,15 @@
       }
       return parts.join("");
     }
-    return base64Js;
+    return base64Js$1;
   }
-  var ieee754 = {};
+  var ieee754$1 = {};
   /*! ieee754. BSD-3-Clause License. Feross Aboukhadijeh <https://feross.org/opensource> */
-  var hasRequiredIeee754;
-  function requireIeee754() {
-    if (hasRequiredIeee754) return ieee754;
-    hasRequiredIeee754 = 1;
-    ieee754.read = function(buffer2, offset, isLE, mLen, nBytes) {
+  var hasRequiredIeee754$1;
+  function requireIeee754$1() {
+    if (hasRequiredIeee754$1) return ieee754$1;
+    hasRequiredIeee754$1 = 1;
+    ieee754$1.read = function(buffer2, offset, isLE, mLen, nBytes) {
       var e, m;
       var eLen = nBytes * 8 - mLen - 1;
       var eMax = (1 << eLen) - 1;
@@ -140,7 +140,7 @@
       }
       return (s ? -1 : 1) * m * Math.pow(2, e - mLen);
     };
-    ieee754.write = function(buffer2, value2, offset, isLE, mLen, nBytes) {
+    ieee754$1.write = function(buffer2, value2, offset, isLE, mLen, nBytes) {
       var e, m, c;
       var eLen = nBytes * 8 - mLen - 1;
       var eMax = (1 << eLen) - 1;
@@ -187,7 +187,7 @@
       }
       buffer2[offset + i - d] |= s * 128;
     };
-    return ieee754;
+    return ieee754$1;
   }
   /*!
    * The buffer module from node.js, for the browser.
@@ -200,8 +200,8 @@
     if (hasRequiredBuffer$1) return buffer$1;
     hasRequiredBuffer$1 = 1;
     (function(exports) {
-      const base64 = requireBase64Js();
-      const ieee7542 = requireIeee754();
+      const base64 = requireBase64Js$1();
+      const ieee7542 = requireIeee754$1();
       const customInspectSymbol = typeof Symbol === "function" && typeof Symbol["for"] === "function" ? Symbol["for"]("nodejs.util.inspect.custom") : null;
       exports.Buffer = Buffer;
       exports.SlowBuffer = SlowBuffer;
@@ -1766,7 +1766,7 @@
       function numberIsNaN(obj) {
         return obj !== obj;
       }
-      const hexSliceLookupTable = function() {
+      const hexSliceLookupTable = (function() {
         const alphabet2 = "0123456789abcdef";
         const table = new Array(256);
         for (let i = 0; i < 16; ++i) {
@@ -1776,7 +1776,7 @@
           }
         }
         return table;
-      }();
+      })();
       function defineBigIntMethod(fn) {
         return typeof BigInt === "undefined" ? BufferBigIntNotDefined : fn;
       }
@@ -3444,6 +3444,190 @@
   new FixedNatClass(64);
   var src$1 = {};
   var buffer = {};
+  var base64Js = {};
+  var hasRequiredBase64Js;
+  function requireBase64Js() {
+    if (hasRequiredBase64Js) return base64Js;
+    hasRequiredBase64Js = 1;
+    base64Js.byteLength = byteLength;
+    base64Js.toByteArray = toByteArray;
+    base64Js.fromByteArray = fromByteArray;
+    var lookup = [];
+    var revLookup = [];
+    var Arr = typeof Uint8Array !== "undefined" ? Uint8Array : Array;
+    var code = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
+    for (var i = 0, len = code.length; i < len; ++i) {
+      lookup[i] = code[i];
+      revLookup[code.charCodeAt(i)] = i;
+    }
+    revLookup["-".charCodeAt(0)] = 62;
+    revLookup["_".charCodeAt(0)] = 63;
+    function getLens(b64) {
+      var len2 = b64.length;
+      if (len2 % 4 > 0) {
+        throw new Error("Invalid string. Length must be a multiple of 4");
+      }
+      var validLen = b64.indexOf("=");
+      if (validLen === -1) validLen = len2;
+      var placeHoldersLen = validLen === len2 ? 0 : 4 - validLen % 4;
+      return [validLen, placeHoldersLen];
+    }
+    function byteLength(b64) {
+      var lens = getLens(b64);
+      var validLen = lens[0];
+      var placeHoldersLen = lens[1];
+      return (validLen + placeHoldersLen) * 3 / 4 - placeHoldersLen;
+    }
+    function _byteLength(b64, validLen, placeHoldersLen) {
+      return (validLen + placeHoldersLen) * 3 / 4 - placeHoldersLen;
+    }
+    function toByteArray(b64) {
+      var tmp;
+      var lens = getLens(b64);
+      var validLen = lens[0];
+      var placeHoldersLen = lens[1];
+      var arr = new Arr(_byteLength(b64, validLen, placeHoldersLen));
+      var curByte = 0;
+      var len2 = placeHoldersLen > 0 ? validLen - 4 : validLen;
+      var i2;
+      for (i2 = 0; i2 < len2; i2 += 4) {
+        tmp = revLookup[b64.charCodeAt(i2)] << 18 | revLookup[b64.charCodeAt(i2 + 1)] << 12 | revLookup[b64.charCodeAt(i2 + 2)] << 6 | revLookup[b64.charCodeAt(i2 + 3)];
+        arr[curByte++] = tmp >> 16 & 255;
+        arr[curByte++] = tmp >> 8 & 255;
+        arr[curByte++] = tmp & 255;
+      }
+      if (placeHoldersLen === 2) {
+        tmp = revLookup[b64.charCodeAt(i2)] << 2 | revLookup[b64.charCodeAt(i2 + 1)] >> 4;
+        arr[curByte++] = tmp & 255;
+      }
+      if (placeHoldersLen === 1) {
+        tmp = revLookup[b64.charCodeAt(i2)] << 10 | revLookup[b64.charCodeAt(i2 + 1)] << 4 | revLookup[b64.charCodeAt(i2 + 2)] >> 2;
+        arr[curByte++] = tmp >> 8 & 255;
+        arr[curByte++] = tmp & 255;
+      }
+      return arr;
+    }
+    function tripletToBase64(num) {
+      return lookup[num >> 18 & 63] + lookup[num >> 12 & 63] + lookup[num >> 6 & 63] + lookup[num & 63];
+    }
+    function encodeChunk(uint8, start, end) {
+      var tmp;
+      var output = [];
+      for (var i2 = start; i2 < end; i2 += 3) {
+        tmp = (uint8[i2] << 16 & 16711680) + (uint8[i2 + 1] << 8 & 65280) + (uint8[i2 + 2] & 255);
+        output.push(tripletToBase64(tmp));
+      }
+      return output.join("");
+    }
+    function fromByteArray(uint8) {
+      var tmp;
+      var len2 = uint8.length;
+      var extraBytes = len2 % 3;
+      var parts = [];
+      var maxChunkLength = 16383;
+      for (var i2 = 0, len22 = len2 - extraBytes; i2 < len22; i2 += maxChunkLength) {
+        parts.push(encodeChunk(uint8, i2, i2 + maxChunkLength > len22 ? len22 : i2 + maxChunkLength));
+      }
+      if (extraBytes === 1) {
+        tmp = uint8[len2 - 1];
+        parts.push(
+          lookup[tmp >> 2] + lookup[tmp << 4 & 63] + "=="
+        );
+      } else if (extraBytes === 2) {
+        tmp = (uint8[len2 - 2] << 8) + uint8[len2 - 1];
+        parts.push(
+          lookup[tmp >> 10] + lookup[tmp >> 4 & 63] + lookup[tmp << 2 & 63] + "="
+        );
+      }
+      return parts.join("");
+    }
+    return base64Js;
+  }
+  var ieee754 = {};
+  /*! ieee754. BSD-3-Clause License. Feross Aboukhadijeh <https://feross.org/opensource> */
+  var hasRequiredIeee754;
+  function requireIeee754() {
+    if (hasRequiredIeee754) return ieee754;
+    hasRequiredIeee754 = 1;
+    ieee754.read = function(buffer2, offset, isLE, mLen, nBytes) {
+      var e, m;
+      var eLen = nBytes * 8 - mLen - 1;
+      var eMax = (1 << eLen) - 1;
+      var eBias = eMax >> 1;
+      var nBits = -7;
+      var i = isLE ? nBytes - 1 : 0;
+      var d = isLE ? -1 : 1;
+      var s = buffer2[offset + i];
+      i += d;
+      e = s & (1 << -nBits) - 1;
+      s >>= -nBits;
+      nBits += eLen;
+      for (; nBits > 0; e = e * 256 + buffer2[offset + i], i += d, nBits -= 8) {
+      }
+      m = e & (1 << -nBits) - 1;
+      e >>= -nBits;
+      nBits += mLen;
+      for (; nBits > 0; m = m * 256 + buffer2[offset + i], i += d, nBits -= 8) {
+      }
+      if (e === 0) {
+        e = 1 - eBias;
+      } else if (e === eMax) {
+        return m ? NaN : (s ? -1 : 1) * Infinity;
+      } else {
+        m = m + Math.pow(2, mLen);
+        e = e - eBias;
+      }
+      return (s ? -1 : 1) * m * Math.pow(2, e - mLen);
+    };
+    ieee754.write = function(buffer2, value2, offset, isLE, mLen, nBytes) {
+      var e, m, c;
+      var eLen = nBytes * 8 - mLen - 1;
+      var eMax = (1 << eLen) - 1;
+      var eBias = eMax >> 1;
+      var rt = mLen === 23 ? Math.pow(2, -24) - Math.pow(2, -77) : 0;
+      var i = isLE ? 0 : nBytes - 1;
+      var d = isLE ? 1 : -1;
+      var s = value2 < 0 || value2 === 0 && 1 / value2 < 0 ? 1 : 0;
+      value2 = Math.abs(value2);
+      if (isNaN(value2) || value2 === Infinity) {
+        m = isNaN(value2) ? 1 : 0;
+        e = eMax;
+      } else {
+        e = Math.floor(Math.log(value2) / Math.LN2);
+        if (value2 * (c = Math.pow(2, -e)) < 1) {
+          e--;
+          c *= 2;
+        }
+        if (e + eBias >= 1) {
+          value2 += rt / c;
+        } else {
+          value2 += rt * Math.pow(2, 1 - eBias);
+        }
+        if (value2 * c >= 2) {
+          e++;
+          c /= 2;
+        }
+        if (e + eBias >= eMax) {
+          m = 0;
+          e = eMax;
+        } else if (e + eBias >= 1) {
+          m = (value2 * c - 1) * Math.pow(2, mLen);
+          e = e + eBias;
+        } else {
+          m = value2 * Math.pow(2, eBias - 1) * Math.pow(2, mLen);
+          e = 0;
+        }
+      }
+      for (; mLen >= 8; buffer2[offset + i] = m & 255, i += d, m /= 256, mLen -= 8) {
+      }
+      e = e << mLen | m;
+      eLen += mLen;
+      for (; eLen > 0; buffer2[offset + i] = e & 255, i += d, e /= 256, eLen -= 8) {
+      }
+      buffer2[offset + i - d] |= s * 128;
+    };
+    return ieee754;
+  }
   /*!
    * The buffer module from node.js, for the browser.
    *
@@ -4808,7 +4992,7 @@
       function numberIsNaN(obj) {
         return obj !== obj;
       }
-      var hexSliceLookupTable = function() {
+      var hexSliceLookupTable = (function() {
         var alphabet2 = "0123456789abcdef";
         var table = new Array(256);
         for (var i = 0; i < 16; ++i) {
@@ -4818,7 +5002,7 @@
           }
         }
         return table;
-      }();
+      })();
     })(buffer);
     return buffer;
   }
@@ -5098,7 +5282,7 @@
           BigNumber2.minimum = BigNumber2.min = function() {
             return maxOrMin(arguments, 1);
           };
-          BigNumber2.random = function() {
+          BigNumber2.random = (function() {
             var pow2_53 = 9007199254740992;
             var random53bitInt = Math.random() * pow2_53 & 2097151 ? function() {
               return mathfloor(Math.random() * pow2_53);
@@ -5166,13 +5350,13 @@
               rand.c = c;
               return rand;
             };
-          }();
+          })();
           BigNumber2.sum = function() {
             var i = 1, args = arguments, sum = new BigNumber2(args[0]);
             for (; i < args.length; ) sum = sum.plus(args[i++]);
             return sum;
           };
-          convertBase = /* @__PURE__ */ function() {
+          convertBase = /* @__PURE__ */ (function() {
             var decimal = "0123456789";
             function toBaseOut(str, baseIn, baseOut, alphabet2) {
               var j, arr = [0], arrL, i = 0, len = str.length;
@@ -5245,8 +5429,8 @@
               }
               return str;
             };
-          }();
-          div = /* @__PURE__ */ function() {
+          })();
+          div = /* @__PURE__ */ (function() {
             function multiply(x, k, base) {
               var m, temp, xlo, xhi, carry = 0, i = x.length, klo = k % SQRT_BASE, khi = k / SQRT_BASE | 0;
               for (x = x.slice(); i--; ) {
@@ -5387,7 +5571,7 @@
               }
               return q;
             };
-          }();
+          })();
           function format(n, i, rm, id) {
             var c0, e, ne, len, str;
             if (rm == null) rm = ROUNDING_MODE;
@@ -5446,7 +5630,7 @@
             }
             return n;
           }
-          parseNumeric = /* @__PURE__ */ function() {
+          parseNumeric = /* @__PURE__ */ (function() {
             var basePrefix = /^(-?)0([xbo])(?=\w[\w.]*$)/i, dotAfter = /^([^.]+)\.$/, dotBefore = /^\.([^.]+)$/, isInfinityOrNaN = /^-?(Infinity|NaN)$/, whitespaceOrPlus = /^\s*\+(?=[\w.])|^\s+|\s+$/g;
             return function(x, str, isNum, b) {
               var base, s = isNum ? str : str.replace(whitespaceOrPlus, "");
@@ -5471,7 +5655,7 @@
               }
               x.c = x.e = null;
             };
-          }();
+          })();
           function round(x, sd, rm, r) {
             var d, i, j, k, n, ni, rd, xc = x.c, pows10 = POWS_TEN;
             if (xc) {
@@ -10808,7 +10992,7 @@
         const u = is25519 ? Fp2.div(_1n$1 + y, _1n$1 - y) : Fp2.div(y - _1n$1, y + _1n$1);
         return Fp2.toBytes(u);
       },
-      toMontgomeryPriv(secretKey) {
+      toMontgomerySecret(secretKey) {
         const size = lengths.secretKey;
         _abytes2(secretKey, size);
         const hashed = cHash(secretKey.subarray(0, size));
