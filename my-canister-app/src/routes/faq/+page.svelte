@@ -10,7 +10,9 @@
   <h1>FAQ</h1>
 
   <Section>
-    <h2 slot="title">What is a Canister Dapp?</h2>
+    {#snippet title()}
+      <h2>What is a Canister Dapp?</h2>
+    {/snippet}
     <p>
       A Canister Dapp is a decentralized application that runs on the <a
         href="https://internetcomputer.org"
@@ -27,7 +29,9 @@
   </Section>
 
   <Section>
-    <h2 slot="title">Why do we need Canister Dapps?</h2>
+    {#snippet title()}
+      <h2>Why do we need Canister Dapps?</h2>
+    {/snippet}
     <p>
       The <a
         href="https://internetcomputer.org"
@@ -74,7 +78,9 @@
   </Section>
 
   <Section>
-    <h2 slot="title">What is a Canister Dapp more technically?</h2>
+    {#snippet title()}
+      <h2>What is a Canister Dapp more technically?</h2>
+    {/snippet}
     <p>
       A Canister Dapp is a single canister that functions as both a frontend
       server and a backend. It is controlled by the user's <a
@@ -87,7 +93,9 @@
   </Section>
 
   <Section>
-    <h2 slot="title">How does it work?</h2>
+    {#snippet title()}
+      <h2>How does it work?</h2>
+    {/snippet}
     <p>
       A user can use a service like <a href="https://mycanister.app"
         >mycanister.app</a
@@ -98,7 +106,9 @@
   </Section>
 
   <Section>
-    <h2 slot="title">What are the challenges?</h2>
+    {#snippet title()}
+      <h2>What are the challenges?</h2>
+    {/snippet}
     <p>
       The end user is fully responsible for their Dapp. The framework needs to
       ensure security and protect against data loss, all without requiring the
@@ -111,7 +121,9 @@
   </Section>
 
   <Section>
-    <h2 slot="title">How decentralized is it really?</h2>
+    {#snippet title()}
+      <h2>How decentralized is it really?</h2>
+    {/snippet}
     <p>
       The domain icp0.io remains a central point of failure, which is inherent
       in the security model of <a
@@ -133,7 +145,9 @@
   </Section>
 
   <Section>
-    <h2 slot="title">Who should use Canister Dapps?</h2>
+    {#snippet title()}
+      <h2>Who should use Canister Dapps?</h2>
+    {/snippet}
     <p>
       Canister Dapps are meant for users who want to create their own
       decentralized applications with the guarantee that they are the only
@@ -144,7 +158,9 @@
   </Section>
 
   <Section>
-    <h2 slot="title">Does mycanister.app store user data?</h2>
+    {#snippet title()}
+      <h2>Does mycanister.app store user data?</h2>
+    {/snippet}
     <p>
       No, mycanister.app does not store any user data. It's simply a static
       website. The platform is designed to give users full control over their
@@ -154,9 +170,9 @@
   </Section>
 
   <Section>
-    <h2 slot="title">
-      How does mycanister.app remember my installed app history?
-    </h2>
+    {#snippet title()}
+      <h2>How does mycanister.app remember my installed app history?</h2>
+    {/snippet}
     <p>
       When you create a new canister, you deposit ICP to an account only you can
       access. The canister creation transaction is public. mycanister.app

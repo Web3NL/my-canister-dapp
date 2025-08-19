@@ -29,20 +29,30 @@
 
   <div class="keyVal" id="principal">
     <KeyValuePair>
-      <Value slot="key">{principalText}</Value>
-      <Copy slot="value" value={principalText}></Copy>
+      {#snippet key()}
+        <Value>{principalText}</Value>
+      {/snippet}
+      {#snippet value()}
+        <Copy value={principalText} />
+      {/snippet}
     </KeyValuePair>
   </div>
 
   <div class="keyVal">
     <KeyValuePair>
-      <Value slot="key">Balance</Value>
-      <Value slot="value"
-        >{formattedBalance}
-        {#if showSpinner}<span class="spinner-container"
-            ><Spinner size="small" inline={true} /></span
-          >{/if}</Value
-      >
+      {#snippet key()}
+        <Value>Balance</Value>
+      {/snippet}
+      {#snippet value()}
+        <Value>
+          {formattedBalance}
+          {#if showSpinner}
+            <span class="spinner-container"
+              ><Spinner size="small" inline={true} /></span
+            >
+          {/if}
+        </Value>
+      {/snippet}
     </KeyValuePair>
   </div>
 
