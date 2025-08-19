@@ -1,10 +1,7 @@
 <script lang="ts">
   import { authStore } from '$lib/stores/auth';
-  import {
-    ProgressSteps,
-    busyStore,
-    toastsStore,
-  } from '@dfinity/gix-components';
+  import { ProgressSteps, busyStore } from '@dfinity/gix-components';
+  import { showWarnToast, showErrorToast } from '$lib/utils/toast';
   import type { ProgressStep } from '@dfinity/gix-components';
   import { LedgerApi } from '$lib/api/ledgerIcp';
   import { formatIcpBalance } from '$lib/utils/format';
@@ -60,20 +57,14 @@
           }
           advanceToStep(2);
         } else if (!lowDepositWarnShown) {
-          toastsStore.show({
-            text: 'Balance too low.',
-            level: 'warn',
-          });
+          showWarnToast('Balance too low.');
           lowDepositWarnShown = true;
         }
       }
     } catch (err) {
       console.error('Failed to fetch balance', err);
       if (!balanceFetchFailedToastShown) {
-        toastsStore.show({
-          text: 'Failed to fetch balance. Please file issue in GitHub.',
-          level: 'error',
-        });
+        showErrorToast('Failed to fetch balance. Please file issue in GitHub.');
         balanceFetchFailedToastShown = true;
       }
     }
@@ -114,29 +105,32 @@
     steps.findIndex(step => step.state === 'in_progress') + 1 || steps.length;
 
   function advanceToStep(targetStep: 2 | 3 | 4) {
-    for (let i = 0; i < targetStep - 1; i++) {
-      if (steps[i]) {
-        steps[i]!.state = 'completed';
+    // targetStep is 1-based for the step the user is entering (or completing if 4)
+    steps = steps.map((s, idx) => {
+      const stepIndex = idx + 1; // 1-based
+      let state: ProgressStep['state'];
+      if (targetStep === 4) {
+        // All steps completed
+        state = 'completed';
+      } else if (stepIndex < targetStep) {
+        state = 'completed';
+      } else if (stepIndex === targetStep) {
+        state = 'in_progress';
+      } else {
+        state = 'next';
       }
-    }
+      return { ...s, state };
+    }) as typeof steps;
+  }
 
-    if (targetStep === 4) {
-      if (steps[targetStep - 1]) {
-        steps[targetStep - 1]!.state = 'completed';
-      }
-    } else {
-      if (steps[targetStep - 1]) {
-        steps[targetStep - 1]!.state = 'in_progress';
-      }
-    }
-
-    for (let i = targetStep; i < steps.length; i++) {
-      if (steps[i]) {
-        steps[i]!.state = 'next';
-      }
-    }
-
-    steps = [...steps];
+  function setFailed(stepKey: 'fund' | 'create' | 'connect-ii') {
+    steps = steps.map(s =>
+      s.step === stepKey
+        ? { ...s, state: 'failed' }
+        : s.state === 'in_progress' && s.step !== stepKey
+          ? { ...s, state: 'next' }
+          : s
+    ) as typeof steps;
   }
 
   async function createCanister() {
@@ -160,10 +154,8 @@
       advanceToStep(3);
     } catch (err) {
       console.error('Failed to create canister', err);
-      toastsStore.show({
-        text: `Failed to create Dapp: Please file issue on GitHub`,
-        level: 'error',
-      });
+      setFailed('create');
+      showErrorToast('Failed to create Dapp: Please file issue on GitHub');
     } finally {
       busyStore.stopBusy('create-canister');
     }
@@ -185,10 +177,8 @@
       advanceToStep(4);
     } catch (err) {
       console.error('Failed to install code / connect II', err);
-      toastsStore.show({
-        text: `Failed to create Dapp: Please file issue on GitHub`,
-        level: 'error',
-      });
+      setFailed('connect-ii');
+      showErrorToast('Failed to connect II: Please file issue on GitHub');
     } finally {
       busyStore.stopBusy('connect-ii');
     }
