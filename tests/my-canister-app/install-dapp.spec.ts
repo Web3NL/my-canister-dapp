@@ -41,10 +41,11 @@ test('My Canister App E2E Suite', async ({ page }) => {
     // Wait until the minimum balance number is loaded in the new text format
     await expect(depositLocator).toHaveText(/Deposit\s+at\s+least\s+\d/, { timeout: 30000 });
     const depositTextRaw = await depositLocator.textContent();
-    // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
+
     if (!depositTextRaw) {
         throw new Error('Could not read deposit text');
     }
+
     // Capture number after 'at least'
     const match = depositTextRaw.match(/Deposit\s+at\s+least\s+([0-9]+(?:\.[0-9]+)?)\s+ICP/);
     if (!match) {
@@ -54,7 +55,7 @@ test('My Canister App E2E Suite', async ({ page }) => {
 
     // Read the principal from the page and transfer funds
     const principalText = await page.locator('#principal .value').first().textContent();
-    // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
+
     if (!principalText) {
         throw new Error('Principal text not found on the page');
     }
@@ -77,14 +78,13 @@ test('My Canister App E2E Suite', async ({ page }) => {
     await page.getByRole('menuitem', { name: 'My Dapps' }).waitFor({ state: 'visible' });
     await page.getByRole('menuitem', { name: 'My Dapps' }).click();
 
-    await page.locator('article[data-tid="card"]').filter({ hasText: 'My Hello World' }).first().waitFor({ state: 'visible' });
+    await page.locator('article[data-tid="gix-cmp-card"]').filter({ hasText: 'My Hello World' }).first().waitFor({ state: 'visible' });
 
     // Extract canister ID from the card
-    const cardElement = page.locator('article[data-tid="card"]').filter({ hasText: 'My Hello World' }).first();
+    const cardElement = page.locator('article[data-tid="gix-cmp-card"]').filter({ hasText: 'My Hello World' }).first();
     const dappFrontpageLink = cardElement.locator('a').filter({ hasText: 'Dapp frontpage' });
     const href = await dappFrontpageLink.getAttribute('href');
 
-    // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
     if (!href) {
         throw new Error('Dapp frontpage href not found');
     }
@@ -93,7 +93,6 @@ test('My Canister App E2E Suite', async ({ page }) => {
     const url = new URL(href);
     const canisterId = url.hostname.split('.')[0];
 
-    // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
     if (!canisterId) {
         throw new Error(`Could not extract canister ID from URL: ${href}`);
     }

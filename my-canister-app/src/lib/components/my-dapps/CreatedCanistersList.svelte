@@ -5,7 +5,8 @@
     getCreatedCanister,
     type CreatedCanister,
   } from '$lib/services/createdCanisters';
-  import { Card, SkeletonText, toastsStore } from '@dfinity/gix-components';
+  import { Card, SkeletonText } from '@dfinity/gix-components';
+  import { showErrorToast } from '$lib/utils/toast';
   import InstalledDappCard from './InstalledDappCard.svelte';
 
   let createdCanisters: CreatedCanister[] = [];
@@ -31,10 +32,7 @@
         .map(result => result.value)
         .sort((a, b) => Number(b.blockId - a.blockId));
     } catch {
-      toastsStore.show({
-        text: 'Failed to load installed Dapps',
-        level: 'error',
-      });
+      showErrorToast('Failed to load installed Dapps');
     }
     loading = false;
   }

@@ -42,8 +42,12 @@
   <Menu slot="menu-items" />
 
   <Content>
-    <div slot="title"><ThemeToggleButton /></div>
-    <button slot="toolbar-end" on:click={handleLogout}><IconLogout /></button>
+    {#snippet title()}
+      <ThemeToggleButton />
+    {/snippet}
+    {#snippet toolbarEnd()}
+      <button on:click={handleLogout}><IconLogout /></button>
+    {/snippet}
     <div class="development-warning">
       <p>DEMO</p>
       <p>

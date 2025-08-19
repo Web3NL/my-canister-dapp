@@ -1,6 +1,7 @@
 <script lang="ts">
   import { authStore } from '$lib/stores/auth';
   import { ProgressSteps, busyStore } from '@dfinity/gix-components';
+  import { showWarnToast, showErrorToast } from '$lib/utils/toast';
   import type { ProgressStep } from '@dfinity/gix-components';
   import { LedgerApi } from '$lib/api/ledgerIcp';
   import { formatIcpBalance } from '$lib/utils/format';
@@ -31,6 +32,8 @@
   let canisterPrincipal: Principal | null = null;
   let balanceTimer: ReturnType<typeof setInterval> | null = null;
   let currentBalance = BigInt(0);
+  let balanceFetchFailedToastShown = false;
+  let lowDepositWarnShown = false;
 
   $: wasmId = $page.url.searchParams.get('id');
   $: wasmIdNumber = wasmId != null ? parseInt(wasmId, 10) : null;
@@ -42,17 +45,28 @@
   const CANISTER_STORAGE_KEY = 'pendingCanisterId';
 
   async function loadBalance() {
-    const ledgerApi = await LedgerApi.create();
-    currentBalance = await ledgerApi.balance();
-    formattedBalance = formatIcpBalance(currentBalance);
-
-    if (requiredBalanceE8s > 0n && currentBalance >= requiredBalanceE8s) {
-      if (balanceTimer) {
-        clearInterval(balanceTimer);
-        balanceTimer = null;
+    try {
+      const ledgerApi = await LedgerApi.create();
+      currentBalance = await ledgerApi.balance();
+      formattedBalance = formatIcpBalance(currentBalance);
+      if (requiredBalanceE8s > 0n) {
+        if (currentBalance >= requiredBalanceE8s) {
+          if (balanceTimer) {
+            clearInterval(balanceTimer);
+            balanceTimer = null;
+          }
+          advanceToStep(2);
+        } else if (!lowDepositWarnShown) {
+          showWarnToast('Balance too low.');
+          lowDepositWarnShown = true;
+        }
       }
-
-      advanceToStep(2);
+    } catch (err) {
+      console.error('Failed to fetch balance', err);
+      if (!balanceFetchFailedToastShown) {
+        showErrorToast('Failed to fetch balance. Please file issue in GitHub.');
+        balanceFetchFailedToastShown = true;
+      }
     }
   }
 
@@ -91,29 +105,32 @@
     steps.findIndex(step => step.state === 'in_progress') + 1 || steps.length;
 
   function advanceToStep(targetStep: 2 | 3 | 4) {
-    for (let i = 0; i < targetStep - 1; i++) {
-      if (steps[i]) {
-        steps[i]!.state = 'completed';
+    // targetStep is 1-based for the step the user is entering (or completing if 4)
+    steps = steps.map((s, idx) => {
+      const stepIndex = idx + 1; // 1-based
+      let state: ProgressStep['state'];
+      if (targetStep === 4) {
+        // All steps completed
+        state = 'completed';
+      } else if (stepIndex < targetStep) {
+        state = 'completed';
+      } else if (stepIndex === targetStep) {
+        state = 'in_progress';
+      } else {
+        state = 'next';
       }
-    }
+      return { ...s, state };
+    }) as typeof steps;
+  }
 
-    if (targetStep === 4) {
-      if (steps[targetStep - 1]) {
-        steps[targetStep - 1]!.state = 'completed';
-      }
-    } else {
-      if (steps[targetStep - 1]) {
-        steps[targetStep - 1]!.state = 'in_progress';
-      }
-    }
-
-    for (let i = targetStep; i < steps.length; i++) {
-      if (steps[i]) {
-        steps[i]!.state = 'next';
-      }
-    }
-
-    steps = [...steps];
+  function setFailed(stepKey: 'fund' | 'create' | 'connect-ii') {
+    steps = steps.map(s =>
+      s.step === stepKey
+        ? { ...s, state: 'failed' }
+        : s.state === 'in_progress' && s.step !== stepKey
+          ? { ...s, state: 'next' }
+          : s
+    ) as typeof steps;
   }
 
   async function createCanister() {
@@ -127,14 +144,21 @@
       text: 'Keep window open. Creating Dapp...',
     });
 
-    canisterPrincipal = await createNewCanister(wasmIdNumber);
+    try {
+      canisterPrincipal = await createNewCanister(wasmIdNumber);
 
-    if (browser) {
-      localStorage.setItem(CANISTER_STORAGE_KEY, canisterPrincipal.toText());
+      if (browser) {
+        localStorage.setItem(CANISTER_STORAGE_KEY, canisterPrincipal.toText());
+      }
+
+      advanceToStep(3);
+    } catch (err) {
+      console.error('Failed to create canister', err);
+      setFailed('create');
+      showErrorToast('Failed to create Dapp: Please file issue on GitHub');
+    } finally {
+      busyStore.stopBusy('create-canister');
     }
-
-    advanceToStep(3);
-    busyStore.stopBusy('create-canister');
   }
 
   async function takeControlOfCanister() {
@@ -143,14 +167,21 @@
       text: 'Keep window open. Installing and connecting II to Dapp...',
     });
 
-    await installAndTakeControl(canisterPrincipal!);
+    try {
+      await installAndTakeControl(canisterPrincipal!);
 
-    if (browser) {
-      localStorage.removeItem(CANISTER_STORAGE_KEY);
+      if (browser) {
+        localStorage.removeItem(CANISTER_STORAGE_KEY);
+      }
+
+      advanceToStep(4);
+    } catch (err) {
+      console.error('Failed to install code / connect II', err);
+      setFailed('connect-ii');
+      showErrorToast('Failed to connect II: Please file issue on GitHub');
+    } finally {
+      busyStore.stopBusy('connect-ii');
     }
-
-    advanceToStep(4);
-    busyStore.stopBusy('connect-ii');
   }
 
   onMount(async () => {
