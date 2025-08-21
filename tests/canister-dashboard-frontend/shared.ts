@@ -21,7 +21,9 @@ export const waitForListUpdate = async (
     shouldContain: boolean = true
 ): Promise<void> => {
     const listLocator = page.locator(listSelector);
-    await expect(listLocator).not.toHaveText(/Loading\.\.\./);
+    await expect(async () => {
+        await expect(listLocator).not.toHaveText(/Loading\.\.\./);
+    }).toPass({ timeout: 10000, intervals: [100, 250, 500, 1000] });
 
     if (shouldContain) {
         await expect(listLocator.locator('li', { hasText: expectedItem })).toBeVisible({ timeout: 10000 });
