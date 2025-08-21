@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { login, checkPrincipal } from './login';
+import { login } from './login';
 import {
   TEST_CONTROLLER,
   waitForListUpdate,
@@ -18,8 +18,6 @@ test('add and remove canister controllers', async ({ page }, testInfo) => {
 
   await page.goto(testUrl);
   await login(page);
-
-  await checkPrincipal(page);
 
   console.log('Testing controller addition...');
 

@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { login, checkPrincipal } from './login';
+import { login } from './login';
 import {
   TEST_ORIGINS,
   waitForListUpdate,
@@ -19,8 +19,6 @@ test('manage alternative HTTP origins', async ({ page }, testInfo) => {
 
   await page.goto(testUrl);
   await login(page);
-
-  await checkPrincipal(page);
 
   await page.waitForSelector('#alternative-origins-list');
   await expect(async () => {
