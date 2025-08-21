@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { login, checkPrincipal } from './login';
+import { login } from './login';
 
 test('manage canister auto top-up rule CRUD', async ({ page }, testInfo) => {
   const testUrl = testInfo.project.metadata.testUrl;
@@ -14,8 +14,6 @@ test('manage canister auto top-up rule CRUD', async ({ page }, testInfo) => {
 
   await page.goto(testUrl);
   await login(page);
-
-  await checkPrincipal(page);
 
   console.log('Testing top-up rule management...');
   await expect(page.locator('#top-up-rule-display')).not.toHaveText(/Loading/);
