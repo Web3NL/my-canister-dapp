@@ -104,7 +104,7 @@ test('Canister Dashboard Frontend Suite', async ({ page }, testInfo) => {
     await page.waitForLoadState('networkidle');
 
     // Wait for origin to appear in the list
-  await waitForListUpdate(page, '#alternative-origins-list', origin, true);
+    await waitForListUpdate(page, '#alternative-origins-list', origin, true);
 
     // Verify origin was added with retry
     await expect(async () => {
@@ -118,7 +118,7 @@ test('Canister Dashboard Frontend Suite', async ({ page }, testInfo) => {
     }).toPass({ timeout: 5000 });
 
     // Wait for input to be cleared
-  await waitForInputToClear(page, '#alternative-origin-input');
+    await waitForInputToClear(page, '#alternative-origin-input');
 
     // Remove origin
     console.log(`Removing origin: ${origin}`);
@@ -134,7 +134,7 @@ test('Canister Dashboard Frontend Suite', async ({ page }, testInfo) => {
     await page.waitForLoadState('networkidle');
 
     // Wait for origin to be removed from the list
-  await waitForListUpdate(page, '#alternative-origins-list', origin, false);
+    await waitForListUpdate(page, '#alternative-origins-list', origin, false);
 
     // Verify origin was removed with retry
     await expect(async () => {
@@ -147,7 +147,7 @@ test('Canister Dashboard Frontend Suite', async ({ page }, testInfo) => {
     }).toPass({ timeout: 5000 });
 
     // Wait for input to be cleared
-  await waitForInputToClear(page, '#alternative-origin-input');
+    await waitForInputToClear(page, '#alternative-origin-input');
   }
 
   console.log('Alternative origins management tests completed successfully');
