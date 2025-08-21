@@ -107,7 +107,6 @@ export function loadDfxEnv(): void {
 export function getDfxEnv(key: string): string {
   const value = process.env[key];
 
-  // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
   if (!value) {
     throw new Error(`DFX environment variable ${key} not found. Make sure to call loadDfxEnv() first.`);
   }
