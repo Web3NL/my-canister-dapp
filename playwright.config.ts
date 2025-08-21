@@ -29,14 +29,6 @@ export default defineConfig({
       }
     },
     {
-      name: 'canister-dashboard-frontend-mainnet',
-      testMatch: /.*canister-dashboard-frontend.*\.spec\.ts/,
-      metadata: {
-        testUrl: 'http://qqz4n-iqaaa-aaaap-qp75q-cai.icp0.io/canister-dashboard',
-        mainNet: true,
-      }
-    },
-    {
       name: 'my-hello-world-frontend-dfx',
       testMatch: /.*my-hello-world-frontend.*\.spec\.ts/,
     },
