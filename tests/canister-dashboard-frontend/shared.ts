@@ -1,8 +1,5 @@
 import { expect, Page } from '@playwright/test';
-
-// Shared constants originally declared inside the test block
-export const TOPUP_AMOUNT_MAINNET = BigInt(100_000);
-export const TOPUP_AMOUNT_LOCAL = BigInt(100_000);
+export const TOPUP_AMOUNT = BigInt(100_000);
 export const TEST_CONTROLLER = 'rkp4c-7iaaa-aaaaa-aaaca-cai';
 export const TEST_ORIGINS: string[] = [
     'http://localhost:9999',
@@ -11,9 +8,6 @@ export const TEST_ORIGINS: string[] = [
     // 'https://mycanister.app',
 ];
 
-/**
- * Waits until a list either contains (default) or no longer contains the expected item.
- */
 export const waitForListUpdate = async (
     page: Page,
     listSelector: string,
@@ -35,9 +29,6 @@ export const waitForListUpdate = async (
     }
 };
 
-/**
- * Waits for an input element to become empty.
- */
 export const waitForInputToClear = async (
     page: Page,
     inputSelector: string,

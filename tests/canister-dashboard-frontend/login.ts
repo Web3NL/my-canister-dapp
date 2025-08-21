@@ -1,11 +1,6 @@
 import { Page, expect } from '@playwright/test';
 import { readTestData } from '../helpers';
 import { Principal } from '@dfinity/principal';
-
-/**
- * Performs the automated Internet Identity login flow using an existing anchor.
- * Assumes the main dashboard page is already loaded and the "Login" button is visible.
- */
 export const login = async (page: Page): Promise<void> => {
     const iiAnchor = readTestData('ii-anchor.txt');
 
@@ -19,10 +14,6 @@ export const login = async (page: Page): Promise<void> => {
     await popup.getByRole('button', { name: 'Remind me later' }).click();
 };
 
-/**
- * Extracts and verifies the principal from the dashboard page (ensuring the ICRC1 account matches).
- * Returns the validated Principal. Top-up amount formatting is intentionally left to the caller.
- */
 export const checkPrincipal = async (page: Page): Promise<Principal> => {
     const iiPrincipalElement = page.locator('#ii-principal');
     await iiPrincipalElement.waitFor({ state: 'visible', timeout: 10000 });
