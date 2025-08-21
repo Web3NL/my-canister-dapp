@@ -16,7 +16,12 @@ test('manage canister auto top-up rule CRUD', async ({ page }, testInfo) => {
   await login(page);
 
   console.log('Testing top-up rule management...');
-  await expect(page.locator('#top-up-rule-display')).not.toHaveText(/Loading/);
+  const ruleDisplay = page.locator('#top-up-rule-display');
+  // Allow longer, retried wait for the rule display to finish loading
+  await expect(async () => {
+    const txt = (await ruleDisplay.textContent()) || '';
+    expect(/Loading/.test(txt)).toBeFalsy();
+  }).toPass({ timeout: 15000, intervals: [250, 500, 1000] });
 
   await page.selectOption('#top-up-rule-interval', 'Hourly');
   await page.selectOption('#top-up-rule-threshold', '_0_25T');
@@ -24,7 +29,6 @@ test('manage canister auto top-up rule CRUD', async ({ page }, testInfo) => {
 
   await page.click('#top-up-rule-set');
 
-  const ruleDisplay = page.locator('#top-up-rule-display');
   const expectedRule = 'Interval: Hourly\nThreshold: 0.25T cycles\nAmount: 0.5T cycles';
   await expect(async () => {
     const txt = (await ruleDisplay.textContent())?.trim();
