@@ -4,6 +4,7 @@ members = [
     "my-canister-dapp-rs/my-canister-frontend",
     "my-canister-dapp-rs/canister-dapp-test",
     "examples/my-hello-world/src/my-hello-world",
+    "dfx-env/fake-cmc",
 ]
 resolver = "2"
 
@@ -14,19 +15,22 @@ authors = ["Samer"]
 repository = "https://github.com/Web3NL/my-canister-dapp"
 
 [workspace.dependencies]
-candid = "=0.10.14"
-hex = "=0.4.3"
-ic-asset-certification = "=3.0.3"
-ic-cdk = "=0.18.5"
-ic-cdk-timers = "=0.12.2"
-ic-http-certification = "=3.0.3"
-ic-ledger-types = "=0.15.0"
-include_dir = "=0.7.4"
-icrc-ledger-types = "=0.1.10"
-mime_guess = "=2.0.5"
-pocket-ic = "=9.0.2"
-serde = { version = "=1.0.219", features = ["derive"] }
-serde_cbor = "=0.11.2"
-serde_json = "=1.0.140"
-sha2 = "=0.10.9"
-num-traits = "=0.2.19"
+candid = "0.10.17"
+candid_parser = "0.2.1"
+hex = "0.4.3"
+ic-asset-certification = "3.0.3"
+ic-cdk = "0.18.7"
+ic-cdk-timers = "0.12.2"
+ic-http-certification = "3.0.3"
+ic-ledger-types = "0.15.0"
+include_dir = "0.7.4"
+icrc-ledger-types = "0.1.10"
+mime_guess = "2.0.5"
+pocket-ic = "9.0.2"
+serde = { version = "1.0.219", features = ["derive"] }
+serde_bytes = "0.11.17"
+serde_cbor = "0.11.2"
+serde_derive = "1.0.219"
+serde_json = "1.0.143"
+sha2 = "0.10.9"
+num-traits = "0.2.19"
