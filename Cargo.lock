@@ -549,6 +549,7 @@ dependencies = [
  "candid",
  "candid_parser",
  "ic-cdk",
+ "ic-ledger-types",
  "serde",
  "serde_bytes",
  "serde_derive",

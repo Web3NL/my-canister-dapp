@@ -15,3 +15,4 @@ ic-cdk = { workspace = true }
 serde_bytes = { workspace = true }
 serde_derive = { workspace = true }
 serde = { workspace = true }
+ic-ledger-types = { workspace = true }
