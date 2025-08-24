@@ -1,0 +1,80 @@
+type Cycles = nat;
+type BlockIndex = nat64;
+
+type NotifyTopUpArg = record {
+  block_index : BlockIndex;
+  canister_id : principal
+};
+
+type NotifyTopUpResult = variant {
+  Ok : Cycles;
+  Err : NotifyError
+};
+
+type NotifyError = variant {
+  Refunded : record {
+    reason : text;
+    block_index : opt BlockIndex
+  };
+  Processing;
+  TransactionTooOld : BlockIndex;
+  InvalidTransaction : text;
+  Other : record { error_code : nat64; error_message : text }
+};
+
+type SubnetSelection = variant {
+  Subnet : record {
+    subnet : principal
+  };
+  Filter : SubnetFilter
+};
+
+type SubnetFilter = record {
+  subnet_type : opt text
+};
+
+type log_visibility = variant {
+  controllers;
+  public
+};
+
+type CanisterSettings = record {
+  controllers : opt vec principal;
+  compute_allocation : opt nat;
+  memory_allocation : opt nat;
+  freezing_threshold : opt nat;
+  reserved_cycles_limit : opt nat;
+  log_visibility : opt log_visibility;
+  wasm_memory_limit : opt nat;
+  wasm_memory_threshold : opt nat
+};
+
+type NotifyCreateCanisterArg = record {
+  block_index : BlockIndex;
+  controller : principal;
+  subnet_type : opt text;
+  subnet_selection : opt SubnetSelection;
+  settings : opt CanisterSettings
+};
+
+type NotifyCreateCanisterResult = variant {
+  Ok : principal;
+  Err : NotifyError
+};
+
+type IcpXdrConversionRate = record {
+  timestamp_seconds : nat64;
+  xdr_permyriad_per_icp : nat64
+};
+
+type IcpXdrConversionRateResponse = record {
+  data : IcpXdrConversionRate;
+  hash_tree : blob;
+  certificate : blob
+};
+
+service : {
+  notify_top_up : (NotifyTopUpArg) -> (NotifyTopUpResult);
+  notify_create_canister : (NotifyCreateCanisterArg) -> (NotifyCreateCanisterResult);
+  get_icp_xdr_conversion_rate : () -> (IcpXdrConversionRateResponse) query
+}
