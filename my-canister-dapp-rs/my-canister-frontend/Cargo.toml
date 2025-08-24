@@ -22,7 +22,7 @@ ic-cdk = { workspace = true }
 include_dir = { workspace = true }
 mime_guess = { workspace = true }
 
-my-canister-dashboard = "0.10.0"
+my-canister-dashboard = { path = "../my-canister-dashboard" }
 
 [package.metadata.release]
 pre-release-replacements = [
