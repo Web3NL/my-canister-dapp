@@ -1,5 +1,5 @@
 [workspace]
-members = ["fake-cmc/fake-cmc"]
+members = ["fake-cmc"]
 resolver = "2"
 
 [workspace.package]

@@ -1,4 +1,18 @@
-package = { name = "fake-cmc-workspace-shim", version = "0.0.0", publish = false }
+[package]
+name = "fake-cmc"
+version = "0.1.0"
+edition.workspace = true
+license.workspace = true
+authors.workspace = true
 
-# This file intentionally minimal; the real crate is under fake-cmc/.
-# Workspace is defined at dfx-env/Cargo.toml.
+[lib]
+crate-type = ["cdylib", "rlib"]
+
+[dependencies]
+candid.workspace = true
+candid_parser.workspace = true
+ic-cdk.workspace = true
+serde_bytes.workspace = true
+serde_derive.workspace = true
+serde.workspace = true
+ic-ledger-types.workspace = true
