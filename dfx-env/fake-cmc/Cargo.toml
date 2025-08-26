@@ -8,6 +8,7 @@ authors.workspace = true
 [lib]
 crate-type = ["cdylib", "rlib"]
 
+
 [dependencies]
 candid = { workspace = true }
 candid_parser = { workspace = true }

@@ -5,12 +5,12 @@ use ic_cdk::management_canister::{
 };
 use ic_cdk::{query, update};
 
+use crate::{
+    IcpXdrConversionRate, IcpXdrConversionRateResponse, NotifyCreateCanisterArg,
+    NotifyCreateCanisterResult, NotifyError, NotifyTopUpArg, NotifyTopUpResult,
+};
 use candid::Principal;
 use candid::candid_method;
-use fake_cmc::{
-    IcpXdrConversionRateResponse, NotifyCreateCanisterArg, NotifyCreateCanisterResult,
-    NotifyTopUpArg, NotifyTopUpResult,
-};
 use ic_ledger_types::{AccountIdentifier, Subaccount};
 
 // --- Constants & helpers ---
@@ -191,15 +191,13 @@ async fn verify_transfer_via_index(
     Ok(TransferCheckResult::Processing)
 }
 
-fn main() {}
-
 #[candid_method]
 #[query]
 fn get_icp_xdr_conversion_rate() -> IcpXdrConversionRateResponse {
     IcpXdrConversionRateResponse {
         certificate: Default::default(),
         hash_tree: Default::default(),
-        data: fake_cmc::IcpXdrConversionRate {
+        data: IcpXdrConversionRate {
             xdr_permyriad_per_icp: XDR_PERMYRIAD_PER_ICP,
             timestamp_seconds: ic_cdk::api::time() / 1_000_000_000,
         },
@@ -216,8 +214,8 @@ async fn notify_create_canister(arg: NotifyCreateCanisterArg) -> NotifyCreateCan
     let amount_e8s =
         match verify_transfer_via_index(arg.block_index, &expected_ai, &CREATE_MEMO).await {
             Ok(TransferCheckResult::Found(a)) => a,
-            Ok(TransferCheckResult::Processing) => return Err(fake_cmc::NotifyError::Processing),
-            Err(err) => return Err(fake_cmc::NotifyError::InvalidTransaction(err)),
+            Ok(TransferCheckResult::Processing) => return Err(NotifyError::Processing),
+            Err(err) => return Err(NotifyError::InvalidTransaction(err)),
         };
 
     // Use minimal settings: set controller only (safe for stub)
@@ -238,7 +236,7 @@ async fn notify_create_canister(arg: NotifyCreateCanisterArg) -> NotifyCreateCan
 
     match res {
         Ok(cid_record) => Ok(cid_record.canister_id),
-        Err(e) => Err(fake_cmc::NotifyError::Other {
+        Err(e) => Err(NotifyError::Other {
             error_code: 500,
             error_message: format!("failed to create canister: {e:?}"),
         }),
@@ -254,8 +252,8 @@ async fn notify_top_up(arg: NotifyTopUpArg) -> NotifyTopUpResult {
     let amount_e8s =
         match verify_transfer_via_index(arg.block_index, &expected_ai, &TPUP_MEMO).await {
             Ok(TransferCheckResult::Found(a)) => a,
-            Ok(TransferCheckResult::Processing) => return Err(fake_cmc::NotifyError::Processing),
-            Err(err) => return Err(fake_cmc::NotifyError::InvalidTransaction(err)),
+            Ok(TransferCheckResult::Processing) => return Err(NotifyError::Processing),
+            Err(err) => return Err(NotifyError::InvalidTransaction(err)),
         };
 
     // Convert ICP to cycles and top up provisionally
@@ -269,7 +267,7 @@ async fn notify_top_up(arg: NotifyTopUpArg) -> NotifyTopUpResult {
 
     match res {
         Ok(()) => Ok(minted_cycles.into()),
-        Err(e) => Err(fake_cmc::NotifyError::Other {
+        Err(e) => Err(NotifyError::Other {
             error_code: 501,
             error_message: format!("failed to deposit cycles: {e:?}"),
         }),

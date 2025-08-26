@@ -1,5 +1,7 @@
 use candid::{CandidType, Deserialize, Principal};
 
+pub mod canister;
+
 #[derive(CandidType, Deserialize)]
 pub struct IcpXdrConversionRate {
     pub xdr_permyriad_per_icp: u64,

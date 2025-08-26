@@ -1,0 +1,22 @@
+{
+    "canisters": {
+        "icp-ledger": {
+            "type": "custom",
+            "candid": "icp-ledger/icp-ledger.did",
+            "wasm": "icp-ledger/icp-ledger.wasm.gz",
+            "specified_id": "ryjl3-tyaaa-aaaaa-aaaba-cai"
+        },
+        "internet-identity": {
+            "type": "custom",
+            "candid": "internet-identity/internet_identity.did",
+            "wasm": "internet-identity/internet-identity.wasm.gz",
+            "specified_id": "rdmx6-jaaaa-aaaaa-aaadq-cai"
+        },
+        "fake-cmc": {
+            "type": "rust",
+            "package": "fake-cmc",
+            "candid": "fake-cmc/fake-cmc.did",
+            "specified_id": "rkp4c-7iaaa-aaaaa-aaaca-cai"
+        }
+    }
+}
