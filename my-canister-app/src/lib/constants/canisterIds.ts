@@ -1,4 +1,4 @@
-const INDEX_CANISTER_ID_LOCAL = 'ca77u-aiaaa-aaaap-abxiq-cai';
+const INDEX_CANISTER_ID_LOCAL = 'qhbym-qaaaa-aaaaa-aaafq-cai';
 const INDEX_CANISTER_ID_MAINNET = 'qhbym-qaaaa-aaaaa-aaafq-cai';
 
 export const INDEX_CANISTER_ID = PROD

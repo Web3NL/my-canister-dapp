@@ -25,7 +25,7 @@ const XDR_PERMYRIAD_PER_ICP: u64 = 1_000_000; // 100 XDR per ICP
 
 // ICP Ledger principal (mainnet)
 const _ICP_LEDGER_ID_TEXT: &str = "ryjl3-tyaaa-aaaaa-aaaba-cai";
-const ICP_INDEX_CANISTER_ID: &str = "ca77u-aiaaa-aaaap-abxiq-cai";
+const ICP_INDEX_CANISTER_ID: &str = "qhbym-qaaaa-aaaaa-aaafq-cai";
 
 // ICRC-1 memos used by the flow
 // CREATE memo required by CMC for canister-creation transfers: 'CREA' + zeros in LE
