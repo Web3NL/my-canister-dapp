@@ -17,3 +17,13 @@ https://raw.githubusercontent.com/dfinity/internet-identity/release-2023-05-30/s
 ### WASM
 
 https://github.com/dfinity/internet-identity/releases/download/release-2023-05-30/internet_identity_production.wasm.gz
+
+## ICP Index
+
+### Candid
+
+https://github.com/dfinity/ic/releases/download/ledger-suite-icp-2025-05-15/index.did
+
+### WASM
+
+https://github.com/dfinity/ic/releases/download/ledger-suite-icp-2025-05-15/ic-icp-index-canister.wasm.gz

@@ -17,6 +17,13 @@
             "package": "fake-cmc",
             "candid": "fake-cmc/fake-cmc.did",
             "specified_id": "rkp4c-7iaaa-aaaaa-aaaca-cai"
+        },
+        "icp-index": {
+            "type": "custom",
+            "candid": "icp-index/icp-index.did",
+            "wasm": "icp-index/icp-index.wasm.gz",
+            "init_arg_file": "icp-index/icp-index-args",
+            "specified_id": "qhbym-qaaaa-aaaaa-aaafq-cai"
         }
     }
 }
