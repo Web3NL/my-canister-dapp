@@ -15,7 +15,7 @@
         "fake-cmc": {
             "type": "rust",
             "package": "fake-cmc",
-            "candid": "fake-cmc/fake-cmc.did",
+            "candid": "fake-cmc/fake-cmc/fake-cmc.did",
             "specified_id": "rkp4c-7iaaa-aaaaa-aaaca-cai"
         }
     }

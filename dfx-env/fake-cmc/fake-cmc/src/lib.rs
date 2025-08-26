@@ -1,6 +1,6 @@
 use candid::{CandidType, Deserialize, Principal};
 
-pub mod canister;
+pub mod fake_cmc;
 
 #[derive(CandidType, Deserialize)]
 pub struct IcpXdrConversionRate {
@@ -71,3 +71,93 @@ pub struct NotifyTopUpArg {
 }
 pub type Cycles = candid::Nat;
 pub type NotifyTopUpResult = std::result::Result<Cycles, NotifyError>;
+
+// Index-related types for ledger interaction
+#[derive(CandidType, Deserialize)]
+pub struct IndexGetAccountIdentifierTransactionsArgs {
+    pub max_results: u64,
+    pub start: Option<u64>,
+    pub account_identifier: String,
+}
+
+#[derive(CandidType, Deserialize)]
+pub struct IndexTokens {
+    pub e8s: u64,
+}
+
+#[derive(CandidType, Deserialize)]
+pub struct IndexTimeStamp {
+    pub timestamp_nanos: u64,
+}
+
+#[derive(CandidType, Deserialize)]
+pub struct IndexTransaction {
+    pub memo: u64,
+    pub icrc1_memo: Option<Vec<u8>>, // ic index uses opt vec nat8
+    #[allow(dead_code)]
+    pub operation: IndexOperation,
+    #[allow(dead_code)]
+    pub created_at_time: Option<IndexTimeStamp>,
+    #[allow(dead_code)]
+    pub timestamp: Option<IndexTimeStamp>,
+}
+
+#[derive(CandidType, Deserialize)]
+pub enum IndexOperation {
+    #[allow(dead_code)]
+    Approve {
+        fee: IndexTokens,
+        from: String,
+        allowance: IndexTokens,
+        expires_at: Option<IndexTimeStamp>,
+        spender: String,
+        expected_allowance: Option<IndexTokens>,
+    },
+    Burn {
+        from: String,
+        amount: IndexTokens,
+        spender: Option<String>,
+    },
+    Mint {
+        to: String,
+        amount: IndexTokens,
+    },
+    Transfer {
+        to: String,
+        fee: IndexTokens,
+        from: String,
+        amount: IndexTokens,
+        spender: Option<String>,
+    },
+}
+
+#[derive(CandidType, Deserialize)]
+pub struct IndexTransactionWithId {
+    pub id: u64,
+    pub transaction: IndexTransaction,
+}
+
+#[derive(CandidType, Deserialize)]
+pub struct IndexGetAccountIdentifierTransactionsResponse {
+    #[allow(dead_code)]
+    pub balance: u64,
+    pub transactions: Vec<IndexTransactionWithId>,
+    #[allow(dead_code)]
+    pub oldest_tx_id: Option<u64>,
+}
+
+#[derive(CandidType, Deserialize)]
+pub struct IndexError {
+    pub message: String,
+}
+
+#[derive(CandidType, Deserialize)]
+pub enum IndexGetAccountIdentifierTransactionsResult {
+    Ok(IndexGetAccountIdentifierTransactionsResponse),
+    Err(IndexError),
+}
+
+pub enum TransferCheckResult {
+    Found(u64),
+    Processing,
+}

@@ -6,8 +6,10 @@ use ic_cdk::management_canister::{
 use ic_cdk::{query, update};
 
 use crate::{
-    IcpXdrConversionRate, IcpXdrConversionRateResponse, NotifyCreateCanisterArg,
+    IcpXdrConversionRate, IcpXdrConversionRateResponse, IndexGetAccountIdentifierTransactionsArgs,
+    IndexGetAccountIdentifierTransactionsResult, IndexOperation, NotifyCreateCanisterArg,
     NotifyCreateCanisterResult, NotifyError, NotifyTopUpArg, NotifyTopUpResult,
+    TransferCheckResult,
 };
 use candid::Principal;
 use candid::candid_method;
@@ -40,96 +42,6 @@ fn cmc_account_for_principal(cmc: Principal, p: Principal) -> AccountIdentifier 
     sub[1..1 + len].copy_from_slice(&pb[..len]);
     let subaccount = Subaccount(sub);
     AccountIdentifier::new(&cmc, &subaccount)
-}
-
-// ---- Minimal ICP Index candid models and helper ----
-#[derive(candid::CandidType, serde::Deserialize)]
-struct IndexGetAccountIdentifierTransactionsArgs {
-    max_results: u64,
-    start: Option<u64>,
-    account_identifier: String,
-}
-
-#[derive(candid::CandidType, serde::Deserialize)]
-struct IndexTokens {
-    e8s: u64,
-}
-
-#[derive(candid::CandidType, serde::Deserialize)]
-struct IndexTimeStamp {
-    timestamp_nanos: u64,
-}
-
-#[derive(candid::CandidType, serde::Deserialize)]
-struct IndexTransaction {
-    memo: u64,
-    icrc1_memo: Option<Vec<u8>>, // ic index uses opt vec nat8
-    #[allow(dead_code)]
-    operation: IndexOperation,
-    #[allow(dead_code)]
-    created_at_time: Option<IndexTimeStamp>,
-    #[allow(dead_code)]
-    timestamp: Option<IndexTimeStamp>,
-}
-
-#[derive(candid::CandidType, serde::Deserialize)]
-enum IndexOperation {
-    #[allow(dead_code)]
-    Approve {
-        fee: IndexTokens,
-        from: String,
-        allowance: IndexTokens,
-        expires_at: Option<IndexTimeStamp>,
-        spender: String,
-        expected_allowance: Option<IndexTokens>,
-    },
-    Burn {
-        from: String,
-        amount: IndexTokens,
-        spender: Option<String>,
-    },
-    Mint {
-        to: String,
-        amount: IndexTokens,
-    },
-    Transfer {
-        to: String,
-        fee: IndexTokens,
-        from: String,
-        amount: IndexTokens,
-        spender: Option<String>,
-    },
-}
-
-#[derive(candid::CandidType, serde::Deserialize)]
-struct IndexTransactionWithId {
-    id: u64,
-    transaction: IndexTransaction,
-}
-
-#[derive(candid::CandidType, serde::Deserialize)]
-struct IndexGetAccountIdentifierTransactionsResponse {
-    #[allow(dead_code)]
-    balance: u64,
-    transactions: Vec<IndexTransactionWithId>,
-    #[allow(dead_code)]
-    oldest_tx_id: Option<u64>,
-}
-
-#[derive(candid::CandidType, serde::Deserialize)]
-struct IndexError {
-    message: String,
-}
-
-#[derive(candid::CandidType, serde::Deserialize)]
-enum IndexGetAccountIdentifierTransactionsResult {
-    Ok(IndexGetAccountIdentifierTransactionsResponse),
-    Err(IndexError),
-}
-
-enum TransferCheckResult {
-    Found(u64),
-    Processing,
 }
 
 async fn verify_transfer_via_index(

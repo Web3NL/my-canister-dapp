@@ -4,7 +4,6 @@ members = [
     "my-canister-dapp-rs/my-canister-frontend",
     "my-canister-dapp-rs/canister-dapp-test",
     "examples/my-hello-world/src/my-hello-world",
-    "dfx-env/fake-cmc",
 ]
 resolver = "2"
 
