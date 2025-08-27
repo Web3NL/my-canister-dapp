@@ -1,6 +1,7 @@
 use candid::{CandidType, Deserialize, Principal};
 
 pub mod fake_cmc;
+pub mod helpers;
 
 #[derive(CandidType, Deserialize)]
 pub struct IcpXdrConversionRate {
