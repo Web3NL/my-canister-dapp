@@ -7,12 +7,18 @@
         {
             "name": "dfx-env",
             "path": "./dfx-env"
+        },
+        {
+            "name": "fake-cmc",
+            "path": "./dfx-env/fake-cmc"
         }
     ],
     "settings": {
         "rust-analyzer.linkedProjects": [
             "./Cargo.toml",
             "./dfx-env/Cargo.toml"
-        ]
+        ],
+        "rust-analyzer.cargo.features": "all",
+        "rust-analyzer.checkOnSave": true,
     }
 }

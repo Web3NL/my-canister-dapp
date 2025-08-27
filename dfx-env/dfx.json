@@ -25,5 +25,14 @@
             "init_arg_file": "icp-index/icp-index-args",
             "specified_id": "qhbym-qaaaa-aaaaa-aaafq-cai"
         }
+    },
+    "networks": {
+        "local": {
+            "bind": "127.0.0.1:8080",
+            "type": "ephemeral",
+            "replica": {
+                "subnet_type": "application"
+            }
+        }
     }
 }
