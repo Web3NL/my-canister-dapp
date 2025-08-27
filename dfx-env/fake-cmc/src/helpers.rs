@@ -88,3 +88,11 @@ fn get_u64_memo(transaction: &Transaction) -> u64 {
     }
     0
 }
+
+// Extract the transfer amount from a transaction
+pub fn get_transfer_amount(transaction: &Transaction) -> Result<u64, String> {
+    match &transaction.operation {
+        Some(Operation::Transfer { amount, .. }) => Ok(amount.e8s()),
+        _ => Err("Transaction is not a transfer".to_string()),
+    }
+}

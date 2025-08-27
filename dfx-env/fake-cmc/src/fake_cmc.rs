@@ -1,14 +1,16 @@
 use ic_cdk::{
     api::msg_caller,
     management_canister::{
-        create_canister, CanisterSettings as ManagementCanisterSettings, CreateCanisterArgs,
+        create_canister, deposit_cycles, CanisterSettings as ManagementCanisterSettings,
+        CreateCanisterArgs, DepositCyclesArgs,
     },
     query, update,
 };
 
 use crate::helpers::{
-    cmc_account_for_principal, get_ledger_transaction, verify_transfer_destination,
-    verify_transfer_memo, CREATE_MEMO, FAKE_CMC_CANISTER_ID,
+    cmc_account_for_principal, get_ledger_transaction, get_transfer_amount,
+    verify_transfer_destination, verify_transfer_memo, CREATE_MEMO, FAKE_CMC_CANISTER_ID,
+    TPUP_MEMO,
 };
 use crate::{
     helpers::ICP_LEDGER_CANISTER_ID, IcpXdrConversionRate, IcpXdrConversionRateResponse,
@@ -18,12 +20,17 @@ use crate::{
 use candid::{candid_method, Principal};
 use ic_ledger_types::{AccountIdentifier, Subaccount};
 
+// Fixed conversion rate: 5 XDR per ICP => 5 * 10_000 permyriad
+const XDR_PERMYRIAD_PER_ICP: u64 = 5 * 10_000;
+// Conversion rate: 5T cycles per ICP (5 trillion cycles)
+const CYCLES_PER_ICP: u128 = 5_000_000_000_000;
+
 #[candid_method]
 #[query]
 fn get_icp_xdr_conversion_rate() -> IcpXdrConversionRateResponse {
     // Fixed at 5 XDR per ICP => 5 * 10_000 permyriad
     let data = IcpXdrConversionRate {
-        xdr_permyriad_per_icp: 5 * 10_000,
+        xdr_permyriad_per_icp: XDR_PERMYRIAD_PER_ICP,
         timestamp_seconds: 0,
     };
 
@@ -120,8 +127,65 @@ async fn notify_create_canister(arg: NotifyCreateCanisterArg) -> NotifyCreateCan
 
 #[candid_method]
 #[update]
-fn notify_top_up(_arg: NotifyTopUpArg) -> NotifyTopUpResult {
-    unimplemented!()
+async fn notify_top_up(arg: NotifyTopUpArg) -> NotifyTopUpResult {
+    let ledger_principal =
+        Principal::from_text(ICP_LEDGER_CANISTER_ID).map_err(|e| NotifyError::Other {
+            error_code: 500,
+            error_message: format!("Invalid ledger canister ID: {e}"),
+        })?;
+
+    let transaction = get_ledger_transaction(ledger_principal, arg.block_index)
+        .await
+        .map_err(|e| {
+            NotifyError::InvalidTransaction(format!("Failed to fetch transaction: {e}"))
+        })?;
+
+    verify_transfer_memo(&transaction, TPUP_MEMO).map_err(|e| {
+        NotifyError::InvalidTransaction(format!("Transfer memo verification failed: {e}"))
+    })?;
+
+    let fake_cmc_principal =
+        Principal::from_text(FAKE_CMC_CANISTER_ID).map_err(|e| NotifyError::Other {
+            error_code: 500,
+            error_message: format!("Invalid CMC canister ID: {e}"),
+        })?;
+
+    let expected_cmc_account = cmc_account_for_principal(fake_cmc_principal, arg.canister_id);
+    let expected_account_id = expected_cmc_account
+        .subaccount
+        .as_ref()
+        .map(|subaccount_bytes| {
+            let subaccount = Subaccount(*subaccount_bytes);
+            AccountIdentifier::new(&expected_cmc_account.owner, &subaccount)
+        })
+        .unwrap_or_else(|| {
+            AccountIdentifier::new(&expected_cmc_account.owner, &Subaccount([0; 32]))
+        });
+
+    verify_transfer_destination(&transaction, &expected_account_id)
+        .map_err(NotifyError::InvalidTransaction)?;
+
+    // Extract transfer amount and convert to cycles
+    let icp_amount_e8s = get_transfer_amount(&transaction).map_err(|e| {
+        NotifyError::InvalidTransaction(format!("Failed to get transfer amount: {e}"))
+    })?;
+
+    // Convert ICP (in e8s) to cycles: amount_e8s / 1e8 * CYCLES_PER_ICP
+    let cycles_amount = (icp_amount_e8s as u128 * CYCLES_PER_ICP) / 100_000_000;
+
+    // Deposit cycles to the specified canister
+    let deposit_args = DepositCyclesArgs {
+        canister_id: arg.canister_id,
+    };
+
+    deposit_cycles(&deposit_args, cycles_amount as u128)
+        .await
+        .map_err(|e| NotifyError::Other {
+            error_code: 500,
+            error_message: format!("Failed to deposit cycles: {e:?}"),
+        })?;
+
+    Ok(candid::Nat::from(cycles_amount))
 }
 
 #[test]

@@ -2,7 +2,7 @@
 
 if ! dfx identity list | grep -q minter; then
     # If minter is not found, run the command
-    dfx identity new minter
+    dfx identity new minter --storage-mode=plaintext
 fi
 
 export MINTER_ACCOUNT_ID=$(dfx ledger account-id --identity minter)
