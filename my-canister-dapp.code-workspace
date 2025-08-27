@@ -1,0 +1,18 @@
+{
+    "folders": [
+        {
+            "name": "my-canister-dapp (root)",
+            "path": "."
+        },
+        {
+            "name": "dfx-env",
+            "path": "./dfx-env"
+        }
+    ],
+    "settings": {
+        "rust-analyzer.linkedProjects": [
+            "./Cargo.toml",
+            "./dfx-env/Cargo.toml"
+        ]
+    }
+}

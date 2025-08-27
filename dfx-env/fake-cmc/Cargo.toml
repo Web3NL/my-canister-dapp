@@ -1,18 +1,18 @@
 [package]
 name = "fake-cmc"
 version = "0.1.0"
-edition.workspace = true
-license.workspace = true
-authors.workspace = true
+edition = "2021"
+authors = ["Samer"]
+license = "MIT"
 
 [lib]
 crate-type = ["cdylib", "rlib"]
 
 [dependencies]
-candid.workspace = true
-candid_parser.workspace = true
-ic-cdk.workspace = true
-serde_bytes.workspace = true
-serde_derive.workspace = true
-serde.workspace = true
-ic-ledger-types.workspace = true
+candid = "0.10.17"
+candid_parser = "0.2.1"
+ic-cdk = "0.18.7"
+serde_bytes = "0.11.15"
+serde_derive = "1.0.219"
+serde = { version = "1.0.219", features = ["derive"] }
+ic-ledger-types = "0.15.0"

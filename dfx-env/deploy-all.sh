@@ -29,3 +29,7 @@ dfx deploy icp-ledger --specified-id ryjl3-tyaaa-aaaaa-aaaba-cai --argument "
     }
   })
 "
+
+dfx deploy icp-index
+dfx deploy fake-cmc
+dfx deploy internet-identity
