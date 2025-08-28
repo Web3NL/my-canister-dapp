@@ -28,8 +28,11 @@ dfx deploy icp-ledger --specified-id ryjl3-tyaaa-aaaaa-aaaba-cai --argument "
       token_name = opt \"Local ICP\";
     }
   })
-"
+" &
 
-dfx deploy icp-index
-dfx deploy fake-cmc
-dfx deploy internet-identity
+dfx deploy icp-index &
+dfx deploy fake-cmc &
+dfx deploy internet-identity &
+
+# Wait for all background jobs to complete
+wait
