@@ -19,6 +19,12 @@ use crate::{
 };
 use candid::{candid_method, Principal};
 use ic_ledger_types::{AccountIdentifier, Subaccount};
+use std::cell::RefCell;
+use std::collections::HashMap;
+
+thread_local! {
+    static STORAGE: RefCell<HashMap<u64, Principal>> = RefCell::new(HashMap::new());
+}
 
 // Fixed conversion rate: 5 XDR per ICP => 5 * 10_000 permyriad
 const XDR_PERMYRIAD_PER_ICP: u64 = 5 * 10_000;
@@ -44,6 +50,12 @@ fn get_icp_xdr_conversion_rate() -> IcpXdrConversionRateResponse {
 #[candid_method]
 #[update]
 async fn notify_create_canister(arg: NotifyCreateCanisterArg) -> NotifyCreateCanisterResult {
+    if let Some(existing_canister_id) =
+        STORAGE.with(|storage| storage.borrow().get(&arg.block_index).copied())
+    {
+        return Ok(existing_canister_id);
+    }
+
     let message_caller = msg_caller();
 
     let ledger_principal =
@@ -117,7 +129,14 @@ async fn notify_create_canister(arg: NotifyCreateCanisterArg) -> NotifyCreateCan
     };
 
     match create_canister(&create_arg).await {
-        Ok(canister_record) => Ok(canister_record.canister_id),
+        Ok(canister_record) => {
+            STORAGE.with(|storage| {
+                storage
+                    .borrow_mut()
+                    .insert(arg.block_index, canister_record.canister_id);
+            });
+            Ok(canister_record.canister_id)
+        }
         Err(e) => Err(NotifyError::Other {
             error_code: 500,
             error_message: format!("Failed to create canister: {e:?}"),
