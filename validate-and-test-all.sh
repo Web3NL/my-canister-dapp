@@ -53,6 +53,8 @@ if [ "$SKIP_DFX_BOOTSTRAP_FLAG" != "true" ]; then
     ./deploy-all.sh
 
     cd ..
+
+    dfx start
 fi
 
 echo "Setting up dashboard dev environment..."
