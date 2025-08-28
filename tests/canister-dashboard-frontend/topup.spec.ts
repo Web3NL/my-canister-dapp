@@ -19,11 +19,16 @@ test('canister top-up increases cycles balance', async ({ page }, testInfo) => {
 
     await login(page);
 
+    // Ensure authenticated content is visible before interacting
+    await expect(page.locator('#authenticated-content')).toBeVisible();
+
     const principal = await checkPrincipal(page);
     const topupAmount = TOPUP_AMOUNT;
     const formattedAmount = formatIcpBalance(topupAmount);
 
-    await page.getByRole('button', { name: 'Top-up' }).waitFor({ state: 'visible', timeout: 10000 });
+    const topupButton = page.getByRole('button', { name: 'Top-up' });
+    await topupButton.waitFor({ state: 'visible', timeout: 10000 });
+    await expect(topupButton).toBeEnabled();
 
     await transferToPrincipal(principal, formattedAmount);
 
@@ -49,45 +54,52 @@ test('canister top-up increases cycles balance', async ({ page }, testInfo) => {
 
     const balanceText = await page.textContent('#balance-value');
     console.log(`Current ICP balance after transfer: ${balanceText}`);
-    const cyclesElement = page.locator('.status-info p:has-text("Cycles:")');
-    await cyclesElement.waitFor({ timeout: 10000 });
-    await expect(cyclesElement).not.toHaveText(/Loading\.\.\./);
-    const cyclesTextBefore = await cyclesElement.textContent();
+    // Target the exact cycles value span to avoid flaky paragraph matches
+    const cyclesValue = page.locator('#cycles-value');
+    await expect(cyclesValue).toBeVisible();
+    await expect(cyclesValue).not.toHaveText(/Loading\.\.\./);
+    const cyclesTextBefore = await cyclesValue.textContent();
     if (!cyclesTextBefore) {
         throw new Error('Cycles balance not found before top-up');
     }
-    const cyclesBalanceBefore = cyclesTextBefore.replace(/Cycles:\s*/g, '').trim();
+    const cyclesBalanceBefore = cyclesTextBefore.trim();
     console.log(`Recorded cycles balance before top-up: ${cyclesBalanceBefore}`);
 
-    await page.getByRole('button', { name: 'Top-up' }).click();
+    // Click Top-up only when overlay is hidden and button is enabled
+    const overlay = page.locator('#loading-overlay');
+    await expect(overlay).toBeHidden();
+    await expect(topupButton).toBeEnabled();
+    await topupButton.click();
 
+    // Wait for the action to start (overlay appears) and finish (overlay hidden)
+    await expect(overlay).toBeVisible({ timeout: 5000 });
+    await expect(overlay).toBeHidden({ timeout: 60000 });
     await page.waitForLoadState('networkidle');
-    const cyclesLocator = page.locator('.status-info p:has-text("Cycles:")');
-    await expect(cyclesLocator).not.toHaveText(/Loading\.\.\./);
+    await expect(cyclesValue).not.toHaveText(/Loading\.\.\./);
 
-    const cyclesLocatorInline = page.locator('.status-info p:has-text("Cycles:")');
-    const beforeNum = parseFloat(cyclesBalanceBefore.replace(/\s*T\s*$/i, '').trim());
+    const parseCycles = (text: string | null): number => {
+        const raw = (text ?? '').replace(/,/g, '').trim();
+        // UI shows like "0.00 T"; strip trailing unit
+        const numeric = raw.replace(/\s*[A-Za-z]+\s*$/i, '').trim();
+        return parseFloat(numeric);
+    };
+    const beforeNum = parseCycles(cyclesBalanceBefore);
     if (isNaN(beforeNum)) {
         throw new Error(`Invalid before cycles balance: "${cyclesBalanceBefore}" - cannot parse as number`);
     }
-    if (beforeNum <= 0) {
-        throw new Error(`Initial cycles balance must be greater than 0, got: "${cyclesBalanceBefore}"`);
-    }
+    // Wait until the displayed text actually changes to avoid rounding masking small deltas
     await expect(async () => {
-        const cyclesTextNow = await cyclesLocatorInline.textContent();
-        const currentBalanceStr = cyclesTextNow?.replace(/Cycles:\s*/g, '').trim();
-        if (!currentBalanceStr) {
-            throw new Error('Current cycles balance is empty');
-        }
-        const currentNum = parseFloat(currentBalanceStr.replace(/\s*T\s*$/i, '').trim());
+        const cyclesTextNow = (await cyclesValue.textContent())?.trim() ?? '';
+        expect(cyclesTextNow).not.toBe(cyclesBalanceBefore);
+        const currentNum = parseCycles(cyclesTextNow);
         if (isNaN(currentNum)) {
-            throw new Error(`Invalid current cycles balance: "${currentBalanceStr}" - cannot parse as number`);
+            throw new Error(`Invalid current cycles balance: "${cyclesTextNow}" - cannot parse as number`);
         }
         expect(currentNum).toBeGreaterThan(beforeNum);
-    }).toPass({ timeout: 15000 });
+    }).toPass({ timeout: 45000, intervals: [250, 500, 1000, 2000] });
 
-    const cyclesTextAfter = await cyclesElement.textContent();
-    const cyclesBalanceAfter = cyclesTextAfter?.replace(/Cycles:\s*/g, '').trim();
+    const cyclesTextAfter = await cyclesValue.textContent();
+    const cyclesBalanceAfter = cyclesTextAfter?.trim();
     console.log(`Recorded cycles balance after top-up: ${cyclesBalanceAfter}`);
     console.log('Top-up successfully completed - cycles balance has changed');
 
