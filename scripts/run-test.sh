@@ -15,6 +15,10 @@ else
     echo "Using PocketIC binary for macOS: $POCKET_IC_BIN"
 fi
 
+# Copy pocket-ic binary to test directory
+echo "Copying PocketIC binary to test directory..."
+cp "$POCKET_IC_BIN" my-canister-dapp-rs/canister-dapp-test/
+
 echo "🧪 Running Canister Dapp Test"
 ./scripts/build-examples.sh
 cargo test -p canister-dapp-test
