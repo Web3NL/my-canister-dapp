@@ -24,7 +24,20 @@ cargo build --release --target wasm32-unknown-unknown -p my-hello-world
 
 # Process WASM with ic-wasm
 echo "Optimizing WASM with ic-wasm..."
-cargo install ic-wasm
+
+# Add ic-wasm binary to PATH based on environment
+if [[ -n "$CI" ]]; then
+    # We're in CI/CD (GitHub Actions sets CI=true)
+    export PATH="$(pwd)/bin/ic-wasm/linux:$PATH"
+else
+    # Local development - detect platform
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        export PATH="$(pwd)/bin/ic-wasm/darwin:$PATH"
+    else
+        export PATH="$(pwd)/bin/ic-wasm/linux:$PATH"
+    fi
+fi
+
 WASM_FILE="target/wasm32-unknown-unknown/release/my_hello_world.wasm"
 
 # Optimize for small code size
