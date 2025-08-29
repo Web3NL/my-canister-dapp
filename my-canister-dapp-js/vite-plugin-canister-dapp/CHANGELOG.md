@@ -1,5 +1,11 @@
 # @web3nl/vite-plugin-canister-dapp
 
+## 0.2.2
+
+### Patch Changes
+
+- [#150](https://github.com/Web3NL/my-canister-dapp/pull/150) [`3b82de6`](https://github.com/Web3NL/my-canister-dapp/commit/3b82de6cc465663b4c3fdda6ffeb25a0fb16a999) Thanks [@Web3NL](https://github.com/Web3NL)! - Document usage with config arg
+
 ## 0.2.1
 
 ### Patch Changes
