@@ -36,6 +36,10 @@ fn init() {
 }
 ```
 
+## Vite Plugin Canister Dapp
+
+The My Canister Dashboard determines its development environment at runtime by fetching `/canister-dashboard-dev-config.json`. To run the dashboard in dev mode locally, we can use [vite-plugin-canister-dapp](https://www.npmjs.com/package/@web3nl/vite-plugin-canister-dapp).
+
 ## License
 
 MIT
