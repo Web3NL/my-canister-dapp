@@ -15,7 +15,7 @@ hex = { workspace = true }
 ic-cdk = { workspace = true }
 pocket-ic = { workspace = true }
 ic-http-certification = { workspace = true }
-# my-canister-dashboard = "=0.5.1"
+
 my-canister-dashboard = { path = "../my-canister-dashboard" }
 
 
