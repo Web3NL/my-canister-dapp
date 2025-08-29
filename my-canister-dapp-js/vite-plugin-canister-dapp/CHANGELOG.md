@@ -1,5 +1,11 @@
 # @web3nl/vite-plugin-canister-dapp
 
+## 0.2.3
+
+### Patch Changes
+
+- fix late version bump commit
+
 ## 0.2.2
 
 ### Patch Changes
