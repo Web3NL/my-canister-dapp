@@ -44,13 +44,15 @@ if [ "$SKIP_DFX_BOOTSTRAP_FLAG" != "true" ]; then
 
     ./scripts/setup-dfx-identity.sh
 
+    rm -rf .dfx
+    cd dfx-env
+
     dfx killall
     dfx start --clean --background > dfx.log 2>&1
 
-    dfx extension install nns
-    dfx nns install
+    ./deploy-all.sh
 
-    dfx deploy icp-index
+    cd ..
 fi
 
 echo "Setting up dashboard dev environment..."

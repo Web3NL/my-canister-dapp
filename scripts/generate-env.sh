@@ -7,7 +7,7 @@ ROOT_ENV_FILE=".env.development"
 
 echo "Generating $ROOT_ENV_FILE at repository root..."
 cat > "$ROOT_ENV_FILE" << 'EOF'
-VITE_IDENTITY_PROVIDER=http://qhbym-qaaaa-aaaaa-aaafq-cai.localhost:8080
+VITE_IDENTITY_PROVIDER=http://rdmx6-jaaaa-aaaaa-aaadq-cai.localhost:8080
 
 VITE_DFXHOST=http://localhost:8080
 VITE_HOSTNAME=localhost:8080
@@ -19,7 +19,7 @@ VITE_DFX_HOST=http://localhost:8080
 VITE_MY_HELLO_WORLD_CANISTER_ID=22ajg-aqaaa-aaaap-adukq-cai
 VITE_CANISTER_ID=22ajg-aqaaa-aaaap-adukq-cai
 VITE_DASHBOARD_CANISTER_ID=22ajg-aqaaa-aaaap-adukq-cai
-VITE_II_CANISTER_ID=qhbym-qaaaa-aaaaa-aaafq-cai
+VITE_II_CANISTER_ID=rdmx6-jaaaa-aaaaa-aaadq-cai
 
 VITE_MY_CANISTER_APP_CANISTER_ID=c7lwu-3qaaa-aaaam-qbgia-cai
 EOF

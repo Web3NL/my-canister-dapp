@@ -7,7 +7,7 @@ const LOCAL_HOST = 'http://localhost:8080';
 
 const MAINNET_IDENTITY_PROVIDER = 'https://identity.internetcomputer.org';
 const LOCAL_IDENTITY_PROVIDER =
-  'http://qhbym-qaaaa-aaaaa-aaafq-cai.localhost:8080';
+  'http://rdmx6-jaaaa-aaaaa-aaadq-cai.localhost:8080';
 
 export const HOST = PROD ? MAINNET_HOST : LOCAL_HOST;
 export const IDENTITY_PROVIDER = PROD

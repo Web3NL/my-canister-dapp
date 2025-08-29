@@ -1,0 +1,38 @@
+{
+    "canisters": {
+        "icp-ledger": {
+            "type": "custom",
+            "candid": "icp-ledger/icp-ledger.did",
+            "wasm": "icp-ledger/icp-ledger.wasm.gz",
+            "specified_id": "ryjl3-tyaaa-aaaaa-aaaba-cai"
+        },
+        "internet-identity": {
+            "type": "custom",
+            "candid": "internet-identity/internet_identity.did",
+            "wasm": "internet-identity/internet-identity.wasm.gz",
+            "specified_id": "rdmx6-jaaaa-aaaaa-aaadq-cai"
+        },
+        "fake-cmc": {
+            "type": "rust",
+            "package": "fake-cmc",
+            "candid": "fake-cmc/fake-cmc.did",
+            "specified_id": "rkp4c-7iaaa-aaaaa-aaaca-cai"
+        },
+        "icp-index": {
+            "type": "custom",
+            "candid": "icp-index/icp-index.did",
+            "wasm": "icp-index/icp-index.wasm.gz",
+            "init_arg_file": "icp-index/icp-index-args",
+            "specified_id": "qhbym-qaaaa-aaaaa-aaafq-cai"
+        }
+    },
+    "networks": {
+        "local": {
+            "bind": "127.0.0.1:8080",
+            "type": "ephemeral",
+            "replica": {
+                "subnet_type": "application"
+            }
+        }
+    }
+}

@@ -1,5 +1,5 @@
 import { expect, Page } from '@playwright/test';
-export const TOPUP_AMOUNT = BigInt(100_000);
+export const TOPUP_AMOUNT = BigInt(5_000_000);
 export const TEST_CONTROLLER = 'rkp4c-7iaaa-aaaaa-aaaca-cai';
 export const TEST_ORIGINS: string[] = [
     'http://localhost:9999',
