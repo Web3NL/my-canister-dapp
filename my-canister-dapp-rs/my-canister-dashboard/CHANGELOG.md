@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.10.3] - 2025-08-29
+
 ### Docs
 
 - Added documentation to mention Vite plugin configuration options.
