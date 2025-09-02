@@ -46,3 +46,32 @@ export async function createHttpAgent(): Promise<HttpAgent> {
     throw error;
   }
 }
+
+export function isValidPrincipal(text: string): boolean {
+  try {
+    Principal.fromText(text);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+// Mirror backend my-canister-dapp-rs/my-canister-dashboard/src/dashboard/alternative_origins.rs
+// Allowed:
+// - http://localhost:<port>
+// - http://<subdomain>.localhost:<port>
+// - https://<any>
+export function isValidOrigin(text: string): boolean {
+  try {
+    const url = new URL(text);
+    const isHttps = url.protocol === 'https:';
+    const isHttpLocalhost =
+      url.protocol === 'http:' &&
+      (url.hostname === 'localhost' || url.hostname.endsWith('.localhost')) &&
+      /:\d+$/.test(url.host);
+
+    return isHttps || isHttpLocalhost;
+  } catch {
+    return false;
+  }
+}
