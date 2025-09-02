@@ -1,9 +1,6 @@
 import { CanisterApi } from '../api/canister';
-import {
-  INVALID_ORIGIN_MESSAGE,
-  isValidOrigin,
-  NETWORK_ERROR_MESSAGE,
-} from '../error';
+import { INVALID_ORIGIN_MESSAGE, NETWORK_ERROR_MESSAGE } from '../error';
+import { isValidOrigin } from '../utils';
 import {
   getElement,
   addEventListener,
@@ -98,12 +95,6 @@ export class AlternativeOriginsManager {
     const origin = getInputValue('alternative-origin-input');
     if (!origin) {
       throw new Error('Origin input is required');
-    }
-
-    if (!isValidOrigin(origin)) {
-      showError(INVALID_ORIGIN_MESSAGE);
-      clearInput('alternative-origin-input');
-      return;
     }
 
     showLoading();

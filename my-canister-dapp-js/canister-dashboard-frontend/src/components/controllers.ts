@@ -5,8 +5,8 @@ import {
   DUPLICATE_CONTROLLER_MESSAGE,
   CONTROLLER_NOT_FOUND_MESSAGE,
   REQUIRED_CONTROLLERS_MESSAGE,
-  isValidPrincipal,
 } from '../error';
+import { isValidPrincipal } from '../utils';
 import {
   getElement,
   addEventListener,
