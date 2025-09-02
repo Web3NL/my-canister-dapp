@@ -19510,26 +19510,10 @@ const INSUFFICIENT_BALANCE_MESSAGE = "Insufficient balance for this operation.";
 const DUPLICATE_CONTROLLER_MESSAGE = "Controller already exists.";
 const CONTROLLER_NOT_FOUND_MESSAGE = "Controller not found.";
 const REQUIRED_CONTROLLERS_MESSAGE = "Cannot remove required controllers.";
-const INVALID_ORIGIN_MESSAGE = "Invalid origin format.";
+const INVALID_ORIGIN_MESSAGE = "URL must start with 'http://localhost:', 'http://*.localhost:', or 'https://'";
 const CANISTER_ID_ERROR_MESSAGE = "Unable to determine canister ID.";
 const HTTP_AGENT_ERROR_MESSAGE = "Failed to create HTTP agent.";
 const DASHBOARD_INIT_ERROR_MESSAGE = "Failed to initialize dashboard.";
-function isValidPrincipal(text) {
-  try {
-    Principal$1.fromText(text);
-    return true;
-  } catch {
-    return false;
-  }
-}
-function isValidOrigin(text) {
-  try {
-    new URL(text);
-    return true;
-  } catch {
-    return false;
-  }
-}
 async function canisterId() {
   try {
     return M();
@@ -19558,6 +19542,24 @@ async function createHttpAgent() {
   } catch (error) {
     showError(HTTP_AGENT_ERROR_MESSAGE);
     throw error;
+  }
+}
+function isValidPrincipal(text) {
+  try {
+    Principal$1.fromText(text);
+    return true;
+  } catch {
+    return false;
+  }
+}
+function isValidOrigin(text) {
+  try {
+    const url = new URL(text);
+    const isHttps = url.protocol === "https:";
+    const isHttpLocalhost = url.protocol === "http:" && (url.hostname === "localhost" || url.hostname.endsWith(".localhost")) && /:\d+$/.test(url.host);
+    return isHttps || isHttpLocalhost;
+  } catch {
+    return false;
   }
 }
 class ManagementApi {
@@ -20341,11 +20343,6 @@ class AlternativeOriginsManager {
     const origin = getInputValue("alternative-origin-input");
     if (!origin) {
       throw new Error("Origin input is required");
-    }
-    if (!isValidOrigin(origin)) {
-      showError(INVALID_ORIGIN_MESSAGE);
-      clearInput("alternative-origin-input");
-      return;
     }
     showLoading();
     const result = await this.canisterApi.manageAlternativeOrigins({
