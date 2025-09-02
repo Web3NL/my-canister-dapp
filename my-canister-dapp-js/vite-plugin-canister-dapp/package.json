@@ -5,7 +5,7 @@
   "author": "Web3NL",
   "bugs": "https://github.com/Web3NL/my-canister-dapp/issues",
   "devDependencies": {
-    "typedoc": "^0.28.10",
+    "typedoc": "^0.28.12",
     "typescript": "^5.9.2"
   },
   "engines": {
@@ -38,7 +38,7 @@
   "license": "MIT",
   "main": "dist/index.js",
   "peerDependencies": {
-    "vite": "^7.1.2"
+    "vite": "^7.1.4"
   },
   "publishConfig": {
     "access": "public"
