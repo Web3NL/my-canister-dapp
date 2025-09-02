@@ -20384,7 +20384,7 @@ class CanisterLogsManager {
       logsList.innerHTML = '<li class="data-display">No logs found.</li>';
       return;
     }
-    const items = canister_log_records.map((record) => {
+    const items = canister_log_records.reverse().map((record) => {
       const contentBytes = record.content instanceof Uint8Array ? record.content : Uint8Array.from(record.content);
       const rawMessage = new TextDecoder().decode(contentBytes);
       const timestampMs = Number(record.timestamp_nanos / 1000000n);
