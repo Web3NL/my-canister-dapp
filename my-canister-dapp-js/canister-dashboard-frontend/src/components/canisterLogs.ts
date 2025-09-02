@@ -29,6 +29,7 @@ export class CanisterLogsManager {
     }
 
     const items = canister_log_records
+      .reverse()
       .map(record => {
         // Decode log message from bytes
         const contentBytes =
