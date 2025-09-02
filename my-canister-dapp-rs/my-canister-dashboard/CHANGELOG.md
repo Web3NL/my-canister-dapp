@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Fixed
+
+- fix canister dashboard frontend to follow same alternative origin validation as backend
+
 ## [0.10.3] - 2025-08-29
 
 ### Docs
