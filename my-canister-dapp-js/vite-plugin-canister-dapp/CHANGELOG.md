@@ -1,5 +1,11 @@
 # @web3nl/vite-plugin-canister-dapp
 
+## 0.3.1
+
+### Patch Changes
+
+- [#164](https://github.com/Web3NL/my-canister-dapp/pull/164) [`4f0c43c`](https://github.com/Web3NL/my-canister-dapp/commit/4f0c43caae0483fd262029558a0195a5a4b429d2) Thanks [@Web3NL](https://github.com/Web3NL)! - use type import
+
 ## 0.3.0
 
 ### Minor Changes
