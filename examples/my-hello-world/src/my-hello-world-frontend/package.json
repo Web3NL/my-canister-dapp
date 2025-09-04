@@ -2,7 +2,7 @@
   "name": "my-hello-world-frontend",
   "version": "5.0.0",
   "dependencies": {
-    "@dfinity/utils": "^2.14.0",
+    "@dfinity/utils": "^3.0.1",
     "@web3nl/my-canister-dashboard": "0.7.0",
     "lit-html": "3.3.1"
   },

@@ -1,13 +1,13 @@
 {
   "dependencies": {
-    "@dfinity/agent": "^2.4.1",
-    "@dfinity/auth-client": "^2.4.1",
-    "@dfinity/candid": "^2.4.1",
-    "@dfinity/cmc": "^5.0.8",
-    "@dfinity/ic-management": "^6.2.2",
-    "@dfinity/ledger-icp": "^4.1.0",
-    "@dfinity/principal": "^2.4.1",
-    "@dfinity/utils": "^2.14.0"
+    "@dfinity/agent": "^3.2.4",
+    "@dfinity/auth-client": "^3.2.4",
+    "@dfinity/candid": "^3.2.4",
+    "@dfinity/cmc": "6.0.1",
+    "@dfinity/ic-management": "7.0.1",
+    "@dfinity/ledger-icp": "6.0.0",
+    "@dfinity/principal": "^3.2.4",
+    "@dfinity/utils": "^3.0.1"
   },
   "devDependencies": {
     "@changesets/changelog-github": "^0.5.1",
@@ -16,18 +16,18 @@
     "@playwright/test": "1.55.0",
     "@sveltejs/adapter-static": "^3.0.9",
     "@sveltejs/kit": "^2.37.0",
-    "@sveltejs/vite-plugin-svelte": "^6.1.2",
-    "@types/node": "^24.3.0",
-    "dotenv": "^17.2.1",
+    "@sveltejs/vite-plugin-svelte": "6.1.4",
+    "@types/node": "24.3.1",
+    "dotenv": "17.2.2",
     "eslint": "^9.34.0",
     "eslint-config-prettier": "^10.1.8",
-    "eslint-plugin-svelte": "^3.11.0",
+    "eslint-plugin-svelte": "3.12.1",
     "globals": "^16.3.0",
     "jsdom": "^26.1.0",
-    "knip": "^5.63.0",
+    "knip": "5.63.1",
     "prettier": "^3.6.2",
     "prettier-plugin-svelte": "^3.4.0",
-    "sass": "^1.91.0",
+    "sass": "1.92.0",
     "svelte": "^5.38.6",
     "svelte-check": "^4.3.1",
     "syncpack": "^13.0.4",
@@ -42,7 +42,7 @@
   "engines": {
     "node": ">=22.0.0"
   },
-  "packageManager": "npm@11.5.2",
+  "packageManager": "npm@11.6.0",
   "private": true,
   "scripts": {
     "build": "npm run build --workspaces",

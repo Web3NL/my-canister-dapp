@@ -32,6 +32,7 @@ export default [
         'warn',
         { args: 'none', ignoreRestSiblings: true },
       ],
+      'svelte/no-navigation-without-resolve': 'off',
     },
   },
 ];
