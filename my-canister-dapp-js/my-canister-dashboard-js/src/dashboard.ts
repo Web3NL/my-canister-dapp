@@ -62,7 +62,7 @@ export class MyCanisterDashboard {
   }
 
   /**
-   * Check whether the current caller is the Dapp owner with known Internet Identity principal 
+   * Check whether the current caller is the Dapp owner with known Internet Identity principal
    * Returns true if authenticated as the known II principal, false otherwise.
    */
   async isAuthenticated(): Promise<boolean> {
