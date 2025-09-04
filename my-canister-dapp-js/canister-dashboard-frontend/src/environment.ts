@@ -1,4 +1,4 @@
-import type { CanisterDashboardDevConfig } from '@web3nl/vite-plugin-canister-dapp';
+import type { CanisterDashboardDevConfig } from '@web3nl/my-canister-dashboard';
 
 // Hardcoded production configuration
 const PRODUCTION_CONFIG: CanisterDashboardDevConfig = {
