@@ -2,9 +2,15 @@
   "compilerOptions": {
     "target": "ES2022",
     "module": "ESNext",
-    "moduleResolution": "Node",
-    "lib": ["ES2022", "DOM", "DOM.Iterable"],
-    "types": ["node"],
+    "moduleResolution": "bundler",
+    "lib": [
+      "ES2022",
+      "DOM",
+      "DOM.Iterable"
+    ],
+    "types": [
+      "node"
+    ],
     "declaration": true,
     "declarationMap": true,
     "sourceMap": true,
@@ -28,7 +34,9 @@
     "preserveWatchOutput": true,
     "baseUrl": ".",
     "paths": {
-      "$declarations/*": ["declarations/*"]
+      "$declarations/*": [
+        "declarations/*"
+      ]
     }
   },
   "include": [
