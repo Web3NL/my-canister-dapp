@@ -1,5 +1,6 @@
 import type { Plugin, ViteDevServer } from 'vite';
 import { loadEnv } from 'vite';
+import { CanisterDashboardDevConfig as _CanisterDashboardDevConfig } from '@web3nl/my-canister-dashboard';
 
 /**
  * Configuration interface for My Canister Dashboard in development
@@ -18,6 +19,8 @@ export interface CanisterDashboardDevConfig {
  * Plugin configuration interface for enabling/disabling features
  */
 export interface CanisterDashboardPluginConfig {
+  /** Directory to load Vite environment variables from (defaults to config.root, otherwise current working directory) */
+  root?: string;
   /** Whether to serve the canister dashboard dev config endpoint in dev server (default: true) */
   serveCanisterDashboardDevEnv?: boolean;
   /** Whether to emit the canister dashboard dev config during dev build as a static asset (default: true) */
@@ -36,7 +39,7 @@ export interface CanisterDashboardPluginConfig {
 function loadCanisterDappDevEnv(
   mode: string,
   root: string
-): CanisterDashboardDevConfig | null {
+): _CanisterDashboardDevConfig | null {
   // Load environment variables using Vite's loadEnv
   const env = loadEnv(mode, root, '');
 
@@ -103,6 +106,7 @@ export function canisterDashboardDevConfig(
 ): Plugin {
   // Set default configuration values
   const {
+    root: configRoot,
     serveCanisterDashboardDevEnv = true,
     emitCanisterDashboardDevConfig = true,
     serverProxies = {},
@@ -114,7 +118,7 @@ export function canisterDashboardDevConfig(
     iiAlternativeOrigins: enableIiAlternativeOriginsProxy = true,
   } = serverProxies;
 
-  let dashboardConfig: CanisterDashboardDevConfig | null = null;
+  let dashboardConfig: _CanisterDashboardDevConfig | null = null;
   let currentMode = 'production';
 
   return {
@@ -131,8 +135,8 @@ export function canisterDashboardDevConfig(
         return;
       }
 
-      // Use root from config or current working directory
-      const root = config.root ?? process.cwd();
+      // Use root from plugin config, fallback to vite config root, then cwd as last resort
+      const root = configRoot ?? config.root ?? process.cwd();
       dashboardConfig = loadCanisterDappDevEnv(mode, root);
 
       // If config failed to load, skip proxy configuration
