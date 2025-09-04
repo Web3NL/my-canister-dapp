@@ -1,5 +1,12 @@
 # @web3nl/vite-plugin-canister-dapp
 
+## 0.3.0
+
+### Minor Changes
+
+- [#163](https://github.com/Web3NL/my-canister-dapp/pull/163) [`bab4902`](https://github.com/Web3NL/my-canister-dapp/commit/bab4902a8af2d065997f7f59454acb741b1a4ba9) Thanks [@Web3NL](https://github.com/Web3NL)! - - Allow specifying root dir for .env.development file in plugin config.
+  - Use deprecated type from correct import path.
+
 ## 0.2.4
 
 ### Patch Changes
