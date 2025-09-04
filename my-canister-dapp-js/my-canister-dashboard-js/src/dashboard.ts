@@ -1,6 +1,7 @@
 import type { HttpAgent } from '@dfinity/agent';
 import type { Principal } from '@dfinity/principal';
 import { ICManagementCanister } from '@dfinity/ic-management';
+import { MyDashboardBackend } from './actor';
 import { LOW_CYCLES_THRESHOLD } from './constants';
 
 /**
@@ -23,10 +24,10 @@ export class MyCanisterDashboard {
   private icManagement: ICManagementCanister;
 
   private constructor(
-    agent: HttpAgent,
+    private agent: HttpAgent,
     private canisterId: Principal
   ) {
-    this.icManagement = ICManagementCanister.create({ agent });
+    this.icManagement = ICManagementCanister.create({ agent: this.agent });
   }
 
   /**
@@ -57,6 +58,24 @@ export class MyCanisterDashboard {
       return { ok: cycles };
     } catch (error) {
       return { error: String(error) };
+    }
+  }
+
+  /**
+   * Check whether the current caller is the Dapp owner with known Internet Identity principal 
+   * Returns true if authenticated as the known II principal, false otherwise.
+   */
+  async isAuthenticated(): Promise<boolean> {
+    try {
+      const backend = MyDashboardBackend.create({
+        agent: this.agent,
+        canisterId: this.canisterId,
+      });
+
+      const result = await backend.manageIIPrincipal({ Get: null });
+      return 'Ok' in result;
+    } catch {
+      return false;
     }
   }
 }
