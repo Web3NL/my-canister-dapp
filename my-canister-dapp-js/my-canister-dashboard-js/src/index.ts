@@ -27,3 +27,5 @@ export type {
 } from './actor';
 
 export { inferCanisterIdFromLocation } from './canisterId';
+
+export type { CanisterDashboardDevConfig } from './types';

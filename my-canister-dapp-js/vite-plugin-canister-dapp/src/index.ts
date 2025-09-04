@@ -3,6 +3,7 @@ import { loadEnv } from 'vite';
 
 /**
  * Configuration interface for My Canister Dashboard in development
+ * @deprecated This type will be removed in a future version. Please use the equivalent type from the my-canister-dashboard package instead.
  */
 export interface CanisterDashboardDevConfig {
   /** Canister ID (optional) */
