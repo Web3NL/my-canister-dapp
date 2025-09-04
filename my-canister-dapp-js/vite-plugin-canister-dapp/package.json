@@ -1,11 +1,11 @@
 {
   "name": "@web3nl/vite-plugin-canister-dapp",
   "description": "Vite plugin for Internet Computer canister dapp development configuration",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "author": "Web3NL",
   "bugs": "https://github.com/Web3NL/my-canister-dapp/issues",
   "dependencies": {
-    "@web3nl/my-canister-dashboard": "0.7.0"
+    "@web3nl/my-canister-dashboard": "0.8.0"
   },
   "devDependencies": {
     "typedoc": "^0.28.12",

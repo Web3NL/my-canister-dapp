@@ -1,5 +1,12 @@
 # @web3nl/vite-plugin-canister-dapp
 
+## 0.3.2
+
+### Patch Changes
+
+- Updated dependencies [[`eb4fe07`](https://github.com/Web3NL/my-canister-dapp/commit/eb4fe07958bac1b15af9992dd9d9d6a84155d900)]:
+  - @web3nl/my-canister-dashboard@0.8.0
+
 ## 0.3.1
 
 ### Patch Changes

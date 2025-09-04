@@ -1,5 +1,11 @@
 # @web3nl/my-canister-dashboard
 
+## 0.8.0
+
+### Minor Changes
+
+- [#167](https://github.com/Web3NL/my-canister-dapp/pull/167) [`eb4fe07`](https://github.com/Web3NL/my-canister-dapp/commit/eb4fe07958bac1b15af9992dd9d9d6a84155d900) Thanks [@Web3NL](https://github.com/Web3NL)! - add isAuthenticated guard method to MyCanisterDashboard class
+
 ## 0.7.0
 
 ### Minor Changes
