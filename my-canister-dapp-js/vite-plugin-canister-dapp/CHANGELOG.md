@@ -1,5 +1,11 @@
 # @web3nl/vite-plugin-canister-dapp
 
+## 0.2.4
+
+### Patch Changes
+
+- [#160](https://github.com/Web3NL/my-canister-dapp/pull/160) [`bb64c98`](https://github.com/Web3NL/my-canister-dapp/commit/bb64c98ecbb448a5eff497567d74753350f15729) Thanks [@Web3NL](https://github.com/Web3NL)! - Deprecated `CanisterDashboardDevConfig` type in vite-plugin-canister-dapp, moved type to more appropriate my-canister-dashboard package
+
 ## 0.2.3
 
 ### Patch Changes

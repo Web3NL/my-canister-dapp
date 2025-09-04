@@ -3,7 +3,7 @@
   "version": "0.4.1",
   "dependencies": {
     "@dfinity/gix-components": "^8.0.0",
-    "@web3nl/my-canister-dashboard": "0.6.4"
+    "@web3nl/my-canister-dashboard": "0.7.0"
   },
   "deployedAtCommit": "e0d6e9950584a366434729bfb1aa8d5ddd6a8ebe",
   "engines": {
