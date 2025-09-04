@@ -24,6 +24,6 @@ echo "✓ Wrote $ROOT_ENV_FILE"
 
 # Reuse existing helper to generate per-app envs (kept minimal, consolidated entrypoint)
 echo "Generating per-app .env.development files..."
-bash ./scripts/create-canister-dapp-dev-env.sh my-canister-dapp-js/canister-dashboard-frontend/src
+bash ./scripts/create-canister-dapp-dev-env.sh my-canister-dapp-js/canister-dashboard-frontend
 bash ./scripts/create-canister-dapp-dev-env.sh examples/my-hello-world/src/my-hello-world-frontend
 echo "✓ Per-app .env.development files generated"

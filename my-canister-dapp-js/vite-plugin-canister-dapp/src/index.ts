@@ -1,6 +1,6 @@
 import type { Plugin, ViteDevServer } from 'vite';
 import { loadEnv } from 'vite';
-import { CanisterDashboardDevConfig as _CanisterDashboardDevConfig } from '@web3nl/my-canister-dashboard';
+import type { CanisterDashboardDevConfig as _CanisterDashboardDevConfig } from '@web3nl/my-canister-dashboard';
 
 /**
  * Configuration interface for My Canister Dashboard in development
