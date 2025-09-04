@@ -9,6 +9,7 @@ export default defineConfig(() => {
     publicDir: false as const,
     plugins: [
       canisterDashboardDevConfig({
+        root: '.',
         serverProxies: {
           canisterDashboard: false,
         }
