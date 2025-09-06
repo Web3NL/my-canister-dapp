@@ -12442,7 +12442,7 @@ async function canisterId() {
       return Principal$1.fromText(config.canisterId);
     }
     reportError(CANISTER_ID_ERROR_MESSAGE);
-    return Principal$1.anonymous();
+    throw new Error(CANISTER_ID_ERROR_MESSAGE);
   }
 }
 async function createHttpAgent() {
@@ -13203,10 +13203,13 @@ class ControllersManager {
   }
   renderControllersContent() {
     const controllersList = getElement("controllers-list");
-    const controllersListHtml = this.controllersList.map(
-      (controller) => `<li class="data-display">${controller.toString()}</li>`
-    ).join("");
-    controllersList.innerHTML = controllersListHtml;
+    controllersList.textContent = "";
+    for (const controller of this.controllersList) {
+      const li = document.createElement("li");
+      li.className = "data-display";
+      li.textContent = controller.toString();
+      controllersList.appendChild(li);
+    }
     this.attachEventListeners();
   }
   attachEventListeners() {
@@ -13345,16 +13348,25 @@ class AlternativeOriginsManager {
   }
   async initializeDisplay() {
     const origins = await this.fetchAlternativeOrigins();
-    const originsList = origins.map((origin) => `<li class="data-display">${origin}</li>`).join("");
-    this.renderAlternativeOriginsContent(originsList);
+    this.renderAlternativeOriginsContent(origins);
   }
-  renderAlternativeOriginsContent(originsList) {
-    const alternativeOriginsList = getElement("alternative-origins-list");
-    alternativeOriginsList.innerHTML = originsList;
+  renderAlternativeOriginsContent(origins) {
+    const list = getElement("alternative-origins-list");
+    list.textContent = "";
+    for (const origin of origins) {
+      const li = document.createElement("li");
+      li.className = "data-display";
+      li.textContent = origin;
+      list.appendChild(li);
+    }
   }
   async fetchAlternativeOrigins() {
     try {
       const response = await fetch("/.well-known/ii-alternative-origins");
+      if (!response.ok) {
+        reportError(NETWORK_ERROR_MESSAGE);
+        return [];
+      }
       const data = await response.json();
       return data.alternativeOrigins;
     } catch (error) {
@@ -13671,15 +13683,27 @@ class Dashboard {
   async initializeManagers(canisterIdPrincipal, iiPrincipal) {
     try {
       showLoading();
-      this.managers.topup = await TopupManager.create();
-      this.managers.topUpRule = await TopUpRuleManager.create();
-      this.managers.status = await StatusManager.create();
-      this.managers.controllers = await ControllersManager.create(
-        canisterIdPrincipal,
-        iiPrincipal
-      );
-      this.managers.alternativeOrigins = await AlternativeOriginsManager.create();
-      this.managers.canisterLogs = await CanisterLogsManager.create();
+      const [
+        topup,
+        topUpRule,
+        status,
+        controllers,
+        alternativeOrigins,
+        canisterLogs
+      ] = await Promise.all([
+        TopupManager.create(),
+        TopUpRuleManager.create(),
+        StatusManager.create(),
+        ControllersManager.create(canisterIdPrincipal, iiPrincipal),
+        AlternativeOriginsManager.create(),
+        CanisterLogsManager.create()
+      ]);
+      this.managers.topup = topup;
+      this.managers.topUpRule = topUpRule;
+      this.managers.status = status;
+      this.managers.controllers = controllers;
+      this.managers.alternativeOrigins = alternativeOrigins;
+      this.managers.canisterLogs = canisterLogs;
     } finally {
       hideLoading();
     }
