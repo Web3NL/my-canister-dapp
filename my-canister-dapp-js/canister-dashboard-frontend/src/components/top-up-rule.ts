@@ -21,9 +21,19 @@ import type {
 
 export class TopUpRuleManager {
   private api = new CanisterApi();
-  async create() {
-    await Promise.all([this.fetchAndRender(), this.renderCanisterInfo()]);
-    this.attachEventListeners();
+
+  private constructor() {
+    // Private constructor to enforce use of static create method
+  }
+
+  static async create(): Promise<TopUpRuleManager> {
+    const instance = new TopUpRuleManager();
+    await Promise.all([
+      instance.fetchAndRender(),
+      instance.renderCanisterInfo(),
+    ]);
+    instance.attachEventListeners();
+    return instance;
   }
 
   private async renderCanisterInfo(): Promise<void> {
@@ -42,8 +52,9 @@ export class TopUpRuleManager {
   async fetchAndRender() {
     try {
       this.render(await this.api.manageTopUpRule({ Get: null }));
-    } catch {
-      showError('TopUp' + NETWORK_ERROR_MESSAGE);
+    } catch (e) {
+      showError(NETWORK_ERROR_MESSAGE);
+      throw e;
     }
   }
 

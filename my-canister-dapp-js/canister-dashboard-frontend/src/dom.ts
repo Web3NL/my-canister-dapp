@@ -23,15 +23,40 @@ function toggleVisibility(id: string, show: boolean): void {
   }
 }
 
+// Keep a registry of listeners we attach so we can avoid stacking duplicates
+const listenersRegistry = new WeakMap<
+  HTMLElement,
+  Map<string, EventListener>
+>();
+
 export function addEventListener(
   id: string,
   event: string,
   handler: () => void | Promise<void>
 ): void {
   const element = getElement(id);
-  element.addEventListener(event, async (): Promise<void> => {
+
+  // Remove an existing listener for this element/event pair (if any)
+  const existingMap = listenersRegistry.get(element);
+  const existingListener = existingMap?.get(event);
+  if (existingListener) {
+    element.removeEventListener(event, existingListener);
+  }
+
+  // Wrap provided handler to unify signature and error handling
+  const wrapped: EventListener = async (): Promise<void> => {
     await handler();
-  });
+  };
+
+  element.addEventListener(event, wrapped);
+
+  // Record the new listener so it can be replaced next time
+  const map =
+    listenersRegistry.get(element) ?? new Map<string, EventListener>();
+  map.set(event, wrapped);
+  if (!listenersRegistry.has(element)) {
+    listenersRegistry.set(element, map);
+  }
 }
 
 // UI State Management Methods
@@ -61,20 +86,12 @@ export function setLoggedOutState(onLogin: () => void | Promise<void>): void {
   const authBtn = getElement('auth-btn');
 
   authBtn.textContent = 'Login';
-  authBtn.onclick = async (): Promise<void> => {
-    try {
-      await onLogin();
-    } catch {
-      showError('Login failed. Please try again.');
-    }
-  };
+  authBtn.onclick = async (): Promise<void> => await onLogin();
 
   toggleVisibility('ii-principal', false);
   toggleVisibility('ii-principal-label', false);
   setText('ii-principal', '');
   toggleVisibility('authenticated-content', false);
-  toggleVisibility('error-section', false);
-  setText('error-section', '');
   toggleVisibility('loading-overlay', false);
 }
 
@@ -115,6 +132,12 @@ export function showError(message: string): void {
 
   errorSection.appendChild(errorMessage);
   toggleVisibility('error-section', true);
+}
+
+export function clearErrors(): void {
+  const errorSection = getElement('error-section');
+  errorSection.innerHTML = '';
+  toggleVisibility('error-section', false);
 }
 
 // Form Input Helpers

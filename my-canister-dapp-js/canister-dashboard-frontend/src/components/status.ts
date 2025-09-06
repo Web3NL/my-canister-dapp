@@ -12,12 +12,17 @@ interface FormattedStatusData {
 }
 
 export class StatusManager {
-  async create(): Promise<void> {
+  private constructor() {
+    // Private constructor to enforce use of static create method
+  }
+
+  static async create(): Promise<StatusManager> {
+    const instance = new StatusManager();
     const managementApi = new ManagementApi();
     const status = await managementApi.getCanisterStatus();
 
     const { statusText, memorySizeFormatted, cyclesFormatted, moduleHashHex } =
-      this.formatStatusData(status);
+      instance.formatStatusData(status);
 
     updateStatusDisplay(
       statusText,
@@ -25,6 +30,8 @@ export class StatusManager {
       cyclesFormatted,
       moduleHashHex
     );
+
+    return instance;
   }
 
   private formatStatusData(

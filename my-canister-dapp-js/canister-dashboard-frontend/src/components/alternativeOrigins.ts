@@ -20,18 +20,24 @@ interface AlternativeOriginsResponse {
 export class AlternativeOriginsManager {
   private canisterApi: CanisterApi;
 
-  constructor() {
+  private constructor() {
     this.canisterApi = new CanisterApi();
   }
 
-  async create(): Promise<void> {
+  static async create(): Promise<AlternativeOriginsManager> {
+    const instance = new AlternativeOriginsManager();
+    await instance.initializeDisplay();
+    instance.attachEventListeners();
+    return instance;
+  }
+
+  private async initializeDisplay(): Promise<void> {
     const origins = await this.fetchAlternativeOrigins();
     const originsList = origins
       .map(origin => `<li class="data-display">${origin}</li>`)
       .join('');
 
     this.renderAlternativeOriginsContent(originsList);
-    this.attachEventListeners();
   }
 
   private renderAlternativeOriginsContent(originsList: string): void {
@@ -77,7 +83,7 @@ export class AlternativeOriginsManager {
 
     if ('Ok' in result) {
       await new Promise(resolve => setTimeout(resolve, IC_UPDATE_CALL_DELAY));
-      await this.create();
+      await this.initializeDisplay();
       clearInput('alternative-origin-input');
     } else if ('Err' in result) {
       const err = (result as { Err: string }).Err;
@@ -105,7 +111,7 @@ export class AlternativeOriginsManager {
 
     if ('Ok' in result) {
       await new Promise(resolve => setTimeout(resolve, IC_UPDATE_CALL_DELAY));
-      await this.create();
+      await this.initializeDisplay();
       clearInput('alternative-origin-input');
     } else if ('Err' in result) {
       const err = (result as { Err: string }).Err;

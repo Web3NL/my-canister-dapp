@@ -17,9 +17,15 @@ import {
 import { AuthManager } from './auth';
 
 export class TopupManager {
-  async create(): Promise<void> {
-    await this.fetchAndRenderBalance();
-    this.attachEventListeners();
+  private constructor() {
+    // Private constructor to enforce use of static create method
+  }
+
+  static async create(): Promise<TopupManager> {
+    const instance = new TopupManager();
+    await instance.fetchAndRenderBalance();
+    instance.attachEventListeners();
+    return instance;
   }
 
   private async fetchAndRenderBalance(): Promise<void> {
@@ -29,8 +35,7 @@ export class TopupManager {
 
     updateBalanceDisplay(formattedBalance);
 
-    const authManager = new AuthManager();
-    await authManager.create();
+    const authManager = await AuthManager.create();
     const principal = await authManager.getPrincipal();
     updateIcrc1AccountDisplay(principal.toText());
   }
@@ -74,8 +79,7 @@ export class TopupManager {
   }
 
   private async updateBalanceAndStatus(): Promise<void> {
-    const statusManager = new StatusManager();
-    await statusManager.create();
+    await StatusManager.create();
     await this.fetchAndRenderBalance();
   }
 

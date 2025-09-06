@@ -13,9 +13,11 @@ import { showError, NETWORK_ERROR_MESSAGE } from '../error';
 
 export class CanisterApi {
   private canisterApi!: ActorSubclass<CanisterApiService>;
+  private ready: Promise<void>;
 
   constructor() {
-    void this.create();
+    // Start async initialization immediately and store the promise
+    this.ready = this.create();
   }
 
   private async create(): Promise<void> {
@@ -32,6 +34,8 @@ export class CanisterApi {
     arg: ManageAlternativeOriginsArg
   ): Promise<ManageAlternativeOriginsResult> {
     try {
+      // Ensure the actor is initialized before making the call
+      await this.ready;
       return await this.canisterApi.manage_alternative_origins(arg);
     } catch (error) {
       showError(NETWORK_ERROR_MESSAGE);
@@ -43,6 +47,8 @@ export class CanisterApi {
     arg: ManageTopUpRuleArg
   ): Promise<ManageTopUpRuleResult> {
     try {
+      // Ensure the actor is initialized before making the call
+      await this.ready;
       return await this.canisterApi.manage_top_up_rule(arg);
     } catch (error) {
       showError(NETWORK_ERROR_MESSAGE);

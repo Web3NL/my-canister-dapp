@@ -2,9 +2,15 @@ import { ManagementApi } from '../api/management';
 import { addEventListener, getElement, showLoading, hideLoading } from '../dom';
 
 export class CanisterLogsManager {
-  async create(): Promise<void> {
-    await this.renderLogs();
-    this.attachEventListeners();
+  private constructor() {
+    // Private constructor to enforce use of static create method
+  }
+
+  static async create(): Promise<CanisterLogsManager> {
+    const instance = new CanisterLogsManager();
+    await instance.renderLogs();
+    instance.attachEventListeners();
+    return instance;
   }
 
   private attachEventListeners(): void {

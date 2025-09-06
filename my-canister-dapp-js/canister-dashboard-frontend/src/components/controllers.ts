@@ -22,17 +22,23 @@ export class ControllersManager {
   private iiPrincipal: Principal;
   private controllersList: Principal[] = [];
 
-  constructor(canisterId: Principal, iiPrincipal: Principal) {
+  private constructor(canisterId: Principal, iiPrincipal: Principal) {
     this.canisterId = canisterId;
     this.iiPrincipal = iiPrincipal;
   }
 
-  async create(): Promise<void> {
+  static async create(
+    canisterId: Principal,
+    iiPrincipal: Principal
+  ): Promise<ControllersManager> {
+    const instance = new ControllersManager(canisterId, iiPrincipal);
     const managementApi = new ManagementApi();
     const status = await managementApi.getCanisterStatus();
 
-    this.controllersList = status.settings.controllers;
-    this.renderControllersContent();
+    instance.controllersList = status.settings.controllers;
+    instance.renderControllersContent();
+    instance.attachEventListeners();
+    return instance;
   }
 
   private renderControllersContent(): void {

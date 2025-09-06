@@ -12,5 +12,7 @@ export const INVALID_ORIGIN_MESSAGE =
 export const CANISTER_ID_ERROR_MESSAGE = 'Unable to determine canister ID.';
 export const HTTP_AGENT_ERROR_MESSAGE = 'Failed to create HTTP agent.';
 export const DASHBOARD_INIT_ERROR_MESSAGE = 'Failed to initialize dashboard.';
+export const NOT_AUTHORIZED_MESSAGE =
+  'You are not authorized to access this application.';
 
 export { showError } from './dom';
