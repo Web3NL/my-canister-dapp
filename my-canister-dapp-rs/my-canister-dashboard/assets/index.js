@@ -12278,7 +12278,8 @@ const TPUP_MEMO = new Uint8Array([
 function getElement(id) {
   const element = document.getElementById(id);
   if (!element) {
-    throw new Error(`Element with id '${id}' not found`);
+    console.error(`Element with id '${id}' not found`);
+    return document.createElement("div");
   }
   return element;
 }
@@ -12303,7 +12304,12 @@ function addEventListener(id, event, handler) {
     element.removeEventListener(event, existingListener);
   }
   const wrapped = async () => {
-    await handler();
+    try {
+      await handler();
+    } catch (err) {
+      console.error(`Unhandled error in '${event}' handler for #${id}:`, err);
+      showError(GENERIC_ERROR_MESSAGE);
+    }
   };
   element.addEventListener(event, wrapped);
   const map = listenersRegistry.get(element) ?? /* @__PURE__ */ new Map();
@@ -12319,7 +12325,7 @@ function setLoggedInState(principalText, onLogout) {
     try {
       await onLogout();
     } catch {
-      showError("Logout failed. Please try again.");
+      showError(LOGOUT_FAILED_MESSAGE);
     }
   };
   toggleVisibility("ii-principal", true);
@@ -12398,16 +12404,35 @@ function getSelectValue(id) {
   return select.value;
 }
 const NETWORK_ERROR_MESSAGE = "Network error occurred. Please try again.";
+const GENERIC_ERROR_MESSAGE = "Something went wrong. Please try again.";
+const DASHBOARD_INIT_ERROR_MESSAGE = "Failed to initialize dashboard.";
 const INVALID_PRINCIPAL_MESSAGE = "Invalid principal format.";
+const INVALID_ORIGIN_MESSAGE = "URL must start with 'http://localhost:', 'http://*.localhost:', or 'https://'";
+const SELECT_THRESHOLD_AMOUNT_MESSAGE = "Please select threshold and amount.";
+const CANISTER_ID_ERROR_MESSAGE = "Unable to determine canister ID.";
+const HTTP_AGENT_ERROR_MESSAGE = "Failed to create HTTP agent.";
+const NOT_AUTHORIZED_MESSAGE = "You are not authorized to access this application.";
+const LOGOUT_FAILED_MESSAGE = "Logout failed. Please try again.";
+const AUTH_MANAGER_NOT_INITIALIZED_MESSAGE = "Auth manager not initialized";
+const USER_NOT_AUTHENTICATED_MESSAGE = "User is not authenticated";
+const FAILED_ADD_ALT_ORIGIN_MESSAGE_PREFIX = "Failed to add alternative origin";
+const UNKNOWN_ADD_ALT_ORIGIN_MESSAGE = "Unknown error adding alternative origin";
+const FAILED_REMOVE_ALT_ORIGIN_MESSAGE_PREFIX = "Failed to remove alternative origin";
+const UNKNOWN_REMOVE_ALT_ORIGIN_MESSAGE = "Unknown error removing alternative origin";
 const INSUFFICIENT_BALANCE_MESSAGE = "Insufficient balance for this operation.";
+const TOP_UP_RULE_ERROR_PREFIX = "TopUpRule Error:";
+const TOP_UP_ERROR_PREFIX = "TopUpError:";
 const DUPLICATE_CONTROLLER_MESSAGE = "Controller already exists.";
 const CONTROLLER_NOT_FOUND_MESSAGE = "Controller not found.";
 const REQUIRED_CONTROLLERS_MESSAGE = "Cannot remove required controllers.";
-const INVALID_ORIGIN_MESSAGE = "URL must start with 'http://localhost:', 'http://*.localhost:', or 'https://'";
-const CANISTER_ID_ERROR_MESSAGE = "Unable to determine canister ID.";
-const HTTP_AGENT_ERROR_MESSAGE = "Failed to create HTTP agent.";
-const DASHBOARD_INIT_ERROR_MESSAGE = "Failed to initialize dashboard.";
-const NOT_AUTHORIZED_MESSAGE = "You are not authorized to access this application.";
+function reportError(message, error) {
+  if (error) console.error(message, error);
+  else console.error(message);
+  try {
+    showError(message);
+  } catch {
+  }
+}
 async function canisterId() {
   try {
     return M$1();
@@ -12416,8 +12441,8 @@ async function canisterId() {
     if (config.canisterId !== void 0) {
       return Principal$1.fromText(config.canisterId);
     }
-    showError(CANISTER_ID_ERROR_MESSAGE);
-    throw new Error("No canister ID available");
+    reportError(CANISTER_ID_ERROR_MESSAGE);
+    return Principal$1.anonymous();
   }
 }
 async function createHttpAgent() {
@@ -12434,7 +12459,7 @@ async function createHttpAgent() {
     }
     return agent;
   } catch (error) {
-    showError(HTTP_AGENT_ERROR_MESSAGE);
+    reportError(HTTP_AGENT_ERROR_MESSAGE, error);
     throw error;
   }
 }
@@ -12515,7 +12540,7 @@ class AuthManager {
       showError(NOT_AUTHORIZED_MESSAGE);
       await (await this.ensureAuthClient()).logout();
       this.authClient = null;
-      throw new Error(NOT_AUTHORIZED_MESSAGE);
+      return;
     }
   }
   async logout() {
@@ -12535,7 +12560,8 @@ class AuthManager {
     const client = await this.ensureAuthClient();
     const isAuthed = await client.isAuthenticated();
     if (!isAuthed) {
-      throw new Error("User is not authenticated");
+      reportError(USER_NOT_AUTHENTICATED_MESSAGE);
+      return client.getIdentity().getPrincipal();
     }
     return client.getIdentity().getPrincipal();
   }
@@ -12553,7 +12579,7 @@ class ManagementApi {
       const canisterIdPrincipal = await canisterId();
       return await icManagement.canisterStatus(canisterIdPrincipal);
     } catch (error) {
-      showError(NETWORK_ERROR_MESSAGE);
+      reportError(NETWORK_ERROR_MESSAGE, error);
       throw error;
     }
   }
@@ -12568,7 +12594,7 @@ class ManagementApi {
         }
       });
     } catch (error) {
-      showError(NETWORK_ERROR_MESSAGE);
+      reportError(NETWORK_ERROR_MESSAGE, error);
       throw error;
     }
   }
@@ -12578,7 +12604,7 @@ class ManagementApi {
       const canisterIdPrincipal = await canisterId();
       return await icManagement.fetchCanisterLogs(canisterIdPrincipal);
     } catch (error) {
-      showError(NETWORK_ERROR_MESSAGE);
+      reportError(NETWORK_ERROR_MESSAGE, error);
       throw error;
     }
   }
@@ -12615,15 +12641,24 @@ class StatusManager {
   }
   static async create() {
     const instance = new StatusManager();
-    const managementApi = new ManagementApi();
-    const status = await managementApi.getCanisterStatus();
-    const { statusText, memorySizeFormatted, cyclesFormatted, moduleHashHex } = instance.formatStatusData(status);
-    updateStatusDisplay(
-      statusText,
-      memorySizeFormatted,
-      cyclesFormatted,
-      moduleHashHex
-    );
+    try {
+      const managementApi = new ManagementApi();
+      const status = await managementApi.getCanisterStatus();
+      const {
+        statusText,
+        memorySizeFormatted,
+        cyclesFormatted,
+        moduleHashHex
+      } = instance.formatStatusData(status);
+      updateStatusDisplay(
+        statusText,
+        memorySizeFormatted,
+        cyclesFormatted,
+        moduleHashHex
+      );
+    } catch (e5) {
+      reportError(NETWORK_ERROR_MESSAGE, e5);
+    }
     return instance;
   }
   formatStatusData(status) {
@@ -12959,7 +12994,7 @@ class LedgerApi {
         accountIdentifier
       });
     } catch (error) {
-      showError(NETWORK_ERROR_MESSAGE);
+      reportError(NETWORK_ERROR_MESSAGE, error);
       throw error;
     }
   }
@@ -12974,7 +13009,7 @@ class LedgerApi {
         accountIdentifier
       });
     } catch (error) {
-      showError(NETWORK_ERROR_MESSAGE);
+      reportError(NETWORK_ERROR_MESSAGE, error);
       throw error;
     }
   }
@@ -12991,7 +13026,7 @@ class LedgerApi {
         fee
       });
     } catch (error) {
-      showError(NETWORK_ERROR_MESSAGE);
+      reportError(NETWORK_ERROR_MESSAGE, error);
       throw error;
     }
   }
@@ -13060,7 +13095,7 @@ class CMCApi {
         block_index: blockIndex
       });
     } catch (error) {
-      showError(NETWORK_ERROR_MESSAGE);
+      reportError(NETWORK_ERROR_MESSAGE, error);
       throw error;
     }
   }
@@ -13093,26 +13128,36 @@ class TopupManager {
   }
   async refreshBalance() {
     showLoading();
-    await this.fetchAndRenderBalance();
-    hideLoading();
+    try {
+      await this.fetchAndRenderBalance();
+    } catch (e5) {
+      reportError(NETWORK_ERROR_MESSAGE, e5);
+    } finally {
+      hideLoading();
+    }
   }
   async performTopUp() {
     showLoading();
-    const hasEnoughBalance = await this.checkBalanceForTopUp();
-    if (!hasEnoughBalance) {
-      showError(INSUFFICIENT_BALANCE_MESSAGE);
-      return;
+    try {
+      const hasEnoughBalance = await this.checkBalanceForTopUp();
+      if (!hasEnoughBalance) {
+        showError(INSUFFICIENT_BALANCE_MESSAGE);
+        return;
+      }
+      const ledgerApi = new LedgerApi();
+      const balance = await ledgerApi.balance();
+      const transferAmount = balance - ICP_TX_FEE;
+      const blockHeight = await this.transferToCMC(transferAmount);
+      const cmcApi = new CMCApi();
+      const canisterIdPrincipal = await canisterId();
+      const canisterIdString = canisterIdPrincipal.toString();
+      await cmcApi.notifyTopUp(canisterIdString, blockHeight);
+      await this.updateBalanceAndStatus();
+    } catch (e5) {
+      reportError(NETWORK_ERROR_MESSAGE, e5);
+    } finally {
+      hideLoading();
     }
-    const ledgerApi = new LedgerApi();
-    const balance = await ledgerApi.balance();
-    const transferAmount = balance - ICP_TX_FEE;
-    const blockHeight = await this.transferToCMC(transferAmount);
-    const cmcApi = new CMCApi();
-    const canisterIdPrincipal = await canisterId();
-    const canisterIdString = canisterIdPrincipal.toString();
-    await cmcApi.notifyTopUp(canisterIdString, blockHeight);
-    await this.updateBalanceAndStatus();
-    hideLoading();
   }
   async updateBalanceAndStatus() {
     await StatusManager.create();
@@ -13193,18 +13238,21 @@ class ControllersManager {
       return;
     }
     showLoading();
-    const managementApi = new ManagementApi();
-    await managementApi.updateControllers(updatedControllers);
-    this.controllersList = updatedControllers;
-    clearInput("controller-input");
-    this.renderControllersContent();
-    hideLoading();
+    try {
+      const managementApi = new ManagementApi();
+      await managementApi.updateControllers(updatedControllers);
+      this.controllersList = updatedControllers;
+      clearInput("controller-input");
+      this.renderControllersContent();
+    } catch (e5) {
+      reportError(NETWORK_ERROR_MESSAGE, e5);
+    } finally {
+      hideLoading();
+    }
   }
   async handleRemove() {
     const principalText = getInputValue("controller-input");
-    if (!principalText) {
-      throw new Error("Principal input is required");
-    }
+    if (!principalText) return;
     if (!isValidPrincipal(principalText)) {
       showError(INVALID_PRINCIPAL_MESSAGE);
       clearInput("controller-input");
@@ -13228,12 +13276,17 @@ class ControllersManager {
       return;
     }
     showLoading();
-    const managementApi = new ManagementApi();
-    await managementApi.updateControllers(updatedControllers);
-    this.controllersList = updatedControllers;
-    clearInput("controller-input");
-    this.renderControllersContent();
-    hideLoading();
+    try {
+      const managementApi = new ManagementApi();
+      await managementApi.updateControllers(updatedControllers);
+      this.controllersList = updatedControllers;
+      clearInput("controller-input");
+      this.renderControllersContent();
+    } catch (e5) {
+      reportError(NETWORK_ERROR_MESSAGE, e5);
+    } finally {
+      hideLoading();
+    }
   }
   hasRequiredPrincipals(controllers) {
     const hasCanisterId = controllers.some(
@@ -13264,7 +13317,7 @@ class CanisterApi {
       await this.ready;
       return await this.canisterApi.manage_alternative_origins(arg);
     } catch (error) {
-      showError(NETWORK_ERROR_MESSAGE);
+      reportError(NETWORK_ERROR_MESSAGE, error);
       throw error;
     }
   }
@@ -13273,7 +13326,7 @@ class CanisterApi {
       await this.ready;
       return await this.canisterApi.manage_top_up_rule(arg);
     } catch (error) {
-      showError(NETWORK_ERROR_MESSAGE);
+      reportError(NETWORK_ERROR_MESSAGE, error);
       throw error;
     }
   }
@@ -13305,8 +13358,8 @@ class AlternativeOriginsManager {
       const data = await response.json();
       return data.alternativeOrigins;
     } catch (error) {
-      showError(NETWORK_ERROR_MESSAGE);
-      throw error;
+      reportError(NETWORK_ERROR_MESSAGE, error);
+      return [];
     }
   }
   attachEventListeners() {
@@ -13319,54 +13372,58 @@ class AlternativeOriginsManager {
   }
   async handleAdd() {
     const origin = getInputValue("alternative-origin-input");
-    if (!origin) {
-      throw new Error("Origin input is required");
-    }
+    if (!origin) return;
     if (!isValidOrigin(origin)) {
       showError(INVALID_ORIGIN_MESSAGE);
       clearInput("alternative-origin-input");
       return;
     }
     showLoading();
-    const result = await this.canisterApi.manageAlternativeOrigins({
-      Add: origin
-    });
-    if ("Ok" in result) {
-      await new Promise((resolve) => setTimeout(resolve, IC_UPDATE_CALL_DELAY));
-      await this.initializeDisplay();
-      clearInput("alternative-origin-input");
-    } else if ("Err" in result) {
-      const err = result.Err;
-      showError(NETWORK_ERROR_MESSAGE);
-      throw new Error(`Failed to add alternative origin: ${err}`);
-    } else {
-      showError("Unknown error");
-      throw new Error("Unknown error adding alternative origin");
+    try {
+      const result = await this.canisterApi.manageAlternativeOrigins({
+        Add: origin
+      });
+      if ("Ok" in result) {
+        await new Promise((resolve) => setTimeout(resolve, IC_UPDATE_CALL_DELAY));
+        await this.initializeDisplay();
+        clearInput("alternative-origin-input");
+      } else if ("Err" in result) {
+        const err = result.Err;
+        reportError(NETWORK_ERROR_MESSAGE + ` (${err})`);
+      } else {
+        reportError("Unknown error adding alternative origin");
+        reportError(UNKNOWN_ADD_ALT_ORIGIN_MESSAGE);
+      }
+    } catch (e5) {
+      reportError(FAILED_ADD_ALT_ORIGIN_MESSAGE_PREFIX, e5);
+    } finally {
+      hideLoading();
     }
-    hideLoading();
   }
   async handleRemove() {
     const origin = getInputValue("alternative-origin-input");
-    if (!origin) {
-      throw new Error("Origin input is required");
-    }
+    if (!origin) return;
     showLoading();
-    const result = await this.canisterApi.manageAlternativeOrigins({
-      Remove: origin
-    });
-    if ("Ok" in result) {
-      await new Promise((resolve) => setTimeout(resolve, IC_UPDATE_CALL_DELAY));
-      await this.initializeDisplay();
-      clearInput("alternative-origin-input");
-    } else if ("Err" in result) {
-      const err = result.Err;
-      showError(NETWORK_ERROR_MESSAGE);
-      throw new Error(`Failed to remove alternative origin: ${err}`);
-    } else {
-      showError("Unknown error");
-      throw new Error("Unknown error removing alternative origin");
+    try {
+      const result = await this.canisterApi.manageAlternativeOrigins({
+        Remove: origin
+      });
+      if ("Ok" in result) {
+        await new Promise((resolve) => setTimeout(resolve, IC_UPDATE_CALL_DELAY));
+        await this.initializeDisplay();
+        clearInput("alternative-origin-input");
+      } else if ("Err" in result) {
+        const err = result.Err;
+        reportError(NETWORK_ERROR_MESSAGE + ` (${err})`);
+      } else {
+        reportError("Unknown error removing alternative origin");
+        reportError(UNKNOWN_REMOVE_ALT_ORIGIN_MESSAGE);
+      }
+    } catch (e5) {
+      reportError(FAILED_REMOVE_ALT_ORIGIN_MESSAGE_PREFIX, e5);
+    } finally {
+      hideLoading();
     }
-    hideLoading();
   }
 }
 class CanisterLogsManager {
@@ -13387,24 +13444,28 @@ class CanisterLogsManager {
     hideLoading();
   }
   async renderLogs() {
-    const managementApi = new ManagementApi();
-    const { canister_log_records } = await managementApi.getCanisterLogs();
-    const logsList = getElement("logs-list");
-    if (canister_log_records.length === 0) {
-      logsList.innerHTML = '<li class="data-display">No logs found.</li>';
-      return;
+    try {
+      const managementApi = new ManagementApi();
+      const { canister_log_records } = await managementApi.getCanisterLogs();
+      const logsList = getElement("logs-list");
+      if (canister_log_records.length === 0) {
+        logsList.innerHTML = '<li class="data-display">No logs found.</li>';
+        return;
+      }
+      const items = canister_log_records.reverse().map((record) => {
+        const contentBytes = record.content instanceof Uint8Array ? record.content : Uint8Array.from(record.content);
+        const rawMessage = new TextDecoder().decode(contentBytes);
+        const timestampMs = Number(record.timestamp_nanos / 1000000n);
+        const date = new Date(timestampMs);
+        const ts = isNaN(date.getTime()) ? "Unknown time" : formatSimpleDateTime(date);
+        const idx = record.idx.toString();
+        const message = escapeHtml(rawMessage).replace(/\r\n|\n|\r/g, "<br>");
+        return `<li class="data-display">[${ts}] (#${idx})<br>${message}</li>`;
+      }).join("");
+      logsList.innerHTML = items;
+    } catch (e5) {
+      reportError(NETWORK_ERROR_MESSAGE, e5);
     }
-    const items = canister_log_records.reverse().map((record) => {
-      const contentBytes = record.content instanceof Uint8Array ? record.content : Uint8Array.from(record.content);
-      const rawMessage = new TextDecoder().decode(contentBytes);
-      const timestampMs = Number(record.timestamp_nanos / 1000000n);
-      const date = new Date(timestampMs);
-      const ts = isNaN(date.getTime()) ? "Unknown time" : formatSimpleDateTime(date);
-      const idx = record.idx.toString();
-      const message = escapeHtml(rawMessage).replace(/\r\n|\n|\r/g, "<br>");
-      return `<li class="data-display">[${ts}] (#${idx})<br>${message}</li>`;
-    }).join("");
-    logsList.innerHTML = items;
   }
 }
 function pad2(n2) {
@@ -13450,12 +13511,12 @@ class TopUpRuleManager {
     try {
       this.render(await this.api.manageTopUpRule({ Get: null }));
     } catch (e5) {
-      showError(NETWORK_ERROR_MESSAGE);
-      throw e5;
+      reportError(NETWORK_ERROR_MESSAGE, e5);
     }
   }
   render(result) {
-    if ("Err" in result) return showError("TopUpRule Error: " + result.Err);
+    if ("Err" in result)
+      return showError(TOP_UP_RULE_ERROR_PREFIX + " " + result.Err);
     if ("Ok" in result) {
       const rule = result.Ok[0];
       updateTopUpRuleDisplay(rule ? formatRule(rule) : null);
@@ -13466,7 +13527,7 @@ class TopUpRuleManager {
     const thresholdValue = getSelectValue("top-up-rule-threshold");
     const amountValue = getSelectValue("top-up-rule-amount");
     if (!thresholdValue || !amountValue)
-      return showError("Please select threshold and amount.");
+      return showError(SELECT_THRESHOLD_AMOUNT_MESSAGE);
     showLoading();
     try {
       const res = await this.api.manageTopUpRule({
@@ -13478,8 +13539,8 @@ class TopUpRuleManager {
       });
       if ("Err" in res) return showError(res.Err);
       await this.fetchAndRender();
-    } catch {
-      showError("TopUpError: " + NETWORK_ERROR_MESSAGE);
+    } catch (e5) {
+      reportError(TOP_UP_ERROR_PREFIX + " " + NETWORK_ERROR_MESSAGE, e5);
     } finally {
       hideLoading();
     }
@@ -13488,10 +13549,11 @@ class TopUpRuleManager {
     showLoading();
     try {
       const res = await this.api.manageTopUpRule({ Clear: null });
-      if ("Err" in res) return showError("TopUpRule Error: " + res.Err);
+      if ("Err" in res)
+        return showError(TOP_UP_RULE_ERROR_PREFIX + " " + res.Err);
       await this.fetchAndRender();
-    } catch {
-      showError("TopUpError: " + NETWORK_ERROR_MESSAGE);
+    } catch (e5) {
+      reportError(TOP_UP_ERROR_PREFIX + " " + NETWORK_ERROR_MESSAGE, e5);
     } finally {
       hideLoading();
     }
@@ -13560,9 +13622,8 @@ class Dashboard {
     }
   }
   async checkAuthenticationState() {
-    if (!this.authManager) {
-      throw new Error("Auth manager not initialized");
-    }
+    if (!this.authManager)
+      return reportError(AUTH_MANAGER_NOT_INITIALIZED_MESSAGE);
     try {
       const isAuthed = await this.authManager.isAuthenticated();
       if (isAuthed) {
@@ -13576,9 +13637,8 @@ class Dashboard {
     }
   }
   async transitionToLoggedIn() {
-    if (!this.authManager) {
-      throw new Error("Auth manager not initialized");
-    }
+    if (!this.authManager)
+      return reportError(AUTH_MANAGER_NOT_INITIALIZED_MESSAGE);
     try {
       this.setState(
         "logged-in"
@@ -13592,7 +13652,6 @@ class Dashboard {
     } catch (error) {
       console.error("Failed to transition to logged in state:", error);
       this.transitionToLoggedOut();
-      throw error;
     }
   }
   transitionToLoggedOut() {
@@ -13634,9 +13693,8 @@ class Dashboard {
     this.managers.canisterLogs = null;
   }
   async handleLogin() {
-    if (!this.authManager) {
-      throw new Error("Auth manager not initialized");
-    }
+    if (!this.authManager)
+      return reportError(AUTH_MANAGER_NOT_INITIALIZED_MESSAGE);
     if (this.currentState === "logging-in") {
       return;
     }
@@ -13649,7 +13707,11 @@ class Dashboard {
       showLoading();
       clearErrors();
       await this.authManager.login();
-      await this.transitionToLoggedIn();
+      if (await this.authManager.isAuthenticated()) {
+        await this.transitionToLoggedIn();
+      } else {
+        this.transitionToLoggedOut();
+      }
     } catch (error) {
       console.error("Login failed:", error);
       this.setState(
@@ -13662,9 +13724,8 @@ class Dashboard {
     }
   }
   async handleLogout() {
-    if (!this.authManager) {
-      throw new Error("Auth manager not initialized");
-    }
+    if (!this.authManager)
+      return reportError(AUTH_MANAGER_NOT_INITIALIZED_MESSAGE);
     try {
       showLoading();
       clearErrors();
@@ -13672,7 +13733,7 @@ class Dashboard {
       this.transitionToLoggedOut();
     } catch (error) {
       console.error("Logout failed:", error);
-      showError("Logout failed. Please try again.");
+      showError(LOGOUT_FAILED_MESSAGE);
     } finally {
       hideLoading();
     }
