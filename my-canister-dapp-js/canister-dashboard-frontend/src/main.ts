@@ -5,7 +5,12 @@ import { ControllersManager } from './components/controllers';
 import { AlternativeOriginsManager } from './components/alternativeOrigins';
 import { CanisterLogsManager } from './components/canisterLogs';
 import { canisterId } from './utils';
-import { DASHBOARD_INIT_ERROR_MESSAGE } from './error';
+import {
+  DASHBOARD_INIT_ERROR_MESSAGE,
+  reportError,
+  LOGOUT_FAILED_MESSAGE,
+  AUTH_MANAGER_NOT_INITIALIZED_MESSAGE,
+} from './error';
 import {
   setLoggedInState,
   setLoggedOutState,
@@ -64,9 +69,8 @@ class Dashboard {
   }
 
   private async checkAuthenticationState(): Promise<void> {
-    if (!this.authManager) {
-      throw new Error('Auth manager not initialized');
-    }
+    if (!this.authManager)
+      return reportError(AUTH_MANAGER_NOT_INITIALIZED_MESSAGE);
 
     try {
       const isAuthed = await this.authManager.isAuthenticated();
@@ -83,9 +87,8 @@ class Dashboard {
   }
 
   private async transitionToLoggedIn(): Promise<void> {
-    if (!this.authManager) {
-      throw new Error('Auth manager not initialized');
-    }
+    if (!this.authManager)
+      return reportError(AUTH_MANAGER_NOT_INITIALIZED_MESSAGE);
 
     try {
       this.setState(DashboardState.LOGGED_IN);
@@ -101,7 +104,6 @@ class Dashboard {
     } catch (error) {
       console.error('Failed to transition to logged in state:', error);
       this.transitionToLoggedOut();
-      throw error;
     }
   }
 
@@ -151,9 +153,8 @@ class Dashboard {
   }
 
   private async handleLogin(): Promise<void> {
-    if (!this.authManager) {
-      throw new Error('Auth manager not initialized');
-    }
+    if (!this.authManager)
+      return reportError(AUTH_MANAGER_NOT_INITIALIZED_MESSAGE);
 
     // Prevent multiple simultaneous login attempts
     if (this.currentState === DashboardState.LOGGING_IN) {
@@ -172,7 +173,12 @@ class Dashboard {
       clearErrors();
 
       await this.authManager.login();
-      await this.transitionToLoggedIn();
+      // Only proceed if we're actually authenticated and authorized
+      if (await this.authManager.isAuthenticated()) {
+        await this.transitionToLoggedIn();
+      } else {
+        this.transitionToLoggedOut();
+      }
     } catch (error) {
       console.error('Login failed:', error);
       this.setState(DashboardState.ERROR);
@@ -185,9 +191,8 @@ class Dashboard {
   }
 
   private async handleLogout(): Promise<void> {
-    if (!this.authManager) {
-      throw new Error('Auth manager not initialized');
-    }
+    if (!this.authManager)
+      return reportError(AUTH_MANAGER_NOT_INITIALIZED_MESSAGE);
 
     try {
       showLoading();
@@ -197,7 +202,7 @@ class Dashboard {
       this.transitionToLoggedOut();
     } catch (error) {
       console.error('Logout failed:', error);
-      showError('Logout failed. Please try again.');
+      showError(LOGOUT_FAILED_MESSAGE);
     } finally {
       hideLoading();
     }

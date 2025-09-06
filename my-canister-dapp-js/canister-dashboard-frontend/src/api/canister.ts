@@ -9,7 +9,7 @@ import {
 } from '@web3nl/my-canister-dashboard';
 
 import { createHttpAgent, canisterId } from '../utils';
-import { showError, NETWORK_ERROR_MESSAGE } from '../error';
+import { reportError, NETWORK_ERROR_MESSAGE } from '../error';
 
 export class CanisterApi {
   private canisterApi!: ActorSubclass<CanisterApiService>;
@@ -38,7 +38,7 @@ export class CanisterApi {
       await this.ready;
       return await this.canisterApi.manage_alternative_origins(arg);
     } catch (error) {
-      showError(NETWORK_ERROR_MESSAGE);
+      reportError(NETWORK_ERROR_MESSAGE, error);
       throw error;
     }
   }
@@ -51,7 +51,7 @@ export class CanisterApi {
       await this.ready;
       return await this.canisterApi.manage_top_up_rule(arg);
     } catch (error) {
-      showError(NETWORK_ERROR_MESSAGE);
+      reportError(NETWORK_ERROR_MESSAGE, error);
       throw error;
     }
   }

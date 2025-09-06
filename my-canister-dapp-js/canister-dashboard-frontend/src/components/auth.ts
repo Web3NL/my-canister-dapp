@@ -4,7 +4,12 @@ import { MyCanisterDashboard } from '@web3nl/my-canister-dashboard';
 import { getConfig } from '../environment';
 import { MAX_TIME_TO_LIVE } from '../constants';
 import { createHttpAgent, canisterId } from '../utils';
-import { showError, NOT_AUTHORIZED_MESSAGE } from '../error';
+import {
+  showError,
+  NOT_AUTHORIZED_MESSAGE,
+  reportError,
+  USER_NOT_AUTHENTICATED_MESSAGE,
+} from '../error';
 
 export class AuthManager {
   private authClient: AuthClient | null = null;
@@ -85,7 +90,7 @@ export class AuthManager {
       // Logout to clear II local storage so the next click restarts the flow
       await (await this.ensureAuthClient()).logout();
       this.authClient = null;
-      throw new Error(NOT_AUTHORIZED_MESSAGE);
+      return;
     }
   }
 
@@ -114,7 +119,9 @@ export class AuthManager {
     const client = await this.ensureAuthClient();
     const isAuthed = await client.isAuthenticated();
     if (!isAuthed) {
-      throw new Error('User is not authenticated');
+      reportError(USER_NOT_AUTHENTICATED_MESSAGE);
+      // Fallback: return the anonymous principal shape by asking identity
+      return client.getIdentity().getPrincipal();
     }
 
     return client.getIdentity().getPrincipal();

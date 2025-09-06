@@ -1,7 +1,7 @@
 import { LedgerCanister, AccountIdentifier } from '@dfinity/ledger-icp';
 import type { Principal } from '@dfinity/principal';
 import { createHttpAgent, canisterId } from '../utils';
-import { showError, NETWORK_ERROR_MESSAGE } from '../error';
+import { reportError, NETWORK_ERROR_MESSAGE } from '../error';
 
 export class LedgerApi {
   private async ledgerApi(): Promise<LedgerCanister> {
@@ -23,7 +23,7 @@ export class LedgerApi {
         accountIdentifier,
       });
     } catch (error) {
-      showError(NETWORK_ERROR_MESSAGE);
+      reportError(NETWORK_ERROR_MESSAGE, error);
       throw error;
     }
   }
@@ -39,7 +39,7 @@ export class LedgerApi {
         accountIdentifier,
       });
     } catch (error) {
-      showError(NETWORK_ERROR_MESSAGE);
+      reportError(NETWORK_ERROR_MESSAGE, error);
       throw error;
     }
   }
@@ -64,7 +64,7 @@ export class LedgerApi {
         fee: fee,
       });
     } catch (error) {
-      showError(NETWORK_ERROR_MESSAGE);
+      reportError(NETWORK_ERROR_MESSAGE, error);
       throw error;
     }
   }

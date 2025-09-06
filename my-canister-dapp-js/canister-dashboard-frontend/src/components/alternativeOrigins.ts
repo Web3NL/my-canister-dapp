@@ -1,5 +1,13 @@
 import { CanisterApi } from '../api/canister';
-import { INVALID_ORIGIN_MESSAGE, NETWORK_ERROR_MESSAGE } from '../error';
+import {
+  INVALID_ORIGIN_MESSAGE,
+  NETWORK_ERROR_MESSAGE,
+  reportError,
+  FAILED_ADD_ALT_ORIGIN_MESSAGE_PREFIX,
+  UNKNOWN_ADD_ALT_ORIGIN_MESSAGE,
+  FAILED_REMOVE_ALT_ORIGIN_MESSAGE_PREFIX,
+  UNKNOWN_REMOVE_ALT_ORIGIN_MESSAGE,
+} from '../error';
 import { isValidOrigin } from '../utils';
 import {
   getElement,
@@ -51,8 +59,8 @@ export class AlternativeOriginsManager {
       const data = (await response.json()) as AlternativeOriginsResponse;
       return data.alternativeOrigins;
     } catch (error) {
-      showError(NETWORK_ERROR_MESSAGE);
-      throw error;
+      reportError(NETWORK_ERROR_MESSAGE, error);
+      return [];
     }
   }
 
@@ -65,9 +73,7 @@ export class AlternativeOriginsManager {
 
   private async handleAdd(): Promise<void> {
     const origin = getInputValue('alternative-origin-input');
-    if (!origin) {
-      throw new Error('Origin input is required');
-    }
+    if (!origin) return;
 
     if (!isValidOrigin(origin)) {
       showError(INVALID_ORIGIN_MESSAGE);
@@ -77,51 +83,53 @@ export class AlternativeOriginsManager {
 
     showLoading();
 
-    const result = await this.canisterApi.manageAlternativeOrigins({
-      Add: origin,
-    });
-
-    if ('Ok' in result) {
-      await new Promise(resolve => setTimeout(resolve, IC_UPDATE_CALL_DELAY));
-      await this.initializeDisplay();
-      clearInput('alternative-origin-input');
-    } else if ('Err' in result) {
-      const err = (result as { Err: string }).Err;
-      showError(NETWORK_ERROR_MESSAGE);
-      throw new Error(`Failed to add alternative origin: ${err}`);
-    } else {
-      showError('Unknown error');
-      throw new Error('Unknown error adding alternative origin');
+    try {
+      const result = await this.canisterApi.manageAlternativeOrigins({
+        Add: origin,
+      });
+      if ('Ok' in result) {
+        await new Promise(resolve => setTimeout(resolve, IC_UPDATE_CALL_DELAY));
+        await this.initializeDisplay();
+        clearInput('alternative-origin-input');
+      } else if ('Err' in result) {
+        const err = (result as { Err: string }).Err;
+        reportError(NETWORK_ERROR_MESSAGE + ` (${err})`);
+      } else {
+        reportError('Unknown error adding alternative origin');
+        reportError(UNKNOWN_ADD_ALT_ORIGIN_MESSAGE);
+      }
+    } catch (e) {
+      reportError(FAILED_ADD_ALT_ORIGIN_MESSAGE_PREFIX, e);
+    } finally {
+      hideLoading();
     }
-
-    hideLoading();
   }
 
   private async handleRemove(): Promise<void> {
     const origin = getInputValue('alternative-origin-input');
-    if (!origin) {
-      throw new Error('Origin input is required');
-    }
+    if (!origin) return;
 
     showLoading();
 
-    const result = await this.canisterApi.manageAlternativeOrigins({
-      Remove: origin,
-    });
-
-    if ('Ok' in result) {
-      await new Promise(resolve => setTimeout(resolve, IC_UPDATE_CALL_DELAY));
-      await this.initializeDisplay();
-      clearInput('alternative-origin-input');
-    } else if ('Err' in result) {
-      const err = (result as { Err: string }).Err;
-      showError(NETWORK_ERROR_MESSAGE);
-      throw new Error(`Failed to remove alternative origin: ${err}`);
-    } else {
-      showError('Unknown error');
-      throw new Error('Unknown error removing alternative origin');
+    try {
+      const result = await this.canisterApi.manageAlternativeOrigins({
+        Remove: origin,
+      });
+      if ('Ok' in result) {
+        await new Promise(resolve => setTimeout(resolve, IC_UPDATE_CALL_DELAY));
+        await this.initializeDisplay();
+        clearInput('alternative-origin-input');
+      } else if ('Err' in result) {
+        const err = (result as { Err: string }).Err;
+        reportError(NETWORK_ERROR_MESSAGE + ` (${err})`);
+      } else {
+        reportError('Unknown error removing alternative origin');
+        reportError(UNKNOWN_REMOVE_ALT_ORIGIN_MESSAGE);
+      }
+    } catch (e) {
+      reportError(FAILED_REMOVE_ALT_ORIGIN_MESSAGE_PREFIX, e);
+    } finally {
+      hideLoading();
     }
-
-    hideLoading();
   }
 }

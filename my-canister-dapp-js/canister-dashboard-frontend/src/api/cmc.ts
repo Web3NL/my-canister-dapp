@@ -2,7 +2,7 @@ import { CMCCanister } from '@dfinity/cmc';
 import { Principal } from '@dfinity/principal';
 import { createHttpAgent } from '../utils';
 import { CMC_CANISTER_ID } from '../constants';
-import { showError, NETWORK_ERROR_MESSAGE } from '../error';
+import { reportError, NETWORK_ERROR_MESSAGE } from '../error';
 
 export class CMCApi {
   private async cmcApi(): Promise<CMCCanister> {
@@ -21,7 +21,7 @@ export class CMCApi {
         block_index: blockIndex,
       });
     } catch (error) {
-      showError(NETWORK_ERROR_MESSAGE);
+      reportError(NETWORK_ERROR_MESSAGE, error);
       throw error;
     }
   }

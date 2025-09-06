@@ -11,7 +11,13 @@ import {
   updateTopUpRuleDisplay,
   getSelectValue,
 } from '../dom';
-import { NETWORK_ERROR_MESSAGE } from '../error';
+import {
+  NETWORK_ERROR_MESSAGE,
+  reportError,
+  TOP_UP_RULE_ERROR_PREFIX,
+  TOP_UP_ERROR_PREFIX,
+  SELECT_THRESHOLD_AMOUNT_MESSAGE,
+} from '../error';
 import type {
   ManageTopUpRuleResult,
   TopUpRule,
@@ -53,13 +59,13 @@ export class TopUpRuleManager {
     try {
       this.render(await this.api.manageTopUpRule({ Get: null }));
     } catch (e) {
-      showError(NETWORK_ERROR_MESSAGE);
-      throw e;
+      reportError(NETWORK_ERROR_MESSAGE, e);
     }
   }
 
   render(result: ManageTopUpRuleResult) {
-    if ('Err' in result) return showError('TopUpRule Error: ' + result.Err);
+    if ('Err' in result)
+      return showError(TOP_UP_RULE_ERROR_PREFIX + ' ' + result.Err);
     if ('Ok' in result) {
       const rule = result.Ok[0];
       updateTopUpRuleDisplay(rule ? formatRule(rule) : null);
@@ -72,7 +78,7 @@ export class TopUpRuleManager {
     const amountValue = getSelectValue('top-up-rule-amount');
 
     if (!thresholdValue || !amountValue)
-      return showError('Please select threshold and amount.');
+      return showError(SELECT_THRESHOLD_AMOUNT_MESSAGE);
 
     showLoading();
     try {
@@ -85,8 +91,8 @@ export class TopUpRuleManager {
       });
       if ('Err' in res) return showError(res.Err);
       await this.fetchAndRender();
-    } catch {
-      showError('TopUpError: ' + NETWORK_ERROR_MESSAGE);
+    } catch (e) {
+      reportError(TOP_UP_ERROR_PREFIX + ' ' + NETWORK_ERROR_MESSAGE, e);
     } finally {
       hideLoading();
     }
@@ -96,10 +102,11 @@ export class TopUpRuleManager {
     showLoading();
     try {
       const res = await this.api.manageTopUpRule({ Clear: null });
-      if ('Err' in res) return showError('TopUpRule Error: ' + res.Err);
+      if ('Err' in res)
+        return showError(TOP_UP_RULE_ERROR_PREFIX + ' ' + res.Err);
       await this.fetchAndRender();
-    } catch {
-      showError('TopUpError: ' + NETWORK_ERROR_MESSAGE);
+    } catch (e) {
+      reportError(TOP_UP_ERROR_PREFIX + ' ' + NETWORK_ERROR_MESSAGE, e);
     } finally {
       hideLoading();
     }

@@ -1,10 +1,13 @@
 // DOM Abstraction Layer with UI Logic
+import { GENERIC_ERROR_MESSAGE, LOGOUT_FAILED_MESSAGE } from './error';
 
 // DOM Utility Functions
+// Never throw on missing elements; log and return a detached placeholder so UI keeps working.
 export function getElement<T extends HTMLElement = HTMLElement>(id: string): T {
   const element = document.getElementById(id) as T | null;
   if (!element) {
-    throw new Error(`Element with id '${id}' not found`);
+    console.error(`Element with id '${id}' not found`);
+    return document.createElement('div') as unknown as T;
   }
   return element;
 }
@@ -45,7 +48,13 @@ export function addEventListener(
 
   // Wrap provided handler to unify signature and error handling
   const wrapped: EventListener = async (): Promise<void> => {
-    await handler();
+    try {
+      await handler();
+    } catch (err) {
+      console.error(`Unhandled error in '${event}' handler for #${id}:`, err);
+      // Defer user-friendly messaging to callers where possible
+      showError(GENERIC_ERROR_MESSAGE);
+    }
   };
 
   element.addEventListener(event, wrapped);
@@ -72,7 +81,7 @@ export function setLoggedInState(
     try {
       await onLogout();
     } catch {
-      showError('Logout failed. Please try again.');
+      showError(LOGOUT_FAILED_MESSAGE);
     }
   };
 

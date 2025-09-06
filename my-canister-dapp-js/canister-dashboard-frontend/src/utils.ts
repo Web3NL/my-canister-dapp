@@ -4,7 +4,7 @@ import { getConfig, isDevMode } from './environment';
 import { AuthClient } from '@dfinity/auth-client';
 import { inferCanisterIdFromLocation } from '@web3nl/my-canister-dashboard';
 import {
-  showError,
+  reportError,
   CANISTER_ID_ERROR_MESSAGE,
   HTTP_AGENT_ERROR_MESSAGE,
 } from './error';
@@ -19,8 +19,9 @@ export async function canisterId(): Promise<Principal> {
       return Principal.fromText(config.canisterId);
     }
 
-    showError(CANISTER_ID_ERROR_MESSAGE);
-    throw new Error('No canister ID available');
+    reportError(CANISTER_ID_ERROR_MESSAGE);
+    // Return anonymous principal as a safe fallback; callers must handle failures gracefully
+    return Principal.anonymous();
   }
 }
 
@@ -42,7 +43,7 @@ export async function createHttpAgent(): Promise<HttpAgent> {
 
     return agent;
   } catch (error) {
-    showError(HTTP_AGENT_ERROR_MESSAGE);
+    reportError(HTTP_AGENT_ERROR_MESSAGE, error);
     throw error;
   }
 }

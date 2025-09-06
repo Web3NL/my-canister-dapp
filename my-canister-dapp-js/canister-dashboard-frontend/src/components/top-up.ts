@@ -5,7 +5,11 @@ import { ICP_TX_FEE, TPUP_MEMO, CMC_CANISTER_ID } from '../constants';
 import { canisterId } from '../utils';
 import { StatusManager } from './status';
 import { Principal } from '@dfinity/principal';
-import { INSUFFICIENT_BALANCE_MESSAGE } from '../error';
+import {
+  INSUFFICIENT_BALANCE_MESSAGE,
+  NETWORK_ERROR_MESSAGE,
+  reportError,
+} from '../error';
 import {
   updateBalanceDisplay,
   showLoading,
@@ -49,33 +53,41 @@ export class TopupManager {
 
   private async refreshBalance(): Promise<void> {
     showLoading();
-    await this.fetchAndRenderBalance();
-    hideLoading();
+    try {
+      await this.fetchAndRenderBalance();
+    } catch (e) {
+      reportError(NETWORK_ERROR_MESSAGE, e);
+    } finally {
+      hideLoading();
+    }
   }
 
   private async performTopUp(): Promise<void> {
     showLoading();
+    try {
+      const hasEnoughBalance = await this.checkBalanceForTopUp();
+      if (!hasEnoughBalance) {
+        showError(INSUFFICIENT_BALANCE_MESSAGE);
+        return;
+      }
 
-    const hasEnoughBalance = await this.checkBalanceForTopUp();
-    if (!hasEnoughBalance) {
-      showError(INSUFFICIENT_BALANCE_MESSAGE);
-      return;
+      const ledgerApi = new LedgerApi();
+      const balance = await ledgerApi.balance();
+      const transferAmount = balance - ICP_TX_FEE;
+
+      const blockHeight = await this.transferToCMC(transferAmount);
+
+      const cmcApi = new CMCApi();
+      const canisterIdPrincipal = await canisterId();
+      const canisterIdString = canisterIdPrincipal.toString();
+      await cmcApi.notifyTopUp(canisterIdString, blockHeight);
+
+      await this.updateBalanceAndStatus();
+    } catch (e) {
+      reportError(NETWORK_ERROR_MESSAGE, e);
+    } finally {
+      hideLoading();
     }
-
-    const ledgerApi = new LedgerApi();
-    const balance = await ledgerApi.balance();
-    const transferAmount = balance - ICP_TX_FEE;
-
-    const blockHeight = await this.transferToCMC(transferAmount);
-
-    const cmcApi = new CMCApi();
-    const canisterIdPrincipal = await canisterId();
-    const canisterIdString = canisterIdPrincipal.toString();
-    await cmcApi.notifyTopUp(canisterIdString, blockHeight);
-
-    await this.updateBalanceAndStatus();
-
-    hideLoading();
   }
 
   private async updateBalanceAndStatus(): Promise<void> {

@@ -5,6 +5,8 @@ import {
   DUPLICATE_CONTROLLER_MESSAGE,
   CONTROLLER_NOT_FOUND_MESSAGE,
   REQUIRED_CONTROLLERS_MESSAGE,
+  NETWORK_ERROR_MESSAGE,
+  reportError,
 } from '../error';
 import { isValidPrincipal } from '../utils';
 import {
@@ -94,21 +96,23 @@ export class ControllersManager {
 
     showLoading();
 
-    const managementApi = new ManagementApi();
-    await managementApi.updateControllers(updatedControllers);
+    try {
+      const managementApi = new ManagementApi();
+      await managementApi.updateControllers(updatedControllers);
 
-    this.controllersList = updatedControllers;
-    clearInput('controller-input');
-    this.renderControllersContent();
-
-    hideLoading();
+      this.controllersList = updatedControllers;
+      clearInput('controller-input');
+      this.renderControllersContent();
+    } catch (e) {
+      reportError(NETWORK_ERROR_MESSAGE, e);
+    } finally {
+      hideLoading();
+    }
   }
 
   private async handleRemove(): Promise<void> {
     const principalText = getInputValue('controller-input');
-    if (!principalText) {
-      throw new Error('Principal input is required');
-    }
+    if (!principalText) return;
 
     if (!isValidPrincipal(principalText)) {
       showError(INVALID_PRINCIPAL_MESSAGE);
@@ -140,14 +144,18 @@ export class ControllersManager {
 
     showLoading();
 
-    const managementApi = new ManagementApi();
-    await managementApi.updateControllers(updatedControllers);
+    try {
+      const managementApi = new ManagementApi();
+      await managementApi.updateControllers(updatedControllers);
 
-    this.controllersList = updatedControllers;
-    clearInput('controller-input');
-    this.renderControllersContent();
-
-    hideLoading();
+      this.controllersList = updatedControllers;
+      clearInput('controller-input');
+      this.renderControllersContent();
+    } catch (e) {
+      reportError(NETWORK_ERROR_MESSAGE, e);
+    } finally {
+      hideLoading();
+    }
   }
 
   private hasRequiredPrincipals(controllers: Principal[]): boolean {
