@@ -128,16 +128,28 @@ class Dashboard {
     try {
       showLoading();
 
-      this.managers.topup = await TopupManager.create();
-      this.managers.topUpRule = await TopUpRuleManager.create();
-      this.managers.status = await StatusManager.create();
-      this.managers.controllers = await ControllersManager.create(
-        canisterIdPrincipal,
-        iiPrincipal
-      );
-      this.managers.alternativeOrigins =
-        await AlternativeOriginsManager.create();
-      this.managers.canisterLogs = await CanisterLogsManager.create();
+      const [
+        topup,
+        topUpRule,
+        status,
+        controllers,
+        alternativeOrigins,
+        canisterLogs,
+      ] = await Promise.all([
+        TopupManager.create(),
+        TopUpRuleManager.create(),
+        StatusManager.create(),
+        ControllersManager.create(canisterIdPrincipal, iiPrincipal),
+        AlternativeOriginsManager.create(),
+        CanisterLogsManager.create(),
+      ]);
+
+      this.managers.topup = topup;
+      this.managers.topUpRule = topUpRule;
+      this.managers.status = status;
+      this.managers.controllers = controllers;
+      this.managers.alternativeOrigins = alternativeOrigins;
+      this.managers.canisterLogs = canisterLogs;
     } finally {
       hideLoading();
     }
