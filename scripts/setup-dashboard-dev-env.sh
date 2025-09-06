@@ -9,6 +9,8 @@ dfx identity use ident-1
 echo "Creating my-hello-world canister..."
 dfx generate my-hello-world
 dfx canister create my-hello-world --with-cycles 900000000000
+
+./scripts/prebuild-mcd.sh
 DAPP_BUILD_MODE=dev dfx build my-hello-world
 DAPP_BUILD_MODE=dev ./scripts/copy-example-wasm.sh
 dfx canister install my-hello-world --mode reinstall --yes
