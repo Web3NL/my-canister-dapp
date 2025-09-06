@@ -8,13 +8,9 @@ import {
 
 test('manage alternative HTTP origins', async ({ page }, testInfo) => {
   const testUrl = testInfo.project.metadata.testUrl;
-  const principalFile = testInfo.project.metadata.principalFile;
 
   if (!testUrl) {
     throw new Error('testUrl not found in project metadata');
-  }
-  if (!principalFile) {
-    throw new Error('principalFile not found in project metadata');
   }
 
   await page.goto(testUrl);
@@ -37,7 +33,6 @@ test('manage alternative HTTP origins', async ({ page }, testInfo) => {
 
     await page.click('#alternative-origin-add');
 
-    await page.waitForLoadState('networkidle');
     await waitForListUpdate(page, '#alternative-origins-list', origin, true);
 
     await expect(async () => {
@@ -58,7 +53,6 @@ test('manage alternative HTTP origins', async ({ page }, testInfo) => {
 
     await page.click('#alternative-origin-remove');
 
-    await page.waitForLoadState('networkidle');
     await waitForListUpdate(page, '#alternative-origins-list', origin, false);
 
     await expect(async () => {

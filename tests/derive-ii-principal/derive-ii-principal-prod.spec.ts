@@ -10,7 +10,6 @@ test.describe.only('derive ii principal', () => {
 
   test.only('should derive principal from II at any domain', async ({ page }) => {
     const dappOrigin = process.env.DAPP_ORIGIN;
-    // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
     if (!dappOrigin) {
       throw new Error('DAPP_ORIGIN environment variable is required');
     }

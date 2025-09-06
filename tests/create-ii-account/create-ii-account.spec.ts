@@ -25,7 +25,6 @@ test.describe.only('create ii account', () => {
       'data-usernumber'
     );
 
-    // eslint-disable-next-line @typescript-eslint/strict-boolean-expressions
     if (!userNumber) {
       throw new Error('User number not found in data-usernumber attribute');
     }

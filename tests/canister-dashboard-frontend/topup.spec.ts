@@ -6,13 +6,9 @@ import { transferToPrincipal } from 'tests/helpers';
 
 test('canister top-up increases cycles balance', async ({ page }, testInfo) => {
     const testUrl = testInfo.project.metadata.testUrl;
-    const principalFile = testInfo.project.metadata.principalFile;
 
     if (!testUrl) {
         throw new Error('testUrl not found in project metadata');
-    }
-    if (!principalFile) {
-        throw new Error('principalFile not found in project metadata');
     }
 
     await page.goto(testUrl);
@@ -74,7 +70,6 @@ test('canister top-up increases cycles balance', async ({ page }, testInfo) => {
     // Wait for the action to start (overlay appears) and finish (overlay hidden)
     await expect(overlay).toBeVisible({ timeout: 5000 });
     await expect(overlay).toBeHidden({ timeout: 60000 });
-    await page.waitForLoadState('networkidle');
     await expect(cyclesValue).not.toHaveText(/Loading\.\.\./);
 
     const parseCycles = (text: string | null): number => {

@@ -3,13 +3,9 @@ import { login } from './login';
 
 test('manage canister auto top-up rule CRUD', async ({ page }, testInfo) => {
   const testUrl = testInfo.project.metadata.testUrl;
-  const principalFile = testInfo.project.metadata.principalFile;
 
   if (!testUrl) {
     throw new Error('testUrl not found in project metadata');
-  }
-  if (!principalFile) {
-    throw new Error('principalFile not found in project metadata');
   }
 
   await page.goto(testUrl);
