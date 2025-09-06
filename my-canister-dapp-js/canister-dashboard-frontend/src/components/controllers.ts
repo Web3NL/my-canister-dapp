@@ -45,14 +45,13 @@ export class ControllersManager {
 
   private renderControllersContent(): void {
     const controllersList = getElement('controllers-list');
-
-    const controllersListHtml = this.controllersList
-      .map(
-        controller => `<li class="data-display">${controller.toString()}</li>`
-      )
-      .join('');
-
-    controllersList.innerHTML = controllersListHtml;
+    controllersList.textContent = '';
+    for (const controller of this.controllersList) {
+      const li = document.createElement('li');
+      li.className = 'data-display';
+      li.textContent = controller.toString();
+      controllersList.appendChild(li);
+    }
 
     this.attachEventListeners();
   }

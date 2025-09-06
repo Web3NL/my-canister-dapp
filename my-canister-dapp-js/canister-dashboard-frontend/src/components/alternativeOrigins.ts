@@ -41,21 +41,27 @@ export class AlternativeOriginsManager {
 
   private async initializeDisplay(): Promise<void> {
     const origins = await this.fetchAlternativeOrigins();
-    const originsList = origins
-      .map(origin => `<li class="data-display">${origin}</li>`)
-      .join('');
-
-    this.renderAlternativeOriginsContent(originsList);
+    this.renderAlternativeOriginsContent(origins);
   }
 
-  private renderAlternativeOriginsContent(originsList: string): void {
-    const alternativeOriginsList = getElement('alternative-origins-list');
-    alternativeOriginsList.innerHTML = originsList;
+  private renderAlternativeOriginsContent(origins: string[]): void {
+    const list = getElement('alternative-origins-list');
+    list.textContent = '';
+    for (const origin of origins) {
+      const li = document.createElement('li');
+      li.className = 'data-display';
+      li.textContent = origin;
+      list.appendChild(li);
+    }
   }
 
   private async fetchAlternativeOrigins(): Promise<string[]> {
     try {
       const response = await fetch('/.well-known/ii-alternative-origins');
+      if (!response.ok) {
+        reportError(NETWORK_ERROR_MESSAGE);
+        return [];
+      }
       const data = (await response.json()) as AlternativeOriginsResponse;
       return data.alternativeOrigins;
     } catch (error) {

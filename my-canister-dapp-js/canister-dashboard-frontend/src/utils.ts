@@ -20,8 +20,7 @@ export async function canisterId(): Promise<Principal> {
     }
 
     reportError(CANISTER_ID_ERROR_MESSAGE);
-    // Return anonymous principal as a safe fallback; callers must handle failures gracefully
-    return Principal.anonymous();
+    throw new Error(CANISTER_ID_ERROR_MESSAGE);
   }
 }
 
