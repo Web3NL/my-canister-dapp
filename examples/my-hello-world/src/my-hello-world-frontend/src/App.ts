@@ -93,6 +93,11 @@ export default class App {
     this.render();
   };
 
+  private handleOpenDashboard = (): void => {
+    // Same link as used in cyclesChecker.ts
+    window.open('/canister-dashboard', '_blank', 'noopener,noreferrer');
+  };
+
   private handleSubmit = async (e: Event): Promise<void> => {
     e.preventDefault();
 
@@ -150,6 +155,17 @@ export default class App {
         <img src="${logo}" alt="DFINITY logo" />
         <br />
 
+        ${this.isAuthenticated && this.isAuthorized
+          ? html`
+              <div>
+                <button type="button" class="open-dashboard-btn">
+                  Goto Canister Dashboard
+                </button>
+              </div>
+              <br />
+            `
+          : ''}
+
         <div class="auth-section">
           ${this.isAuthenticated
             ? html`
@@ -166,8 +182,6 @@ export default class App {
 
         ${this.isAuthenticated && this.isAuthorized
           ? html`
-              <br />
-
               <form action="#">
                 <label for="name">Enter your name: &nbsp;</label>
                 <input id="name" alt="Name" type="text" />
@@ -201,6 +215,15 @@ export default class App {
     const logoutBtn = document.querySelector('.logout-btn');
     if (logoutBtn) {
       this.addEventListener(logoutBtn, 'click', this.handleLogout);
+    }
+
+    const openDashboardBtn = document.querySelector('.open-dashboard-btn');
+    if (openDashboardBtn) {
+      this.addEventListener(
+        openDashboardBtn,
+        'click',
+        this.handleOpenDashboard
+      );
     }
   }
 }
