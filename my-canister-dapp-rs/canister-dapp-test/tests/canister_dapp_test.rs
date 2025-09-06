@@ -1,6 +1,5 @@
 use candid::Principal;
 use canister_dapp_test::*;
-use flate2::read::GzDecoder;
 use ic_cdk::management_canister::CanisterSettings;
 use ic_http_certification::{HttpRequest, HttpResponse};
 use ic_ledger_types::{AccountIdentifier, Subaccount};
@@ -13,7 +12,6 @@ use my_canister_dashboard::{
 use my_canister_dashboard::{ManageTopUpRuleArg, ManageTopUpRuleResult, TopUpInterval, TopUpRule};
 use pocket_ic::{query_candid, update_candid_as};
 use std::fs;
-use std::io::Read;
 
 #[test]
 fn canister_dapp_test() {
@@ -22,14 +20,11 @@ fn canister_dapp_test() {
     let pic = pocket_ic::PocketIcBuilder::new().with_nns_subnet().build();
 
     // Prepare helper and constants to install Ledger/CMC later (after we know our canister ID)
-    let ledger_id = Principal::from_text("ryjl3-tyaaa-aaaaa-aaaba-cai").unwrap();
-    let cmc_id = Principal::from_text("rkp4c-7iaaa-aaaaa-aaaca-cai").unwrap();
-    fn read_wasm_gz(path: &str) -> Vec<u8> {
-        let data = fs::read(path).unwrap_or_else(|e| panic!("Failed to read {path}: {e}"));
-        let mut decoder = GzDecoder::new(&data[..]);
-        let mut out = Vec::new();
-        decoder.read_to_end(&mut out).expect("gunzip ledger wasm");
-        out
+    let ledger_id = Principal::from_text(ICP_LEDGER_CANISTER_ID_TEXT).unwrap();
+    let cmc_id = Principal::from_text(FAKE_CMC_CANISTER_ID_TEXT).unwrap();
+    // For this experiment, we'll pass the gzipped bytes directly to install_canister
+    fn read_bytes(path: &str) -> Vec<u8> {
+        fs::read(path).unwrap_or_else(|e| panic!("Failed to read {path}: {e}"))
     }
 
     // Setup principals
@@ -73,9 +68,8 @@ fn canister_dapp_test() {
 
     // Ledger wasm and init payload (similar to dfx-env/deploy-all.sh)
     let manifest_dir = env!("CARGO_MANIFEST_DIR");
-    let ledger_wasm_path =
-        std::path::Path::new(manifest_dir).join("../../dfx-env/icp-ledger/icp-ledger.wasm.gz");
-    let ledger_wasm = read_wasm_gz(ledger_wasm_path.to_str().unwrap());
+    let ledger_wasm_path = std::path::Path::new(manifest_dir).join(LEDGER_WASM_GZ_RELATIVE);
+    let ledger_wasm = read_bytes(ledger_wasm_path.to_str().unwrap());
 
     // Fabricated principals for minter and an initial funded account (not strictly needed)
     let minter = Principal::from_slice(&[201; 29]);
@@ -136,14 +130,16 @@ fn canister_dapp_test() {
         initial_values: vec![(
             canister_ai_text.clone(),
             TokensArg {
-                e8s: 20_000_000_000,
-            }, // 200 ICP for headroom
+                e8s: LEDGER_PREFUND_E8S,
+            }, // pre-fund for headroom
         )],
         max_message_size_bytes: None,
         transaction_window: None,
         archive_options: None,
         send_whitelist: vec![],
-        transfer_fee: Some(TokensArg { e8s: 10_000 }),
+        transfer_fee: Some(TokensArg {
+            e8s: LEDGER_INIT_TRANSFER_FEE_E8S,
+        }),
         token_symbol: Some("LICP".to_string()),
         token_name: Some("Local ICP".to_string()),
         feature_flags: None,
@@ -155,7 +151,7 @@ fn canister_dapp_test() {
     // Create and install with fixed IDs and a known controller
     pic.create_canister_with_id(Some(user), None, ledger_id)
         .unwrap();
-    pic.add_cycles(ledger_id, 10_000_000_000_000);
+    pic.add_cycles(ledger_id, SYSTEM_CANISTER_BOOT_CYCLES);
     pic.install_canister(
         ledger_id,
         ledger_wasm,
@@ -164,13 +160,12 @@ fn canister_dapp_test() {
     );
 
     // Fake CMC wasm
-    let cmc_wasm_path = std::path::Path::new(manifest_dir)
-        .join("../../dfx-env/.dfx/local/canisters/fake-cmc/fake-cmc.wasm");
+    let cmc_wasm_path = std::path::Path::new(manifest_dir).join(FAKE_CMC_WASM_RELATIVE);
     let cmc_wasm = fs::read(&cmc_wasm_path)
         .unwrap_or_else(|e| panic!("Missing fake-cmc.wasm at {}: {e}", cmc_wasm_path.display()));
     pic.create_canister_with_id(Some(user), None, cmc_id)
         .unwrap();
-    pic.add_cycles(cmc_id, 10_000_000_000_000);
+    pic.add_cycles(cmc_id, SYSTEM_CANISTER_BOOT_CYCLES);
     pic.install_canister(cmc_id, cmc_wasm, vec![], Some(user));
 
     // Assert ManageIIPrincipalResult::Err when Get II Principal before Set

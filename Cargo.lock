@@ -197,10 +197,9 @@ dependencies = [
 
 [[package]]
 name = "canister-dapp-test"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "candid",
- "flate2",
  "hex",
  "ic-cdk",
  "ic-http-certification",
