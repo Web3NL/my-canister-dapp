@@ -5,7 +5,7 @@ import type {
 import { ICManagementCanister } from '@dfinity/ic-management';
 import type { Principal } from '@dfinity/principal';
 import { createHttpAgent, canisterId } from '../utils';
-import { showError, NETWORK_ERROR_MESSAGE } from '../error';
+import { reportError, NETWORK_ERROR_MESSAGE } from '../error';
 
 export class ManagementApi {
   private async managmentApi(): Promise<ICManagementCanister> {
@@ -22,7 +22,7 @@ export class ManagementApi {
 
       return await icManagement.canisterStatus(canisterIdPrincipal);
     } catch (error) {
-      showError(NETWORK_ERROR_MESSAGE);
+      reportError(NETWORK_ERROR_MESSAGE, error);
       throw error;
     }
   }
@@ -39,7 +39,7 @@ export class ManagementApi {
         },
       });
     } catch (error) {
-      showError(NETWORK_ERROR_MESSAGE);
+      reportError(NETWORK_ERROR_MESSAGE, error);
       throw error;
     }
   }
@@ -51,7 +51,7 @@ export class ManagementApi {
 
       return await icManagement.fetchCanisterLogs(canisterIdPrincipal);
     } catch (error) {
-      showError(NETWORK_ERROR_MESSAGE);
+      reportError(NETWORK_ERROR_MESSAGE, error);
       throw error;
     }
   }

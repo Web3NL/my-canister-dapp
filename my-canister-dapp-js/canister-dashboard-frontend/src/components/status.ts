@@ -3,6 +3,7 @@ import { uint8ArrayToHexString } from '@dfinity/utils';
 import { formatMemorySize, formatCycles } from '../helpers';
 import type { CanisterStatusResponse } from '@dfinity/ic-management';
 import { updateStatusDisplay } from '../dom';
+import { NETWORK_ERROR_MESSAGE, reportError } from '../error';
 
 interface FormattedStatusData {
   statusText: string;
@@ -12,19 +13,34 @@ interface FormattedStatusData {
 }
 
 export class StatusManager {
-  async create(): Promise<void> {
-    const managementApi = new ManagementApi();
-    const status = await managementApi.getCanisterStatus();
+  private constructor() {
+    // Private constructor to enforce use of static create method
+  }
 
-    const { statusText, memorySizeFormatted, cyclesFormatted, moduleHashHex } =
-      this.formatStatusData(status);
+  static async create(): Promise<StatusManager> {
+    const instance = new StatusManager();
+    try {
+      const managementApi = new ManagementApi();
+      const status = await managementApi.getCanisterStatus();
 
-    updateStatusDisplay(
-      statusText,
-      memorySizeFormatted,
-      cyclesFormatted,
-      moduleHashHex
-    );
+      const {
+        statusText,
+        memorySizeFormatted,
+        cyclesFormatted,
+        moduleHashHex,
+      } = instance.formatStatusData(status);
+
+      updateStatusDisplay(
+        statusText,
+        memorySizeFormatted,
+        cyclesFormatted,
+        moduleHashHex
+      );
+    } catch (e) {
+      reportError(NETWORK_ERROR_MESSAGE, e);
+    }
+
+    return instance;
   }
 
   private formatStatusData(

@@ -1,5 +1,13 @@
 import { CanisterApi } from '../api/canister';
-import { INVALID_ORIGIN_MESSAGE, NETWORK_ERROR_MESSAGE } from '../error';
+import {
+  INVALID_ORIGIN_MESSAGE,
+  NETWORK_ERROR_MESSAGE,
+  reportError,
+  FAILED_ADD_ALT_ORIGIN_MESSAGE_PREFIX,
+  UNKNOWN_ADD_ALT_ORIGIN_MESSAGE,
+  FAILED_REMOVE_ALT_ORIGIN_MESSAGE_PREFIX,
+  UNKNOWN_REMOVE_ALT_ORIGIN_MESSAGE,
+} from '../error';
 import { isValidOrigin } from '../utils';
 import {
   getElement,
@@ -20,33 +28,45 @@ interface AlternativeOriginsResponse {
 export class AlternativeOriginsManager {
   private canisterApi: CanisterApi;
 
-  constructor() {
+  private constructor() {
     this.canisterApi = new CanisterApi();
   }
 
-  async create(): Promise<void> {
-    const origins = await this.fetchAlternativeOrigins();
-    const originsList = origins
-      .map(origin => `<li class="data-display">${origin}</li>`)
-      .join('');
-
-    this.renderAlternativeOriginsContent(originsList);
-    this.attachEventListeners();
+  static async create(): Promise<AlternativeOriginsManager> {
+    const instance = new AlternativeOriginsManager();
+    await instance.initializeDisplay();
+    instance.attachEventListeners();
+    return instance;
   }
 
-  private renderAlternativeOriginsContent(originsList: string): void {
-    const alternativeOriginsList = getElement('alternative-origins-list');
-    alternativeOriginsList.innerHTML = originsList;
+  private async initializeDisplay(): Promise<void> {
+    const origins = await this.fetchAlternativeOrigins();
+    this.renderAlternativeOriginsContent(origins);
+  }
+
+  private renderAlternativeOriginsContent(origins: string[]): void {
+    const list = getElement('alternative-origins-list');
+    list.textContent = '';
+    for (const origin of origins) {
+      const li = document.createElement('li');
+      li.className = 'data-display';
+      li.textContent = origin;
+      list.appendChild(li);
+    }
   }
 
   private async fetchAlternativeOrigins(): Promise<string[]> {
     try {
       const response = await fetch('/.well-known/ii-alternative-origins');
+      if (!response.ok) {
+        reportError(NETWORK_ERROR_MESSAGE);
+        return [];
+      }
       const data = (await response.json()) as AlternativeOriginsResponse;
       return data.alternativeOrigins;
     } catch (error) {
-      showError(NETWORK_ERROR_MESSAGE);
-      throw error;
+      reportError(NETWORK_ERROR_MESSAGE, error);
+      return [];
     }
   }
 
@@ -59,9 +79,7 @@ export class AlternativeOriginsManager {
 
   private async handleAdd(): Promise<void> {
     const origin = getInputValue('alternative-origin-input');
-    if (!origin) {
-      throw new Error('Origin input is required');
-    }
+    if (!origin) return;
 
     if (!isValidOrigin(origin)) {
       showError(INVALID_ORIGIN_MESSAGE);
@@ -71,51 +89,53 @@ export class AlternativeOriginsManager {
 
     showLoading();
 
-    const result = await this.canisterApi.manageAlternativeOrigins({
-      Add: origin,
-    });
-
-    if ('Ok' in result) {
-      await new Promise(resolve => setTimeout(resolve, IC_UPDATE_CALL_DELAY));
-      await this.create();
-      clearInput('alternative-origin-input');
-    } else if ('Err' in result) {
-      const err = (result as { Err: string }).Err;
-      showError(NETWORK_ERROR_MESSAGE);
-      throw new Error(`Failed to add alternative origin: ${err}`);
-    } else {
-      showError('Unknown error');
-      throw new Error('Unknown error adding alternative origin');
+    try {
+      const result = await this.canisterApi.manageAlternativeOrigins({
+        Add: origin,
+      });
+      if ('Ok' in result) {
+        await new Promise(resolve => setTimeout(resolve, IC_UPDATE_CALL_DELAY));
+        await this.initializeDisplay();
+        clearInput('alternative-origin-input');
+      } else if ('Err' in result) {
+        const err = (result as { Err: string }).Err;
+        reportError(NETWORK_ERROR_MESSAGE + ` (${err})`);
+      } else {
+        reportError('Unknown error adding alternative origin');
+        reportError(UNKNOWN_ADD_ALT_ORIGIN_MESSAGE);
+      }
+    } catch (e) {
+      reportError(FAILED_ADD_ALT_ORIGIN_MESSAGE_PREFIX, e);
+    } finally {
+      hideLoading();
     }
-
-    hideLoading();
   }
 
   private async handleRemove(): Promise<void> {
     const origin = getInputValue('alternative-origin-input');
-    if (!origin) {
-      throw new Error('Origin input is required');
-    }
+    if (!origin) return;
 
     showLoading();
 
-    const result = await this.canisterApi.manageAlternativeOrigins({
-      Remove: origin,
-    });
-
-    if ('Ok' in result) {
-      await new Promise(resolve => setTimeout(resolve, IC_UPDATE_CALL_DELAY));
-      await this.create();
-      clearInput('alternative-origin-input');
-    } else if ('Err' in result) {
-      const err = (result as { Err: string }).Err;
-      showError(NETWORK_ERROR_MESSAGE);
-      throw new Error(`Failed to remove alternative origin: ${err}`);
-    } else {
-      showError('Unknown error');
-      throw new Error('Unknown error removing alternative origin');
+    try {
+      const result = await this.canisterApi.manageAlternativeOrigins({
+        Remove: origin,
+      });
+      if ('Ok' in result) {
+        await new Promise(resolve => setTimeout(resolve, IC_UPDATE_CALL_DELAY));
+        await this.initializeDisplay();
+        clearInput('alternative-origin-input');
+      } else if ('Err' in result) {
+        const err = (result as { Err: string }).Err;
+        reportError(NETWORK_ERROR_MESSAGE + ` (${err})`);
+      } else {
+        reportError('Unknown error removing alternative origin');
+        reportError(UNKNOWN_REMOVE_ALT_ORIGIN_MESSAGE);
+      }
+    } catch (e) {
+      reportError(FAILED_REMOVE_ALT_ORIGIN_MESSAGE_PREFIX, e);
+    } finally {
+      hideLoading();
     }
-
-    hideLoading();
   }
 }

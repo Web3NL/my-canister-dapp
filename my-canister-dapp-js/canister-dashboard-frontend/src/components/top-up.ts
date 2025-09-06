@@ -5,7 +5,11 @@ import { ICP_TX_FEE, TPUP_MEMO, CMC_CANISTER_ID } from '../constants';
 import { canisterId } from '../utils';
 import { StatusManager } from './status';
 import { Principal } from '@dfinity/principal';
-import { INSUFFICIENT_BALANCE_MESSAGE } from '../error';
+import {
+  INSUFFICIENT_BALANCE_MESSAGE,
+  NETWORK_ERROR_MESSAGE,
+  reportError,
+} from '../error';
 import {
   updateBalanceDisplay,
   showLoading,
@@ -17,9 +21,15 @@ import {
 import { AuthManager } from './auth';
 
 export class TopupManager {
-  async create(): Promise<void> {
-    await this.fetchAndRenderBalance();
-    this.attachEventListeners();
+  private constructor() {
+    // Private constructor to enforce use of static create method
+  }
+
+  static async create(): Promise<TopupManager> {
+    const instance = new TopupManager();
+    await instance.fetchAndRenderBalance();
+    instance.attachEventListeners();
+    return instance;
   }
 
   private async fetchAndRenderBalance(): Promise<void> {
@@ -29,8 +39,7 @@ export class TopupManager {
 
     updateBalanceDisplay(formattedBalance);
 
-    const authManager = new AuthManager();
-    await authManager.create();
+    const authManager = await AuthManager.create();
     const principal = await authManager.getPrincipal();
     updateIcrc1AccountDisplay(principal.toText());
   }
@@ -44,38 +53,45 @@ export class TopupManager {
 
   private async refreshBalance(): Promise<void> {
     showLoading();
-    await this.fetchAndRenderBalance();
-    hideLoading();
+    try {
+      await this.fetchAndRenderBalance();
+    } catch (e) {
+      reportError(NETWORK_ERROR_MESSAGE, e);
+    } finally {
+      hideLoading();
+    }
   }
 
   private async performTopUp(): Promise<void> {
     showLoading();
+    try {
+      const hasEnoughBalance = await this.checkBalanceForTopUp();
+      if (!hasEnoughBalance) {
+        showError(INSUFFICIENT_BALANCE_MESSAGE);
+        return;
+      }
 
-    const hasEnoughBalance = await this.checkBalanceForTopUp();
-    if (!hasEnoughBalance) {
-      showError(INSUFFICIENT_BALANCE_MESSAGE);
-      return;
+      const ledgerApi = new LedgerApi();
+      const balance = await ledgerApi.balance();
+      const transferAmount = balance - ICP_TX_FEE;
+
+      const blockHeight = await this.transferToCMC(transferAmount);
+
+      const cmcApi = new CMCApi();
+      const canisterIdPrincipal = await canisterId();
+      const canisterIdString = canisterIdPrincipal.toString();
+      await cmcApi.notifyTopUp(canisterIdString, blockHeight);
+
+      await this.updateBalanceAndStatus();
+    } catch (e) {
+      reportError(NETWORK_ERROR_MESSAGE, e);
+    } finally {
+      hideLoading();
     }
-
-    const ledgerApi = new LedgerApi();
-    const balance = await ledgerApi.balance();
-    const transferAmount = balance - ICP_TX_FEE;
-
-    const blockHeight = await this.transferToCMC(transferAmount);
-
-    const cmcApi = new CMCApi();
-    const canisterIdPrincipal = await canisterId();
-    const canisterIdString = canisterIdPrincipal.toString();
-    await cmcApi.notifyTopUp(canisterIdString, blockHeight);
-
-    await this.updateBalanceAndStatus();
-
-    hideLoading();
   }
 
   private async updateBalanceAndStatus(): Promise<void> {
-    const statusManager = new StatusManager();
-    await statusManager.create();
+    await StatusManager.create();
     await this.fetchAndRenderBalance();
   }
 

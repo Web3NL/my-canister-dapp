@@ -11,7 +11,13 @@ import {
   updateTopUpRuleDisplay,
   getSelectValue,
 } from '../dom';
-import { NETWORK_ERROR_MESSAGE } from '../error';
+import {
+  NETWORK_ERROR_MESSAGE,
+  reportError,
+  TOP_UP_RULE_ERROR_PREFIX,
+  TOP_UP_ERROR_PREFIX,
+  SELECT_THRESHOLD_AMOUNT_MESSAGE,
+} from '../error';
 import type {
   ManageTopUpRuleResult,
   TopUpRule,
@@ -21,9 +27,19 @@ import type {
 
 export class TopUpRuleManager {
   private api = new CanisterApi();
-  async create() {
-    await Promise.all([this.fetchAndRender(), this.renderCanisterInfo()]);
-    this.attachEventListeners();
+
+  private constructor() {
+    // Private constructor to enforce use of static create method
+  }
+
+  static async create(): Promise<TopUpRuleManager> {
+    const instance = new TopUpRuleManager();
+    await Promise.all([
+      instance.fetchAndRender(),
+      instance.renderCanisterInfo(),
+    ]);
+    instance.attachEventListeners();
+    return instance;
   }
 
   private async renderCanisterInfo(): Promise<void> {
@@ -42,13 +58,14 @@ export class TopUpRuleManager {
   async fetchAndRender() {
     try {
       this.render(await this.api.manageTopUpRule({ Get: null }));
-    } catch {
-      showError('TopUp' + NETWORK_ERROR_MESSAGE);
+    } catch (e) {
+      reportError(NETWORK_ERROR_MESSAGE, e);
     }
   }
 
   render(result: ManageTopUpRuleResult) {
-    if ('Err' in result) return showError('TopUpRule Error: ' + result.Err);
+    if ('Err' in result)
+      return showError(TOP_UP_RULE_ERROR_PREFIX + ' ' + result.Err);
     if ('Ok' in result) {
       const rule = result.Ok[0];
       updateTopUpRuleDisplay(rule ? formatRule(rule) : null);
@@ -61,7 +78,7 @@ export class TopUpRuleManager {
     const amountValue = getSelectValue('top-up-rule-amount');
 
     if (!thresholdValue || !amountValue)
-      return showError('Please select threshold and amount.');
+      return showError(SELECT_THRESHOLD_AMOUNT_MESSAGE);
 
     showLoading();
     try {
@@ -74,8 +91,8 @@ export class TopUpRuleManager {
       });
       if ('Err' in res) return showError(res.Err);
       await this.fetchAndRender();
-    } catch {
-      showError('TopUpError: ' + NETWORK_ERROR_MESSAGE);
+    } catch (e) {
+      reportError(TOP_UP_ERROR_PREFIX + ' ' + NETWORK_ERROR_MESSAGE, e);
     } finally {
       hideLoading();
     }
@@ -85,10 +102,11 @@ export class TopUpRuleManager {
     showLoading();
     try {
       const res = await this.api.manageTopUpRule({ Clear: null });
-      if ('Err' in res) return showError('TopUpRule Error: ' + res.Err);
+      if ('Err' in res)
+        return showError(TOP_UP_RULE_ERROR_PREFIX + ' ' + res.Err);
       await this.fetchAndRender();
-    } catch {
-      showError('TopUpError: ' + NETWORK_ERROR_MESSAGE);
+    } catch (e) {
+      reportError(TOP_UP_ERROR_PREFIX + ' ' + NETWORK_ERROR_MESSAGE, e);
     } finally {
       hideLoading();
     }

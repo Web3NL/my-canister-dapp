@@ -1,10 +1,13 @@
 // DOM Abstraction Layer with UI Logic
+import { GENERIC_ERROR_MESSAGE, LOGOUT_FAILED_MESSAGE } from './error';
 
 // DOM Utility Functions
+// Never throw on missing elements; log and return a detached placeholder so UI keeps working.
 export function getElement<T extends HTMLElement = HTMLElement>(id: string): T {
   const element = document.getElementById(id) as T | null;
   if (!element) {
-    throw new Error(`Element with id '${id}' not found`);
+    console.error(`Element with id '${id}' not found`);
+    return document.createElement('div') as unknown as T;
   }
   return element;
 }
@@ -23,15 +26,46 @@ function toggleVisibility(id: string, show: boolean): void {
   }
 }
 
+// Keep a registry of listeners we attach so we can avoid stacking duplicates
+const listenersRegistry = new WeakMap<
+  HTMLElement,
+  Map<string, EventListener>
+>();
+
 export function addEventListener(
   id: string,
   event: string,
   handler: () => void | Promise<void>
 ): void {
   const element = getElement(id);
-  element.addEventListener(event, async (): Promise<void> => {
-    await handler();
-  });
+
+  // Remove an existing listener for this element/event pair (if any)
+  const existingMap = listenersRegistry.get(element);
+  const existingListener = existingMap?.get(event);
+  if (existingListener) {
+    element.removeEventListener(event, existingListener);
+  }
+
+  // Wrap provided handler to unify signature and error handling
+  const wrapped: EventListener = async (): Promise<void> => {
+    try {
+      await handler();
+    } catch (err) {
+      console.error(`Unhandled error in '${event}' handler for #${id}:`, err);
+      // Defer user-friendly messaging to callers where possible
+      showError(GENERIC_ERROR_MESSAGE);
+    }
+  };
+
+  element.addEventListener(event, wrapped);
+
+  // Record the new listener so it can be replaced next time
+  const map =
+    listenersRegistry.get(element) ?? new Map<string, EventListener>();
+  map.set(event, wrapped);
+  if (!listenersRegistry.has(element)) {
+    listenersRegistry.set(element, map);
+  }
 }
 
 // UI State Management Methods
@@ -47,7 +81,7 @@ export function setLoggedInState(
     try {
       await onLogout();
     } catch {
-      showError('Logout failed. Please try again.');
+      showError(LOGOUT_FAILED_MESSAGE);
     }
   };
 
@@ -61,20 +95,12 @@ export function setLoggedOutState(onLogin: () => void | Promise<void>): void {
   const authBtn = getElement('auth-btn');
 
   authBtn.textContent = 'Login';
-  authBtn.onclick = async (): Promise<void> => {
-    try {
-      await onLogin();
-    } catch {
-      showError('Login failed. Please try again.');
-    }
-  };
+  authBtn.onclick = async (): Promise<void> => await onLogin();
 
   toggleVisibility('ii-principal', false);
   toggleVisibility('ii-principal-label', false);
   setText('ii-principal', '');
   toggleVisibility('authenticated-content', false);
-  toggleVisibility('error-section', false);
-  setText('error-section', '');
   toggleVisibility('loading-overlay', false);
 }
 
@@ -115,6 +141,12 @@ export function showError(message: string): void {
 
   errorSection.appendChild(errorMessage);
   toggleVisibility('error-section', true);
+}
+
+export function clearErrors(): void {
+  const errorSection = getElement('error-section');
+  errorSection.innerHTML = '';
+  toggleVisibility('error-section', false);
 }
 
 // Form Input Helpers

@@ -1,10 +1,17 @@
 import { ManagementApi } from '../api/management';
 import { addEventListener, getElement, showLoading, hideLoading } from '../dom';
+import { NETWORK_ERROR_MESSAGE, reportError } from '../error';
 
 export class CanisterLogsManager {
-  async create(): Promise<void> {
-    await this.renderLogs();
-    this.attachEventListeners();
+  private constructor() {
+    // Private constructor to enforce use of static create method
+  }
+
+  static async create(): Promise<CanisterLogsManager> {
+    const instance = new CanisterLogsManager();
+    await instance.renderLogs();
+    instance.attachEventListeners();
+    return instance;
   }
 
   private attachEventListeners(): void {
@@ -18,43 +25,47 @@ export class CanisterLogsManager {
   }
 
   private async renderLogs(): Promise<void> {
-    const managementApi = new ManagementApi();
-    const { canister_log_records } = await managementApi.getCanisterLogs();
+    try {
+      const managementApi = new ManagementApi();
+      const { canister_log_records } = await managementApi.getCanisterLogs();
 
-    const logsList = getElement('logs-list');
+      const logsList = getElement('logs-list');
 
-    if (canister_log_records.length === 0) {
-      logsList.innerHTML = '<li class="data-display">No logs found.</li>';
-      return;
+      if (canister_log_records.length === 0) {
+        logsList.innerHTML = '<li class="data-display">No logs found.</li>';
+        return;
+      }
+
+      const items = canister_log_records
+        .reverse()
+        .map(record => {
+          // Decode log message from bytes
+          const contentBytes =
+            record.content instanceof Uint8Array
+              ? record.content
+              : Uint8Array.from(record.content);
+          const rawMessage = new TextDecoder().decode(contentBytes);
+
+          // Simple, local datetime: YYYY-MM-DD HH:mm:ss
+          const timestampMs = Number(record.timestamp_nanos / 1_000_000n);
+          const date = new Date(timestampMs);
+          const ts = isNaN(date.getTime())
+            ? 'Unknown time'
+            : formatSimpleDateTime(date);
+
+          const idx = record.idx.toString();
+
+          // Escape HTML and convert line breaks to <br>
+          const message = escapeHtml(rawMessage).replace(/\r\n|\n|\r/g, '<br>');
+
+          return `<li class="data-display">[${ts}] (#${idx})<br>${message}</li>`;
+        })
+        .join('');
+
+      logsList.innerHTML = items;
+    } catch (e) {
+      reportError(NETWORK_ERROR_MESSAGE, e);
     }
-
-    const items = canister_log_records
-      .reverse()
-      .map(record => {
-        // Decode log message from bytes
-        const contentBytes =
-          record.content instanceof Uint8Array
-            ? record.content
-            : Uint8Array.from(record.content);
-        const rawMessage = new TextDecoder().decode(contentBytes);
-
-        // Simple, local datetime: YYYY-MM-DD HH:mm:ss
-        const timestampMs = Number(record.timestamp_nanos / 1_000_000n);
-        const date = new Date(timestampMs);
-        const ts = isNaN(date.getTime())
-          ? 'Unknown time'
-          : formatSimpleDateTime(date);
-
-        const idx = record.idx.toString();
-
-        // Escape HTML and convert line breaks to <br>
-        const message = escapeHtml(rawMessage).replace(/\r\n|\n|\r/g, '<br>');
-
-        return `<li class="data-display">[${ts}] (#${idx})<br>${message}</li>`;
-      })
-      .join('');
-
-    logsList.innerHTML = items;
   }
 }
 
