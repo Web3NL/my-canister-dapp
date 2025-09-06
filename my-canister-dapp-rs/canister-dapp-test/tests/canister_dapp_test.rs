@@ -1,6 +1,8 @@
+use candid::Principal;
 use canister_dapp_test::*;
 use ic_cdk::management_canister::CanisterSettings;
 use ic_http_certification::{HttpRequest, HttpResponse};
+use ic_ledger_types::{AccountIdentifier, Subaccount};
 use my_canister_dashboard::CyclesAmount;
 use my_canister_dashboard::{
     ALTERNATIVE_ORIGINS_PATH, CANISTER_DASHBOARD_CSS_PATH, CANISTER_DASHBOARD_HTML_PATH,
@@ -8,12 +10,22 @@ use my_canister_dashboard::{
     ManageIIPrincipalArg, ManageIIPrincipalResult, WasmStatus,
 };
 use my_canister_dashboard::{ManageTopUpRuleArg, ManageTopUpRuleResult, TopUpInterval, TopUpRule};
-use pocket_ic::{PocketIc, query_candid, update_candid_as};
+use pocket_ic::{query_candid, update_candid_as};
 use std::fs;
 
 #[test]
 fn canister_dapp_test() {
-    let pic = PocketIc::new();
+    // Use a PocketIC instance with an NNS subnet to allow installing canisters with
+    // mainnet-reserved IDs (ledger/CMC) used by the code under test.
+    let pic = pocket_ic::PocketIcBuilder::new().with_nns_subnet().build();
+
+    // Prepare helper and constants to install Ledger/CMC later (after we know our canister ID)
+    let ledger_id = Principal::from_text(ICP_LEDGER_CANISTER_ID_TEXT).unwrap();
+    let cmc_id = Principal::from_text(FAKE_CMC_CANISTER_ID_TEXT).unwrap();
+    // For this experiment, we'll pass the gzipped bytes directly to install_canister
+    fn read_bytes(path: &str) -> Vec<u8> {
+        fs::read(path).unwrap_or_else(|e| panic!("Failed to read {path}: {e}"))
+    }
 
     // Setup principals
     let user = ii_principal_at_installer_app();
@@ -48,6 +60,113 @@ fn canister_dapp_test() {
     // Install wasm
     pic.install_canister(canister_id, wasm_bytes, vec![], Some(user));
     println!("Wasm installed: \n {wasm_path} \n");
+
+    // Now install ICP Ledger and Fake CMC so top-up can actually mint cycles.
+    // Compute the canister's default ledger account identifier to pre-fund it.
+    let canister_ai = AccountIdentifier::new(&canister_id, &Subaccount([0; 32]));
+    let canister_ai_text = format!("{canister_ai}");
+
+    // Ledger wasm and init payload (similar to dfx-env/deploy-all.sh)
+    let manifest_dir = env!("CARGO_MANIFEST_DIR");
+    let ledger_wasm_path = std::path::Path::new(manifest_dir).join(LEDGER_WASM_GZ_RELATIVE);
+    let ledger_wasm = read_bytes(ledger_wasm_path.to_str().unwrap());
+
+    // Fabricated principals for minter and an initial funded account (not strictly needed)
+    let minter = Principal::from_slice(&[201; 29]);
+    let minter_ai = AccountIdentifier::new(&minter, &Subaccount([0; 32]));
+    let minter_text = format!("{minter_ai}");
+
+    #[derive(candid::CandidType, serde::Deserialize)]
+    struct TokensArg {
+        e8s: u64,
+    }
+    #[derive(candid::CandidType, serde::Deserialize)]
+    struct DurationArg {
+        secs: u64,
+        nanos: u32,
+    }
+    #[derive(candid::CandidType, serde::Deserialize)]
+    struct ArchiveOptionsArg {
+        trigger_threshold: u64,
+        num_blocks_to_archive: u64,
+        node_max_memory_size_bytes: Option<u64>,
+        max_message_size_bytes: Option<u64>,
+        controller_id: Principal,
+        more_controller_ids: Option<Vec<Principal>>,
+        cycles_for_archive_creation: Option<u64>,
+        max_transactions_per_response: Option<u64>,
+    }
+    #[derive(candid::CandidType, serde::Deserialize)]
+    struct IcrcAccount {
+        owner: Principal,
+        subaccount: Option<Vec<u8>>,
+    }
+    #[derive(candid::CandidType, serde::Deserialize)]
+    struct InitArgs {
+        minting_account: String,
+        icrc1_minting_account: Option<IcrcAccount>,
+        initial_values: Vec<(String, TokensArg)>,
+        max_message_size_bytes: Option<u64>,
+        transaction_window: Option<DurationArg>,
+        archive_options: Option<ArchiveOptionsArg>,
+        send_whitelist: Vec<Principal>,
+        transfer_fee: Option<TokensArg>,
+        token_symbol: Option<String>,
+        token_name: Option<String>,
+        feature_flags: Option<candid::Empty>,
+        maximum_number_of_accounts: Option<u64>,
+        accounts_overflow_trim_quantity: Option<u64>,
+    }
+    #[derive(candid::CandidType, serde::Deserialize)]
+    enum LedgerCanisterPayload {
+        Init(Box<InitArgs>),
+        Upgrade(Option<candid::Empty>),
+    }
+
+    let init_args = InitArgs {
+        minting_account: minter_text.clone(),
+        icrc1_minting_account: None,
+        // Pre-fund the dashboard canister's default account so it can pay transfer+fee.
+        initial_values: vec![(
+            canister_ai_text.clone(),
+            TokensArg {
+                e8s: LEDGER_PREFUND_E8S,
+            }, // pre-fund for headroom
+        )],
+        max_message_size_bytes: None,
+        transaction_window: None,
+        archive_options: None,
+        send_whitelist: vec![],
+        transfer_fee: Some(TokensArg {
+            e8s: LEDGER_INIT_TRANSFER_FEE_E8S,
+        }),
+        token_symbol: Some("LICP".to_string()),
+        token_name: Some("Local ICP".to_string()),
+        feature_flags: None,
+        maximum_number_of_accounts: None,
+        accounts_overflow_trim_quantity: None,
+    };
+    let payload = LedgerCanisterPayload::Init(Box::new(init_args));
+
+    // Create and install with fixed IDs and a known controller
+    pic.create_canister_with_id(Some(user), None, ledger_id)
+        .unwrap();
+    pic.add_cycles(ledger_id, SYSTEM_CANISTER_BOOT_CYCLES);
+    pic.install_canister(
+        ledger_id,
+        ledger_wasm,
+        candid::encode_one(payload).unwrap(),
+        Some(user),
+    );
+
+    // Fake CMC wasm
+    let cmc_wasm_path = std::path::Path::new(manifest_dir).join(FAKE_CMC_WASM_RELATIVE);
+    let cmc_wasm = fs::read(&cmc_wasm_path)
+        .unwrap_or_else(|e| panic!("Missing fake-cmc.wasm at {}: {e}", cmc_wasm_path.display()));
+    pic.create_canister_with_id(Some(user), None, cmc_id)
+        .unwrap();
+    pic.add_cycles(cmc_id, SYSTEM_CANISTER_BOOT_CYCLES);
+    pic.install_canister(cmc_id, cmc_wasm, vec![], Some(user));
 
     // Assert ManageIIPrincipalResult::Err when Get II Principal before Set
     let get_result = update_candid_as::<(ManageIIPrincipalArg,), (ManageIIPrincipalResult,)>(
@@ -540,15 +659,14 @@ fn canister_dapp_test() {
     assert!(matches!(get_after_clear.0, ManageTopUpRuleResult::Ok(None)));
 
     // ---- Top-up timer trigger (advance time) ----
-    // Goal: set a rule, ensure balance is below threshold, fast-forward time so the timer ticks,
-    //       then verify logs show the timer fired and a top-up attempt started.
-    // Note: We don't require a full successful mint (ledger/CMC not provisioned in tests);
-    //       we only assert the essential log lines proving the rule fired and evaluated.
+    // Now that ledger and fake-cmc are installed, verify a successful mint actually happens.
+    // Record cycles before adding the rule so we can detect an increase.
+    let cycles_before = pic.cycle_balance(canister_id);
 
-    // Set a rule with threshold above current cycles so it will trigger on first tick.
+    // Set a rule with threshold above current cycles so it will trigger on the immediate tick.
     let trigger_rule = TopUpRule {
         interval: TopUpInterval::Hourly,     // 3600s
-        cycles_threshold: CyclesAmount::_1T, // threshold 1T
+        cycles_threshold: CyclesAmount::_2T, // threshold 2T to ensure trigger
         cycles_amount: CyclesAmount::_1T,    // desired amount (value not important here)
     };
     let add_trigger_rule = update_candid_as::<(ManageTopUpRuleArg,), (ManageTopUpRuleResult,)>(
@@ -582,19 +700,15 @@ fn canister_dapp_test() {
         "missing immediate tick log after Add; logs were: {body_immediate}",
     );
 
-    // Sanity: current cycles should be below the activation threshold with hysteresis (90% of threshold).
-    let current_cycles = pic.cycle_balance(canister_id);
+    // For reference, print threshold vs. initial cycles
     let threshold_cycles = trigger_rule.cycles_threshold.as_cycles() as u128;
-    let activate_below = threshold_cycles - (threshold_cycles / 10);
-    assert!(
-        current_cycles < activate_below,
-        "precondition failed: current_cycles ({current_cycles}) >= activate_below ({activate_below})"
-    );
+    println!("cycles before top-up: current={cycles_before}, threshold={threshold_cycles}");
 
     // Fast-forward time beyond the interval and tick the IC so the timer fires.
     use std::time::Duration;
     pic.advance_time(Duration::from_secs(60 * 60 + 5));
     // One or two ticks may be needed to process timers and spawned tasks.
+    pic.tick();
     pic.tick();
     pic.tick();
 
@@ -622,5 +736,20 @@ fn canister_dapp_test() {
     assert!(
         body.contains("top-up: active rule") || body.contains("top-up: below threshold"),
         "missing rule evaluation logs; logs were: {body}",
+    );
+
+    // With fake-cmc + ledger available, the flow should complete successfully at least once.
+    // Look for success markers and verify cycles increased.
+    assert!(
+        body.contains("top-up: transfer ok") && body.contains("top-up: notify succeeded")
+            || body.contains("top-up: flow completed"),
+        "missing success logs; logs were: {body}",
+    );
+
+    // Cycles should have increased due to deposit_cycles in fake-cmc notify_top_up
+    let cycles_after = pic.cycle_balance(canister_id);
+    assert!(
+        cycles_after > cycles_before,
+        "expected cycles to increase after successful top-up; before={cycles_before} after={cycles_after}"
     );
 }

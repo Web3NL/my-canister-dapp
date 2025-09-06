@@ -86,7 +86,9 @@ fn get_u64_memo(transaction: &Transaction) -> u64 {
             return u64::from_le_bytes(memo_array);
         }
     }
-    0
+
+    // Fallback to legacy ICP ledger memo
+    transaction.memo.0
 }
 
 // Extract the transfer amount from a transaction

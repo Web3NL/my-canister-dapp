@@ -8,13 +8,28 @@ use std::fs;
 use std::path::Path;
 
 const TARGET_WASM_DIR: &str = "../../wasm";
-// const VERSION_HASHES_FILE: &str = "../../assets/version-hashes.json";
 
 const II_PRINCIPAL_AT_INSTALLER_APP_BYTE: u8 = 255;
 const II_PRINCIPAL_AT_USER_CONTROLLED_DAPP_BYTE: u8 = 254;
 const STRANGER_PRINCIPAL_BYTE: u8 = 253;
 
 pub const MIN_CANISTER_CREATION_BALANCE: u128 = 500_000_000_000;
+
+// Common constants for PocketIC system canisters and artifacts used by tests
+pub const ICP_LEDGER_CANISTER_ID_TEXT: &str = "ryjl3-tyaaa-aaaaa-aaaba-cai";
+pub const FAKE_CMC_CANISTER_ID_TEXT: &str = "rkp4c-7iaaa-aaaaa-aaaca-cai";
+
+// Relative paths (from CARGO_MANIFEST_DIR of the test crate) to Wasm artifacts
+pub const LEDGER_WASM_GZ_RELATIVE: &str = "../../dfx-env/icp-ledger/icp-ledger.wasm.gz";
+pub const FAKE_CMC_WASM_RELATIVE: &str =
+    "../../dfx-env/.dfx/local/canisters/fake-cmc/fake-cmc.wasm";
+
+// Ledger init configuration used in tests
+pub const LEDGER_INIT_TRANSFER_FEE_E8S: u64 = 10_000; // 0.0001 ICP
+pub const LEDGER_PREFUND_E8S: u64 = 20_000_000_000; // 200 ICP
+
+// Cycles to seed system canisters (ledger, cmc) in PocketIC
+pub const SYSTEM_CANISTER_BOOT_CYCLES: u128 = 10_000_000_000_000; // 10T cycles
 
 pub fn get_wasm_file_name() -> Result<String, String> {
     if !Path::new(TARGET_WASM_DIR).exists() {

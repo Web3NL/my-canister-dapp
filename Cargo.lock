@@ -197,12 +197,13 @@ dependencies = [
 
 [[package]]
 name = "canister-dapp-test"
-version = "0.1.0"
+version = "0.2.0"
 dependencies = [
  "candid",
  "hex",
  "ic-cdk",
  "ic-http-certification",
+ "ic-ledger-types",
  "my-canister-dashboard",
  "pocket-ic",
  "serde",
