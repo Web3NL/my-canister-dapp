@@ -34,4 +34,9 @@ test('My Hello World Frontend', async ({ page }) => {
 
     // Wait for the greeting message to appear
     await page.getByText('Hello, test!').waitFor({ state: 'visible' });
+
+    // At the end, verify the low cycles warning is shown (test setup ensures low cycles)
+    await page.locator('.warning-notification').waitFor({ state: 'visible' });
+    await page.locator('.warning-notification').getByText('Low cycles', { exact: false }).waitFor({ state: 'visible' });
+    await page.locator('.warning-notification a', { hasText: 'Goto dashboard to top-up' }).waitFor({ state: 'visible' });
 });
