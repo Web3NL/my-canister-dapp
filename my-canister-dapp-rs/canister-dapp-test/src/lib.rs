@@ -8,7 +8,6 @@ use std::fs;
 use std::path::Path;
 
 const TARGET_WASM_DIR: &str = "../../wasm";
-// const VERSION_HASHES_FILE: &str = "../../assets/version-hashes.json";
 
 const II_PRINCIPAL_AT_INSTALLER_APP_BYTE: u8 = 255;
 const II_PRINCIPAL_AT_USER_CONTROLLED_DAPP_BYTE: u8 = 254;
