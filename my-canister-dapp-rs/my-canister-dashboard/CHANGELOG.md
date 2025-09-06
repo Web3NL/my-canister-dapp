@@ -4,6 +4,17 @@
 
 ## [0.10.5] - 2025-09-02
 
+### Fixed
+
+Canister dashboard frontend:
+
+- Dashboard only loads if user is authed
+- Improved component lifecycle handling
+- Improved error handling
+- Cleanup e2e tests
+
+- Reverse canister log order in canister dashboard frontend
+
 ## [0.10.4] - 2025-09-02
 
 ### Fixed
