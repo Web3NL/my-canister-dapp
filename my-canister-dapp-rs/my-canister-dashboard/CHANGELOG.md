@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Changed
+
+- Remove CSP meta tag in `index.html` in favour of http headers, tightened CSP.
+
 ## [0.10.6] - 2025-09-06
 
 ## [0.10.5] - 2025-09-02
