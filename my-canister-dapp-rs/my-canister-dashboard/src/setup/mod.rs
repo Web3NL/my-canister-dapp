@@ -5,7 +5,7 @@ use crate::{
     manage_alternative_origins,
 };
 
-/// Certifies dashboard assets in a given [`AssetRouter`]. Typically used in the [`#[init]`](https://docs.rs/ic-cdk/latest/ic_cdk/attr.init.html) function of a canister.
+/// Sets up dashboard assets in a given [`AssetRouter`]. Typically used in the [`#[init]`](https://docs.rs/ic-cdk/latest/ic_cdk/attr.init.html) function of a canister.
 ///
 /// # Arguments
 ///

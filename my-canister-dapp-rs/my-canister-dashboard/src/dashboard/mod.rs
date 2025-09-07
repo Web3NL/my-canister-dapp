@@ -53,10 +53,12 @@ pub fn create_asset_config(path: &str) -> AssetConfig {
 
 /// Create asset config for index.html
 fn canister_dashboard_html_config() -> AssetConfig {
+    let csp_value = build_csp_header();
+
     AssetConfig::File {
         path: "index.html".to_string(),
         content_type: Some("text/html".to_string()),
-        headers: vec![],
+        headers: vec![("Content-Security-Policy".to_string(), csp_value)],
         fallback_for: vec![],
         aliased_by: vec![CANISTER_DASHBOARD_HTML_PATH.to_string()],
         encodings: vec![(AssetEncoding::Identity, "".to_string())],
@@ -97,4 +99,34 @@ pub fn alternative_origins_asset_config() -> AssetConfig {
         aliased_by: vec![],
         encodings: vec![(AssetEncoding::Identity, "".to_string())],
     }
+}
+
+fn build_csp_header() -> String {
+    let directives = [
+        "default-src 'none'",
+        "script-src 'self'",
+        "style-src 'self'",
+        "img-src 'self'",
+        "object-src 'none'",
+        "base-uri 'none'",
+        "form-action 'self'",
+        "frame-ancestors 'none'",
+    ];
+
+    let connect_src = [
+        "'self'",
+        "https://icp-api.io",
+        "https://*.icp0.io",
+        "http://localhost:*",
+        "http://*.localhost:*",
+        "http://127.0.0.1:*",
+        "ws://localhost:*",
+        "ws://127.0.0.1:*",
+    ];
+
+    format!(
+        "{}; connect-src {}",
+        directives.join("; "),
+        connect_src.join(" ")
+    )
 }
