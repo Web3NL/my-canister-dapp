@@ -1284,7 +1284,7 @@ dependencies = [
 
 [[package]]
 name = "my-canister-dashboard"
-version = "0.10.6"
+version = "0.10.7"
 dependencies = [
  "candid",
  "ic-asset-certification",
