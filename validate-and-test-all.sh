@@ -2,6 +2,14 @@
 
 set -e
 
+# Minimal total runtime reporting (MM:SS)
+SCRIPT_START_TIME=$(date +%s)
+print_total_time() {
+    local duration=$(( $(date +%s) - SCRIPT_START_TIME ))
+    printf "Total time: %02d:%02d\n" $(( duration / 60 )) $(( duration % 60 ))
+}
+trap print_total_time EXIT
+
 E2E_FLAG=""
 CLEAN_FLAG=""
 SKIP_DFX_BOOTSTRAP_FLAG=""
