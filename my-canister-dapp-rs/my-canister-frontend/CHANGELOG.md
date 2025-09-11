@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+### Changed
+
+- Specify version for internal dep
+- Update dependencies
+
 ## [0.2.0] - 2025-08-15
 
 ### Added
