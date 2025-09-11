@@ -41,7 +41,7 @@
   "license": "MIT",
   "main": "dist/index.js",
   "peerDependencies": {
-    "vite": "^7.1.4"
+    "vite": "^7.1.5"
   },
   "publishConfig": {
     "access": "public"
