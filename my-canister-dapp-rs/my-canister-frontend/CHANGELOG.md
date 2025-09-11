@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.2.1] - 2025-09-11
+
 ### Changed
 
 - Specify version for internal dep

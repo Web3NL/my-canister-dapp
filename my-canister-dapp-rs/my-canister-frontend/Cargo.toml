@@ -1,6 +1,6 @@
 [package]
 name = "my-canister-frontend"
-version = "0.2.0"
+version = "0.2.1"
 description = "Frontend asset utilities Canister Dapps"
 documentation = "https://docs.rs/my-canister-frontend"
 readme = "README.md"
