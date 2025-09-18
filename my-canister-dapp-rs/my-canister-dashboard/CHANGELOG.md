@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+### Added
+
+- Canister dashboard frontend: implemented `canisterStatusStore` and used it in `controllers` and `status` components.
+- Adjusted `top-up` and `status` to use new `canisterStatusStore.refresh` method
+
+
 ## [0.10.7] - 2025-09-07
 
 ### Changed

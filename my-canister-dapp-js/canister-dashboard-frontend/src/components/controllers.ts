@@ -1,4 +1,5 @@
 import { ManagementApi } from '../api/management';
+import { canisterStatusStore } from '../store/statusStore';
 import { Principal } from '@dfinity/principal';
 import {
   INVALID_PRINCIPAL_MESSAGE,
@@ -34,9 +35,7 @@ export class ControllersManager {
     iiPrincipal: Principal
   ): Promise<ControllersManager> {
     const instance = new ControllersManager(canisterId, iiPrincipal);
-    const managementApi = new ManagementApi();
-    const status = await managementApi.getCanisterStatus();
-
+    const status = await canisterStatusStore.getStatus();
     instance.controllersList = status.settings.controllers;
     instance.renderControllersContent();
     instance.attachEventListeners();
@@ -98,7 +97,7 @@ export class ControllersManager {
     try {
       const managementApi = new ManagementApi();
       await managementApi.updateControllers(updatedControllers);
-
+      await canisterStatusStore.refresh();
       this.controllersList = updatedControllers;
       clearInput('controller-input');
       this.renderControllersContent();
@@ -146,7 +145,7 @@ export class ControllersManager {
     try {
       const managementApi = new ManagementApi();
       await managementApi.updateControllers(updatedControllers);
-
+      await canisterStatusStore.refresh();
       this.controllersList = updatedControllers;
       clearInput('controller-input');
       this.renderControllersContent();

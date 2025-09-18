@@ -1,4 +1,4 @@
-import { ManagementApi } from '../api/management';
+import { canisterStatusStore } from '../store/statusStore';
 import { uint8ArrayToHexString } from '@dfinity/utils';
 import { formatMemorySize, formatCycles } from '../helpers';
 import type { CanisterStatusResponse } from '@dfinity/ic-management';
@@ -20,8 +20,7 @@ export class StatusManager {
   static async create(): Promise<StatusManager> {
     const instance = new StatusManager();
     try {
-      const managementApi = new ManagementApi();
-      const status = await managementApi.getCanisterStatus();
+      const status = await canisterStatusStore.getStatus();
 
       const {
         statusText,
@@ -41,6 +40,27 @@ export class StatusManager {
     }
 
     return instance;
+  }
+
+  static async refresh(): Promise<void> {
+    try {
+      const status = await canisterStatusStore.refresh();
+      const instance = new StatusManager();
+      const {
+        statusText,
+        memorySizeFormatted,
+        cyclesFormatted,
+        moduleHashHex,
+      } = instance.formatStatusData(status);
+      updateStatusDisplay(
+        statusText,
+        memorySizeFormatted,
+        cyclesFormatted,
+        moduleHashHex
+      );
+    } catch (e) {
+      reportError(NETWORK_ERROR_MESSAGE, e);
+    }
   }
 
   private formatStatusData(
