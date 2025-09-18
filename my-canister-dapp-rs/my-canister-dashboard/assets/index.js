@@ -12609,6 +12609,35 @@ class ManagementApi {
     }
   }
 }
+function createStatusStore() {
+  let statusCache = null;
+  let inFlight = null;
+  const fetchStatus = async () => {
+    const api = new ManagementApi();
+    return api.getCanisterStatus();
+  };
+  const refresh = async () => {
+    if (!inFlight) {
+      inFlight = fetchStatus().then((status) => {
+        statusCache = status;
+        return status;
+      }).finally(() => {
+        inFlight = null;
+      });
+    }
+    return inFlight;
+  };
+  const getStatus = async () => {
+    if (statusCache) return statusCache;
+    if (inFlight) return inFlight;
+    return refresh();
+  };
+  return {
+    getStatus,
+    refresh
+  };
+}
+const canisterStatusStore = createStatusStore();
 function principalToSubaccount(principal) {
   const principalBytes = principal.toUint8Array();
   const subaccount = new Uint8Array(32);
@@ -12642,8 +12671,7 @@ class StatusManager {
   static async create() {
     const instance = new StatusManager();
     try {
-      const managementApi = new ManagementApi();
-      const status = await managementApi.getCanisterStatus();
+      const status = await canisterStatusStore.getStatus();
       const {
         statusText,
         memorySizeFormatted,
@@ -12660,6 +12688,26 @@ class StatusManager {
       reportError(NETWORK_ERROR_MESSAGE, e5);
     }
     return instance;
+  }
+  static async refresh() {
+    try {
+      const status = await canisterStatusStore.refresh();
+      const instance = new StatusManager();
+      const {
+        statusText,
+        memorySizeFormatted,
+        cyclesFormatted,
+        moduleHashHex
+      } = instance.formatStatusData(status);
+      updateStatusDisplay(
+        statusText,
+        memorySizeFormatted,
+        cyclesFormatted,
+        moduleHashHex
+      );
+    } catch (e5) {
+      reportError(NETWORK_ERROR_MESSAGE, e5);
+    }
   }
   formatStatusData(status) {
     const statusText = "running" in status.status ? "Running" : "stopped" in status.status ? "Stopped" : "stopping" in status.status ? "Stopping" : "Unknown";
@@ -13160,7 +13208,7 @@ class TopupManager {
     }
   }
   async updateBalanceAndStatus() {
-    await StatusManager.create();
+    await StatusManager.refresh();
     await this.fetchAndRenderBalance();
   }
   async checkBalanceForTopUp() {
@@ -13194,8 +13242,7 @@ class ControllersManager {
   }
   static async create(canisterId2, iiPrincipal) {
     const instance = new ControllersManager(canisterId2, iiPrincipal);
-    const managementApi = new ManagementApi();
-    const status = await managementApi.getCanisterStatus();
+    const status = await canisterStatusStore.getStatus();
     instance.controllersList = status.settings.controllers;
     instance.renderControllersContent();
     instance.attachEventListeners();
@@ -13244,6 +13291,7 @@ class ControllersManager {
     try {
       const managementApi = new ManagementApi();
       await managementApi.updateControllers(updatedControllers);
+      await canisterStatusStore.refresh();
       this.controllersList = updatedControllers;
       clearInput("controller-input");
       this.renderControllersContent();
@@ -13282,6 +13330,7 @@ class ControllersManager {
     try {
       const managementApi = new ManagementApi();
       await managementApi.updateControllers(updatedControllers);
+      await canisterStatusStore.refresh();
       this.controllersList = updatedControllers;
       clearInput("controller-input");
       this.renderControllersContent();

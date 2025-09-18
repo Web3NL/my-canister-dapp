@@ -91,7 +91,8 @@ export class TopupManager {
   }
 
   private async updateBalanceAndStatus(): Promise<void> {
-    await StatusManager.create();
+    // Force a refresh so we don't use stale status cache after top-up
+    await StatusManager.refresh();
     await this.fetchAndRenderBalance();
   }
 
