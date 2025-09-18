@@ -14,7 +14,7 @@ authors = ["Web3NL"]
 repository = "https://github.com/Web3NL/my-canister-dapp"
 
 [workspace.dependencies]
-candid = "0.10.18"
+candid = "0.10.19"
 hex = "0.4.3"
 ic-asset-certification = "3.0.3"
 ic-cdk = "0.18.7"
@@ -24,9 +24,9 @@ ic-ledger-types = "0.15.0"
 include_dir = "0.7.4"
 icrc-ledger-types = "0.1.10"
 mime_guess = "2.0.5"
-pocket-ic = "9.0.2"
-serde = { version = "1.0.219", features = ["derive"] }
+pocket-ic = "10.0.0"
+serde = { version = "1.0.225", features = ["derive"] }
 serde_cbor = "0.11.2"
-serde_json = "1.0.143"
+serde_json = "1.0.145"
 sha2 = "0.10.9"
 num-traits = "0.2.19"
