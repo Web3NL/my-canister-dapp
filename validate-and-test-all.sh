@@ -10,25 +10,17 @@ print_total_time() {
 }
 trap print_total_time EXIT
 
-E2E_FLAG=""
 CLEAN_FLAG=""
-SKIP_DFX_BOOTSTRAP_FLAG=""
 SKIP_CHECKS_FLAG=""
+SKIP_DFX_BOOTSTRAP_FLAG=""
+SKIP_E2E_FLAG=""
 
 for arg in "$@"; do
     case $arg in
-        --e2e)
-            E2E_FLAG="true"
-            ;;
-        --clean)
-            CLEAN_FLAG="true"
-            ;;
-        --skip-dfx-bootstrap)
-            SKIP_DFX_BOOTSTRAP_FLAG="true"
-            ;;
-        --skip-checks)
-            SKIP_CHECKS_FLAG="true"
-            ;;
+        --clean) CLEAN_FLAG="true" ;;
+        --skip-checks) SKIP_CHECKS_FLAG="true" ;;
+        --skip-dfx-bootstrap) SKIP_DFX_BOOTSTRAP_FLAG="true" ;;
+        --skip-e2e) SKIP_E2E_FLAG="true" ;;
     esac
 done
 
@@ -73,7 +65,7 @@ dfx deploy my-canister-app
 echo "Running tests..."
 ./scripts/run-test.sh
 
-if [ "$E2E_FLAG" = "true" ]; then
+if [ "$SKIP_E2E_FLAG" != "true" ]; then
     ./scripts/run-test-e2e.sh
 fi
 
