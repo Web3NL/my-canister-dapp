@@ -34,4 +34,4 @@ jobs:
           getent hosts localhost || true
 
       - name: Build, validate and run tests (E2E)
-        run: ./validate-and-test-all.sh --e2e
+        run: ./validate-and-test-all.sh
