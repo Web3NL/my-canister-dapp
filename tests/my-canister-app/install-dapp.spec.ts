@@ -11,6 +11,9 @@ test('My Canister App E2E Suite', async ({ page }) => {
     const appUrl = myCanisterAppDfxUrl();
     await page.goto(appUrl);
 
+    // Dismiss maintenance mode overlay with Shift+M
+    await page.keyboard.press('Shift+KeyM');
+
     await page.getByRole('button', { name: 'My Dapps', exact: true }).waitFor({ state: 'visible' });
     await page.getByRole('button', { name: 'My Dapps', exact: true }).click();
 
