@@ -8,6 +8,7 @@
     Toasts,
   } from '@dfinity/gix-components';
   import Menu from '$lib/layout/Menu.svelte';
+  import MaintenanceOverlay from '$lib/components/MaintenanceOverlay.svelte';
   import { authStore } from '$lib/stores/auth';
 
   const handleLogout = async () => {
@@ -17,6 +18,7 @@
 
 <BusyScreen />
 <Toasts position="top" />
+<MaintenanceOverlay />
 
 <Layout layout="split">
   <a href="/" slot="menu-logo" class="logo" aria-label="Go to homepage">
