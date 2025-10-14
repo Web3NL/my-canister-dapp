@@ -6,22 +6,21 @@ import { authStore } from '$lib/stores/auth';
 import type { Principal } from '@dfinity/principal';
 import { remoteAuthStore } from '$lib/stores/remoteAuth';
 import { hasSufficientBalanceForCanisterCreation } from '$lib/utils/balance';
-import { fetchDappWasmFromRegistry } from '$lib/utils/fetch';
 import {
   MyDashboardBackend,
   type ManageIIPrincipalArg,
 } from '@web3nl/my-canister-dashboard';
 import { createHttpAgent } from '$lib/utils/agent';
 
-export async function createNewCanister(wasmId: number): Promise<Principal> {
+export async function createNewCanister(
+  wasmModule: Uint8Array
+): Promise<Principal> {
   const ledgerApi = await LedgerApi.create();
   const balance = await ledgerApi.balance();
 
   if (!(await hasSufficientBalanceForCanisterCreation(balance))) {
     throw new Error('Insufficient balance for canister creation');
   }
-
-  const wasmModule = await fetchDappWasmFromRegistry(wasmId);
 
   const blockIndex = await sendToCmc(balance);
   const canisterId = await createCanister(blockIndex);

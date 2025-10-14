@@ -12,9 +12,23 @@ interface Registry {
   canister_dapps: WasmModule[];
 }
 
-export async function fetchDappWasmFromRegistry(
-  id: number
-): Promise<Uint8Array> {
+export type WasmSource =
+  | { type: 'registry'; id: number }
+  | { type: 'file'; data: Uint8Array }
+  | { type: 'remote'; url: string };
+
+export async function fetchWasmModule(source: WasmSource): Promise<Uint8Array> {
+  switch (source.type) {
+    case 'registry':
+      return fetchDappWasmFromRegistry(source.id);
+    case 'file':
+      return source.data;
+    case 'remote':
+      return fetchWasmFromRemoteUrl(source.url);
+  }
+}
+
+async function fetchDappWasmFromRegistry(id: number): Promise<Uint8Array> {
   const response = await fetch(REGISTRY_URL);
   if (!response.ok) {
     throw new Error(
@@ -33,6 +47,18 @@ export async function fetchDappWasmFromRegistry(
   if (!wasmResponse.ok) {
     throw new Error(
       `Failed to fetch WASM: ${wasmResponse.status} ${wasmResponse.statusText}`
+    );
+  }
+
+  const arrayBuffer = await wasmResponse.arrayBuffer();
+  return new Uint8Array(arrayBuffer);
+}
+
+async function fetchWasmFromRemoteUrl(url: string): Promise<Uint8Array> {
+  const wasmResponse = await fetch(url);
+  if (!wasmResponse.ok) {
+    throw new Error(
+      `Failed to fetch WASM from ${url}: ${wasmResponse.status} ${wasmResponse.statusText}`
     );
   }
 
