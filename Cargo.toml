@@ -3,6 +3,7 @@ members = [
     "my-canister-dapp-rs/my-canister-dashboard",
     "my-canister-dapp-rs/my-canister-frontend",
     "my-canister-dapp-rs/canister-dapp-test",
+    "my-canister-dapp-rs/canister-dapp-cli",
     "examples/my-hello-world/src/my-hello-world",
 ]
 resolver = "2"

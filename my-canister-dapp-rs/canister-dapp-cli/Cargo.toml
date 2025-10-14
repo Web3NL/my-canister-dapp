@@ -1,0 +1,26 @@
+[package]
+name = "canister-dapp-cli"
+version = "0.1.0"
+description = "A command-line tool for creating, testing and deploying Canister Dapps on the Internet Computer"
+edition = { workspace = true }
+license = { workspace = true }
+authors = { workspace = true }
+repository = "https://github.com/Web3NL/my-canister-dapp/tree/main/my-canister-dapp-rs/canister-dapp-cli"
+keywords = ["internet-computer", "canister", "cli", "development", "web3"]
+categories = ["command-line-utilities", "development-tools"]
+
+[[bin]]
+name = "dapp"
+path = "src/main.rs"
+
+[dependencies]
+# For running system commands
+tokio = { version = "1.0", features = ["full"] }
+# For command line argument parsing
+clap = { version = "4.0", features = ["derive"] }
+# For opening browser
+webbrowser = "1.0"
+# For colored output
+colored = "3.0"
+# For error handling
+anyhow = "1.0"
