@@ -22,10 +22,10 @@ ic-cdk-timers = "0.12.2"
 ic-http-certification = "3.0.3"
 ic-ledger-types = "0.15.0"
 include_dir = "0.7.4"
-icrc-ledger-types = "0.1.10"
+icrc-ledger-types = "0.1.11"
 mime_guess = "2.0.5"
 pocket-ic = "10.0.0"
-serde = { version = "1.0.225", features = ["derive"] }
+serde = { version = "1.0.228", features = ["derive"] }
 serde_cbor = "0.11.2"
 serde_json = "1.0.145"
 sha2 = "0.10.9"
