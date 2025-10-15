@@ -1,5 +1,5 @@
 import { test } from '@playwright/test';
-import { saveTestData, getDfxEnv } from '../helpers';
+import { saveTestData, getDfxEnv } from '../helpers.js';
 
 const identityProvider = getDfxEnv('VITE_IDENTITY_PROVIDER');
 

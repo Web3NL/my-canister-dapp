@@ -22,8 +22,8 @@ npm run build:derive-ii-principal
 DAPP_ORIGIN=http://localhost:5173 DAPP_DEV_ENV=vite npm run test:derive-ii-principal
 DAPP_ORIGIN=http://22ajg-aqaaa-aaaap-adukq-cai.localhost:8080 DAPP_DEV_ENV=dfx npm run test:derive-ii-principal
 
-echo "Reading canister ID from global .env.development..."
-CANISTER_ID=$(grep VITE_MY_HELLO_WORLD_CANISTER_ID .env.development | cut -d '=' -f2)
+echo "Reading canister ID from tests/test.env..."
+CANISTER_ID=$(grep VITE_MY_HELLO_WORLD_CANISTER_ID tests/test.env | cut -d '=' -f2)
 
 echo "Reading principals from both files..."
 PRINCIPAL_VITE=$(cat test-output/derived-ii-principal-vite.txt)

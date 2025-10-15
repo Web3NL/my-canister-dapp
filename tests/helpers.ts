@@ -74,10 +74,10 @@ export function myCanisterAppDfxUrl(): string {
 }
 
 export function loadDfxEnv(): void {
-  const envPath = path.join(process.cwd(), '.env.development');
+  const envPath = path.join(process.cwd(), 'tests', 'test.env');
 
   if (!fs.existsSync(envPath)) {
-    throw new Error('Global .env.development not found at monorepo root');
+    throw new Error('Test environment file not found at tests/test.env');
   }
 
   dotenv.config({ path: envPath });

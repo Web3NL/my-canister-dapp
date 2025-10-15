@@ -3,6 +3,7 @@
 .env.*
 !.env.example
 !.env.test*
+!tests/test.env
 
 # Vite local env files
 **/.env

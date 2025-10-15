@@ -1,5 +1,5 @@
 import { test } from '@playwright/test';
-import { saveTestData, readTestData, getDfxEnv } from '../helpers';
+import { saveTestData, readTestData, getDfxEnv } from '../helpers.js';
 import { readFileSync } from 'fs';
 import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';

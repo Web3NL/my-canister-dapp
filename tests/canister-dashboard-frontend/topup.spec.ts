@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 import { login, checkPrincipal } from './login';
 import { formatIcpBalance } from '../../my-canister-dapp-js/canister-dashboard-frontend/src/helpers';
 import { TOPUP_AMOUNT } from './shared';
-import { transferToPrincipal } from 'tests/helpers';
+import { transferToPrincipal } from '../helpers.js';
 
 test('canister top-up increases cycles balance', async ({ page }, testInfo) => {
     const testUrl = testInfo.project.metadata.testUrl;

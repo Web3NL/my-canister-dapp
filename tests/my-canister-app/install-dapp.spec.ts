@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { myCanisterAppDfxUrl, loadDfxEnv, readTestData, transferToPrincipal, saveTestData } from '../helpers';
+import { myCanisterAppDfxUrl, loadDfxEnv, readTestData, transferToPrincipal, saveTestData } from '../helpers.js';
 import { Principal } from '@dfinity/principal';
 
 // Load global dfx environment variables
