@@ -3,9 +3,9 @@
     "@dfinity/agent": "^3.2.4",
     "@dfinity/auth-client": "^3.2.4",
     "@dfinity/candid": "^3.2.4",
-    "@dfinity/cmc": "6.0.1",
+    "@dfinity/cmc": "6.0.6",
     "@dfinity/ic-management": "7.0.1",
-    "@dfinity/ledger-icp": "6.0.0",
+    "@dfinity/ledger-icp": "6.1.2",
     "@dfinity/principal": "^3.2.4",
     "@dfinity/utils": "^3.0.1"
   },

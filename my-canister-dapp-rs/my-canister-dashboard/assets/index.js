@@ -778,13 +778,13 @@ class SHA256 extends HashMD {
     this.H = SHA256_IV[7] | 0;
   }
   get() {
-    const { A: A4, B: B3, C: C2, D: D2, E: E3, F: F2, G: G2, H: H2 } = this;
-    return [A4, B3, C2, D2, E3, F2, G2, H2];
+    const { A: A4, B: B2, C: C2, D: D2, E: E3, F: F2, G: G2, H: H2 } = this;
+    return [A4, B2, C2, D2, E3, F2, G2, H2];
   }
   // prettier-ignore
-  set(A4, B3, C2, D2, E3, F2, G2, H2) {
+  set(A4, B2, C2, D2, E3, F2, G2, H2) {
     this.A = A4 | 0;
-    this.B = B3 | 0;
+    this.B = B2 | 0;
     this.C = C2 | 0;
     this.D = D2 | 0;
     this.E = E3 | 0;
@@ -802,30 +802,30 @@ class SHA256 extends HashMD {
       const s1 = rotr(W2, 17) ^ rotr(W2, 19) ^ W2 >>> 10;
       SHA256_W[i3] = s1 + SHA256_W[i3 - 7] + s0 + SHA256_W[i3 - 16] | 0;
     }
-    let { A: A4, B: B3, C: C2, D: D2, E: E3, F: F2, G: G2, H: H2 } = this;
+    let { A: A4, B: B2, C: C2, D: D2, E: E3, F: F2, G: G2, H: H2 } = this;
     for (let i3 = 0; i3 < 64; i3++) {
       const sigma1 = rotr(E3, 6) ^ rotr(E3, 11) ^ rotr(E3, 25);
       const T1 = H2 + sigma1 + Chi(E3, F2, G2) + SHA256_K[i3] + SHA256_W[i3] | 0;
       const sigma0 = rotr(A4, 2) ^ rotr(A4, 13) ^ rotr(A4, 22);
-      const T2 = sigma0 + Maj(A4, B3, C2) | 0;
+      const T2 = sigma0 + Maj(A4, B2, C2) | 0;
       H2 = G2;
       G2 = F2;
       F2 = E3;
       E3 = D2 + T1 | 0;
       D2 = C2;
-      C2 = B3;
-      B3 = A4;
+      C2 = B2;
+      B2 = A4;
       A4 = T1 + T2 | 0;
     }
     A4 = A4 + this.A | 0;
-    B3 = B3 + this.B | 0;
+    B2 = B2 + this.B | 0;
     C2 = C2 + this.C | 0;
     D2 = D2 + this.D | 0;
     E3 = E3 + this.E | 0;
     F2 = F2 + this.F | 0;
     G2 = G2 + this.G | 0;
     H2 = H2 + this.H | 0;
-    this.set(A4, B3, C2, D2, E3, F2, G2, H2);
+    this.set(A4, B2, C2, D2, E3, F2, G2, H2);
   }
   roundClean() {
     clean(SHA256_W);
@@ -4214,7 +4214,7 @@ let w$3 = class w extends Error {
 };
 const m$2 = 55799, L$1 = Symbol("CBOR_STOP_CODE");
 var g$2 = /* @__PURE__ */ ((t3) => (t3[t3.False = 20] = "False", t3[t3.True = 21] = "True", t3[t3.Null = 22] = "Null", t3[t3.Undefined = 23] = "Undefined", t3[t3.Break = 31] = "Break", t3))(g$2 || {}), c = /* @__PURE__ */ ((t3) => (t3[t3.UnsignedInteger = 0] = "UnsignedInteger", t3[t3.NegativeInteger = 1] = "NegativeInteger", t3[t3.ByteString = 2] = "ByteString", t3[t3.TextString = 3] = "TextString", t3[t3.Array = 4] = "Array", t3[t3.Map = 5] = "Map", t3[t3.Tag = 6] = "Tag", t3[t3.Simple = 7] = "Simple", t3))(c || {});
-const z = 23, Y = 255, G$1 = 65535, P$1 = 4294967295, H = BigInt("0xffffffffffffffff");
+const z = 23, Y = 255, G$1 = 65535, P$1 = 4294967295, H$1 = BigInt("0xffffffffffffffff");
 var d = /* @__PURE__ */ ((t3) => (t3[t3.Value = 23] = "Value", t3[t3.OneByte = 24] = "OneByte", t3[t3.TwoBytes = 25] = "TwoBytes", t3[t3.FourBytes = 26] = "FourBytes", t3[t3.EightBytes = 27] = "EightBytes", t3[t3.Indefinite = 31] = "Indefinite", t3))(d || {});
 const h$2 = false;
 function W$1(t3) {
@@ -4234,11 +4234,11 @@ function q$1(t3) {
 let A$3 = new Uint8Array(), y$1, a = 0;
 function ut(t3, n2) {
   A$3 = t3, a = 0;
-  const e5 = B$2();
+  const e5 = B$1();
   return (n2 == null ? void 0 : n2(e5)) ?? e5;
 }
-function B$2(t3) {
-  const [n2, e5] = N$2();
+function B$1(t3) {
+  const [n2, e5] = N$3();
   switch (n2) {
     case c.UnsignedInteger:
       return E$2(e5);
@@ -4259,7 +4259,7 @@ function B$2(t3) {
   }
   throw new w$3(`Unsupported major type: ${n2}`);
 }
-function N$2() {
+function N$3() {
   const t3 = A$3.at(a);
   if (W$1(t3))
     throw new w$3("Provided CBOR data is empty");
@@ -4270,14 +4270,14 @@ function J$1(t3, n2) {
   const e5 = E$2(t3);
   if (e5 === 1 / 0) {
     const u2 = [];
-    let f2 = B$2();
+    let f2 = B$1();
     for (; f2 !== L$1; )
-      u2.push(f2), f2 = B$2();
+      u2.push(f2), f2 = B$1();
     return u2;
   }
   const i3 = new Array(e5);
   for (let u2 = 0; u2 < e5; u2++) {
-    const f2 = B$2();
+    const f2 = B$1();
     i3[u2] = f2;
   }
   return i3;
@@ -4300,18 +4300,18 @@ function Q(t3) {
 function b$3(t3, n2) {
   const e5 = E$2(t3), i3 = {};
   if (e5 === 1 / 0) {
-    let [u2, f2] = N$2();
+    let [u2, f2] = N$3();
     for (; u2 !== c.Simple && f2 !== g$2.Break; ) {
-      const l3 = F$2(f2), U2 = B$2();
-      i3[l3] = U2, [u2, f2] = N$2();
+      const l3 = F$2(f2), U2 = B$1();
+      i3[l3] = U2, [u2, f2] = N$3();
     }
     return i3;
   }
   for (let u2 = 0; u2 < e5; u2++) {
-    const [f2, l3] = N$2();
+    const [f2, l3] = N$3();
     if (f2 !== c.TextString)
       throw new w$3("Map keys must be text strings");
-    const U2 = F$2(l3), D2 = B$2();
+    const U2 = F$2(l3), D2 = B$1();
     i3[U2] = D2;
   }
   return i3;
@@ -4352,7 +4352,7 @@ function F$2(t3) {
 function M$2(t3, n2) {
   const e5 = E$2(t3);
   if (e5 === m$2)
-    return B$2();
+    return B$1();
   throw new w$3(`Unsupported tag: ${e5}.`);
 }
 let x$1 = class x extends Error {
@@ -4360,18 +4360,18 @@ let x$1 = class x extends Error {
     super(n2), this.name = "SerializationError";
   }
 };
-const p = 2 * 1024, C$1 = 100, v$3 = new TextEncoder();
+const p$1 = 2 * 1024, C$1 = 100, v$3 = new TextEncoder();
 function S$1(t3) {
   return t3 << 5;
 }
-let o$2 = new Uint8Array(p), r$2 = new DataView(o$2.buffer), s$2 = 0, O$3 = [];
+let o$2 = new Uint8Array(p$1), r$1 = new DataView(o$2.buffer), s$2 = 0, O$3 = [];
 function dt(t3, n2) {
   s$2 = 0;
   const e5 = (n2 == null ? void 0 : n2(t3)) ?? t3;
   return it(m$2, e5, n2), o$2.slice(0, s$2);
 }
 function _(t3, n2) {
-  if (s$2 > o$2.length - C$1 && (o$2 = R$2(o$2, o$2.length * 2), r$2 = new DataView(o$2.buffer)), t3 === false || t3 === true || t3 === null || t3 === void 0) {
+  if (s$2 > o$2.length - C$1 && (o$2 = R$2(o$2, o$2.length * 2), r$1 = new DataView(o$2.buffer)), t3 === false || t3 === true || t3 === null || t3 === void 0) {
     et(t3);
     return;
   }
@@ -4402,55 +4402,55 @@ function _(t3, n2) {
   throw new x$1(`Unsupported type: ${typeof t3}`);
 }
 function tt(t3, n2) {
-  I(c.Array, t3.length), t3.forEach((e5, i3) => {
+  I$1(c.Array, t3.length), t3.forEach((e5, i3) => {
     _((n2 == null ? void 0 : n2(e5, i3.toString())) ?? e5, n2);
   });
 }
 function nt(t3, n2) {
-  O$3 = Object.entries(t3), I(c.Map, O$3.length), O$3.forEach(([e5, i3]) => {
+  O$3 = Object.entries(t3), I$1(c.Map, O$3.length), O$3.forEach(([e5, i3]) => {
     X(e5), _((n2 == null ? void 0 : n2(i3, e5)) ?? i3, n2);
   });
 }
-function I(t3, n2) {
+function I$1(t3, n2) {
   if (n2 <= z) {
-    r$2.setUint8(
+    r$1.setUint8(
       s$2++,
       S$1(t3) | Number(n2)
     );
     return;
   }
   if (n2 <= Y) {
-    r$2.setUint8(
+    r$1.setUint8(
       s$2++,
       S$1(t3) | d.OneByte
-    ), r$2.setUint8(s$2, Number(n2)), s$2 += 1;
+    ), r$1.setUint8(s$2, Number(n2)), s$2 += 1;
     return;
   }
   if (n2 <= G$1) {
-    r$2.setUint8(
+    r$1.setUint8(
       s$2++,
       S$1(t3) | d.TwoBytes
-    ), r$2.setUint16(s$2, Number(n2), h$2), s$2 += 2;
+    ), r$1.setUint16(s$2, Number(n2), h$2), s$2 += 2;
     return;
   }
   if (n2 <= P$1) {
-    r$2.setUint8(
+    r$1.setUint8(
       s$2++,
       S$1(t3) | d.FourBytes
-    ), r$2.setUint32(s$2, Number(n2), h$2), s$2 += 4;
+    ), r$1.setUint32(s$2, Number(n2), h$2), s$2 += 4;
     return;
   }
-  if (n2 <= H) {
-    r$2.setUint8(
+  if (n2 <= H$1) {
+    r$1.setUint8(
       s$2++,
       S$1(t3) | d.EightBytes
-    ), r$2.setBigUint64(s$2, BigInt(n2), h$2), s$2 += 8;
+    ), r$1.setBigUint64(s$2, BigInt(n2), h$2), s$2 += 8;
     return;
   }
   throw new x$1(`Value too large to encode: ${n2}`);
 }
 function et(t3) {
-  I(c.Simple, st(t3));
+  I$1(c.Simple, st(t3));
 }
 function st(t3) {
   if (t3 === false)
@@ -4464,16 +4464,16 @@ function st(t3) {
   throw new x$1(`Unrecognized simple value: ${t3.toString()}`);
 }
 function k$1(t3, n2) {
-  I(t3, n2.length), s$2 > o$2.length - n2.length && (o$2 = R$2(o$2, o$2.length + n2.length), r$2 = new DataView(o$2.buffer)), o$2.set(n2, s$2), s$2 += n2.length;
+  I$1(t3, n2.length), s$2 > o$2.length - n2.length && (o$2 = R$2(o$2, o$2.length + n2.length), r$1 = new DataView(o$2.buffer)), o$2.set(n2, s$2), s$2 += n2.length;
 }
-function T$2(t3, n2) {
-  I(t3, n2);
+function T$3(t3, n2) {
+  I$1(t3, n2);
 }
 function ct(t3) {
-  T$2(c.UnsignedInteger, t3);
+  T$3(c.UnsignedInteger, t3);
 }
 function ot(t3) {
-  T$2(
+  T$3(
     c.NegativeInteger,
     typeof t3 == "bigint" ? -1n - t3 : -1 - t3
   );
@@ -4488,7 +4488,7 @@ function V$1(t3) {
   k$1(c.ByteString, t3);
 }
 function it(t3, n2, e5) {
-  I(c.Tag, t3), _(n2, e5);
+  I$1(c.Tag, t3), _(n2, e5);
 }
 function hasCborValueMethod(value) {
   return typeof value === "object" && value !== null && "toCborValue" in value;
@@ -6085,8 +6085,8 @@ function SWUFpSqrtRatio(Fp3, Z2) {
 }
 function mapToCurveSimpleSWU(Fp3, opts) {
   validateField(Fp3);
-  const { A: A4, B: B3, Z: Z2 } = opts;
-  if (!Fp3.isValid(A4) || !Fp3.isValid(B3) || !Fp3.isValid(Z2))
+  const { A: A4, B: B2, Z: Z2 } = opts;
+  if (!Fp3.isValid(A4) || !Fp3.isValid(B2) || !Fp3.isValid(Z2))
     throw new Error("mapToCurveSimpleSWU: invalid opts");
   const sqrtRatio = SWUFpSqrtRatio(Fp3, Z2);
   if (!Fp3.isOdd)
@@ -6098,7 +6098,7 @@ function mapToCurveSimpleSWU(Fp3, opts) {
     tv2 = Fp3.sqr(tv1);
     tv2 = Fp3.add(tv2, tv1);
     tv3 = Fp3.add(tv2, Fp3.ONE);
-    tv3 = Fp3.mul(tv3, B3);
+    tv3 = Fp3.mul(tv3, B2);
     tv4 = Fp3.cmov(Z2, Fp3.neg(tv2), !Fp3.eql(tv2, Fp3.ZERO));
     tv4 = Fp3.mul(tv4, A4);
     tv2 = Fp3.sqr(tv3);
@@ -6107,7 +6107,7 @@ function mapToCurveSimpleSWU(Fp3, opts) {
     tv2 = Fp3.add(tv2, tv5);
     tv2 = Fp3.mul(tv2, tv3);
     tv6 = Fp3.mul(tv6, tv4);
-    tv5 = Fp3.mul(tv6, B3);
+    tv5 = Fp3.mul(tv6, B2);
     tv2 = Fp3.add(tv2, tv5);
     x3 = Fp3.mul(tv1, tv3);
     const { isValid, value } = sqrtRatio(tv2, tv6);
@@ -6891,11 +6891,11 @@ class _Field6 {
     const { Fp2: Fp22 } = this;
     if (b2.length !== this.BYTES)
       throw new Error("fromBytes invalid length=" + b2.length);
-    const B22 = Fp22.BYTES;
+    const B2 = Fp22.BYTES;
     return {
-      c0: Fp22.fromBytes(b2.subarray(0, B22)),
-      c1: Fp22.fromBytes(b2.subarray(B22, B22 * 2)),
-      c2: Fp22.fromBytes(b2.subarray(2 * B22))
+      c0: Fp22.fromBytes(b2.subarray(0, B2)),
+      c1: Fp22.fromBytes(b2.subarray(B2, B2 * 2)),
+      c2: Fp22.fromBytes(b2.subarray(2 * B2))
     };
   }
   toBytes({ c0, c1, c2 }) {
@@ -8528,14 +8528,14 @@ function edwards(params, extraOpts = {}) {
       const { a: a2 } = CURVE;
       const { X: X1, Y: Y1, Z: Z1 } = this;
       const A4 = modP(X1 * X1);
-      const B3 = modP(Y1 * Y1);
+      const B2 = modP(Y1 * Y1);
       const C2 = modP(_2n$1 * modP(Z1 * Z1));
       const D2 = modP(a2 * A4);
       const x1y1 = X1 + Y1;
-      const E3 = modP(modP(x1y1 * x1y1) - A4 - B3);
-      const G2 = D2 + B3;
+      const E3 = modP(modP(x1y1 * x1y1) - A4 - B2);
+      const G2 = D2 + B2;
       const F2 = G2 - C2;
-      const H2 = D2 - B3;
+      const H2 = D2 - B2;
       const X3 = modP(E3 * F2);
       const Y3 = modP(G2 * H2);
       const T3 = modP(E3 * H2);
@@ -8551,13 +8551,13 @@ function edwards(params, extraOpts = {}) {
       const { X: X1, Y: Y1, Z: Z1, T: T1 } = this;
       const { X: X2, Y: Y2, Z: Z2, T: T2 } = other;
       const A4 = modP(X1 * X2);
-      const B3 = modP(Y1 * Y2);
+      const B2 = modP(Y1 * Y2);
       const C2 = modP(T1 * d2 * T2);
       const D2 = modP(Z1 * Z2);
-      const E3 = modP((X1 + Y1) * (X2 + Y2) - A4 - B3);
+      const E3 = modP((X1 + Y1) * (X2 + Y2) - A4 - B2);
       const F2 = D2 - C2;
       const G2 = D2 + C2;
-      const H2 = modP(B3 - a2 * A4);
+      const H2 = modP(B2 - a2 * A4);
       const X3 = modP(E3 * F2);
       const Y3 = modP(G2 * H2);
       const T3 = modP(E3 * H2);
@@ -11969,6 +11969,8 @@ var lt = ({ options: { canisterId: e5, serviceOverride: t3, certifiedServiceOver
 var A$2 = class A extends Error {
 }, f$1 = (e5, t3) => {
   if (e5 == null) throw new A$2(t3);
+}, yt = (e5, t3) => {
+  throw new Error(t3);
 };
 var St = (e5) => new Uint8Array(e5), wt = (e5) => Array.from(e5).map((t3) => t3.charCodeAt(0)), Et$1 = (e5) => {
   let t3 = e5.match(/.{1,2}/g);
@@ -11989,6 +11991,7 @@ var $ = new Uint32Array([0, 1996959894, 3993919788, 2567524794, 124634137, 18860
   let t3 = new ArrayBuffer(4);
   return new DataView(t3).setUint32(0, J(e5), false), new Uint8Array(t3);
 };
+var T$2 = "__bigint__", N$2 = "__principal__", I = "__uint8array__", D$1 = (e5, t3) => typeof t3 == "bigint" ? { [T$2]: `${t3}` } : s$1(t3) && Principal$1.isPrincipal(t3) ? { [N$2]: Principal$1.from(t3).toText() } : s$1(t3) && t3 instanceof Uint8Array ? { [I]: Array.from(t3) } : t3;
 var ne = (e5) => s$1(e5) ? [e5] : [], v$2 = (e5) => e5?.[0];
 var u$1 = ((t3) => (t3[t3.Controllers = 0] = "Controllers", t3[t3.Public = 1] = "Public", t3))(u$1 || {}), i$1 = class i extends Error {
 }, P = ({ controllers: r2, freezingThreshold: a2, memoryAllocation: t3, computeAllocation: s2, reservedCyclesLimit: o3, logVisibility: n2, wasmMemoryLimit: l3, wasmMemoryThreshold: c2 } = {}) => {
@@ -12005,12 +12008,12 @@ var u$1 = ((t3) => (t3[t3.Controllers = 0] = "Controllers", t3[t3.Public = 1] = 
   return { controllers: ne(r2?.map((d2) => Principal$1.fromText(d2))), freezing_threshold: ne(a2), memory_allocation: ne(t3), compute_allocation: ne(s2), reserved_cycles_limit: ne(o3), log_visibility: u$2(n2) ? [] : [m2()], wasm_memory_limit: ne(l3), wasm_memory_threshold: ne(c2) };
 };
 var Et = ({ IDL: t22 }) => {
-  let e5 = t22.Variant({ mainnet: t22.Null, testnet: t22.Null }), n2 = t22.Text, c2 = t22.Record({ network: e5, address: n2, min_confirmations: t22.Opt(t22.Nat32) }), r2 = t22.Nat64, i3 = r2, o3 = t22.Nat32, u2 = t22.Record({ start_height: o3, end_height: t22.Opt(o3), network: e5 }), F2 = t22.Vec(t22.Nat8), O2 = t22.Record({ tip_height: o3, block_headers: t22.Vec(F2) }), P2 = t22.Record({ network: e5 }), x3 = t22.Nat64, w3 = t22.Vec(x3), C2 = t22.Record({ network: e5, filter: t22.Opt(t22.Variant({ page: t22.Vec(t22.Nat8), min_confirmations: t22.Nat32 })), address: n2 }), T2 = t22.Vec(t22.Nat8), S2 = t22.Record({ txid: t22.Vec(t22.Nat8), vout: t22.Nat32 }), z2 = t22.Record({ height: t22.Nat32, value: r2, outpoint: S2 }), q2 = t22.Record({ next_page: t22.Opt(t22.Vec(t22.Nat8)), tip_height: o3, tip_block_hash: T2, utxos: t22.Vec(z2) }), U2 = t22.Record({ transaction: t22.Vec(t22.Nat8), network: e5 }), s2 = t22.Principal, A4 = t22.Record({ canister_id: s2, num_requested_changes: t22.Opt(t22.Nat64) }), W2 = t22.Variant({ from_user: t22.Record({ user_id: t22.Principal }), from_canister: t22.Record({ canister_version: t22.Opt(t22.Nat64), canister_id: t22.Principal }) }), _2 = t22.Vec(t22.Nat8), B3 = t22.Variant({ creation: t22.Record({ controllers: t22.Vec(t22.Principal) }), code_deployment: t22.Record({ mode: t22.Variant({ reinstall: t22.Null, upgrade: t22.Null, install: t22.Null }), module_hash: t22.Vec(t22.Nat8) }), load_snapshot: t22.Record({ canister_version: t22.Nat64, taken_at_timestamp: t22.Nat64, snapshot_id: _2 }), controllers_change: t22.Record({ controllers: t22.Vec(t22.Principal) }), code_uninstall: t22.Null }), E3 = t22.Record({ timestamp_nanos: t22.Nat64, canister_version: t22.Nat64, origin: W2, details: B3 }), M2 = t22.Record({ controllers: t22.Vec(t22.Principal), module_hash: t22.Opt(t22.Vec(t22.Nat8)), recent_changes: t22.Vec(E3), total_num_changes: t22.Nat64 }), Q2 = t22.Record({ canister_id: s2 }), h2 = t22.Variant({ controllers: t22.Null, public: t22.Null, allowed_viewers: t22.Vec(t22.Principal) }), j2 = t22.Record({ freezing_threshold: t22.Nat, wasm_memory_threshold: t22.Nat, controllers: t22.Vec(t22.Principal), reserved_cycles_limit: t22.Nat, log_visibility: h2, wasm_memory_limit: t22.Nat, memory_allocation: t22.Nat, compute_allocation: t22.Nat }), H2 = t22.Record({ memory_metrics: t22.Record({ wasm_binary_size: t22.Nat, wasm_chunk_store_size: t22.Nat, canister_history_size: t22.Nat, stable_memory_size: t22.Nat, snapshots_size: t22.Nat, wasm_memory_size: t22.Nat, global_memory_size: t22.Nat, custom_sections_size: t22.Nat }), status: t22.Variant({ stopped: t22.Null, stopping: t22.Null, running: t22.Null }), memory_size: t22.Nat, cycles: t22.Nat, settings: j2, query_stats: t22.Record({ response_payload_bytes_total: t22.Nat, num_instructions_total: t22.Nat, num_calls_total: t22.Nat, request_payload_bytes_total: t22.Nat }), idle_cycles_burned_per_day: t22.Nat, module_hash: t22.Opt(t22.Vec(t22.Nat8)), reserved_cycles: t22.Nat }), G2 = t22.Record({ canister_id: s2 }), d2 = t22.Record({ freezing_threshold: t22.Opt(t22.Nat), wasm_memory_threshold: t22.Opt(t22.Nat), controllers: t22.Opt(t22.Vec(t22.Principal)), reserved_cycles_limit: t22.Opt(t22.Nat), log_visibility: t22.Opt(h2), wasm_memory_limit: t22.Opt(t22.Nat), memory_allocation: t22.Opt(t22.Nat), compute_allocation: t22.Opt(t22.Nat) }), J2 = t22.Record({ settings: t22.Opt(d2), sender_canister_version: t22.Opt(t22.Nat64) }), K2 = t22.Record({ canister_id: s2 }), X2 = t22.Record({ canister_id: s2 }), Y2 = t22.Record({ canister_id: s2, snapshot_id: _2 }), Z2 = t22.Record({ canister_id: s2 }), m2 = t22.Variant({ secp256k1: t22.Null }), $2 = t22.Record({ key_id: t22.Record({ name: t22.Text, curve: m2 }), canister_id: t22.Opt(s2), derivation_path: t22.Vec(t22.Vec(t22.Nat8)) }), I2 = t22.Record({ public_key: t22.Vec(t22.Nat8), chain_code: t22.Vec(t22.Nat8) }), L2 = t22.Record({ canister_id: s2 }), D2 = t22.Record({ idx: t22.Nat64, timestamp_nanos: t22.Nat64, content: t22.Vec(t22.Nat8) }), tt2 = t22.Record({ canister_log_records: t22.Vec(D2) }), g2 = t22.Record({ value: t22.Text, name: t22.Text }), l3 = t22.Record({ status: t22.Nat, body: t22.Vec(t22.Nat8), headers: t22.Vec(g2) }), et2 = t22.Record({ url: t22.Text, method: t22.Variant({ get: t22.Null, head: t22.Null, post: t22.Null }), max_response_bytes: t22.Opt(t22.Nat64), body: t22.Opt(t22.Vec(t22.Nat8)), transform: t22.Opt(t22.Record({ function: t22.Func([t22.Record({ context: t22.Vec(t22.Nat8), response: l3 })], [l3], []), context: t22.Vec(t22.Nat8) })), headers: t22.Vec(g2) }), N2 = t22.Variant({ reinstall: t22.Null, upgrade: t22.Opt(t22.Record({ wasm_memory_persistence: t22.Opt(t22.Variant({ keep: t22.Null, replace: t22.Null })), skip_pre_upgrade: t22.Opt(t22.Bool) })), install: t22.Null }), p2 = t22.Record({ hash: t22.Vec(t22.Nat8) }), st2 = t22.Record({ arg: t22.Vec(t22.Nat8), wasm_module_hash: t22.Vec(t22.Nat8), mode: N2, chunk_hashes_list: t22.Vec(p2), target_canister: s2, store_canister: t22.Opt(s2), sender_canister_version: t22.Opt(t22.Nat64) }), nt2 = t22.Vec(t22.Nat8), ct2 = t22.Record({ arg: t22.Vec(t22.Nat8), wasm_module: nt2, mode: N2, canister_id: s2, sender_canister_version: t22.Opt(t22.Nat64) }), rt = t22.Record({ canister_id: s2 }), y2 = t22.Record({ id: _2, total_size: t22.Nat64, taken_at_timestamp: t22.Nat64 }), at = t22.Vec(y2), it2 = t22.Record({ canister_id: s2, sender_canister_version: t22.Opt(t22.Nat64), snapshot_id: _2 }), ot2 = t22.Record({ start_at_timestamp_nanos: t22.Nat64, subnet_id: t22.Principal }), _t = t22.Record({ num_block_failures_total: t22.Nat64, node_id: t22.Principal, num_blocks_proposed_total: t22.Nat64 }), dt2 = t22.Vec(t22.Record({ timestamp_nanos: t22.Nat64, node_metrics: t22.Vec(_t) })), lt2 = t22.Record({ settings: t22.Opt(d2), specified_id: t22.Opt(s2), amount: t22.Opt(t22.Nat), sender_canister_version: t22.Opt(t22.Nat64) }), pt = t22.Record({ canister_id: s2 }), ut2 = t22.Record({ canister_id: s2, amount: t22.Nat }), ht = t22.Vec(t22.Nat8), k2 = t22.Variant({ ed25519: t22.Null, bip340secp256k1: t22.Null }), mt = t22.Record({ key_id: t22.Record({ algorithm: k2, name: t22.Text }), canister_id: t22.Opt(s2), derivation_path: t22.Vec(t22.Vec(t22.Nat8)) }), gt = t22.Record({ public_key: t22.Vec(t22.Nat8), chain_code: t22.Vec(t22.Nat8) }), Nt = t22.Record({ key_id: t22.Record({ name: t22.Text, curve: m2 }), derivation_path: t22.Vec(t22.Vec(t22.Nat8)), message_hash: t22.Vec(t22.Nat8) }), yt = t22.Record({ signature: t22.Vec(t22.Nat8) }), kt = t22.Variant({ bip341: t22.Record({ merkle_root_hash: t22.Vec(t22.Nat8) }) }), Rt = t22.Record({ aux: t22.Opt(kt), key_id: t22.Record({ algorithm: k2, name: t22.Text }), derivation_path: t22.Vec(t22.Vec(t22.Nat8)), message: t22.Vec(t22.Nat8) }), Vt = t22.Record({ signature: t22.Vec(t22.Nat8) }), vt = t22.Record({ canister_id: s2 }), bt = t22.Record({ canister_id: s2 }), ft2 = t22.Record({ canister_id: s2 }), Ft = t22.Vec(p2), Ot = t22.Record({ subnet_id: t22.Principal }), Pt = t22.Record({ replica_version: t22.Text, registry_version: t22.Nat64 }), xt = t22.Record({ replace_snapshot: t22.Opt(_2), canister_id: s2 }), wt2 = y2, Ct = t22.Record({ canister_id: s2, sender_canister_version: t22.Opt(t22.Nat64) }), Tt = t22.Record({ canister_id: t22.Principal, settings: d2, sender_canister_version: t22.Opt(t22.Nat64) }), St2 = t22.Record({ chunk: t22.Vec(t22.Nat8), canister_id: t22.Principal }), zt = p2, R2 = t22.Variant({ bls12_381_g2: t22.Null }), qt = t22.Record({ context: t22.Vec(t22.Nat8), key_id: t22.Record({ name: t22.Text, curve: R2 }), input: t22.Vec(t22.Nat8), transport_public_key: t22.Vec(t22.Nat8) }), Ut = t22.Record({ encrypted_key: t22.Vec(t22.Nat8) }), At = t22.Record({ context: t22.Vec(t22.Nat8), key_id: t22.Record({ name: t22.Text, curve: R2 }), canister_id: t22.Opt(s2) }), Wt = t22.Record({ public_key: t22.Vec(t22.Nat8) });
-  return t22.Service({ bitcoin_get_balance: t22.Func([c2], [i3], []), bitcoin_get_block_headers: t22.Func([u2], [O2], []), bitcoin_get_current_fee_percentiles: t22.Func([P2], [w3], []), bitcoin_get_utxos: t22.Func([C2], [q2], []), bitcoin_send_transaction: t22.Func([U2], [], []), canister_info: t22.Func([A4], [M2], []), canister_status: t22.Func([Q2], [H2], []), clear_chunk_store: t22.Func([G2], [], []), create_canister: t22.Func([J2], [K2], []), delete_canister: t22.Func([X2], [], []), delete_canister_snapshot: t22.Func([Y2], [], []), deposit_cycles: t22.Func([Z2], [], []), ecdsa_public_key: t22.Func([$2], [I2], []), fetch_canister_logs: t22.Func([L2], [tt2], []), http_request: t22.Func([et2], [l3], []), install_chunked_code: t22.Func([st2], [], []), install_code: t22.Func([ct2], [], []), list_canister_snapshots: t22.Func([rt], [at], []), load_canister_snapshot: t22.Func([it2], [], []), node_metrics_history: t22.Func([ot2], [dt2], []), provisional_create_canister_with_cycles: t22.Func([lt2], [pt], []), provisional_top_up_canister: t22.Func([ut2], [], []), raw_rand: t22.Func([], [ht], []), schnorr_public_key: t22.Func([mt], [gt], []), sign_with_ecdsa: t22.Func([Nt], [yt], []), sign_with_schnorr: t22.Func([Rt], [Vt], []), start_canister: t22.Func([vt], [], []), stop_canister: t22.Func([bt], [], []), stored_chunks: t22.Func([ft2], [Ft], []), subnet_info: t22.Func([Ot], [Pt], []), take_canister_snapshot: t22.Func([xt], [wt2], []), uninstall_code: t22.Func([Ct], [], []), update_settings: t22.Func([Tt], [], []), upload_chunk: t22.Func([St2], [zt], []), vetkd_derive_key: t22.Func([qt], [Ut], []), vetkd_public_key: t22.Func([At], [Wt], []) });
+  let e5 = t22.Variant({ mainnet: t22.Null, testnet: t22.Null }), n2 = t22.Text, c2 = t22.Record({ network: e5, address: n2, min_confirmations: t22.Opt(t22.Nat32) }), r2 = t22.Nat64, i3 = r2, o3 = t22.Nat32, u2 = t22.Record({ start_height: o3, end_height: t22.Opt(o3), network: e5 }), F2 = t22.Vec(t22.Nat8), O2 = t22.Record({ tip_height: o3, block_headers: t22.Vec(F2) }), P2 = t22.Record({ network: e5 }), x3 = t22.Nat64, w3 = t22.Vec(x3), C2 = t22.Record({ network: e5, filter: t22.Opt(t22.Variant({ page: t22.Vec(t22.Nat8), min_confirmations: t22.Nat32 })), address: n2 }), T2 = t22.Vec(t22.Nat8), S2 = t22.Record({ txid: t22.Vec(t22.Nat8), vout: t22.Nat32 }), z2 = t22.Record({ height: t22.Nat32, value: r2, outpoint: S2 }), q2 = t22.Record({ next_page: t22.Opt(t22.Vec(t22.Nat8)), tip_height: o3, tip_block_hash: T2, utxos: t22.Vec(z2) }), U2 = t22.Record({ transaction: t22.Vec(t22.Nat8), network: e5 }), s2 = t22.Principal, A4 = t22.Record({ canister_id: s2, num_requested_changes: t22.Opt(t22.Nat64) }), W2 = t22.Variant({ from_user: t22.Record({ user_id: t22.Principal }), from_canister: t22.Record({ canister_version: t22.Opt(t22.Nat64), canister_id: t22.Principal }) }), _2 = t22.Vec(t22.Nat8), B2 = t22.Variant({ creation: t22.Record({ controllers: t22.Vec(t22.Principal) }), code_deployment: t22.Record({ mode: t22.Variant({ reinstall: t22.Null, upgrade: t22.Null, install: t22.Null }), module_hash: t22.Vec(t22.Nat8) }), load_snapshot: t22.Record({ canister_version: t22.Nat64, taken_at_timestamp: t22.Nat64, snapshot_id: _2 }), controllers_change: t22.Record({ controllers: t22.Vec(t22.Principal) }), code_uninstall: t22.Null }), E3 = t22.Record({ timestamp_nanos: t22.Nat64, canister_version: t22.Nat64, origin: W2, details: B2 }), M2 = t22.Record({ controllers: t22.Vec(t22.Principal), module_hash: t22.Opt(t22.Vec(t22.Nat8)), recent_changes: t22.Vec(E3), total_num_changes: t22.Nat64 }), Q2 = t22.Record({ canister_id: s2 }), h2 = t22.Variant({ controllers: t22.Null, public: t22.Null, allowed_viewers: t22.Vec(t22.Principal) }), j2 = t22.Record({ freezing_threshold: t22.Nat, wasm_memory_threshold: t22.Nat, controllers: t22.Vec(t22.Principal), reserved_cycles_limit: t22.Nat, log_visibility: h2, wasm_memory_limit: t22.Nat, memory_allocation: t22.Nat, compute_allocation: t22.Nat }), H2 = t22.Record({ memory_metrics: t22.Record({ wasm_binary_size: t22.Nat, wasm_chunk_store_size: t22.Nat, canister_history_size: t22.Nat, stable_memory_size: t22.Nat, snapshots_size: t22.Nat, wasm_memory_size: t22.Nat, global_memory_size: t22.Nat, custom_sections_size: t22.Nat }), status: t22.Variant({ stopped: t22.Null, stopping: t22.Null, running: t22.Null }), memory_size: t22.Nat, cycles: t22.Nat, settings: j2, query_stats: t22.Record({ response_payload_bytes_total: t22.Nat, num_instructions_total: t22.Nat, num_calls_total: t22.Nat, request_payload_bytes_total: t22.Nat }), idle_cycles_burned_per_day: t22.Nat, module_hash: t22.Opt(t22.Vec(t22.Nat8)), reserved_cycles: t22.Nat }), G2 = t22.Record({ canister_id: s2 }), d2 = t22.Record({ freezing_threshold: t22.Opt(t22.Nat), wasm_memory_threshold: t22.Opt(t22.Nat), controllers: t22.Opt(t22.Vec(t22.Principal)), reserved_cycles_limit: t22.Opt(t22.Nat), log_visibility: t22.Opt(h2), wasm_memory_limit: t22.Opt(t22.Nat), memory_allocation: t22.Opt(t22.Nat), compute_allocation: t22.Opt(t22.Nat) }), J2 = t22.Record({ settings: t22.Opt(d2), sender_canister_version: t22.Opt(t22.Nat64) }), K2 = t22.Record({ canister_id: s2 }), X2 = t22.Record({ canister_id: s2 }), Y2 = t22.Record({ canister_id: s2, snapshot_id: _2 }), Z2 = t22.Record({ canister_id: s2 }), m2 = t22.Variant({ secp256k1: t22.Null }), $2 = t22.Record({ key_id: t22.Record({ name: t22.Text, curve: m2 }), canister_id: t22.Opt(s2), derivation_path: t22.Vec(t22.Vec(t22.Nat8)) }), I2 = t22.Record({ public_key: t22.Vec(t22.Nat8), chain_code: t22.Vec(t22.Nat8) }), L2 = t22.Record({ canister_id: s2 }), D2 = t22.Record({ idx: t22.Nat64, timestamp_nanos: t22.Nat64, content: t22.Vec(t22.Nat8) }), tt2 = t22.Record({ canister_log_records: t22.Vec(D2) }), g2 = t22.Record({ value: t22.Text, name: t22.Text }), l3 = t22.Record({ status: t22.Nat, body: t22.Vec(t22.Nat8), headers: t22.Vec(g2) }), et2 = t22.Record({ url: t22.Text, method: t22.Variant({ get: t22.Null, head: t22.Null, post: t22.Null }), max_response_bytes: t22.Opt(t22.Nat64), body: t22.Opt(t22.Vec(t22.Nat8)), transform: t22.Opt(t22.Record({ function: t22.Func([t22.Record({ context: t22.Vec(t22.Nat8), response: l3 })], [l3], []), context: t22.Vec(t22.Nat8) })), headers: t22.Vec(g2) }), N2 = t22.Variant({ reinstall: t22.Null, upgrade: t22.Opt(t22.Record({ wasm_memory_persistence: t22.Opt(t22.Variant({ keep: t22.Null, replace: t22.Null })), skip_pre_upgrade: t22.Opt(t22.Bool) })), install: t22.Null }), p2 = t22.Record({ hash: t22.Vec(t22.Nat8) }), st2 = t22.Record({ arg: t22.Vec(t22.Nat8), wasm_module_hash: t22.Vec(t22.Nat8), mode: N2, chunk_hashes_list: t22.Vec(p2), target_canister: s2, store_canister: t22.Opt(s2), sender_canister_version: t22.Opt(t22.Nat64) }), nt2 = t22.Vec(t22.Nat8), ct2 = t22.Record({ arg: t22.Vec(t22.Nat8), wasm_module: nt2, mode: N2, canister_id: s2, sender_canister_version: t22.Opt(t22.Nat64) }), rt = t22.Record({ canister_id: s2 }), y2 = t22.Record({ id: _2, total_size: t22.Nat64, taken_at_timestamp: t22.Nat64 }), at = t22.Vec(y2), it2 = t22.Record({ canister_id: s2, sender_canister_version: t22.Opt(t22.Nat64), snapshot_id: _2 }), ot2 = t22.Record({ start_at_timestamp_nanos: t22.Nat64, subnet_id: t22.Principal }), _t = t22.Record({ num_block_failures_total: t22.Nat64, node_id: t22.Principal, num_blocks_proposed_total: t22.Nat64 }), dt2 = t22.Vec(t22.Record({ timestamp_nanos: t22.Nat64, node_metrics: t22.Vec(_t) })), lt2 = t22.Record({ settings: t22.Opt(d2), specified_id: t22.Opt(s2), amount: t22.Opt(t22.Nat), sender_canister_version: t22.Opt(t22.Nat64) }), pt = t22.Record({ canister_id: s2 }), ut2 = t22.Record({ canister_id: s2, amount: t22.Nat }), ht = t22.Vec(t22.Nat8), k2 = t22.Variant({ ed25519: t22.Null, bip340secp256k1: t22.Null }), mt = t22.Record({ key_id: t22.Record({ algorithm: k2, name: t22.Text }), canister_id: t22.Opt(s2), derivation_path: t22.Vec(t22.Vec(t22.Nat8)) }), gt = t22.Record({ public_key: t22.Vec(t22.Nat8), chain_code: t22.Vec(t22.Nat8) }), Nt = t22.Record({ key_id: t22.Record({ name: t22.Text, curve: m2 }), derivation_path: t22.Vec(t22.Vec(t22.Nat8)), message_hash: t22.Vec(t22.Nat8) }), yt2 = t22.Record({ signature: t22.Vec(t22.Nat8) }), kt = t22.Variant({ bip341: t22.Record({ merkle_root_hash: t22.Vec(t22.Nat8) }) }), Rt = t22.Record({ aux: t22.Opt(kt), key_id: t22.Record({ algorithm: k2, name: t22.Text }), derivation_path: t22.Vec(t22.Vec(t22.Nat8)), message: t22.Vec(t22.Nat8) }), Vt = t22.Record({ signature: t22.Vec(t22.Nat8) }), vt = t22.Record({ canister_id: s2 }), bt = t22.Record({ canister_id: s2 }), ft2 = t22.Record({ canister_id: s2 }), Ft = t22.Vec(p2), Ot = t22.Record({ subnet_id: t22.Principal }), Pt = t22.Record({ replica_version: t22.Text, registry_version: t22.Nat64 }), xt = t22.Record({ replace_snapshot: t22.Opt(_2), canister_id: s2 }), wt2 = y2, Ct = t22.Record({ canister_id: s2, sender_canister_version: t22.Opt(t22.Nat64) }), Tt = t22.Record({ canister_id: t22.Principal, settings: d2, sender_canister_version: t22.Opt(t22.Nat64) }), St2 = t22.Record({ chunk: t22.Vec(t22.Nat8), canister_id: t22.Principal }), zt = p2, R2 = t22.Variant({ bls12_381_g2: t22.Null }), qt = t22.Record({ context: t22.Vec(t22.Nat8), key_id: t22.Record({ name: t22.Text, curve: R2 }), input: t22.Vec(t22.Nat8), transport_public_key: t22.Vec(t22.Nat8) }), Ut = t22.Record({ encrypted_key: t22.Vec(t22.Nat8) }), At = t22.Record({ context: t22.Vec(t22.Nat8), key_id: t22.Record({ name: t22.Text, curve: R2 }), canister_id: t22.Opt(s2) }), Wt = t22.Record({ public_key: t22.Vec(t22.Nat8) });
+  return t22.Service({ bitcoin_get_balance: t22.Func([c2], [i3], []), bitcoin_get_block_headers: t22.Func([u2], [O2], []), bitcoin_get_current_fee_percentiles: t22.Func([P2], [w3], []), bitcoin_get_utxos: t22.Func([C2], [q2], []), bitcoin_send_transaction: t22.Func([U2], [], []), canister_info: t22.Func([A4], [M2], []), canister_status: t22.Func([Q2], [H2], []), clear_chunk_store: t22.Func([G2], [], []), create_canister: t22.Func([J2], [K2], []), delete_canister: t22.Func([X2], [], []), delete_canister_snapshot: t22.Func([Y2], [], []), deposit_cycles: t22.Func([Z2], [], []), ecdsa_public_key: t22.Func([$2], [I2], []), fetch_canister_logs: t22.Func([L2], [tt2], []), http_request: t22.Func([et2], [l3], []), install_chunked_code: t22.Func([st2], [], []), install_code: t22.Func([ct2], [], []), list_canister_snapshots: t22.Func([rt], [at], []), load_canister_snapshot: t22.Func([it2], [], []), node_metrics_history: t22.Func([ot2], [dt2], []), provisional_create_canister_with_cycles: t22.Func([lt2], [pt], []), provisional_top_up_canister: t22.Func([ut2], [], []), raw_rand: t22.Func([], [ht], []), schnorr_public_key: t22.Func([mt], [gt], []), sign_with_ecdsa: t22.Func([Nt], [yt2], []), sign_with_schnorr: t22.Func([Rt], [Vt], []), start_canister: t22.Func([vt], [], []), stop_canister: t22.Func([bt], [], []), stored_chunks: t22.Func([ft2], [Ft], []), subnet_info: t22.Func([Ot], [Pt], []), take_canister_snapshot: t22.Func([xt], [wt2], []), uninstall_code: t22.Func([Ct], [], []), update_settings: t22.Func([Tt], [], []), upload_chunk: t22.Func([St2], [zt], []), vetkd_derive_key: t22.Func([qt], [Ut], []), vetkd_public_key: t22.Func([At], [Wt], []) });
 };
 var Mt = ({ IDL: t22 }) => {
-  let e5 = t22.Variant({ mainnet: t22.Null, testnet: t22.Null }), n2 = t22.Text, c2 = t22.Record({ network: e5, address: n2, min_confirmations: t22.Opt(t22.Nat32) }), r2 = t22.Nat64, i3 = r2, o3 = t22.Nat32, u2 = t22.Record({ start_height: o3, end_height: t22.Opt(o3), network: e5 }), F2 = t22.Vec(t22.Nat8), O2 = t22.Record({ tip_height: o3, block_headers: t22.Vec(F2) }), P2 = t22.Record({ network: e5 }), x3 = t22.Nat64, w3 = t22.Vec(x3), C2 = t22.Record({ network: e5, filter: t22.Opt(t22.Variant({ page: t22.Vec(t22.Nat8), min_confirmations: t22.Nat32 })), address: n2 }), T2 = t22.Vec(t22.Nat8), S2 = t22.Record({ txid: t22.Vec(t22.Nat8), vout: t22.Nat32 }), z2 = t22.Record({ height: t22.Nat32, value: r2, outpoint: S2 }), q2 = t22.Record({ next_page: t22.Opt(t22.Vec(t22.Nat8)), tip_height: o3, tip_block_hash: T2, utxos: t22.Vec(z2) }), U2 = t22.Record({ transaction: t22.Vec(t22.Nat8), network: e5 }), s2 = t22.Principal, A4 = t22.Record({ canister_id: s2, num_requested_changes: t22.Opt(t22.Nat64) }), W2 = t22.Variant({ from_user: t22.Record({ user_id: t22.Principal }), from_canister: t22.Record({ canister_version: t22.Opt(t22.Nat64), canister_id: t22.Principal }) }), _2 = t22.Vec(t22.Nat8), B3 = t22.Variant({ creation: t22.Record({ controllers: t22.Vec(t22.Principal) }), code_deployment: t22.Record({ mode: t22.Variant({ reinstall: t22.Null, upgrade: t22.Null, install: t22.Null }), module_hash: t22.Vec(t22.Nat8) }), load_snapshot: t22.Record({ canister_version: t22.Nat64, taken_at_timestamp: t22.Nat64, snapshot_id: _2 }), controllers_change: t22.Record({ controllers: t22.Vec(t22.Principal) }), code_uninstall: t22.Null }), E3 = t22.Record({ timestamp_nanos: t22.Nat64, canister_version: t22.Nat64, origin: W2, details: B3 }), M2 = t22.Record({ controllers: t22.Vec(t22.Principal), module_hash: t22.Opt(t22.Vec(t22.Nat8)), recent_changes: t22.Vec(E3), total_num_changes: t22.Nat64 }), Q2 = t22.Record({ canister_id: s2 }), h2 = t22.Variant({ controllers: t22.Null, public: t22.Null, allowed_viewers: t22.Vec(t22.Principal) }), j2 = t22.Record({ freezing_threshold: t22.Nat, wasm_memory_threshold: t22.Nat, controllers: t22.Vec(t22.Principal), reserved_cycles_limit: t22.Nat, log_visibility: h2, wasm_memory_limit: t22.Nat, memory_allocation: t22.Nat, compute_allocation: t22.Nat }), H2 = t22.Record({ memory_metrics: t22.Record({ wasm_binary_size: t22.Nat, wasm_chunk_store_size: t22.Nat, canister_history_size: t22.Nat, stable_memory_size: t22.Nat, snapshots_size: t22.Nat, wasm_memory_size: t22.Nat, global_memory_size: t22.Nat, custom_sections_size: t22.Nat }), status: t22.Variant({ stopped: t22.Null, stopping: t22.Null, running: t22.Null }), memory_size: t22.Nat, cycles: t22.Nat, settings: j2, query_stats: t22.Record({ response_payload_bytes_total: t22.Nat, num_instructions_total: t22.Nat, num_calls_total: t22.Nat, request_payload_bytes_total: t22.Nat }), idle_cycles_burned_per_day: t22.Nat, module_hash: t22.Opt(t22.Vec(t22.Nat8)), reserved_cycles: t22.Nat }), G2 = t22.Record({ canister_id: s2 }), d2 = t22.Record({ freezing_threshold: t22.Opt(t22.Nat), wasm_memory_threshold: t22.Opt(t22.Nat), controllers: t22.Opt(t22.Vec(t22.Principal)), reserved_cycles_limit: t22.Opt(t22.Nat), log_visibility: t22.Opt(h2), wasm_memory_limit: t22.Opt(t22.Nat), memory_allocation: t22.Opt(t22.Nat), compute_allocation: t22.Opt(t22.Nat) }), J2 = t22.Record({ settings: t22.Opt(d2), sender_canister_version: t22.Opt(t22.Nat64) }), K2 = t22.Record({ canister_id: s2 }), X2 = t22.Record({ canister_id: s2 }), Y2 = t22.Record({ canister_id: s2, snapshot_id: _2 }), Z2 = t22.Record({ canister_id: s2 }), m2 = t22.Variant({ secp256k1: t22.Null }), $2 = t22.Record({ key_id: t22.Record({ name: t22.Text, curve: m2 }), canister_id: t22.Opt(s2), derivation_path: t22.Vec(t22.Vec(t22.Nat8)) }), I2 = t22.Record({ public_key: t22.Vec(t22.Nat8), chain_code: t22.Vec(t22.Nat8) }), L2 = t22.Record({ canister_id: s2 }), D2 = t22.Record({ idx: t22.Nat64, timestamp_nanos: t22.Nat64, content: t22.Vec(t22.Nat8) }), tt2 = t22.Record({ canister_log_records: t22.Vec(D2) }), g2 = t22.Record({ value: t22.Text, name: t22.Text }), l3 = t22.Record({ status: t22.Nat, body: t22.Vec(t22.Nat8), headers: t22.Vec(g2) }), et2 = t22.Record({ url: t22.Text, method: t22.Variant({ get: t22.Null, head: t22.Null, post: t22.Null }), max_response_bytes: t22.Opt(t22.Nat64), body: t22.Opt(t22.Vec(t22.Nat8)), transform: t22.Opt(t22.Record({ function: t22.Func([t22.Record({ context: t22.Vec(t22.Nat8), response: l3 })], [l3], ["query"]), context: t22.Vec(t22.Nat8) })), headers: t22.Vec(g2) }), N2 = t22.Variant({ reinstall: t22.Null, upgrade: t22.Opt(t22.Record({ wasm_memory_persistence: t22.Opt(t22.Variant({ keep: t22.Null, replace: t22.Null })), skip_pre_upgrade: t22.Opt(t22.Bool) })), install: t22.Null }), p2 = t22.Record({ hash: t22.Vec(t22.Nat8) }), st2 = t22.Record({ arg: t22.Vec(t22.Nat8), wasm_module_hash: t22.Vec(t22.Nat8), mode: N2, chunk_hashes_list: t22.Vec(p2), target_canister: s2, store_canister: t22.Opt(s2), sender_canister_version: t22.Opt(t22.Nat64) }), nt2 = t22.Vec(t22.Nat8), ct2 = t22.Record({ arg: t22.Vec(t22.Nat8), wasm_module: nt2, mode: N2, canister_id: s2, sender_canister_version: t22.Opt(t22.Nat64) }), rt = t22.Record({ canister_id: s2 }), y2 = t22.Record({ id: _2, total_size: t22.Nat64, taken_at_timestamp: t22.Nat64 }), at = t22.Vec(y2), it2 = t22.Record({ canister_id: s2, sender_canister_version: t22.Opt(t22.Nat64), snapshot_id: _2 }), ot2 = t22.Record({ start_at_timestamp_nanos: t22.Nat64, subnet_id: t22.Principal }), _t = t22.Record({ num_block_failures_total: t22.Nat64, node_id: t22.Principal, num_blocks_proposed_total: t22.Nat64 }), dt2 = t22.Vec(t22.Record({ timestamp_nanos: t22.Nat64, node_metrics: t22.Vec(_t) })), lt2 = t22.Record({ settings: t22.Opt(d2), specified_id: t22.Opt(s2), amount: t22.Opt(t22.Nat), sender_canister_version: t22.Opt(t22.Nat64) }), pt = t22.Record({ canister_id: s2 }), ut2 = t22.Record({ canister_id: s2, amount: t22.Nat }), ht = t22.Vec(t22.Nat8), k2 = t22.Variant({ ed25519: t22.Null, bip340secp256k1: t22.Null }), mt = t22.Record({ key_id: t22.Record({ algorithm: k2, name: t22.Text }), canister_id: t22.Opt(s2), derivation_path: t22.Vec(t22.Vec(t22.Nat8)) }), gt = t22.Record({ public_key: t22.Vec(t22.Nat8), chain_code: t22.Vec(t22.Nat8) }), Nt = t22.Record({ key_id: t22.Record({ name: t22.Text, curve: m2 }), derivation_path: t22.Vec(t22.Vec(t22.Nat8)), message_hash: t22.Vec(t22.Nat8) }), yt = t22.Record({ signature: t22.Vec(t22.Nat8) }), kt = t22.Variant({ bip341: t22.Record({ merkle_root_hash: t22.Vec(t22.Nat8) }) }), Rt = t22.Record({ aux: t22.Opt(kt), key_id: t22.Record({ algorithm: k2, name: t22.Text }), derivation_path: t22.Vec(t22.Vec(t22.Nat8)), message: t22.Vec(t22.Nat8) }), Vt = t22.Record({ signature: t22.Vec(t22.Nat8) }), vt = t22.Record({ canister_id: s2 }), bt = t22.Record({ canister_id: s2 }), ft2 = t22.Record({ canister_id: s2 }), Ft = t22.Vec(p2), Ot = t22.Record({ subnet_id: t22.Principal }), Pt = t22.Record({ replica_version: t22.Text, registry_version: t22.Nat64 }), xt = t22.Record({ replace_snapshot: t22.Opt(_2), canister_id: s2 }), wt2 = y2, Ct = t22.Record({ canister_id: s2, sender_canister_version: t22.Opt(t22.Nat64) }), Tt = t22.Record({ canister_id: t22.Principal, settings: d2, sender_canister_version: t22.Opt(t22.Nat64) }), St2 = t22.Record({ chunk: t22.Vec(t22.Nat8), canister_id: t22.Principal }), zt = p2, R2 = t22.Variant({ bls12_381_g2: t22.Null }), qt = t22.Record({ context: t22.Vec(t22.Nat8), key_id: t22.Record({ name: t22.Text, curve: R2 }), input: t22.Vec(t22.Nat8), transport_public_key: t22.Vec(t22.Nat8) }), Ut = t22.Record({ encrypted_key: t22.Vec(t22.Nat8) }), At = t22.Record({ context: t22.Vec(t22.Nat8), key_id: t22.Record({ name: t22.Text, curve: R2 }), canister_id: t22.Opt(s2) }), Wt = t22.Record({ public_key: t22.Vec(t22.Nat8) });
-  return t22.Service({ bitcoin_get_balance: t22.Func([c2], [i3], []), bitcoin_get_block_headers: t22.Func([u2], [O2], []), bitcoin_get_current_fee_percentiles: t22.Func([P2], [w3], []), bitcoin_get_utxos: t22.Func([C2], [q2], []), bitcoin_send_transaction: t22.Func([U2], [], []), canister_info: t22.Func([A4], [M2], []), canister_status: t22.Func([Q2], [H2], []), clear_chunk_store: t22.Func([G2], [], []), create_canister: t22.Func([J2], [K2], []), delete_canister: t22.Func([X2], [], []), delete_canister_snapshot: t22.Func([Y2], [], []), deposit_cycles: t22.Func([Z2], [], []), ecdsa_public_key: t22.Func([$2], [I2], []), fetch_canister_logs: t22.Func([L2], [tt2], ["query"]), http_request: t22.Func([et2], [l3], []), install_chunked_code: t22.Func([st2], [], []), install_code: t22.Func([ct2], [], []), list_canister_snapshots: t22.Func([rt], [at], []), load_canister_snapshot: t22.Func([it2], [], []), node_metrics_history: t22.Func([ot2], [dt2], []), provisional_create_canister_with_cycles: t22.Func([lt2], [pt], []), provisional_top_up_canister: t22.Func([ut2], [], []), raw_rand: t22.Func([], [ht], []), schnorr_public_key: t22.Func([mt], [gt], []), sign_with_ecdsa: t22.Func([Nt], [yt], []), sign_with_schnorr: t22.Func([Rt], [Vt], []), start_canister: t22.Func([vt], [], []), stop_canister: t22.Func([bt], [], []), stored_chunks: t22.Func([ft2], [Ft], []), subnet_info: t22.Func([Ot], [Pt], []), take_canister_snapshot: t22.Func([xt], [wt2], []), uninstall_code: t22.Func([Ct], [], []), update_settings: t22.Func([Tt], [], []), upload_chunk: t22.Func([St2], [zt], []), vetkd_derive_key: t22.Func([qt], [Ut], []), vetkd_public_key: t22.Func([At], [Wt], []) });
+  let e5 = t22.Variant({ mainnet: t22.Null, testnet: t22.Null }), n2 = t22.Text, c2 = t22.Record({ network: e5, address: n2, min_confirmations: t22.Opt(t22.Nat32) }), r2 = t22.Nat64, i3 = r2, o3 = t22.Nat32, u2 = t22.Record({ start_height: o3, end_height: t22.Opt(o3), network: e5 }), F2 = t22.Vec(t22.Nat8), O2 = t22.Record({ tip_height: o3, block_headers: t22.Vec(F2) }), P2 = t22.Record({ network: e5 }), x3 = t22.Nat64, w3 = t22.Vec(x3), C2 = t22.Record({ network: e5, filter: t22.Opt(t22.Variant({ page: t22.Vec(t22.Nat8), min_confirmations: t22.Nat32 })), address: n2 }), T2 = t22.Vec(t22.Nat8), S2 = t22.Record({ txid: t22.Vec(t22.Nat8), vout: t22.Nat32 }), z2 = t22.Record({ height: t22.Nat32, value: r2, outpoint: S2 }), q2 = t22.Record({ next_page: t22.Opt(t22.Vec(t22.Nat8)), tip_height: o3, tip_block_hash: T2, utxos: t22.Vec(z2) }), U2 = t22.Record({ transaction: t22.Vec(t22.Nat8), network: e5 }), s2 = t22.Principal, A4 = t22.Record({ canister_id: s2, num_requested_changes: t22.Opt(t22.Nat64) }), W2 = t22.Variant({ from_user: t22.Record({ user_id: t22.Principal }), from_canister: t22.Record({ canister_version: t22.Opt(t22.Nat64), canister_id: t22.Principal }) }), _2 = t22.Vec(t22.Nat8), B2 = t22.Variant({ creation: t22.Record({ controllers: t22.Vec(t22.Principal) }), code_deployment: t22.Record({ mode: t22.Variant({ reinstall: t22.Null, upgrade: t22.Null, install: t22.Null }), module_hash: t22.Vec(t22.Nat8) }), load_snapshot: t22.Record({ canister_version: t22.Nat64, taken_at_timestamp: t22.Nat64, snapshot_id: _2 }), controllers_change: t22.Record({ controllers: t22.Vec(t22.Principal) }), code_uninstall: t22.Null }), E3 = t22.Record({ timestamp_nanos: t22.Nat64, canister_version: t22.Nat64, origin: W2, details: B2 }), M2 = t22.Record({ controllers: t22.Vec(t22.Principal), module_hash: t22.Opt(t22.Vec(t22.Nat8)), recent_changes: t22.Vec(E3), total_num_changes: t22.Nat64 }), Q2 = t22.Record({ canister_id: s2 }), h2 = t22.Variant({ controllers: t22.Null, public: t22.Null, allowed_viewers: t22.Vec(t22.Principal) }), j2 = t22.Record({ freezing_threshold: t22.Nat, wasm_memory_threshold: t22.Nat, controllers: t22.Vec(t22.Principal), reserved_cycles_limit: t22.Nat, log_visibility: h2, wasm_memory_limit: t22.Nat, memory_allocation: t22.Nat, compute_allocation: t22.Nat }), H2 = t22.Record({ memory_metrics: t22.Record({ wasm_binary_size: t22.Nat, wasm_chunk_store_size: t22.Nat, canister_history_size: t22.Nat, stable_memory_size: t22.Nat, snapshots_size: t22.Nat, wasm_memory_size: t22.Nat, global_memory_size: t22.Nat, custom_sections_size: t22.Nat }), status: t22.Variant({ stopped: t22.Null, stopping: t22.Null, running: t22.Null }), memory_size: t22.Nat, cycles: t22.Nat, settings: j2, query_stats: t22.Record({ response_payload_bytes_total: t22.Nat, num_instructions_total: t22.Nat, num_calls_total: t22.Nat, request_payload_bytes_total: t22.Nat }), idle_cycles_burned_per_day: t22.Nat, module_hash: t22.Opt(t22.Vec(t22.Nat8)), reserved_cycles: t22.Nat }), G2 = t22.Record({ canister_id: s2 }), d2 = t22.Record({ freezing_threshold: t22.Opt(t22.Nat), wasm_memory_threshold: t22.Opt(t22.Nat), controllers: t22.Opt(t22.Vec(t22.Principal)), reserved_cycles_limit: t22.Opt(t22.Nat), log_visibility: t22.Opt(h2), wasm_memory_limit: t22.Opt(t22.Nat), memory_allocation: t22.Opt(t22.Nat), compute_allocation: t22.Opt(t22.Nat) }), J2 = t22.Record({ settings: t22.Opt(d2), sender_canister_version: t22.Opt(t22.Nat64) }), K2 = t22.Record({ canister_id: s2 }), X2 = t22.Record({ canister_id: s2 }), Y2 = t22.Record({ canister_id: s2, snapshot_id: _2 }), Z2 = t22.Record({ canister_id: s2 }), m2 = t22.Variant({ secp256k1: t22.Null }), $2 = t22.Record({ key_id: t22.Record({ name: t22.Text, curve: m2 }), canister_id: t22.Opt(s2), derivation_path: t22.Vec(t22.Vec(t22.Nat8)) }), I2 = t22.Record({ public_key: t22.Vec(t22.Nat8), chain_code: t22.Vec(t22.Nat8) }), L2 = t22.Record({ canister_id: s2 }), D2 = t22.Record({ idx: t22.Nat64, timestamp_nanos: t22.Nat64, content: t22.Vec(t22.Nat8) }), tt2 = t22.Record({ canister_log_records: t22.Vec(D2) }), g2 = t22.Record({ value: t22.Text, name: t22.Text }), l3 = t22.Record({ status: t22.Nat, body: t22.Vec(t22.Nat8), headers: t22.Vec(g2) }), et2 = t22.Record({ url: t22.Text, method: t22.Variant({ get: t22.Null, head: t22.Null, post: t22.Null }), max_response_bytes: t22.Opt(t22.Nat64), body: t22.Opt(t22.Vec(t22.Nat8)), transform: t22.Opt(t22.Record({ function: t22.Func([t22.Record({ context: t22.Vec(t22.Nat8), response: l3 })], [l3], ["query"]), context: t22.Vec(t22.Nat8) })), headers: t22.Vec(g2) }), N2 = t22.Variant({ reinstall: t22.Null, upgrade: t22.Opt(t22.Record({ wasm_memory_persistence: t22.Opt(t22.Variant({ keep: t22.Null, replace: t22.Null })), skip_pre_upgrade: t22.Opt(t22.Bool) })), install: t22.Null }), p2 = t22.Record({ hash: t22.Vec(t22.Nat8) }), st2 = t22.Record({ arg: t22.Vec(t22.Nat8), wasm_module_hash: t22.Vec(t22.Nat8), mode: N2, chunk_hashes_list: t22.Vec(p2), target_canister: s2, store_canister: t22.Opt(s2), sender_canister_version: t22.Opt(t22.Nat64) }), nt2 = t22.Vec(t22.Nat8), ct2 = t22.Record({ arg: t22.Vec(t22.Nat8), wasm_module: nt2, mode: N2, canister_id: s2, sender_canister_version: t22.Opt(t22.Nat64) }), rt = t22.Record({ canister_id: s2 }), y2 = t22.Record({ id: _2, total_size: t22.Nat64, taken_at_timestamp: t22.Nat64 }), at = t22.Vec(y2), it2 = t22.Record({ canister_id: s2, sender_canister_version: t22.Opt(t22.Nat64), snapshot_id: _2 }), ot2 = t22.Record({ start_at_timestamp_nanos: t22.Nat64, subnet_id: t22.Principal }), _t = t22.Record({ num_block_failures_total: t22.Nat64, node_id: t22.Principal, num_blocks_proposed_total: t22.Nat64 }), dt2 = t22.Vec(t22.Record({ timestamp_nanos: t22.Nat64, node_metrics: t22.Vec(_t) })), lt2 = t22.Record({ settings: t22.Opt(d2), specified_id: t22.Opt(s2), amount: t22.Opt(t22.Nat), sender_canister_version: t22.Opt(t22.Nat64) }), pt = t22.Record({ canister_id: s2 }), ut2 = t22.Record({ canister_id: s2, amount: t22.Nat }), ht = t22.Vec(t22.Nat8), k2 = t22.Variant({ ed25519: t22.Null, bip340secp256k1: t22.Null }), mt = t22.Record({ key_id: t22.Record({ algorithm: k2, name: t22.Text }), canister_id: t22.Opt(s2), derivation_path: t22.Vec(t22.Vec(t22.Nat8)) }), gt = t22.Record({ public_key: t22.Vec(t22.Nat8), chain_code: t22.Vec(t22.Nat8) }), Nt = t22.Record({ key_id: t22.Record({ name: t22.Text, curve: m2 }), derivation_path: t22.Vec(t22.Vec(t22.Nat8)), message_hash: t22.Vec(t22.Nat8) }), yt2 = t22.Record({ signature: t22.Vec(t22.Nat8) }), kt = t22.Variant({ bip341: t22.Record({ merkle_root_hash: t22.Vec(t22.Nat8) }) }), Rt = t22.Record({ aux: t22.Opt(kt), key_id: t22.Record({ algorithm: k2, name: t22.Text }), derivation_path: t22.Vec(t22.Vec(t22.Nat8)), message: t22.Vec(t22.Nat8) }), Vt = t22.Record({ signature: t22.Vec(t22.Nat8) }), vt = t22.Record({ canister_id: s2 }), bt = t22.Record({ canister_id: s2 }), ft2 = t22.Record({ canister_id: s2 }), Ft = t22.Vec(p2), Ot = t22.Record({ subnet_id: t22.Principal }), Pt = t22.Record({ replica_version: t22.Text, registry_version: t22.Nat64 }), xt = t22.Record({ replace_snapshot: t22.Opt(_2), canister_id: s2 }), wt2 = y2, Ct = t22.Record({ canister_id: s2, sender_canister_version: t22.Opt(t22.Nat64) }), Tt = t22.Record({ canister_id: t22.Principal, settings: d2, sender_canister_version: t22.Opt(t22.Nat64) }), St2 = t22.Record({ chunk: t22.Vec(t22.Nat8), canister_id: t22.Principal }), zt = p2, R2 = t22.Variant({ bls12_381_g2: t22.Null }), qt = t22.Record({ context: t22.Vec(t22.Nat8), key_id: t22.Record({ name: t22.Text, curve: R2 }), input: t22.Vec(t22.Nat8), transport_public_key: t22.Vec(t22.Nat8) }), Ut = t22.Record({ encrypted_key: t22.Vec(t22.Nat8) }), At = t22.Record({ context: t22.Vec(t22.Nat8), key_id: t22.Record({ name: t22.Text, curve: R2 }), canister_id: t22.Opt(s2) }), Wt = t22.Record({ public_key: t22.Vec(t22.Nat8) });
+  return t22.Service({ bitcoin_get_balance: t22.Func([c2], [i3], []), bitcoin_get_block_headers: t22.Func([u2], [O2], []), bitcoin_get_current_fee_percentiles: t22.Func([P2], [w3], []), bitcoin_get_utxos: t22.Func([C2], [q2], []), bitcoin_send_transaction: t22.Func([U2], [], []), canister_info: t22.Func([A4], [M2], []), canister_status: t22.Func([Q2], [H2], []), clear_chunk_store: t22.Func([G2], [], []), create_canister: t22.Func([J2], [K2], []), delete_canister: t22.Func([X2], [], []), delete_canister_snapshot: t22.Func([Y2], [], []), deposit_cycles: t22.Func([Z2], [], []), ecdsa_public_key: t22.Func([$2], [I2], []), fetch_canister_logs: t22.Func([L2], [tt2], ["query"]), http_request: t22.Func([et2], [l3], []), install_chunked_code: t22.Func([st2], [], []), install_code: t22.Func([ct2], [], []), list_canister_snapshots: t22.Func([rt], [at], []), load_canister_snapshot: t22.Func([it2], [], []), node_metrics_history: t22.Func([ot2], [dt2], []), provisional_create_canister_with_cycles: t22.Func([lt2], [pt], []), provisional_top_up_canister: t22.Func([ut2], [], []), raw_rand: t22.Func([], [ht], []), schnorr_public_key: t22.Func([mt], [gt], []), sign_with_ecdsa: t22.Func([Nt], [yt2], []), sign_with_schnorr: t22.Func([Rt], [Vt], []), start_canister: t22.Func([vt], [], []), stop_canister: t22.Func([bt], [], []), stored_chunks: t22.Func([ft2], [Ft], []), subnet_info: t22.Func([Ot], [Pt], []), take_canister_snapshot: t22.Func([xt], [wt2], []), uninstall_code: t22.Func([Ct], [], []), update_settings: t22.Func([Tt], [], []), upload_chunk: t22.Func([St2], [zt], []), vetkd_derive_key: t22.Func([qt], [Ut], []), vetkd_public_key: t22.Func([At], [Wt], []) });
 };
 var Gt = (t22) => Et$1(t22), b$1 = (t22) => typeof t22 == "string" ? Gt(t22) : t22;
 var Bt = (t22, e5, n2) => {
@@ -12830,13 +12833,13 @@ function M(e5, t3, r2, n2) {
   let s2 = BigInt(32), o3 = BigInt(4294967295), i3 = Number(r2 >> s2 & o3), c2 = Number(r2 & o3), h2 = n2 ? 4 : 0, a2 = n2 ? 0 : 4;
   e5.setUint32(t3 + h2, i3, n2), e5.setUint32(t3 + a2, c2, n2);
 }
-function G(e5, t3, r2) {
+function T$1(e5, t3, r2) {
   return e5 & t3 ^ ~e5 & r2;
 }
-function T$1(e5, t3, r2) {
+function G(e5, t3, r2) {
   return e5 & t3 ^ e5 & r2 ^ t3 & r2;
 }
-var B$1 = class B extends A$1 {
+var H = class extends A$1 {
   constructor(t3, r2, n2, s2) {
     super(), this.finished = false, this.length = 0, this.pos = 0, this.destroyed = false, this.blockLen = t3, this.outputLen = r2, this.padOffset = n2, this.isLE = s2, this.buffer = new Uint8Array(t3), this.view = m$1(this.buffer);
   }
@@ -12881,7 +12884,7 @@ var B$1 = class B extends A$1 {
     return this._cloneInto();
   }
 }, u = Uint32Array.from([1779033703, 3144134277, 1013904242, 2773480762, 1359893119, 2600822924, 528734635, 1541459225]), b = Uint32Array.from([3238371032, 914150663, 812702999, 4144912697, 4290775857, 1750603025, 1694076839, 3204075428]);
-var j = Uint32Array.from([1116352408, 1899447441, 3049323471, 3921009573, 961987163, 1508970993, 2453635748, 2870763221, 3624381080, 310598401, 607225278, 1426881987, 1925078388, 2162078206, 2614888103, 3248222580, 3835390401, 4022224774, 264347078, 604807628, 770255983, 1249150122, 1555081692, 1996064986, 2554220882, 2821834349, 2952996808, 3210313671, 3336571891, 3584528711, 113926993, 338241895, 666307205, 773529912, 1294757372, 1396182291, 1695183700, 1986661051, 2177026350, 2456956037, 2730485921, 2820302411, 3259730800, 3345764771, 3516065817, 3600352804, 4094571909, 275423344, 430227734, 506948616, 659060556, 883997877, 958139571, 1322822218, 1537002063, 1747873779, 1955562222, 2024104815, 2227730452, 2361852424, 2428436474, 2756734187, 3204031479, 3329325298]), l2 = new Uint32Array(64), L = class extends B$1 {
+var j = Uint32Array.from([1116352408, 1899447441, 3049323471, 3921009573, 961987163, 1508970993, 2453635748, 2870763221, 3624381080, 310598401, 607225278, 1426881987, 1925078388, 2162078206, 2614888103, 3248222580, 3835390401, 4022224774, 264347078, 604807628, 770255983, 1249150122, 1555081692, 1996064986, 2554220882, 2821834349, 2952996808, 3210313671, 3336571891, 3584528711, 113926993, 338241895, 666307205, 773529912, 1294757372, 1396182291, 1695183700, 1986661051, 2177026350, 2456956037, 2730485921, 2820302411, 3259730800, 3345764771, 3516065817, 3600352804, 4094571909, 275423344, 430227734, 506948616, 659060556, 883997877, 958139571, 1322822218, 1537002063, 1747873779, 1955562222, 2024104815, 2227730452, 2361852424, 2428436474, 2756734187, 3204031479, 3329325298]), l2 = new Uint32Array(64), L = class extends H {
   constructor(t3 = 32) {
     super(64, t3, 8, false), this.A = u[0] | 0, this.B = u[1] | 0, this.C = u[2] | 0, this.D = u[3] | 0, this.E = u[4] | 0, this.F = u[5] | 0, this.G = u[6] | 0, this.H = u[7] | 0;
   }
@@ -12895,13 +12898,13 @@ var j = Uint32Array.from([1116352408, 1899447441, 3049323471, 3921009573, 961987
   process(t3, r2) {
     for (let f2 = 0; f2 < 16; f2++, r2 += 4) l2[f2] = t3.getUint32(r2, false);
     for (let f2 = 16; f2 < 64; f2++) {
-      let y2 = l2[f2 - 15], p2 = l2[f2 - 2], _2 = x2(y2, 7) ^ x2(y2, 18) ^ y2 >>> 3, H2 = x2(p2, 17) ^ x2(p2, 19) ^ p2 >>> 10;
-      l2[f2] = H2 + l2[f2 - 7] + _2 + l2[f2 - 16] | 0;
+      let y2 = l2[f2 - 15], p2 = l2[f2 - 2], _2 = x2(y2, 7) ^ x2(y2, 18) ^ y2 >>> 3, B2 = x2(p2, 17) ^ x2(p2, 19) ^ p2 >>> 10;
+      l2[f2] = B2 + l2[f2 - 7] + _2 + l2[f2 - 16] | 0;
     }
     let { A: n2, B: s2, C: o3, D: i3, E: c2, F: h2, G: a2, H: d2 } = this;
     for (let f2 = 0; f2 < 64; f2++) {
-      let y2 = x2(c2, 6) ^ x2(c2, 11) ^ x2(c2, 25), p2 = d2 + y2 + G(c2, h2, a2) + j[f2] + l2[f2] | 0, H2 = (x2(n2, 2) ^ x2(n2, 13) ^ x2(n2, 22)) + T$1(n2, s2, o3) | 0;
-      d2 = a2, a2 = h2, h2 = c2, c2 = i3 + p2 | 0, i3 = o3, o3 = s2, s2 = n2, n2 = p2 + H2 | 0;
+      let y2 = x2(c2, 6) ^ x2(c2, 11) ^ x2(c2, 25), p2 = d2 + y2 + T$1(c2, h2, a2) + j[f2] + l2[f2] | 0, B2 = (x2(n2, 2) ^ x2(n2, 13) ^ x2(n2, 22)) + G(n2, s2, o3) | 0;
+      d2 = a2, a2 = h2, h2 = c2, c2 = i3 + p2 | 0, i3 = o3, o3 = s2, s2 = n2, n2 = p2 + B2 | 0;
     }
     n2 = n2 + this.A | 0, s2 = s2 + this.B | 0, o3 = o3 + this.C | 0, i3 = i3 + this.D | 0, c2 = c2 + this.E | 0, h2 = h2 + this.F | 0, a2 = a2 + this.G | 0, d2 = d2 + this.H | 0, this.set(n2, s2, o3, i3, c2, h2, a2, d2);
   }
@@ -12922,7 +12925,7 @@ var O$1 = class e {
     this.bytes = t3;
   }
   static fromHex(t3) {
-    let r2 = Uint8Array.from(Buffer.from(t3, "hex"));
+    let r2 = Et$1(t3);
     if (r2.length !== 32) throw new Error(`Invalid AccountIdentifier: expected 32 bytes, got ${r2.length}.`);
     let n2 = R$1(r2.slice(0, 4)), s2 = r2.slice(4), o3 = R$1(Lt(s2));
     if (n2 !== o3) throw Error(`Checksum mismatch. Expected ${o3}, but got ${n2}.`);
@@ -12982,7 +12985,7 @@ account-id`), s2 = V.create();
 @noble/hashes/esm/utils.js:
   (*! noble-hashes - MIT License (c) 2022 Paul Miller (paulmillr.com) *)
 */
-var r$1 = Principal$1.fromText("ryjl3-tyaaa-aaaaa-aaaba-cai");
+var r = Principal$1.fromText("ryjl3-tyaaa-aaaaa-aaaba-cai");
 Principal$1.fromText("qhbym-qaaaa-aaaaa-aaafq-cai");
 var f = (t3) => t3 instanceof O$1 ? t3 : O$1.fromHex(t3);
 var Pe = ({ IDL: e5 }) => {
@@ -13017,7 +13020,7 @@ var O = class extends Error {
     this.allowed_window_secs = t3;
   }
 }, v$1 = class v extends R {
-}, B2 = class extends R {
+}, B = class extends R {
   constructor(t3) {
     super();
     this.duplicateOf = t3;
@@ -13054,10 +13057,10 @@ var O = class extends Error {
 }, we = class extends T {
 }, ve = class extends T {
 }, Be = class extends T {
-}, Je = (e5) => "TxDuplicate" in e5 ? new B2(e5.TxDuplicate.duplicate_of) : "InsufficientFunds" in e5 ? new A3(e5.InsufficientFunds.balance.e8s) : "TxCreatedInFuture" in e5 ? new v$1() : "TxTooOld" in e5 ? new w2(Number(e5.TxTooOld.allowed_window_nanos)) : "BadFee" in e5 ? new k(e5.BadFee.expected_fee.e8s) : new R(`Unknown error type ${JSON.stringify(e5)}`), $e = (e5) => "Duplicate" in e5 ? new B2(e5.Duplicate.duplicate_of) : "InsufficientFunds" in e5 ? new A3(e5.InsufficientFunds.balance) : "CreatedInFuture" in e5 ? new v$1() : "TooOld" in e5 ? new w2() : "BadFee" in e5 ? new k(e5.BadFee.expected_fee) : new R(`Unknown error type ${JSON.stringify(e5)}`), Ke = (e5) => "GenericError" in e5 ? new q(e5.GenericError.message, e5.GenericError.error_code) : "TemporarilyUnavailable" in e5 ? new Fe() : "Duplicate" in e5 ? new be(e5.Duplicate.duplicate_of) : "BadFee" in e5 ? new k(e5.BadFee.expected_fee) : "AllowanceChanged" in e5 ? new Ve(e5.AllowanceChanged.current_allowance) : "CreatedInFuture" in e5 ? new Ae() : "TooOld" in e5 ? new ke() : "Expired" in e5 ? new he(e5.Expired.ledger_time) : "InsufficientFunds" in e5 ? new A3(e5.InsufficientFunds.balance) : new m(`Unknown error type ${JSON.stringify(e5)}`), Ye = (e5) => "GenericError" in e5 ? new q(e5.GenericError.description, e5.GenericError.error_code) : "InsufficientPayment" in e5 ? new we(e5.InsufficientPayment.description) : "UnsupportedCanisterCall" in e5 ? new ve(e5.UnsupportedCanisterCall.description) : "ConsentMessageUnavailable" in e5 ? new Be(e5.ConsentMessageUnavailable.description) : new T(`Unknown error type ${JSON.stringify(e5)}`);
+}, Je = (e5) => "TxDuplicate" in e5 ? new B(e5.TxDuplicate.duplicate_of) : "InsufficientFunds" in e5 ? new A3(e5.InsufficientFunds.balance.e8s) : "TxCreatedInFuture" in e5 ? new v$1() : "TxTooOld" in e5 ? new w2(Number(e5.TxTooOld.allowed_window_nanos)) : "BadFee" in e5 ? new k(e5.BadFee.expected_fee.e8s) : new R(`Unknown error type ${JSON.stringify(e5)}`), $e = (e5) => "Duplicate" in e5 ? new B(e5.Duplicate.duplicate_of) : "InsufficientFunds" in e5 ? new A3(e5.InsufficientFunds.balance) : "CreatedInFuture" in e5 ? new v$1() : "TooOld" in e5 ? new w2() : "BadFee" in e5 ? new k(e5.BadFee.expected_fee) : new R(`Unknown error type ${JSON.stringify(e5)}`), Ke = (e5) => "GenericError" in e5 ? new q(e5.GenericError.message, e5.GenericError.error_code) : "TemporarilyUnavailable" in e5 ? new Fe() : "Duplicate" in e5 ? new be(e5.Duplicate.duplicate_of) : "BadFee" in e5 ? new k(e5.BadFee.expected_fee) : "AllowanceChanged" in e5 ? new Ve(e5.AllowanceChanged.current_allowance) : "CreatedInFuture" in e5 ? new Ae() : "TooOld" in e5 ? new ke() : "Expired" in e5 ? new he(e5.Expired.ledger_time) : "InsufficientFunds" in e5 ? new A3(e5.InsufficientFunds.balance) : new m(`Unknown error type ${JSON.stringify(e5)}`), Ye = (e5) => "GenericError" in e5 ? new q(e5.GenericError.description, e5.GenericError.error_code) : "InsufficientPayment" in e5 ? new we(e5.InsufficientPayment.description) : "UnsupportedCanisterCall" in e5 ? new ve(e5.UnsupportedCanisterCall.description) : "ConsentMessageUnavailable" in e5 ? new Be(e5.ConsentMessageUnavailable.description) : new T(`Unknown error type ${JSON.stringify(e5)}`);
 var je = class e3 extends E$1 {
   static create(c2 = {}) {
-    let t3 = c2.canisterId ?? r$1, { service: o3, certifiedService: d2 } = lt({ options: { ...c2, canisterId: t3 }, idlFactory: Ee, certifiedIdlFactory: Pe });
+    let t3 = c2.canisterId ?? r, { service: o3, certifiedService: d2 } = lt({ options: { ...c2, canisterId: t3 }, idlFactory: Ee, certifiedIdlFactory: Pe });
     return new e3(t3, o3, d2);
   }
   accountBalance = async ({ accountIdentifier: c2, certified: t3 = true }) => {
@@ -13151,11 +13154,16 @@ class LedgerApi {
 }
 var e4 = class extends Error {
 }, n = class extends Error {
+}, s = class extends Error {
 }, o2 = class extends Error {
-}, r = class extends Error {
 }, i2 = class extends Error {
-}, s = ({ Err: t3 }) => {
-  throw "Refunded" in t3 ? new e4(t3.Refunded.reason) : "InvalidTransaction" in t3 ? new n(t3.InvalidTransaction) : "Processing" in t3 ? new r() : "TransactionTooOld" in t3 ? new i2() : "Other" in t3 ? new o2(`Error in CMC with code ${t3.Other.error_code}: ${t3.Other.error_message}`) : new Error(`Unsupported error type ${JSON.stringify(t3)}`);
+}, p = ({ Err: t3 }) => {
+  if ("Refunded" in t3) throw new e4(t3.Refunded.reason);
+  if ("InvalidTransaction" in t3) throw new n(t3.InvalidTransaction);
+  if ("Processing" in t3) throw new o2();
+  if ("TransactionTooOld" in t3) throw new i2();
+  if ("Other" in t3) throw new s(`Error in CMC with code ${t3.Other.error_code}: ${t3.Other.error_message}`);
+  yt(t3, `Unsupported error type ${JSON.stringify(t3, D$1)}`);
 };
 var h = ({ IDL: t3 }) => {
   let n2 = t3.Variant({ Set: t3.Principal, Unset: t3.Null }), e5 = t3.Text;
@@ -13180,12 +13188,12 @@ var F = class t2 extends E$1 {
   };
   notifyCreateCanister = async (n2) => {
     let e5 = await this.service.notify_create_canister(n2);
-    if ("Err" in e5 && s(e5), "Ok" in e5) return e5.Ok;
+    if ("Err" in e5 && p(e5), "Ok" in e5) return e5.Ok;
     throw new Error(`Unsupported response type in notifyCreateCanister ${JSON.stringify(e5)}`);
   };
   notifyTopUp = async (n2) => {
     let e5 = await this.service.notify_top_up(n2);
-    if ("Err" in e5 && s(e5), "Ok" in e5) return e5.Ok;
+    if ("Err" in e5 && p(e5), "Ok" in e5) return e5.Ok;
     throw new Error(`Unsupported response type in notifyTopUp ${JSON.stringify(e5)}`);
   };
   getDefaultSubnets = ({ certified: n2 } = {}) => {
