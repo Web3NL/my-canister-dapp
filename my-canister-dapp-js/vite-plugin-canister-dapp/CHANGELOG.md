@@ -1,5 +1,11 @@
 # @web3nl/vite-plugin-canister-dapp
 
+## 0.4.3
+
+### Patch Changes
+
+- [`2ab049c`](https://github.com/Web3NL/my-canister-dapp/commit/2ab049ca495cd8b223653b79fde10673a2c67183) Thanks [@Web3NL](https://github.com/Web3NL)! - fix: file extension
+
 ## 0.4.2
 
 ### Patch Changes
