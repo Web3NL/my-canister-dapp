@@ -1,11 +1,11 @@
 {
   "name": "my-canister-app",
-  "version": "0.5.0",
+  "version": "0.6.0",
   "dependencies": {
     "@dfinity/gix-components": "^8.0.0",
     "@web3nl/my-canister-dashboard": "0.8.0"
   },
-  "deployedAtCommit": "2630a994a7f73ab8dc720f4cd12ce31c1ddd9231",
+  "deployedAtCommit": "1f788a1fd9d4740f6290c7d68f8238c01f7a9145",
   "engines": {
     "node": ">=22.0.0"
   },
