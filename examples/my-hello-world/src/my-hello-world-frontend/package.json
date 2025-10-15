@@ -2,7 +2,6 @@
   "name": "my-hello-world-frontend",
   "version": "5.0.0",
   "dependencies": {
-    "@dfinity/utils": "^3.0.1",
     "@web3nl/my-canister-dashboard": "0.8.0",
     "lit-html": "3.3.1"
   },
@@ -17,7 +16,6 @@
   "repository": "https://github.com/Web3NL/my-canister-dapp/tree/main/examples/my-hello-world/src/my-hello-world-frontend",
   "scripts": {
     "build": "vite build",
-    "build:dev": "vite build --mode development",
     "dev": "vite",
     "format": "prettier --check src",
     "format:fix": "prettier --write src",

@@ -21,8 +21,3 @@ VITE_II_CANISTER_ID=rdmx6-jaaaa-aaaaa-aaadq-cai
 VITE_MY_CANISTER_APP_CANISTER_ID=c7lwu-3qaaa-aaaam-qbgia-cai
 EOF
 echo "✓ Wrote $ROOT_ENV_FILE"
-
-# Reuse existing helper to generate per-app envs (kept minimal, consolidated entrypoint)
-echo "Generating per-app .env.development files..."
-bash ./scripts/create-canister-dapp-dev-env.sh examples/my-hello-world/src/my-hello-world-frontend
-echo "✓ Per-app .env.development files generated"
