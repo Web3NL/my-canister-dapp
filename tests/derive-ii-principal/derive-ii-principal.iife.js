@@ -15,7 +15,7 @@ var __privateSet = (obj, member, value, setter) => (__accessCheck(obj, member, "
   }
   lookupTable["0"] = lookupTable.o;
   lookupTable["1"] = lookupTable.i;
-  function encode(input) {
+  function base32Encode(input) {
     let skip = 0;
     let bits = 0;
     let output = "";
@@ -40,7 +40,7 @@ var __privateSet = (obj, member, value, setter) => (__accessCheck(obj, member, "
     }
     return output + (skip < 0 ? alphabet[bits >> 3] : "");
   }
-  function decode(input) {
+  function base32Decode(input) {
     let skip = 0;
     let byte = 0;
     const output = new Uint8Array(input.length * 4 / 3 | 0);
@@ -1035,7 +1035,7 @@ var __privateSet = (obj, member, value, setter) => (__accessCheck(obj, member, "
         }
       }
       const canisterIdNoDash = maybePrincipal.toLowerCase().replace(/-/g, "");
-      let arr = decode(canisterIdNoDash);
+      let arr = base32Decode(canisterIdNoDash);
       arr = arr.slice(4, arr.length);
       const principal = new this(arr);
       if (principal.toText() !== maybePrincipal) {
@@ -1068,7 +1068,7 @@ var __privateSet = (obj, member, value, setter) => (__accessCheck(obj, member, "
       view.setUint32(0, getCrc32(this._arr));
       const checksum = new Uint8Array(checksumArrayBuf);
       const array = new Uint8Array([...checksum, ...this._arr]);
-      const result = encode(array);
+      const result = base32Encode(array);
       const matches = result.match(/.{1,5}/g);
       if (!matches) {
         throw new Error();
@@ -3209,6 +3209,12 @@ Call context:
       this.#inner = inner;
     }
   }
+  function safeBytesToHex(data) {
+    if (data instanceof Uint8Array) {
+      return bytesToHex(data);
+    }
+    return bytesToHex(new Uint8Array(data));
+  }
   function _parseBlob(value) {
     if (typeof value !== "string" || value.length < 64) {
       throw new Error("Invalid public key.");
@@ -3233,7 +3239,7 @@ Call context:
     toJSON() {
       return {
         expiration: this.expiration.toString(16),
-        pubkey: bytesToHex(this.pubkey),
+        pubkey: safeBytesToHex(this.pubkey),
         ...this.targets && { targets: this.targets.map((p) => p.toHex()) }
       };
     }
@@ -3341,15 +3347,15 @@ Call context:
           return {
             delegation: {
               expiration: delegation.expiration.toString(16),
-              pubkey: bytesToHex(delegation.pubkey),
+              pubkey: safeBytesToHex(delegation.pubkey),
               ...targets && {
                 targets: targets.map((t) => t.toHex())
               }
             },
-            signature: bytesToHex(signature)
+            signature: safeBytesToHex(signature)
           };
         }),
-        publicKey: bytesToHex(this.publicKey)
+        publicKey: safeBytesToHex(this.publicKey)
       };
     }
   }

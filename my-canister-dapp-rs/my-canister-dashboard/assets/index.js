@@ -69,7 +69,7 @@ for (let i3 = 0; i3 < alphabet.length; i3++) {
 }
 lookupTable["0"] = lookupTable.o;
 lookupTable["1"] = lookupTable.i;
-function encode$2(input) {
+function base32Encode(input) {
   let skip = 0;
   let bits = 0;
   let output = "";
@@ -94,7 +94,7 @@ function encode$2(input) {
   }
   return output + (skip < 0 ? alphabet[bits >> 3] : "");
 }
-function decode$2(input) {
+function base32Decode(input) {
   let skip = 0;
   let byte = 0;
   const output = new Uint8Array(input.length * 4 / 3 | 0);
@@ -778,16 +778,16 @@ class SHA256 extends HashMD {
     this.H = SHA256_IV[7] | 0;
   }
   get() {
-    const { A: A4, B: B3, C: C2, D: D2, E: E2, F: F2, G: G2, H: H2 } = this;
-    return [A4, B3, C2, D2, E2, F2, G2, H2];
+    const { A: A4, B: B3, C: C2, D: D2, E: E3, F: F2, G: G2, H: H2 } = this;
+    return [A4, B3, C2, D2, E3, F2, G2, H2];
   }
   // prettier-ignore
-  set(A4, B3, C2, D2, E2, F2, G2, H2) {
+  set(A4, B3, C2, D2, E3, F2, G2, H2) {
     this.A = A4 | 0;
     this.B = B3 | 0;
     this.C = C2 | 0;
     this.D = D2 | 0;
-    this.E = E2 | 0;
+    this.E = E3 | 0;
     this.F = F2 | 0;
     this.G = G2 | 0;
     this.H = H2 | 0;
@@ -802,16 +802,16 @@ class SHA256 extends HashMD {
       const s1 = rotr(W2, 17) ^ rotr(W2, 19) ^ W2 >>> 10;
       SHA256_W[i3] = s1 + SHA256_W[i3 - 7] + s0 + SHA256_W[i3 - 16] | 0;
     }
-    let { A: A4, B: B3, C: C2, D: D2, E: E2, F: F2, G: G2, H: H2 } = this;
+    let { A: A4, B: B3, C: C2, D: D2, E: E3, F: F2, G: G2, H: H2 } = this;
     for (let i3 = 0; i3 < 64; i3++) {
-      const sigma1 = rotr(E2, 6) ^ rotr(E2, 11) ^ rotr(E2, 25);
-      const T1 = H2 + sigma1 + Chi(E2, F2, G2) + SHA256_K[i3] + SHA256_W[i3] | 0;
+      const sigma1 = rotr(E3, 6) ^ rotr(E3, 11) ^ rotr(E3, 25);
+      const T1 = H2 + sigma1 + Chi(E3, F2, G2) + SHA256_K[i3] + SHA256_W[i3] | 0;
       const sigma0 = rotr(A4, 2) ^ rotr(A4, 13) ^ rotr(A4, 22);
       const T2 = sigma0 + Maj(A4, B3, C2) | 0;
       H2 = G2;
       G2 = F2;
-      F2 = E2;
-      E2 = D2 + T1 | 0;
+      F2 = E3;
+      E3 = D2 + T1 | 0;
       D2 = C2;
       C2 = B3;
       B3 = A4;
@@ -821,11 +821,11 @@ class SHA256 extends HashMD {
     B3 = B3 + this.B | 0;
     C2 = C2 + this.C | 0;
     D2 = D2 + this.D | 0;
-    E2 = E2 + this.E | 0;
+    E3 = E3 + this.E | 0;
     F2 = F2 + this.F | 0;
     G2 = G2 + this.G | 0;
     H2 = H2 + this.H | 0;
-    this.set(A4, B3, C2, D2, E2, F2, G2, H2);
+    this.set(A4, B3, C2, D2, E3, F2, G2, H2);
   }
   roundClean() {
     clean(SHA256_W);
@@ -1089,7 +1089,7 @@ let Principal$1 = class Principal {
       }
     }
     const canisterIdNoDash = maybePrincipal.toLowerCase().replace(/-/g, "");
-    let arr = decode$2(canisterIdNoDash);
+    let arr = base32Decode(canisterIdNoDash);
     arr = arr.slice(4, arr.length);
     const principal = new this(arr);
     if (principal.toText() !== maybePrincipal) {
@@ -1122,7 +1122,7 @@ let Principal$1 = class Principal {
     view.setUint32(0, getCrc32(this._arr));
     const checksum = new Uint8Array(checksumArrayBuf);
     const array = new Uint8Array([...checksum, ...this._arr]);
-    const result = encode$2(array);
+    const result = base32Encode(array);
     const matches = result.match(/.{1,5}/g);
     if (!matches) {
       throw new Error();
@@ -2171,9 +2171,11 @@ class TypeTable {
       throw new Error("Missing type index for " + knot);
     }
     this._typs[idx] = this._typs[knotIdx];
+    const idxRefCount = this._getIdxRefCount(idx);
     const knotRefCount = this._getIdxRefCount(knotIdx);
-    this._idxRefCount.set(knotIdx, knotRefCount - 1);
-    this._idx.delete(knot);
+    this._idxRefCount.set(idx, idxRefCount + knotRefCount);
+    this._idx.set(knot, idx);
+    this._idxRefCount.set(knotIdx, 0);
     this._compactFromEnd();
   }
   _getIdxRefCount(idx) {
@@ -2202,7 +2204,7 @@ class TypeTable {
   }
 }
 class Visitor {
-  visitType(_t2, _data) {
+  visitType(_t, _data) {
     throw new Error("Not implemented");
   }
   visitPrimitive(t3, data) {
@@ -2263,7 +2265,7 @@ class Visitor {
   visitVariant(t3, _fields, data) {
     return this.visitConstruct(t3, data);
   }
-  visitRec(_t2, ty, data) {
+  visitRec(_t, ty, data) {
     return this.visitConstruct(ty, data);
   }
   visitFunc(t3, data) {
@@ -2373,7 +2375,7 @@ class UnknownClass extends Type {
   static [Symbol.hasInstance](instance) {
     return instance.typeName === IdlTypeName.UnknownClass;
   }
-  checkType(_t2) {
+  checkType(_t) {
     throw new Error("Method not implemented for unknown.");
   }
   accept(v3, d2) {
@@ -4205,7 +4207,7 @@ class AnonymousIdentity {
     };
   }
 }
-let w$4 = class w extends Error {
+let w$3 = class w extends Error {
   constructor(n2) {
     super(n2), this.name = "DecodingError";
   }
@@ -4218,11 +4220,11 @@ const h$2 = false;
 function W$1(t3) {
   return t3 == null;
 }
-function R$1(t3, n2) {
+function R$2(t3, n2) {
   const e5 = new Uint8Array(n2);
   return e5.set(t3), e5;
 }
-const K$1 = new TextDecoder();
+const K = new TextDecoder();
 function Z(t3) {
   return (t3 & 224) >> 5;
 }
@@ -4239,7 +4241,7 @@ function B$2(t3) {
   const [n2, e5] = N$2();
   switch (n2) {
     case c.UnsignedInteger:
-      return E$1(e5);
+      return E$2(e5);
     case c.NegativeInteger:
       return j$1(e5);
     case c.ByteString:
@@ -4255,17 +4257,17 @@ function B$2(t3) {
     case c.Simple:
       return Q(e5);
   }
-  throw new w$4(`Unsupported major type: ${n2}`);
+  throw new w$3(`Unsupported major type: ${n2}`);
 }
 function N$2() {
   const t3 = A$3.at(a);
   if (W$1(t3))
-    throw new w$4("Provided CBOR data is empty");
+    throw new w$3("Provided CBOR data is empty");
   const n2 = Z(t3), e5 = q$1(t3);
   return a++, [n2, e5];
 }
 function J$1(t3, n2) {
-  const e5 = E$1(t3);
+  const e5 = E$2(t3);
   if (e5 === 1 / 0) {
     const u2 = [];
     let f2 = B$2();
@@ -4293,10 +4295,10 @@ function Q(t3) {
     case g$2.Break:
       return L$1;
   }
-  throw new w$4(`Unrecognized simple type: ${t3.toString(2)}`);
+  throw new w$3(`Unrecognized simple type: ${t3.toString(2)}`);
 }
 function b$3(t3, n2) {
-  const e5 = E$1(t3), i3 = {};
+  const e5 = E$2(t3), i3 = {};
   if (e5 === 1 / 0) {
     let [u2, f2] = N$2();
     for (; u2 !== c.Simple && f2 !== g$2.Break; ) {
@@ -4308,13 +4310,13 @@ function b$3(t3, n2) {
   for (let u2 = 0; u2 < e5; u2++) {
     const [f2, l3] = N$2();
     if (f2 !== c.TextString)
-      throw new w$4("Map keys must be text strings");
+      throw new w$3("Map keys must be text strings");
     const U2 = F$2(l3), D2 = B$2();
     i3[U2] = D2;
   }
   return i3;
 }
-function E$1(t3) {
+function E$2(t3) {
   if (t3 <= d.Value)
     return t3;
   switch (y$1 = new DataView(A$3.buffer, A$3.byteOffset + a), t3) {
@@ -4329,36 +4331,36 @@ function E$1(t3) {
     case d.Indefinite:
       return 1 / 0;
     default:
-      throw new w$4(`Unsupported integer info: ${t3.toString(2)}`);
+      throw new w$3(`Unsupported integer info: ${t3.toString(2)}`);
   }
 }
 function j$1(t3) {
-  const n2 = E$1(t3);
+  const n2 = E$2(t3);
   return typeof n2 == "number" ? -1 - n2 : -1n - n2;
 }
 function $$1(t3) {
-  const n2 = E$1(t3);
+  const n2 = E$2(t3);
   if (n2 > Number.MAX_SAFE_INTEGER)
-    throw new w$4("Byte length is too large");
+    throw new w$3("Byte length is too large");
   const e5 = Number(n2);
   return a += e5, A$3.slice(a - e5, a);
 }
 function F$2(t3) {
   const n2 = $$1(t3);
-  return K$1.decode(n2);
+  return K.decode(n2);
 }
 function M$2(t3, n2) {
-  const e5 = E$1(t3);
+  const e5 = E$2(t3);
   if (e5 === m$2)
     return B$2();
-  throw new w$4(`Unsupported tag: ${e5}.`);
+  throw new w$3(`Unsupported tag: ${e5}.`);
 }
 let x$1 = class x extends Error {
   constructor(n2) {
     super(n2), this.name = "SerializationError";
   }
 };
-const p = 2 * 1024, C$1 = 100, v$2 = new TextEncoder();
+const p = 2 * 1024, C$1 = 100, v$3 = new TextEncoder();
 function S$1(t3) {
   return t3 << 5;
 }
@@ -4369,7 +4371,7 @@ function dt(t3, n2) {
   return it(m$2, e5, n2), o$2.slice(0, s$2);
 }
 function _(t3, n2) {
-  if (s$2 > o$2.length - C$1 && (o$2 = R$1(o$2, o$2.length * 2), r$2 = new DataView(o$2.buffer)), t3 === false || t3 === true || t3 === null || t3 === void 0) {
+  if (s$2 > o$2.length - C$1 && (o$2 = R$2(o$2, o$2.length * 2), r$2 = new DataView(o$2.buffer)), t3 === false || t3 === true || t3 === null || t3 === void 0) {
     et(t3);
     return;
   }
@@ -4400,16 +4402,16 @@ function _(t3, n2) {
   throw new x$1(`Unsupported type: ${typeof t3}`);
 }
 function tt(t3, n2) {
-  I$1(c.Array, t3.length), t3.forEach((e5, i3) => {
+  I(c.Array, t3.length), t3.forEach((e5, i3) => {
     _((n2 == null ? void 0 : n2(e5, i3.toString())) ?? e5, n2);
   });
 }
 function nt(t3, n2) {
-  O$3 = Object.entries(t3), I$1(c.Map, O$3.length), O$3.forEach(([e5, i3]) => {
+  O$3 = Object.entries(t3), I(c.Map, O$3.length), O$3.forEach(([e5, i3]) => {
     X(e5), _((n2 == null ? void 0 : n2(i3, e5)) ?? i3, n2);
   });
 }
-function I$1(t3, n2) {
+function I(t3, n2) {
   if (n2 <= z) {
     r$2.setUint8(
       s$2++,
@@ -4448,7 +4450,7 @@ function I$1(t3, n2) {
   throw new x$1(`Value too large to encode: ${n2}`);
 }
 function et(t3) {
-  I$1(c.Simple, st(t3));
+  I(c.Simple, st(t3));
 }
 function st(t3) {
   if (t3 === false)
@@ -4461,11 +4463,11 @@ function st(t3) {
     return g$2.Undefined;
   throw new x$1(`Unrecognized simple value: ${t3.toString()}`);
 }
-function k$2(t3, n2) {
-  I$1(t3, n2.length), s$2 > o$2.length - n2.length && (o$2 = R$1(o$2, o$2.length + n2.length), r$2 = new DataView(o$2.buffer)), o$2.set(n2, s$2), s$2 += n2.length;
+function k$1(t3, n2) {
+  I(t3, n2.length), s$2 > o$2.length - n2.length && (o$2 = R$2(o$2, o$2.length + n2.length), r$2 = new DataView(o$2.buffer)), o$2.set(n2, s$2), s$2 += n2.length;
 }
 function T$2(t3, n2) {
-  I$1(t3, n2);
+  I(t3, n2);
 }
 function ct(t3) {
   T$2(c.UnsignedInteger, t3);
@@ -4480,13 +4482,13 @@ function ft(t3) {
   t3 >= 0 ? ct(t3) : ot(t3);
 }
 function X(t3) {
-  k$2(c.TextString, v$2.encode(t3));
+  k$1(c.TextString, v$3.encode(t3));
 }
 function V$1(t3) {
-  k$2(c.ByteString, t3);
+  k$1(c.ByteString, t3);
 }
 function it(t3, n2, e5) {
-  I$1(c.Tag, t3), _(n2, e5);
+  I(c.Tag, t3), _(n2, e5);
 }
 function hasCborValueMethod(value) {
   return typeof value === "object" && value !== null && "toCborValue" in value;
@@ -8530,13 +8532,13 @@ function edwards(params, extraOpts = {}) {
       const C2 = modP(_2n$1 * modP(Z1 * Z1));
       const D2 = modP(a2 * A4);
       const x1y1 = X1 + Y1;
-      const E2 = modP(modP(x1y1 * x1y1) - A4 - B3);
+      const E3 = modP(modP(x1y1 * x1y1) - A4 - B3);
       const G2 = D2 + B3;
       const F2 = G2 - C2;
       const H2 = D2 - B3;
-      const X3 = modP(E2 * F2);
+      const X3 = modP(E3 * F2);
       const Y3 = modP(G2 * H2);
-      const T3 = modP(E2 * H2);
+      const T3 = modP(E3 * H2);
       const Z3 = modP(F2 * G2);
       return new Point(X3, Y3, Z3, T3);
     }
@@ -8552,13 +8554,13 @@ function edwards(params, extraOpts = {}) {
       const B3 = modP(Y1 * Y2);
       const C2 = modP(T1 * d2 * T2);
       const D2 = modP(Z1 * Z2);
-      const E2 = modP((X1 + Y1) * (X2 + Y2) - A4 - B3);
+      const E3 = modP((X1 + Y1) * (X2 + Y2) - A4 - B3);
       const F2 = D2 - C2;
       const G2 = D2 + C2;
       const H2 = modP(B3 - a2 * A4);
-      const X3 = modP(E2 * F2);
+      const X3 = modP(E3 * F2);
       const Y3 = modP(G2 * H2);
-      const T3 = modP(E2 * H2);
+      const T3 = modP(E3 * H2);
       const Z3 = modP(F2 * G2);
       return new Point(X3, Y3, Z3, T3);
     }
@@ -10257,7 +10259,6 @@ function chain(...strategies) {
   };
 }
 const DEFAULT_POLLING_OPTIONS = {
-  strategy: defaultStrategy(),
   preSignReadStateRequest: false
 };
 function hasProperty(value, property) {
@@ -10318,6 +10319,8 @@ async function pollForResponse(agent, canisterId2, requestId, options = {}) {
       await strategy(canisterId2, requestId, status);
       return pollForResponse(agent, canisterId2, requestId, {
         ...options,
+        // Pass over either the strategy already provided or the new one created above
+        strategy,
         request: currentRequest
       });
     }
@@ -10395,6 +10398,55 @@ class Actor {
     }
     return CanisterActor;
   }
+  /**
+   * Creates an actor with the given interface factory and configuration.
+   *
+   * The [`@icp-sdk/bindgen`](https://js.icp.build/bindgen/) package can be used to generate the interface factory for your canister.
+   * @param interfaceFactory - the interface factory for the actor, typically generated by the [`@icp-sdk/bindgen`](https://js.icp.build/bindgen/) package
+   * @param configuration - the configuration for the actor
+   * @returns an actor with the given interface factory and configuration
+   * @example
+   * Using the interface factory generated by the [`@icp-sdk/bindgen`](https://js.icp.build/bindgen/) package:
+   * ```ts
+   * import { Actor, HttpAgent } from '@icp-sdk/core/agent';
+   * import { Principal } from '@icp-sdk/core/principal';
+   * import { idlFactory } from './api/declarations/hello-world.did';
+   *
+   * const canisterId = Principal.fromText('rrkah-fqaaa-aaaaa-aaaaq-cai');
+   *
+   * const agent = await HttpAgent.create({
+   *   host: 'https://icp-api.io',
+   * });
+   *
+   * const actor = Actor.createActor(idlFactory, {
+   *   agent,
+   *   canisterId,
+   * });
+   *
+   * const response = await actor.greet('world');
+   * console.log(response);
+   * ```
+   * @example
+   * Using the `createActor` wrapper function generated by the [`@icp-sdk/bindgen`](https://js.icp.build/bindgen/) package:
+   * ```ts
+   * import { HttpAgent } from '@icp-sdk/core/agent';
+   * import { Principal } from '@icp-sdk/core/principal';
+   * import { createActor } from './api/hello-world';
+   *
+   * const canisterId = Principal.fromText('rrkah-fqaaa-aaaaa-aaaaq-cai');
+   *
+   * const agent = await HttpAgent.create({
+   *   host: 'https://icp-api.io',
+   * });
+   *
+   * const actor = createActor(canisterId, {
+   *   agent,
+   * });
+   *
+   * const response = await actor.greet('world');
+   * console.log(response);
+   * ```
+   */
   static createActor(interfaceFactory, configuration) {
     if (!configuration.canisterId) {
       throw InputError.fromCode(new MissingCanisterIdErrorCode(configuration.canisterId));
@@ -10918,6 +10970,12 @@ class PartialIdentity {
     this.#inner = inner;
   }
 }
+function safeBytesToHex(data) {
+  if (data instanceof Uint8Array) {
+    return bytesToHex(data);
+  }
+  return bytesToHex(new Uint8Array(data));
+}
 function _parseBlob(value) {
   if (typeof value !== "string" || value.length < 64) {
     throw new Error("Invalid public key.");
@@ -10942,7 +11000,7 @@ class Delegation {
   toJSON() {
     return {
       expiration: this.expiration.toString(16),
-      pubkey: bytesToHex(this.pubkey),
+      pubkey: safeBytesToHex(this.pubkey),
       ...this.targets && { targets: this.targets.map((p2) => p2.toHex()) }
     };
   }
@@ -11050,15 +11108,15 @@ class DelegationChain {
         return {
           delegation: {
             expiration: delegation.expiration.toString(16),
-            pubkey: bytesToHex(delegation.pubkey),
+            pubkey: safeBytesToHex(delegation.pubkey),
             ...targets && {
               targets: targets.map((t3) => t3.toHex())
             }
           },
-          signature: bytesToHex(signature)
+          signature: safeBytesToHex(signature)
         };
       }),
-      publicKey: bytesToHex(this.publicKey)
+      publicKey: safeBytesToHex(this.publicKey)
     };
   }
 }
@@ -11889,9 +11947,9 @@ function mergeLoginOptions(loginOptions, otherLoginOptions) {
     customValues
   };
 }
-var I = ((n2) => (n2[n2.FractionalMoreThan8Decimals = 0] = "FractionalMoreThan8Decimals", n2[n2.InvalidFormat = 1] = "InvalidFormat", n2[n2.FractionalTooManyDecimals = 2] = "FractionalTooManyDecimals", n2))(I || {});
+var U$1 = ((n2) => (n2[n2.FractionalMoreThan8Decimals = 0] = "FractionalMoreThan8Decimals", n2[n2.InvalidFormat = 1] = "InvalidFormat", n2[n2.FractionalTooManyDecimals = 2] = "FractionalTooManyDecimals", n2))(U$1 || {});
 BigInt(1e8);
-var w$3 = class w2 {
+var E$1 = class E {
   constructor(t3, r2, n2) {
     this.id = t3;
     this.service = r2;
@@ -11912,10 +11970,10 @@ var A$2 = class A extends Error {
 }, f$1 = (e5, t3) => {
   if (e5 == null) throw new A$2(t3);
 };
-var _t = (e5) => new Uint8Array(e5), St = (e5) => Array.from(e5).map((t3) => t3.charCodeAt(0)), wt = (e5) => {
+var St = (e5) => new Uint8Array(e5), wt = (e5) => Array.from(e5).map((t3) => t3.charCodeAt(0)), Et$1 = (e5) => {
   let t3 = e5.match(/.{1,2}/g);
   return f$1(t3, "Invalid hex string."), Uint8Array.from(t3.map((r2) => parseInt(r2, 16)));
-}, k$1 = (e5) => (e5 instanceof Uint8Array || (e5 = Uint8Array.from(e5)), e5.reduce((t3, r2) => t3 + r2.toString(16).padStart(2, "0"), ""));
+}, R$1 = (e5) => (e5 instanceof Uint8Array || (e5 = Uint8Array.from(e5)), e5.reduce((t3, r2) => t3 + r2.toString(16).padStart(2, "0"), ""));
 var g$1 = "abcdefghijklmnopqrstuvwxyz234567", b$2 = /* @__PURE__ */ Object.create(null);
 for (let e5 = 0; e5 < g$1.length; e5++) b$2[g$1[e5]] = e5;
 b$2[0] = b$2.o;
@@ -11931,7 +11989,7 @@ var $ = new Uint32Array([0, 1996959894, 3993919788, 2567524794, 124634137, 18860
   let t3 = new ArrayBuffer(4);
   return new DataView(t3).setUint32(0, J(e5), false), new Uint8Array(t3);
 };
-var re = (e5) => s$1(e5) ? [e5] : [], K = (e5) => e5?.[0];
+var ne = (e5) => s$1(e5) ? [e5] : [], v$2 = (e5) => e5?.[0];
 var u$1 = ((t3) => (t3[t3.Controllers = 0] = "Controllers", t3[t3.Public = 1] = "Public", t3))(u$1 || {}), i$1 = class i extends Error {
 }, P = ({ controllers: r2, freezingThreshold: a2, memoryAllocation: t3, computeAllocation: s2, reservedCyclesLimit: o3, logVisibility: n2, wasmMemoryLimit: l3, wasmMemoryThreshold: c2 } = {}) => {
   let m2 = () => {
@@ -11944,23 +12002,23 @@ var u$1 = ((t3) => (t3[t3.Controllers = 0] = "Controllers", t3[t3.Public = 1] = 
         throw new i$1();
     }
   };
-  return { controllers: re(r2?.map((d2) => Principal$1.fromText(d2))), freezing_threshold: re(a2), memory_allocation: re(t3), compute_allocation: re(s2), reserved_cycles_limit: re(o3), log_visibility: u$2(n2) ? [] : [m2()], wasm_memory_limit: re(l3), wasm_memory_threshold: re(c2) };
+  return { controllers: ne(r2?.map((d2) => Principal$1.fromText(d2))), freezing_threshold: ne(a2), memory_allocation: ne(t3), compute_allocation: ne(s2), reserved_cycles_limit: ne(o3), log_visibility: u$2(n2) ? [] : [m2()], wasm_memory_limit: ne(l3), wasm_memory_threshold: ne(c2) };
 };
 var Et = ({ IDL: t22 }) => {
-  let e5 = t22.Variant({ mainnet: t22.Null, testnet: t22.Null }), n2 = t22.Text, c2 = t22.Record({ network: e5, address: n2, min_confirmations: t22.Opt(t22.Nat32) }), r2 = t22.Nat64, i3 = r2, o3 = t22.Nat32, u2 = t22.Record({ start_height: o3, end_height: t22.Opt(o3), network: e5 }), F2 = t22.Vec(t22.Nat8), O2 = t22.Record({ tip_height: o3, block_headers: t22.Vec(F2) }), P2 = t22.Record({ network: e5 }), x3 = t22.Nat64, w4 = t22.Vec(x3), C2 = t22.Record({ network: e5, filter: t22.Opt(t22.Variant({ page: t22.Vec(t22.Nat8), min_confirmations: t22.Nat32 })), address: n2 }), T2 = t22.Vec(t22.Nat8), S2 = t22.Record({ txid: t22.Vec(t22.Nat8), vout: t22.Nat32 }), z2 = t22.Record({ height: t22.Nat32, value: r2, outpoint: S2 }), q2 = t22.Record({ next_page: t22.Opt(t22.Vec(t22.Nat8)), tip_height: o3, tip_block_hash: T2, utxos: t22.Vec(z2) }), U2 = t22.Record({ transaction: t22.Vec(t22.Nat8), network: e5 }), s2 = t22.Principal, A4 = t22.Record({ canister_id: s2, num_requested_changes: t22.Opt(t22.Nat64) }), W2 = t22.Variant({ from_user: t22.Record({ user_id: t22.Principal }), from_canister: t22.Record({ canister_version: t22.Opt(t22.Nat64), canister_id: t22.Principal }) }), _2 = t22.Vec(t22.Nat8), B3 = t22.Variant({ creation: t22.Record({ controllers: t22.Vec(t22.Principal) }), code_deployment: t22.Record({ mode: t22.Variant({ reinstall: t22.Null, upgrade: t22.Null, install: t22.Null }), module_hash: t22.Vec(t22.Nat8) }), load_snapshot: t22.Record({ canister_version: t22.Nat64, taken_at_timestamp: t22.Nat64, snapshot_id: _2 }), controllers_change: t22.Record({ controllers: t22.Vec(t22.Principal) }), code_uninstall: t22.Null }), E2 = t22.Record({ timestamp_nanos: t22.Nat64, canister_version: t22.Nat64, origin: W2, details: B3 }), M2 = t22.Record({ controllers: t22.Vec(t22.Principal), module_hash: t22.Opt(t22.Vec(t22.Nat8)), recent_changes: t22.Vec(E2), total_num_changes: t22.Nat64 }), Q2 = t22.Record({ canister_id: s2 }), h2 = t22.Variant({ controllers: t22.Null, public: t22.Null, allowed_viewers: t22.Vec(t22.Principal) }), j2 = t22.Record({ freezing_threshold: t22.Nat, wasm_memory_threshold: t22.Nat, controllers: t22.Vec(t22.Principal), reserved_cycles_limit: t22.Nat, log_visibility: h2, wasm_memory_limit: t22.Nat, memory_allocation: t22.Nat, compute_allocation: t22.Nat }), H2 = t22.Record({ memory_metrics: t22.Record({ wasm_binary_size: t22.Nat, wasm_chunk_store_size: t22.Nat, canister_history_size: t22.Nat, stable_memory_size: t22.Nat, snapshots_size: t22.Nat, wasm_memory_size: t22.Nat, global_memory_size: t22.Nat, custom_sections_size: t22.Nat }), status: t22.Variant({ stopped: t22.Null, stopping: t22.Null, running: t22.Null }), memory_size: t22.Nat, cycles: t22.Nat, settings: j2, query_stats: t22.Record({ response_payload_bytes_total: t22.Nat, num_instructions_total: t22.Nat, num_calls_total: t22.Nat, request_payload_bytes_total: t22.Nat }), idle_cycles_burned_per_day: t22.Nat, module_hash: t22.Opt(t22.Vec(t22.Nat8)), reserved_cycles: t22.Nat }), G2 = t22.Record({ canister_id: s2 }), d2 = t22.Record({ freezing_threshold: t22.Opt(t22.Nat), wasm_memory_threshold: t22.Opt(t22.Nat), controllers: t22.Opt(t22.Vec(t22.Principal)), reserved_cycles_limit: t22.Opt(t22.Nat), log_visibility: t22.Opt(h2), wasm_memory_limit: t22.Opt(t22.Nat), memory_allocation: t22.Opt(t22.Nat), compute_allocation: t22.Opt(t22.Nat) }), J2 = t22.Record({ settings: t22.Opt(d2), sender_canister_version: t22.Opt(t22.Nat64) }), K2 = t22.Record({ canister_id: s2 }), X2 = t22.Record({ canister_id: s2 }), Y2 = t22.Record({ canister_id: s2, snapshot_id: _2 }), Z2 = t22.Record({ canister_id: s2 }), m2 = t22.Variant({ secp256k1: t22.Null }), $2 = t22.Record({ key_id: t22.Record({ name: t22.Text, curve: m2 }), canister_id: t22.Opt(s2), derivation_path: t22.Vec(t22.Vec(t22.Nat8)) }), I2 = t22.Record({ public_key: t22.Vec(t22.Nat8), chain_code: t22.Vec(t22.Nat8) }), L2 = t22.Record({ canister_id: s2 }), D2 = t22.Record({ idx: t22.Nat64, timestamp_nanos: t22.Nat64, content: t22.Vec(t22.Nat8) }), tt2 = t22.Record({ canister_log_records: t22.Vec(D2) }), g2 = t22.Record({ value: t22.Text, name: t22.Text }), l3 = t22.Record({ status: t22.Nat, body: t22.Vec(t22.Nat8), headers: t22.Vec(g2) }), et2 = t22.Record({ url: t22.Text, method: t22.Variant({ get: t22.Null, head: t22.Null, post: t22.Null }), max_response_bytes: t22.Opt(t22.Nat64), body: t22.Opt(t22.Vec(t22.Nat8)), transform: t22.Opt(t22.Record({ function: t22.Func([t22.Record({ context: t22.Vec(t22.Nat8), response: l3 })], [l3], []), context: t22.Vec(t22.Nat8) })), headers: t22.Vec(g2) }), N2 = t22.Variant({ reinstall: t22.Null, upgrade: t22.Opt(t22.Record({ wasm_memory_persistence: t22.Opt(t22.Variant({ keep: t22.Null, replace: t22.Null })), skip_pre_upgrade: t22.Opt(t22.Bool) })), install: t22.Null }), p2 = t22.Record({ hash: t22.Vec(t22.Nat8) }), st2 = t22.Record({ arg: t22.Vec(t22.Nat8), wasm_module_hash: t22.Vec(t22.Nat8), mode: N2, chunk_hashes_list: t22.Vec(p2), target_canister: s2, store_canister: t22.Opt(s2), sender_canister_version: t22.Opt(t22.Nat64) }), nt2 = t22.Vec(t22.Nat8), ct2 = t22.Record({ arg: t22.Vec(t22.Nat8), wasm_module: nt2, mode: N2, canister_id: s2, sender_canister_version: t22.Opt(t22.Nat64) }), rt = t22.Record({ canister_id: s2 }), y2 = t22.Record({ id: _2, total_size: t22.Nat64, taken_at_timestamp: t22.Nat64 }), at = t22.Vec(y2), it2 = t22.Record({ canister_id: s2, sender_canister_version: t22.Opt(t22.Nat64), snapshot_id: _2 }), ot2 = t22.Record({ start_at_timestamp_nanos: t22.Nat64, subnet_id: t22.Principal }), _t2 = t22.Record({ num_block_failures_total: t22.Nat64, node_id: t22.Principal, num_blocks_proposed_total: t22.Nat64 }), dt2 = t22.Vec(t22.Record({ timestamp_nanos: t22.Nat64, node_metrics: t22.Vec(_t2) })), lt2 = t22.Record({ settings: t22.Opt(d2), specified_id: t22.Opt(s2), amount: t22.Opt(t22.Nat), sender_canister_version: t22.Opt(t22.Nat64) }), pt = t22.Record({ canister_id: s2 }), ut2 = t22.Record({ canister_id: s2, amount: t22.Nat }), ht = t22.Vec(t22.Nat8), k2 = t22.Variant({ ed25519: t22.Null, bip340secp256k1: t22.Null }), mt = t22.Record({ key_id: t22.Record({ algorithm: k2, name: t22.Text }), canister_id: t22.Opt(s2), derivation_path: t22.Vec(t22.Vec(t22.Nat8)) }), gt = t22.Record({ public_key: t22.Vec(t22.Nat8), chain_code: t22.Vec(t22.Nat8) }), Nt = t22.Record({ key_id: t22.Record({ name: t22.Text, curve: m2 }), derivation_path: t22.Vec(t22.Vec(t22.Nat8)), message_hash: t22.Vec(t22.Nat8) }), yt = t22.Record({ signature: t22.Vec(t22.Nat8) }), kt = t22.Variant({ bip341: t22.Record({ merkle_root_hash: t22.Vec(t22.Nat8) }) }), Rt = t22.Record({ aux: t22.Opt(kt), key_id: t22.Record({ algorithm: k2, name: t22.Text }), derivation_path: t22.Vec(t22.Vec(t22.Nat8)), message: t22.Vec(t22.Nat8) }), Vt = t22.Record({ signature: t22.Vec(t22.Nat8) }), vt = t22.Record({ canister_id: s2 }), bt = t22.Record({ canister_id: s2 }), ft2 = t22.Record({ canister_id: s2 }), Ft = t22.Vec(p2), Ot = t22.Record({ subnet_id: t22.Principal }), Pt = t22.Record({ replica_version: t22.Text, registry_version: t22.Nat64 }), xt = t22.Record({ replace_snapshot: t22.Opt(_2), canister_id: s2 }), wt2 = y2, Ct = t22.Record({ canister_id: s2, sender_canister_version: t22.Opt(t22.Nat64) }), Tt = t22.Record({ canister_id: t22.Principal, settings: d2, sender_canister_version: t22.Opt(t22.Nat64) }), St2 = t22.Record({ chunk: t22.Vec(t22.Nat8), canister_id: t22.Principal }), zt = p2, R2 = t22.Variant({ bls12_381_g2: t22.Null }), qt = t22.Record({ context: t22.Vec(t22.Nat8), key_id: t22.Record({ name: t22.Text, curve: R2 }), input: t22.Vec(t22.Nat8), transport_public_key: t22.Vec(t22.Nat8) }), Ut = t22.Record({ encrypted_key: t22.Vec(t22.Nat8) }), At = t22.Record({ context: t22.Vec(t22.Nat8), key_id: t22.Record({ name: t22.Text, curve: R2 }), canister_id: t22.Opt(s2) }), Wt = t22.Record({ public_key: t22.Vec(t22.Nat8) });
-  return t22.Service({ bitcoin_get_balance: t22.Func([c2], [i3], []), bitcoin_get_block_headers: t22.Func([u2], [O2], []), bitcoin_get_current_fee_percentiles: t22.Func([P2], [w4], []), bitcoin_get_utxos: t22.Func([C2], [q2], []), bitcoin_send_transaction: t22.Func([U2], [], []), canister_info: t22.Func([A4], [M2], []), canister_status: t22.Func([Q2], [H2], []), clear_chunk_store: t22.Func([G2], [], []), create_canister: t22.Func([J2], [K2], []), delete_canister: t22.Func([X2], [], []), delete_canister_snapshot: t22.Func([Y2], [], []), deposit_cycles: t22.Func([Z2], [], []), ecdsa_public_key: t22.Func([$2], [I2], []), fetch_canister_logs: t22.Func([L2], [tt2], []), http_request: t22.Func([et2], [l3], []), install_chunked_code: t22.Func([st2], [], []), install_code: t22.Func([ct2], [], []), list_canister_snapshots: t22.Func([rt], [at], []), load_canister_snapshot: t22.Func([it2], [], []), node_metrics_history: t22.Func([ot2], [dt2], []), provisional_create_canister_with_cycles: t22.Func([lt2], [pt], []), provisional_top_up_canister: t22.Func([ut2], [], []), raw_rand: t22.Func([], [ht], []), schnorr_public_key: t22.Func([mt], [gt], []), sign_with_ecdsa: t22.Func([Nt], [yt], []), sign_with_schnorr: t22.Func([Rt], [Vt], []), start_canister: t22.Func([vt], [], []), stop_canister: t22.Func([bt], [], []), stored_chunks: t22.Func([ft2], [Ft], []), subnet_info: t22.Func([Ot], [Pt], []), take_canister_snapshot: t22.Func([xt], [wt2], []), uninstall_code: t22.Func([Ct], [], []), update_settings: t22.Func([Tt], [], []), upload_chunk: t22.Func([St2], [zt], []), vetkd_derive_key: t22.Func([qt], [Ut], []), vetkd_public_key: t22.Func([At], [Wt], []) });
+  let e5 = t22.Variant({ mainnet: t22.Null, testnet: t22.Null }), n2 = t22.Text, c2 = t22.Record({ network: e5, address: n2, min_confirmations: t22.Opt(t22.Nat32) }), r2 = t22.Nat64, i3 = r2, o3 = t22.Nat32, u2 = t22.Record({ start_height: o3, end_height: t22.Opt(o3), network: e5 }), F2 = t22.Vec(t22.Nat8), O2 = t22.Record({ tip_height: o3, block_headers: t22.Vec(F2) }), P2 = t22.Record({ network: e5 }), x3 = t22.Nat64, w3 = t22.Vec(x3), C2 = t22.Record({ network: e5, filter: t22.Opt(t22.Variant({ page: t22.Vec(t22.Nat8), min_confirmations: t22.Nat32 })), address: n2 }), T2 = t22.Vec(t22.Nat8), S2 = t22.Record({ txid: t22.Vec(t22.Nat8), vout: t22.Nat32 }), z2 = t22.Record({ height: t22.Nat32, value: r2, outpoint: S2 }), q2 = t22.Record({ next_page: t22.Opt(t22.Vec(t22.Nat8)), tip_height: o3, tip_block_hash: T2, utxos: t22.Vec(z2) }), U2 = t22.Record({ transaction: t22.Vec(t22.Nat8), network: e5 }), s2 = t22.Principal, A4 = t22.Record({ canister_id: s2, num_requested_changes: t22.Opt(t22.Nat64) }), W2 = t22.Variant({ from_user: t22.Record({ user_id: t22.Principal }), from_canister: t22.Record({ canister_version: t22.Opt(t22.Nat64), canister_id: t22.Principal }) }), _2 = t22.Vec(t22.Nat8), B3 = t22.Variant({ creation: t22.Record({ controllers: t22.Vec(t22.Principal) }), code_deployment: t22.Record({ mode: t22.Variant({ reinstall: t22.Null, upgrade: t22.Null, install: t22.Null }), module_hash: t22.Vec(t22.Nat8) }), load_snapshot: t22.Record({ canister_version: t22.Nat64, taken_at_timestamp: t22.Nat64, snapshot_id: _2 }), controllers_change: t22.Record({ controllers: t22.Vec(t22.Principal) }), code_uninstall: t22.Null }), E3 = t22.Record({ timestamp_nanos: t22.Nat64, canister_version: t22.Nat64, origin: W2, details: B3 }), M2 = t22.Record({ controllers: t22.Vec(t22.Principal), module_hash: t22.Opt(t22.Vec(t22.Nat8)), recent_changes: t22.Vec(E3), total_num_changes: t22.Nat64 }), Q2 = t22.Record({ canister_id: s2 }), h2 = t22.Variant({ controllers: t22.Null, public: t22.Null, allowed_viewers: t22.Vec(t22.Principal) }), j2 = t22.Record({ freezing_threshold: t22.Nat, wasm_memory_threshold: t22.Nat, controllers: t22.Vec(t22.Principal), reserved_cycles_limit: t22.Nat, log_visibility: h2, wasm_memory_limit: t22.Nat, memory_allocation: t22.Nat, compute_allocation: t22.Nat }), H2 = t22.Record({ memory_metrics: t22.Record({ wasm_binary_size: t22.Nat, wasm_chunk_store_size: t22.Nat, canister_history_size: t22.Nat, stable_memory_size: t22.Nat, snapshots_size: t22.Nat, wasm_memory_size: t22.Nat, global_memory_size: t22.Nat, custom_sections_size: t22.Nat }), status: t22.Variant({ stopped: t22.Null, stopping: t22.Null, running: t22.Null }), memory_size: t22.Nat, cycles: t22.Nat, settings: j2, query_stats: t22.Record({ response_payload_bytes_total: t22.Nat, num_instructions_total: t22.Nat, num_calls_total: t22.Nat, request_payload_bytes_total: t22.Nat }), idle_cycles_burned_per_day: t22.Nat, module_hash: t22.Opt(t22.Vec(t22.Nat8)), reserved_cycles: t22.Nat }), G2 = t22.Record({ canister_id: s2 }), d2 = t22.Record({ freezing_threshold: t22.Opt(t22.Nat), wasm_memory_threshold: t22.Opt(t22.Nat), controllers: t22.Opt(t22.Vec(t22.Principal)), reserved_cycles_limit: t22.Opt(t22.Nat), log_visibility: t22.Opt(h2), wasm_memory_limit: t22.Opt(t22.Nat), memory_allocation: t22.Opt(t22.Nat), compute_allocation: t22.Opt(t22.Nat) }), J2 = t22.Record({ settings: t22.Opt(d2), sender_canister_version: t22.Opt(t22.Nat64) }), K2 = t22.Record({ canister_id: s2 }), X2 = t22.Record({ canister_id: s2 }), Y2 = t22.Record({ canister_id: s2, snapshot_id: _2 }), Z2 = t22.Record({ canister_id: s2 }), m2 = t22.Variant({ secp256k1: t22.Null }), $2 = t22.Record({ key_id: t22.Record({ name: t22.Text, curve: m2 }), canister_id: t22.Opt(s2), derivation_path: t22.Vec(t22.Vec(t22.Nat8)) }), I2 = t22.Record({ public_key: t22.Vec(t22.Nat8), chain_code: t22.Vec(t22.Nat8) }), L2 = t22.Record({ canister_id: s2 }), D2 = t22.Record({ idx: t22.Nat64, timestamp_nanos: t22.Nat64, content: t22.Vec(t22.Nat8) }), tt2 = t22.Record({ canister_log_records: t22.Vec(D2) }), g2 = t22.Record({ value: t22.Text, name: t22.Text }), l3 = t22.Record({ status: t22.Nat, body: t22.Vec(t22.Nat8), headers: t22.Vec(g2) }), et2 = t22.Record({ url: t22.Text, method: t22.Variant({ get: t22.Null, head: t22.Null, post: t22.Null }), max_response_bytes: t22.Opt(t22.Nat64), body: t22.Opt(t22.Vec(t22.Nat8)), transform: t22.Opt(t22.Record({ function: t22.Func([t22.Record({ context: t22.Vec(t22.Nat8), response: l3 })], [l3], []), context: t22.Vec(t22.Nat8) })), headers: t22.Vec(g2) }), N2 = t22.Variant({ reinstall: t22.Null, upgrade: t22.Opt(t22.Record({ wasm_memory_persistence: t22.Opt(t22.Variant({ keep: t22.Null, replace: t22.Null })), skip_pre_upgrade: t22.Opt(t22.Bool) })), install: t22.Null }), p2 = t22.Record({ hash: t22.Vec(t22.Nat8) }), st2 = t22.Record({ arg: t22.Vec(t22.Nat8), wasm_module_hash: t22.Vec(t22.Nat8), mode: N2, chunk_hashes_list: t22.Vec(p2), target_canister: s2, store_canister: t22.Opt(s2), sender_canister_version: t22.Opt(t22.Nat64) }), nt2 = t22.Vec(t22.Nat8), ct2 = t22.Record({ arg: t22.Vec(t22.Nat8), wasm_module: nt2, mode: N2, canister_id: s2, sender_canister_version: t22.Opt(t22.Nat64) }), rt = t22.Record({ canister_id: s2 }), y2 = t22.Record({ id: _2, total_size: t22.Nat64, taken_at_timestamp: t22.Nat64 }), at = t22.Vec(y2), it2 = t22.Record({ canister_id: s2, sender_canister_version: t22.Opt(t22.Nat64), snapshot_id: _2 }), ot2 = t22.Record({ start_at_timestamp_nanos: t22.Nat64, subnet_id: t22.Principal }), _t = t22.Record({ num_block_failures_total: t22.Nat64, node_id: t22.Principal, num_blocks_proposed_total: t22.Nat64 }), dt2 = t22.Vec(t22.Record({ timestamp_nanos: t22.Nat64, node_metrics: t22.Vec(_t) })), lt2 = t22.Record({ settings: t22.Opt(d2), specified_id: t22.Opt(s2), amount: t22.Opt(t22.Nat), sender_canister_version: t22.Opt(t22.Nat64) }), pt = t22.Record({ canister_id: s2 }), ut2 = t22.Record({ canister_id: s2, amount: t22.Nat }), ht = t22.Vec(t22.Nat8), k2 = t22.Variant({ ed25519: t22.Null, bip340secp256k1: t22.Null }), mt = t22.Record({ key_id: t22.Record({ algorithm: k2, name: t22.Text }), canister_id: t22.Opt(s2), derivation_path: t22.Vec(t22.Vec(t22.Nat8)) }), gt = t22.Record({ public_key: t22.Vec(t22.Nat8), chain_code: t22.Vec(t22.Nat8) }), Nt = t22.Record({ key_id: t22.Record({ name: t22.Text, curve: m2 }), derivation_path: t22.Vec(t22.Vec(t22.Nat8)), message_hash: t22.Vec(t22.Nat8) }), yt = t22.Record({ signature: t22.Vec(t22.Nat8) }), kt = t22.Variant({ bip341: t22.Record({ merkle_root_hash: t22.Vec(t22.Nat8) }) }), Rt = t22.Record({ aux: t22.Opt(kt), key_id: t22.Record({ algorithm: k2, name: t22.Text }), derivation_path: t22.Vec(t22.Vec(t22.Nat8)), message: t22.Vec(t22.Nat8) }), Vt = t22.Record({ signature: t22.Vec(t22.Nat8) }), vt = t22.Record({ canister_id: s2 }), bt = t22.Record({ canister_id: s2 }), ft2 = t22.Record({ canister_id: s2 }), Ft = t22.Vec(p2), Ot = t22.Record({ subnet_id: t22.Principal }), Pt = t22.Record({ replica_version: t22.Text, registry_version: t22.Nat64 }), xt = t22.Record({ replace_snapshot: t22.Opt(_2), canister_id: s2 }), wt2 = y2, Ct = t22.Record({ canister_id: s2, sender_canister_version: t22.Opt(t22.Nat64) }), Tt = t22.Record({ canister_id: t22.Principal, settings: d2, sender_canister_version: t22.Opt(t22.Nat64) }), St2 = t22.Record({ chunk: t22.Vec(t22.Nat8), canister_id: t22.Principal }), zt = p2, R2 = t22.Variant({ bls12_381_g2: t22.Null }), qt = t22.Record({ context: t22.Vec(t22.Nat8), key_id: t22.Record({ name: t22.Text, curve: R2 }), input: t22.Vec(t22.Nat8), transport_public_key: t22.Vec(t22.Nat8) }), Ut = t22.Record({ encrypted_key: t22.Vec(t22.Nat8) }), At = t22.Record({ context: t22.Vec(t22.Nat8), key_id: t22.Record({ name: t22.Text, curve: R2 }), canister_id: t22.Opt(s2) }), Wt = t22.Record({ public_key: t22.Vec(t22.Nat8) });
+  return t22.Service({ bitcoin_get_balance: t22.Func([c2], [i3], []), bitcoin_get_block_headers: t22.Func([u2], [O2], []), bitcoin_get_current_fee_percentiles: t22.Func([P2], [w3], []), bitcoin_get_utxos: t22.Func([C2], [q2], []), bitcoin_send_transaction: t22.Func([U2], [], []), canister_info: t22.Func([A4], [M2], []), canister_status: t22.Func([Q2], [H2], []), clear_chunk_store: t22.Func([G2], [], []), create_canister: t22.Func([J2], [K2], []), delete_canister: t22.Func([X2], [], []), delete_canister_snapshot: t22.Func([Y2], [], []), deposit_cycles: t22.Func([Z2], [], []), ecdsa_public_key: t22.Func([$2], [I2], []), fetch_canister_logs: t22.Func([L2], [tt2], []), http_request: t22.Func([et2], [l3], []), install_chunked_code: t22.Func([st2], [], []), install_code: t22.Func([ct2], [], []), list_canister_snapshots: t22.Func([rt], [at], []), load_canister_snapshot: t22.Func([it2], [], []), node_metrics_history: t22.Func([ot2], [dt2], []), provisional_create_canister_with_cycles: t22.Func([lt2], [pt], []), provisional_top_up_canister: t22.Func([ut2], [], []), raw_rand: t22.Func([], [ht], []), schnorr_public_key: t22.Func([mt], [gt], []), sign_with_ecdsa: t22.Func([Nt], [yt], []), sign_with_schnorr: t22.Func([Rt], [Vt], []), start_canister: t22.Func([vt], [], []), stop_canister: t22.Func([bt], [], []), stored_chunks: t22.Func([ft2], [Ft], []), subnet_info: t22.Func([Ot], [Pt], []), take_canister_snapshot: t22.Func([xt], [wt2], []), uninstall_code: t22.Func([Ct], [], []), update_settings: t22.Func([Tt], [], []), upload_chunk: t22.Func([St2], [zt], []), vetkd_derive_key: t22.Func([qt], [Ut], []), vetkd_public_key: t22.Func([At], [Wt], []) });
 };
 var Mt = ({ IDL: t22 }) => {
-  let e5 = t22.Variant({ mainnet: t22.Null, testnet: t22.Null }), n2 = t22.Text, c2 = t22.Record({ network: e5, address: n2, min_confirmations: t22.Opt(t22.Nat32) }), r2 = t22.Nat64, i3 = r2, o3 = t22.Nat32, u2 = t22.Record({ start_height: o3, end_height: t22.Opt(o3), network: e5 }), F2 = t22.Vec(t22.Nat8), O2 = t22.Record({ tip_height: o3, block_headers: t22.Vec(F2) }), P2 = t22.Record({ network: e5 }), x3 = t22.Nat64, w4 = t22.Vec(x3), C2 = t22.Record({ network: e5, filter: t22.Opt(t22.Variant({ page: t22.Vec(t22.Nat8), min_confirmations: t22.Nat32 })), address: n2 }), T2 = t22.Vec(t22.Nat8), S2 = t22.Record({ txid: t22.Vec(t22.Nat8), vout: t22.Nat32 }), z2 = t22.Record({ height: t22.Nat32, value: r2, outpoint: S2 }), q2 = t22.Record({ next_page: t22.Opt(t22.Vec(t22.Nat8)), tip_height: o3, tip_block_hash: T2, utxos: t22.Vec(z2) }), U2 = t22.Record({ transaction: t22.Vec(t22.Nat8), network: e5 }), s2 = t22.Principal, A4 = t22.Record({ canister_id: s2, num_requested_changes: t22.Opt(t22.Nat64) }), W2 = t22.Variant({ from_user: t22.Record({ user_id: t22.Principal }), from_canister: t22.Record({ canister_version: t22.Opt(t22.Nat64), canister_id: t22.Principal }) }), _2 = t22.Vec(t22.Nat8), B3 = t22.Variant({ creation: t22.Record({ controllers: t22.Vec(t22.Principal) }), code_deployment: t22.Record({ mode: t22.Variant({ reinstall: t22.Null, upgrade: t22.Null, install: t22.Null }), module_hash: t22.Vec(t22.Nat8) }), load_snapshot: t22.Record({ canister_version: t22.Nat64, taken_at_timestamp: t22.Nat64, snapshot_id: _2 }), controllers_change: t22.Record({ controllers: t22.Vec(t22.Principal) }), code_uninstall: t22.Null }), E2 = t22.Record({ timestamp_nanos: t22.Nat64, canister_version: t22.Nat64, origin: W2, details: B3 }), M2 = t22.Record({ controllers: t22.Vec(t22.Principal), module_hash: t22.Opt(t22.Vec(t22.Nat8)), recent_changes: t22.Vec(E2), total_num_changes: t22.Nat64 }), Q2 = t22.Record({ canister_id: s2 }), h2 = t22.Variant({ controllers: t22.Null, public: t22.Null, allowed_viewers: t22.Vec(t22.Principal) }), j2 = t22.Record({ freezing_threshold: t22.Nat, wasm_memory_threshold: t22.Nat, controllers: t22.Vec(t22.Principal), reserved_cycles_limit: t22.Nat, log_visibility: h2, wasm_memory_limit: t22.Nat, memory_allocation: t22.Nat, compute_allocation: t22.Nat }), H2 = t22.Record({ memory_metrics: t22.Record({ wasm_binary_size: t22.Nat, wasm_chunk_store_size: t22.Nat, canister_history_size: t22.Nat, stable_memory_size: t22.Nat, snapshots_size: t22.Nat, wasm_memory_size: t22.Nat, global_memory_size: t22.Nat, custom_sections_size: t22.Nat }), status: t22.Variant({ stopped: t22.Null, stopping: t22.Null, running: t22.Null }), memory_size: t22.Nat, cycles: t22.Nat, settings: j2, query_stats: t22.Record({ response_payload_bytes_total: t22.Nat, num_instructions_total: t22.Nat, num_calls_total: t22.Nat, request_payload_bytes_total: t22.Nat }), idle_cycles_burned_per_day: t22.Nat, module_hash: t22.Opt(t22.Vec(t22.Nat8)), reserved_cycles: t22.Nat }), G2 = t22.Record({ canister_id: s2 }), d2 = t22.Record({ freezing_threshold: t22.Opt(t22.Nat), wasm_memory_threshold: t22.Opt(t22.Nat), controllers: t22.Opt(t22.Vec(t22.Principal)), reserved_cycles_limit: t22.Opt(t22.Nat), log_visibility: t22.Opt(h2), wasm_memory_limit: t22.Opt(t22.Nat), memory_allocation: t22.Opt(t22.Nat), compute_allocation: t22.Opt(t22.Nat) }), J2 = t22.Record({ settings: t22.Opt(d2), sender_canister_version: t22.Opt(t22.Nat64) }), K2 = t22.Record({ canister_id: s2 }), X2 = t22.Record({ canister_id: s2 }), Y2 = t22.Record({ canister_id: s2, snapshot_id: _2 }), Z2 = t22.Record({ canister_id: s2 }), m2 = t22.Variant({ secp256k1: t22.Null }), $2 = t22.Record({ key_id: t22.Record({ name: t22.Text, curve: m2 }), canister_id: t22.Opt(s2), derivation_path: t22.Vec(t22.Vec(t22.Nat8)) }), I2 = t22.Record({ public_key: t22.Vec(t22.Nat8), chain_code: t22.Vec(t22.Nat8) }), L2 = t22.Record({ canister_id: s2 }), D2 = t22.Record({ idx: t22.Nat64, timestamp_nanos: t22.Nat64, content: t22.Vec(t22.Nat8) }), tt2 = t22.Record({ canister_log_records: t22.Vec(D2) }), g2 = t22.Record({ value: t22.Text, name: t22.Text }), l3 = t22.Record({ status: t22.Nat, body: t22.Vec(t22.Nat8), headers: t22.Vec(g2) }), et2 = t22.Record({ url: t22.Text, method: t22.Variant({ get: t22.Null, head: t22.Null, post: t22.Null }), max_response_bytes: t22.Opt(t22.Nat64), body: t22.Opt(t22.Vec(t22.Nat8)), transform: t22.Opt(t22.Record({ function: t22.Func([t22.Record({ context: t22.Vec(t22.Nat8), response: l3 })], [l3], ["query"]), context: t22.Vec(t22.Nat8) })), headers: t22.Vec(g2) }), N2 = t22.Variant({ reinstall: t22.Null, upgrade: t22.Opt(t22.Record({ wasm_memory_persistence: t22.Opt(t22.Variant({ keep: t22.Null, replace: t22.Null })), skip_pre_upgrade: t22.Opt(t22.Bool) })), install: t22.Null }), p2 = t22.Record({ hash: t22.Vec(t22.Nat8) }), st2 = t22.Record({ arg: t22.Vec(t22.Nat8), wasm_module_hash: t22.Vec(t22.Nat8), mode: N2, chunk_hashes_list: t22.Vec(p2), target_canister: s2, store_canister: t22.Opt(s2), sender_canister_version: t22.Opt(t22.Nat64) }), nt2 = t22.Vec(t22.Nat8), ct2 = t22.Record({ arg: t22.Vec(t22.Nat8), wasm_module: nt2, mode: N2, canister_id: s2, sender_canister_version: t22.Opt(t22.Nat64) }), rt = t22.Record({ canister_id: s2 }), y2 = t22.Record({ id: _2, total_size: t22.Nat64, taken_at_timestamp: t22.Nat64 }), at = t22.Vec(y2), it2 = t22.Record({ canister_id: s2, sender_canister_version: t22.Opt(t22.Nat64), snapshot_id: _2 }), ot2 = t22.Record({ start_at_timestamp_nanos: t22.Nat64, subnet_id: t22.Principal }), _t2 = t22.Record({ num_block_failures_total: t22.Nat64, node_id: t22.Principal, num_blocks_proposed_total: t22.Nat64 }), dt2 = t22.Vec(t22.Record({ timestamp_nanos: t22.Nat64, node_metrics: t22.Vec(_t2) })), lt2 = t22.Record({ settings: t22.Opt(d2), specified_id: t22.Opt(s2), amount: t22.Opt(t22.Nat), sender_canister_version: t22.Opt(t22.Nat64) }), pt = t22.Record({ canister_id: s2 }), ut2 = t22.Record({ canister_id: s2, amount: t22.Nat }), ht = t22.Vec(t22.Nat8), k2 = t22.Variant({ ed25519: t22.Null, bip340secp256k1: t22.Null }), mt = t22.Record({ key_id: t22.Record({ algorithm: k2, name: t22.Text }), canister_id: t22.Opt(s2), derivation_path: t22.Vec(t22.Vec(t22.Nat8)) }), gt = t22.Record({ public_key: t22.Vec(t22.Nat8), chain_code: t22.Vec(t22.Nat8) }), Nt = t22.Record({ key_id: t22.Record({ name: t22.Text, curve: m2 }), derivation_path: t22.Vec(t22.Vec(t22.Nat8)), message_hash: t22.Vec(t22.Nat8) }), yt = t22.Record({ signature: t22.Vec(t22.Nat8) }), kt = t22.Variant({ bip341: t22.Record({ merkle_root_hash: t22.Vec(t22.Nat8) }) }), Rt = t22.Record({ aux: t22.Opt(kt), key_id: t22.Record({ algorithm: k2, name: t22.Text }), derivation_path: t22.Vec(t22.Vec(t22.Nat8)), message: t22.Vec(t22.Nat8) }), Vt = t22.Record({ signature: t22.Vec(t22.Nat8) }), vt = t22.Record({ canister_id: s2 }), bt = t22.Record({ canister_id: s2 }), ft2 = t22.Record({ canister_id: s2 }), Ft = t22.Vec(p2), Ot = t22.Record({ subnet_id: t22.Principal }), Pt = t22.Record({ replica_version: t22.Text, registry_version: t22.Nat64 }), xt = t22.Record({ replace_snapshot: t22.Opt(_2), canister_id: s2 }), wt2 = y2, Ct = t22.Record({ canister_id: s2, sender_canister_version: t22.Opt(t22.Nat64) }), Tt = t22.Record({ canister_id: t22.Principal, settings: d2, sender_canister_version: t22.Opt(t22.Nat64) }), St2 = t22.Record({ chunk: t22.Vec(t22.Nat8), canister_id: t22.Principal }), zt = p2, R2 = t22.Variant({ bls12_381_g2: t22.Null }), qt = t22.Record({ context: t22.Vec(t22.Nat8), key_id: t22.Record({ name: t22.Text, curve: R2 }), input: t22.Vec(t22.Nat8), transport_public_key: t22.Vec(t22.Nat8) }), Ut = t22.Record({ encrypted_key: t22.Vec(t22.Nat8) }), At = t22.Record({ context: t22.Vec(t22.Nat8), key_id: t22.Record({ name: t22.Text, curve: R2 }), canister_id: t22.Opt(s2) }), Wt = t22.Record({ public_key: t22.Vec(t22.Nat8) });
-  return t22.Service({ bitcoin_get_balance: t22.Func([c2], [i3], []), bitcoin_get_block_headers: t22.Func([u2], [O2], []), bitcoin_get_current_fee_percentiles: t22.Func([P2], [w4], []), bitcoin_get_utxos: t22.Func([C2], [q2], []), bitcoin_send_transaction: t22.Func([U2], [], []), canister_info: t22.Func([A4], [M2], []), canister_status: t22.Func([Q2], [H2], []), clear_chunk_store: t22.Func([G2], [], []), create_canister: t22.Func([J2], [K2], []), delete_canister: t22.Func([X2], [], []), delete_canister_snapshot: t22.Func([Y2], [], []), deposit_cycles: t22.Func([Z2], [], []), ecdsa_public_key: t22.Func([$2], [I2], []), fetch_canister_logs: t22.Func([L2], [tt2], ["query"]), http_request: t22.Func([et2], [l3], []), install_chunked_code: t22.Func([st2], [], []), install_code: t22.Func([ct2], [], []), list_canister_snapshots: t22.Func([rt], [at], []), load_canister_snapshot: t22.Func([it2], [], []), node_metrics_history: t22.Func([ot2], [dt2], []), provisional_create_canister_with_cycles: t22.Func([lt2], [pt], []), provisional_top_up_canister: t22.Func([ut2], [], []), raw_rand: t22.Func([], [ht], []), schnorr_public_key: t22.Func([mt], [gt], []), sign_with_ecdsa: t22.Func([Nt], [yt], []), sign_with_schnorr: t22.Func([Rt], [Vt], []), start_canister: t22.Func([vt], [], []), stop_canister: t22.Func([bt], [], []), stored_chunks: t22.Func([ft2], [Ft], []), subnet_info: t22.Func([Ot], [Pt], []), take_canister_snapshot: t22.Func([xt], [wt2], []), uninstall_code: t22.Func([Ct], [], []), update_settings: t22.Func([Tt], [], []), upload_chunk: t22.Func([St2], [zt], []), vetkd_derive_key: t22.Func([qt], [Ut], []), vetkd_public_key: t22.Func([At], [Wt], []) });
+  let e5 = t22.Variant({ mainnet: t22.Null, testnet: t22.Null }), n2 = t22.Text, c2 = t22.Record({ network: e5, address: n2, min_confirmations: t22.Opt(t22.Nat32) }), r2 = t22.Nat64, i3 = r2, o3 = t22.Nat32, u2 = t22.Record({ start_height: o3, end_height: t22.Opt(o3), network: e5 }), F2 = t22.Vec(t22.Nat8), O2 = t22.Record({ tip_height: o3, block_headers: t22.Vec(F2) }), P2 = t22.Record({ network: e5 }), x3 = t22.Nat64, w3 = t22.Vec(x3), C2 = t22.Record({ network: e5, filter: t22.Opt(t22.Variant({ page: t22.Vec(t22.Nat8), min_confirmations: t22.Nat32 })), address: n2 }), T2 = t22.Vec(t22.Nat8), S2 = t22.Record({ txid: t22.Vec(t22.Nat8), vout: t22.Nat32 }), z2 = t22.Record({ height: t22.Nat32, value: r2, outpoint: S2 }), q2 = t22.Record({ next_page: t22.Opt(t22.Vec(t22.Nat8)), tip_height: o3, tip_block_hash: T2, utxos: t22.Vec(z2) }), U2 = t22.Record({ transaction: t22.Vec(t22.Nat8), network: e5 }), s2 = t22.Principal, A4 = t22.Record({ canister_id: s2, num_requested_changes: t22.Opt(t22.Nat64) }), W2 = t22.Variant({ from_user: t22.Record({ user_id: t22.Principal }), from_canister: t22.Record({ canister_version: t22.Opt(t22.Nat64), canister_id: t22.Principal }) }), _2 = t22.Vec(t22.Nat8), B3 = t22.Variant({ creation: t22.Record({ controllers: t22.Vec(t22.Principal) }), code_deployment: t22.Record({ mode: t22.Variant({ reinstall: t22.Null, upgrade: t22.Null, install: t22.Null }), module_hash: t22.Vec(t22.Nat8) }), load_snapshot: t22.Record({ canister_version: t22.Nat64, taken_at_timestamp: t22.Nat64, snapshot_id: _2 }), controllers_change: t22.Record({ controllers: t22.Vec(t22.Principal) }), code_uninstall: t22.Null }), E3 = t22.Record({ timestamp_nanos: t22.Nat64, canister_version: t22.Nat64, origin: W2, details: B3 }), M2 = t22.Record({ controllers: t22.Vec(t22.Principal), module_hash: t22.Opt(t22.Vec(t22.Nat8)), recent_changes: t22.Vec(E3), total_num_changes: t22.Nat64 }), Q2 = t22.Record({ canister_id: s2 }), h2 = t22.Variant({ controllers: t22.Null, public: t22.Null, allowed_viewers: t22.Vec(t22.Principal) }), j2 = t22.Record({ freezing_threshold: t22.Nat, wasm_memory_threshold: t22.Nat, controllers: t22.Vec(t22.Principal), reserved_cycles_limit: t22.Nat, log_visibility: h2, wasm_memory_limit: t22.Nat, memory_allocation: t22.Nat, compute_allocation: t22.Nat }), H2 = t22.Record({ memory_metrics: t22.Record({ wasm_binary_size: t22.Nat, wasm_chunk_store_size: t22.Nat, canister_history_size: t22.Nat, stable_memory_size: t22.Nat, snapshots_size: t22.Nat, wasm_memory_size: t22.Nat, global_memory_size: t22.Nat, custom_sections_size: t22.Nat }), status: t22.Variant({ stopped: t22.Null, stopping: t22.Null, running: t22.Null }), memory_size: t22.Nat, cycles: t22.Nat, settings: j2, query_stats: t22.Record({ response_payload_bytes_total: t22.Nat, num_instructions_total: t22.Nat, num_calls_total: t22.Nat, request_payload_bytes_total: t22.Nat }), idle_cycles_burned_per_day: t22.Nat, module_hash: t22.Opt(t22.Vec(t22.Nat8)), reserved_cycles: t22.Nat }), G2 = t22.Record({ canister_id: s2 }), d2 = t22.Record({ freezing_threshold: t22.Opt(t22.Nat), wasm_memory_threshold: t22.Opt(t22.Nat), controllers: t22.Opt(t22.Vec(t22.Principal)), reserved_cycles_limit: t22.Opt(t22.Nat), log_visibility: t22.Opt(h2), wasm_memory_limit: t22.Opt(t22.Nat), memory_allocation: t22.Opt(t22.Nat), compute_allocation: t22.Opt(t22.Nat) }), J2 = t22.Record({ settings: t22.Opt(d2), sender_canister_version: t22.Opt(t22.Nat64) }), K2 = t22.Record({ canister_id: s2 }), X2 = t22.Record({ canister_id: s2 }), Y2 = t22.Record({ canister_id: s2, snapshot_id: _2 }), Z2 = t22.Record({ canister_id: s2 }), m2 = t22.Variant({ secp256k1: t22.Null }), $2 = t22.Record({ key_id: t22.Record({ name: t22.Text, curve: m2 }), canister_id: t22.Opt(s2), derivation_path: t22.Vec(t22.Vec(t22.Nat8)) }), I2 = t22.Record({ public_key: t22.Vec(t22.Nat8), chain_code: t22.Vec(t22.Nat8) }), L2 = t22.Record({ canister_id: s2 }), D2 = t22.Record({ idx: t22.Nat64, timestamp_nanos: t22.Nat64, content: t22.Vec(t22.Nat8) }), tt2 = t22.Record({ canister_log_records: t22.Vec(D2) }), g2 = t22.Record({ value: t22.Text, name: t22.Text }), l3 = t22.Record({ status: t22.Nat, body: t22.Vec(t22.Nat8), headers: t22.Vec(g2) }), et2 = t22.Record({ url: t22.Text, method: t22.Variant({ get: t22.Null, head: t22.Null, post: t22.Null }), max_response_bytes: t22.Opt(t22.Nat64), body: t22.Opt(t22.Vec(t22.Nat8)), transform: t22.Opt(t22.Record({ function: t22.Func([t22.Record({ context: t22.Vec(t22.Nat8), response: l3 })], [l3], ["query"]), context: t22.Vec(t22.Nat8) })), headers: t22.Vec(g2) }), N2 = t22.Variant({ reinstall: t22.Null, upgrade: t22.Opt(t22.Record({ wasm_memory_persistence: t22.Opt(t22.Variant({ keep: t22.Null, replace: t22.Null })), skip_pre_upgrade: t22.Opt(t22.Bool) })), install: t22.Null }), p2 = t22.Record({ hash: t22.Vec(t22.Nat8) }), st2 = t22.Record({ arg: t22.Vec(t22.Nat8), wasm_module_hash: t22.Vec(t22.Nat8), mode: N2, chunk_hashes_list: t22.Vec(p2), target_canister: s2, store_canister: t22.Opt(s2), sender_canister_version: t22.Opt(t22.Nat64) }), nt2 = t22.Vec(t22.Nat8), ct2 = t22.Record({ arg: t22.Vec(t22.Nat8), wasm_module: nt2, mode: N2, canister_id: s2, sender_canister_version: t22.Opt(t22.Nat64) }), rt = t22.Record({ canister_id: s2 }), y2 = t22.Record({ id: _2, total_size: t22.Nat64, taken_at_timestamp: t22.Nat64 }), at = t22.Vec(y2), it2 = t22.Record({ canister_id: s2, sender_canister_version: t22.Opt(t22.Nat64), snapshot_id: _2 }), ot2 = t22.Record({ start_at_timestamp_nanos: t22.Nat64, subnet_id: t22.Principal }), _t = t22.Record({ num_block_failures_total: t22.Nat64, node_id: t22.Principal, num_blocks_proposed_total: t22.Nat64 }), dt2 = t22.Vec(t22.Record({ timestamp_nanos: t22.Nat64, node_metrics: t22.Vec(_t) })), lt2 = t22.Record({ settings: t22.Opt(d2), specified_id: t22.Opt(s2), amount: t22.Opt(t22.Nat), sender_canister_version: t22.Opt(t22.Nat64) }), pt = t22.Record({ canister_id: s2 }), ut2 = t22.Record({ canister_id: s2, amount: t22.Nat }), ht = t22.Vec(t22.Nat8), k2 = t22.Variant({ ed25519: t22.Null, bip340secp256k1: t22.Null }), mt = t22.Record({ key_id: t22.Record({ algorithm: k2, name: t22.Text }), canister_id: t22.Opt(s2), derivation_path: t22.Vec(t22.Vec(t22.Nat8)) }), gt = t22.Record({ public_key: t22.Vec(t22.Nat8), chain_code: t22.Vec(t22.Nat8) }), Nt = t22.Record({ key_id: t22.Record({ name: t22.Text, curve: m2 }), derivation_path: t22.Vec(t22.Vec(t22.Nat8)), message_hash: t22.Vec(t22.Nat8) }), yt = t22.Record({ signature: t22.Vec(t22.Nat8) }), kt = t22.Variant({ bip341: t22.Record({ merkle_root_hash: t22.Vec(t22.Nat8) }) }), Rt = t22.Record({ aux: t22.Opt(kt), key_id: t22.Record({ algorithm: k2, name: t22.Text }), derivation_path: t22.Vec(t22.Vec(t22.Nat8)), message: t22.Vec(t22.Nat8) }), Vt = t22.Record({ signature: t22.Vec(t22.Nat8) }), vt = t22.Record({ canister_id: s2 }), bt = t22.Record({ canister_id: s2 }), ft2 = t22.Record({ canister_id: s2 }), Ft = t22.Vec(p2), Ot = t22.Record({ subnet_id: t22.Principal }), Pt = t22.Record({ replica_version: t22.Text, registry_version: t22.Nat64 }), xt = t22.Record({ replace_snapshot: t22.Opt(_2), canister_id: s2 }), wt2 = y2, Ct = t22.Record({ canister_id: s2, sender_canister_version: t22.Opt(t22.Nat64) }), Tt = t22.Record({ canister_id: t22.Principal, settings: d2, sender_canister_version: t22.Opt(t22.Nat64) }), St2 = t22.Record({ chunk: t22.Vec(t22.Nat8), canister_id: t22.Principal }), zt = p2, R2 = t22.Variant({ bls12_381_g2: t22.Null }), qt = t22.Record({ context: t22.Vec(t22.Nat8), key_id: t22.Record({ name: t22.Text, curve: R2 }), input: t22.Vec(t22.Nat8), transport_public_key: t22.Vec(t22.Nat8) }), Ut = t22.Record({ encrypted_key: t22.Vec(t22.Nat8) }), At = t22.Record({ context: t22.Vec(t22.Nat8), key_id: t22.Record({ name: t22.Text, curve: R2 }), canister_id: t22.Opt(s2) }), Wt = t22.Record({ public_key: t22.Vec(t22.Nat8) });
+  return t22.Service({ bitcoin_get_balance: t22.Func([c2], [i3], []), bitcoin_get_block_headers: t22.Func([u2], [O2], []), bitcoin_get_current_fee_percentiles: t22.Func([P2], [w3], []), bitcoin_get_utxos: t22.Func([C2], [q2], []), bitcoin_send_transaction: t22.Func([U2], [], []), canister_info: t22.Func([A4], [M2], []), canister_status: t22.Func([Q2], [H2], []), clear_chunk_store: t22.Func([G2], [], []), create_canister: t22.Func([J2], [K2], []), delete_canister: t22.Func([X2], [], []), delete_canister_snapshot: t22.Func([Y2], [], []), deposit_cycles: t22.Func([Z2], [], []), ecdsa_public_key: t22.Func([$2], [I2], []), fetch_canister_logs: t22.Func([L2], [tt2], ["query"]), http_request: t22.Func([et2], [l3], []), install_chunked_code: t22.Func([st2], [], []), install_code: t22.Func([ct2], [], []), list_canister_snapshots: t22.Func([rt], [at], []), load_canister_snapshot: t22.Func([it2], [], []), node_metrics_history: t22.Func([ot2], [dt2], []), provisional_create_canister_with_cycles: t22.Func([lt2], [pt], []), provisional_top_up_canister: t22.Func([ut2], [], []), raw_rand: t22.Func([], [ht], []), schnorr_public_key: t22.Func([mt], [gt], []), sign_with_ecdsa: t22.Func([Nt], [yt], []), sign_with_schnorr: t22.Func([Rt], [Vt], []), start_canister: t22.Func([vt], [], []), stop_canister: t22.Func([bt], [], []), stored_chunks: t22.Func([ft2], [Ft], []), subnet_info: t22.Func([Ot], [Pt], []), take_canister_snapshot: t22.Func([xt], [wt2], []), uninstall_code: t22.Func([Ct], [], []), update_settings: t22.Func([Tt], [], []), upload_chunk: t22.Func([St2], [zt], []), vetkd_derive_key: t22.Func([qt], [Ut], []), vetkd_public_key: t22.Func([At], [Wt], []) });
 };
-var Gt = (t22) => wt(t22), b$1 = (t22) => typeof t22 == "string" ? Gt(t22) : t22;
+var Gt = (t22) => Et$1(t22), b$1 = (t22) => typeof t22 == "string" ? Gt(t22) : t22;
 var Bt = (t22, e5, n2) => {
   let [c2] = e5;
   if (s$1(c2) && typeof c2 == "object") {
     if (t22 === "install_chunked_code" && s$1(c2.target_canister)) return { effectiveCanisterId: Principal$1.from(c2.target_canister) };
     if (t22 === "provisional_create_canister_with_cycles" && s$1(c2.specified_id)) {
-      let r2 = K(c2.specified_id);
+      let r2 = v$2(c2.specified_id);
       if (s$1(r2)) return { effectiveCanisterId: Principal$1.from(r2) };
     }
     if (s$1(c2.canister_id)) return { effectiveCanisterId: Principal$1.from(c2.canister_id) };
@@ -11977,16 +12035,16 @@ var Qt = class t {
     return new t(n2);
   }
   createCanister = async ({ settings: e5, senderCanisterVersion: n2 } = {}) => {
-    let { create_canister: c2 } = this.service, { canister_id: r2 } = await c2({ settings: re(P(e5)), sender_canister_version: re(n2) });
+    let { create_canister: c2 } = this.service, { canister_id: r2 } = await c2({ settings: ne(P(e5)), sender_canister_version: ne(n2) });
     return r2;
   };
   updateSettings = ({ canisterId: e5, senderCanisterVersion: n2, settings: c2 }) => {
     let { update_settings: r2 } = this.service;
-    return r2({ canister_id: e5, sender_canister_version: re(n2), settings: P(c2) });
+    return r2({ canister_id: e5, sender_canister_version: ne(n2), settings: P(c2) });
   };
   installCode = ({ canisterId: e5, wasmModule: n2, senderCanisterVersion: c2, ...r2 }) => {
     let { install_code: i3 } = this.service;
-    return i3({ ...r2, canister_id: e5, wasm_module: n2, sender_canister_version: re(c2) });
+    return i3({ ...r2, canister_id: e5, wasm_module: n2, sender_canister_version: ne(c2) });
   };
   uploadChunk = ({ canisterId: e5, ...n2 }) => {
     let { upload_chunk: c2 } = this.service;
@@ -12002,11 +12060,11 @@ var Qt = class t {
   };
   installChunkedCode = async ({ senderCanisterVersion: e5, chunkHashesList: n2, targetCanisterId: c2, storeCanisterId: r2, wasmModuleHash: i3, ...o3 }) => {
     let { install_chunked_code: u2 } = this.service;
-    await u2({ ...o3, target_canister: c2, store_canister: re(r2), sender_canister_version: re(e5), chunk_hashes_list: n2, wasm_module_hash: typeof i3 == "string" ? wt(i3) : i3 });
+    await u2({ ...o3, target_canister: c2, store_canister: ne(r2), sender_canister_version: ne(e5), chunk_hashes_list: n2, wasm_module_hash: typeof i3 == "string" ? Et$1(i3) : i3 });
   };
   uninstallCode = ({ canisterId: e5, senderCanisterVersion: n2 }) => {
     let { uninstall_code: c2 } = this.service;
-    return c2({ canister_id: e5, sender_canister_version: re(n2) });
+    return c2({ canister_id: e5, sender_canister_version: ne(n2) });
   };
   startCanister = (e5) => {
     let { start_canister: n2 } = this.service;
@@ -12025,7 +12083,7 @@ var Qt = class t {
     return n2({ canister_id: e5 });
   };
   provisionalCreateCanisterWithCycles = async ({ settings: e5, amount: n2, canisterId: c2 } = {}) => {
-    let { provisional_create_canister_with_cycles: r2 } = this.service, { canister_id: i3 } = await r2({ settings: re(P(e5)), amount: re(n2), specified_id: re(c2), sender_canister_version: [] });
+    let { provisional_create_canister_with_cycles: r2 } = this.service, { canister_id: i3 } = await r2({ settings: ne(P(e5)), amount: ne(n2), specified_id: ne(c2), sender_canister_version: [] });
     return i3;
   };
   fetchCanisterLogs = (e5) => {
@@ -12034,7 +12092,7 @@ var Qt = class t {
   };
   takeCanisterSnapshot = ({ canisterId: e5, snapshotId: n2 }) => {
     let { take_canister_snapshot: c2 } = this.service;
-    return c2({ canister_id: e5, replace_snapshot: re(s$1(n2) ? b$1(n2) : void 0) });
+    return c2({ canister_id: e5, replace_snapshot: ne(s$1(n2) ? b$1(n2) : void 0) });
   };
   listCanisterSnapshots = ({ canisterId: e5 }) => {
     let { list_canister_snapshots: n2 } = this.service;
@@ -12042,7 +12100,7 @@ var Qt = class t {
   };
   loadCanisterSnapshot = async ({ canisterId: e5, snapshotId: n2, senderCanisterVersion: c2 }) => {
     let { load_canister_snapshot: r2 } = this.service;
-    await r2({ canister_id: e5, snapshot_id: b$1(n2), sender_canister_version: re(c2) });
+    await r2({ canister_id: e5, snapshot_id: b$1(n2), sender_canister_version: ne(c2) });
   };
   deleteCanisterSnapshot = async ({ canisterId: e5, snapshotId: n2 }) => {
     let { delete_canister_snapshot: c2 } = this.service;
@@ -12725,7 +12783,7 @@ class StatusManager {
     const statusText = "running" in status.status ? "Running" : "stopped" in status.status ? "Stopped" : "stopping" in status.status ? "Stopping" : "Unknown";
     const memorySizeFormatted = formatMemorySize(status.memory_size);
     const cyclesFormatted = formatCycles(status.cycles);
-    const moduleHashHex = status.module_hash.length > 0 ? k$1(status.module_hash[0]) : "N/A";
+    const moduleHashHex = status.module_hash.length > 0 ? R$1(status.module_hash[0]) : "N/A";
     return { statusText, memorySizeFormatted, cyclesFormatted, moduleHashHex };
   }
 }
@@ -12758,13 +12816,13 @@ function N(e5) {
   if (typeof e5 != "string") throw new Error("string expected");
   return new Uint8Array(new TextEncoder().encode(e5));
 }
-function E(e5) {
+function E2(e5) {
   return typeof e5 == "string" && (e5 = N(e5)), w$1(e5), e5;
 }
 var A$1 = class A2 {
 };
 function F$1(e5) {
-  let t3 = (n2) => e5().update(E(n2)).digest(), r2 = e5();
+  let t3 = (n2) => e5().update(E2(n2)).digest(), r2 = e5();
   return t3.outputLen = r2.outputLen, t3.blockLen = r2.blockLen, t3.create = () => e5(), t3;
 }
 function M(e5, t3, r2, n2) {
@@ -12783,7 +12841,7 @@ var B$1 = class B extends A$1 {
     super(), this.finished = false, this.length = 0, this.pos = 0, this.destroyed = false, this.blockLen = t3, this.outputLen = r2, this.padOffset = n2, this.isLE = s2, this.buffer = new Uint8Array(t3), this.view = m$1(this.buffer);
   }
   update(t3) {
-    U(this), t3 = E(t3), w$1(t3);
+    U(this), t3 = E2(t3), w$1(t3);
     let { view: r2, buffer: n2, blockLen: s2 } = this, o3 = t3.length;
     for (let i3 = 0; i3 < o3; ) {
       let c2 = Math.min(s2 - this.pos, o3 - i3);
@@ -12866,19 +12924,19 @@ var O$1 = class e {
   static fromHex(t3) {
     let r2 = Uint8Array.from(Buffer.from(t3, "hex"));
     if (r2.length !== 32) throw new Error(`Invalid AccountIdentifier: expected 32 bytes, got ${r2.length}.`);
-    let n2 = k$1(r2.slice(0, 4)), s2 = r2.slice(4), o3 = k$1(Lt(s2));
+    let n2 = R$1(r2.slice(0, 4)), s2 = r2.slice(4), o3 = R$1(Lt(s2));
     if (n2 !== o3) throw Error(`Checksum mismatch. Expected ${o3}, but got ${n2}.`);
     return new e(r2);
   }
   static fromPrincipal({ principal: t3, subAccount: r2 = C.fromID(0) }) {
-    let n2 = St(`
+    let n2 = wt(`
 account-id`), s2 = V.create();
-    s2.update(_t([...n2, ...t3.toUint8Array(), ...r2.toUint8Array()]));
+    s2.update(St([...n2, ...t3.toUint8Array(), ...r2.toUint8Array()]));
     let o3 = s2.digest(), i3 = Lt(o3), c2 = new Uint8Array([...i3, ...o3]);
     return new e(c2);
   }
   toHex() {
-    return k$1(this.bytes);
+    return R$1(this.bytes);
   }
   toUint8Array() {
     return this.bytes;
@@ -12930,20 +12988,20 @@ var f = (t3) => t3 instanceof O$1 ? t3 : O$1.fromHex(t3);
 var Pe = ({ IDL: e5 }) => {
   let c2 = e5.Vec(e5.Nat8), t3 = e5.Record({ owner: e5.Principal, subaccount: e5.Opt(c2) }), o3 = e5.Record({ icrc2: e5.Bool }), d2 = e5.Record({ icrc1_minting_account: e5.Opt(t3), feature_flags: e5.Opt(o3) }), r2 = e5.Record({ e8s: e5.Nat64 }), s2 = e5.Text, N2 = e5.Record({ secs: e5.Nat64, nanos: e5.Nat32 }), C2 = e5.Record({ num_blocks_to_archive: e5.Nat64, max_transactions_per_response: e5.Opt(e5.Nat64), trigger_threshold: e5.Nat64, more_controller_ids: e5.Opt(e5.Vec(e5.Principal)), max_message_size_bytes: e5.Opt(e5.Nat64), cycles_for_archive_creation: e5.Opt(e5.Nat64), node_max_memory_size_bytes: e5.Opt(e5.Nat64), controller_id: e5.Principal }), P2 = e5.Record({ send_whitelist: e5.Vec(e5.Principal), token_symbol: e5.Opt(e5.Text), transfer_fee: e5.Opt(r2), minting_account: s2, transaction_window: e5.Opt(N2), max_message_size_bytes: e5.Opt(e5.Nat64), icrc1_minting_account: e5.Opt(t3), archive_options: e5.Opt(C2), initial_values: e5.Vec(e5.Tuple(s2, r2)), token_name: e5.Opt(e5.Text), feature_flags: e5.Opt(o3) });
   e5.Variant({ Upgrade: e5.Opt(d2), Init: P2 });
-  let a2 = e5.Vec(e5.Nat8), E2 = e5.Record({ account: a2 }), S2 = e5.Record({ account: s2 }), U2 = e5.Record({ canister_id: e5.Principal }), M2 = e5.Record({ archives: e5.Vec(U2) }), G2 = e5.Record({ prev_spender_id: e5.Opt(s2), from_account_id: s2, take: e5.Opt(e5.Nat64) }), Q2 = e5.Vec(e5.Record({ from_account_id: s2, to_spender_id: s2, allowance: r2, expires_at: e5.Opt(e5.Nat64) })), n2 = e5.Nat, z2 = e5.Variant({ Int: e5.Int, Nat: e5.Nat, Blob: e5.Vec(e5.Nat8), Text: e5.Text }), u2 = e5.Nat64, H2 = e5.Record({ to: t3, fee: e5.Opt(n2), memo: e5.Opt(e5.Vec(e5.Nat8)), from_subaccount: e5.Opt(c2), created_at_time: e5.Opt(u2), amount: n2 }), l3 = e5.Nat, J2 = e5.Variant({ GenericError: e5.Record({ message: e5.Text, error_code: e5.Nat }), TemporarilyUnavailable: e5.Null, BadBurn: e5.Record({ min_burn_amount: n2 }), Duplicate: e5.Record({ duplicate_of: l3 }), BadFee: e5.Record({ expected_fee: n2 }), CreatedInFuture: e5.Record({ ledger_time: e5.Nat64 }), TooOld: e5.Null, InsufficientFunds: e5.Record({ balance: n2 }) }), $2 = e5.Variant({ Ok: l3, Err: J2 }), y2 = e5.Record({ utc_offset_minutes: e5.Opt(e5.Int16), language: e5.Text }), K2 = e5.Record({ metadata: y2, device_spec: e5.Opt(e5.Variant({ GenericDisplay: e5.Null, FieldsDisplay: e5.Null })) }), Y2 = e5.Record({ arg: e5.Vec(e5.Nat8), method: e5.Text, user_preferences: K2 }), j2 = e5.Variant({ Text: e5.Record({ content: e5.Text }), TokenAmount: e5.Record({ decimals: e5.Nat8, amount: e5.Nat64, symbol: e5.Text }), TimestampSeconds: e5.Record({ amount: e5.Nat64 }), DurationSeconds: e5.Record({ amount: e5.Nat64 }) }), W2 = e5.Record({ fields: e5.Vec(e5.Tuple(e5.Text, j2)), intent: e5.Text }), X2 = e5.Variant({ FieldsDisplayMessage: W2, GenericDisplayMessage: e5.Text }), Z2 = e5.Record({ metadata: y2, consent_message: X2 }), g2 = e5.Record({ description: e5.Text }), I2 = e5.Variant({ GenericError: e5.Record({ description: e5.Text, error_code: e5.Nat }), InsufficientPayment: g2, UnsupportedCanisterCall: g2, ConsentMessageUnavailable: g2 }), D2 = e5.Variant({ Ok: Z2, Err: I2 }), L2 = e5.Record({ account: t3, spender: t3 }), ee = e5.Record({ allowance: n2, expires_at: e5.Opt(u2) }), te = e5.Record({ fee: e5.Opt(n2), memo: e5.Opt(e5.Vec(e5.Nat8)), from_subaccount: e5.Opt(c2), created_at_time: e5.Opt(u2), amount: n2, expected_allowance: e5.Opt(n2), expires_at: e5.Opt(u2), spender: t3 }), ce = e5.Variant({ GenericError: e5.Record({ message: e5.Text, error_code: e5.Nat }), TemporarilyUnavailable: e5.Null, Duplicate: e5.Record({ duplicate_of: l3 }), BadFee: e5.Record({ expected_fee: n2 }), AllowanceChanged: e5.Record({ current_allowance: n2 }), CreatedInFuture: e5.Record({ ledger_time: e5.Nat64 }), TooOld: e5.Null, Expired: e5.Record({ ledger_time: e5.Nat64 }), InsufficientFunds: e5.Record({ balance: n2 }) }), F2 = e5.Variant({ Ok: l3, Err: ce }), re2 = e5.Record({ to: t3, fee: e5.Opt(n2), spender_subaccount: e5.Opt(c2), from: t3, memo: e5.Opt(e5.Vec(e5.Nat8)), created_at_time: e5.Opt(u2), amount: n2 }), ne = e5.Variant({ GenericError: e5.Record({ message: e5.Text, error_code: e5.Nat }), TemporarilyUnavailable: e5.Null, InsufficientAllowance: e5.Record({ allowance: n2 }), BadBurn: e5.Record({ min_burn_amount: n2 }), Duplicate: e5.Record({ duplicate_of: l3 }), BadFee: e5.Record({ expected_fee: n2 }), CreatedInFuture: e5.Record({ ledger_time: u2 }), TooOld: e5.Null, InsufficientFunds: e5.Record({ balance: n2 }) }), oe = e5.Variant({ Ok: l3, Err: ne }), i3 = e5.Nat64, f2 = e5.Record({ start: i3, length: e5.Nat64 }), x3 = e5.Nat64, _2 = e5.Record({ timestamp_nanos: e5.Nat64 }), ae = e5.Variant({ Approve: e5.Record({ fee: r2, from: a2, allowance_e8s: e5.Int, allowance: r2, expected_allowance: e5.Opt(r2), expires_at: e5.Opt(_2), spender: a2 }), Burn: e5.Record({ from: a2, amount: r2, spender: e5.Opt(a2) }), Mint: e5.Record({ to: a2, amount: r2 }), Transfer: e5.Record({ to: a2, fee: r2, from: a2, amount: r2, spender: e5.Opt(e5.Vec(e5.Nat8)) }) }), se = e5.Record({ memo: x3, icrc1_memo: e5.Opt(e5.Vec(e5.Nat8)), operation: e5.Opt(ae), created_at_time: _2 }), b2 = e5.Record({ transaction: se, timestamp: _2, parent_hash: e5.Opt(e5.Vec(e5.Nat8)) }), ie = e5.Record({ blocks: e5.Vec(b2) }), V2 = e5.Variant({ BadFirstBlockIndex: e5.Record({ requested_index: i3, first_valid_index: i3 }), Other: e5.Record({ error_message: e5.Text, error_code: e5.Nat64 }) }), de = e5.Variant({ Ok: ie, Err: V2 }), ue = e5.Func([f2], [de], []), le = e5.Record({ callback: ue, start: i3, length: e5.Nat64 }), pe = e5.Record({ certificate: e5.Opt(e5.Vec(e5.Nat8)), blocks: e5.Vec(b2), chain_length: e5.Nat64, first_block_index: i3, archived_blocks: e5.Vec(le) }), _e = e5.Record({ callback: e5.Func([f2], [e5.Variant({ Ok: e5.Vec(e5.Vec(e5.Nat8)), Err: V2 })], []), start: e5.Nat64, length: e5.Nat64 }), me = e5.Record({ certificate: e5.Opt(e5.Vec(e5.Nat8)), blocks: e5.Vec(e5.Vec(e5.Nat8)), chain_length: e5.Nat64, first_block_index: e5.Nat64, archived_blocks: e5.Vec(_e) }), fe = e5.Record({ fee: e5.Opt(n2), from_subaccount: e5.Opt(c2), spender: a2 }), Re = e5.Record({ to: s2, fee: r2, memo: x3, from_subaccount: e5.Opt(c2), created_at_time: e5.Opt(_2), amount: r2 }), ge = e5.Record({ certification: e5.Opt(e5.Vec(e5.Nat8)), tip_index: i3 }), xe = e5.Record({ to: a2, fee: r2, memo: x3, from_subaccount: e5.Opt(c2), created_at_time: e5.Opt(_2), amount: r2 }), Oe = e5.Variant({ TxTooOld: e5.Record({ allowed_window_nanos: e5.Nat64 }), BadFee: e5.Record({ expected_fee: r2 }), TxDuplicate: e5.Record({ duplicate_of: i3 }), TxCreatedInFuture: e5.Null, InsufficientFunds: e5.Record({ balance: r2 }) }), Te = e5.Variant({ Ok: i3, Err: Oe }), Ne = e5.Record({}), ye = e5.Record({ transfer_fee: r2 });
-  return e5.Service({ account_balance: e5.Func([E2], [r2], []), account_balance_dfx: e5.Func([S2], [r2], []), account_identifier: e5.Func([t3], [a2], []), archives: e5.Func([], [M2], []), decimals: e5.Func([], [e5.Record({ decimals: e5.Nat32 })], []), get_allowances: e5.Func([G2], [Q2], []), icrc10_supported_standards: e5.Func([], [e5.Vec(e5.Record({ url: e5.Text, name: e5.Text }))], []), icrc1_balance_of: e5.Func([t3], [n2], []), icrc1_decimals: e5.Func([], [e5.Nat8], []), icrc1_fee: e5.Func([], [n2], []), icrc1_metadata: e5.Func([], [e5.Vec(e5.Tuple(e5.Text, z2))], []), icrc1_minting_account: e5.Func([], [e5.Opt(t3)], []), icrc1_name: e5.Func([], [e5.Text], []), icrc1_supported_standards: e5.Func([], [e5.Vec(e5.Record({ url: e5.Text, name: e5.Text }))], []), icrc1_symbol: e5.Func([], [e5.Text], []), icrc1_total_supply: e5.Func([], [n2], []), icrc1_transfer: e5.Func([H2], [$2], []), icrc21_canister_call_consent_message: e5.Func([Y2], [D2], []), icrc2_allowance: e5.Func([L2], [ee], []), icrc2_approve: e5.Func([te], [F2], []), icrc2_transfer_from: e5.Func([re2], [oe], []), is_ledger_ready: e5.Func([], [e5.Bool], ["query"]), name: e5.Func([], [e5.Record({ name: e5.Text })], []), query_blocks: e5.Func([f2], [pe], []), query_encoded_blocks: e5.Func([f2], [me], []), remove_approval: e5.Func([fe], [F2], []), send_dfx: e5.Func([Re], [i3], []), symbol: e5.Func([], [e5.Record({ symbol: e5.Text })], []), tip_of_chain: e5.Func([], [ge], []), transfer: e5.Func([xe], [Te], []), transfer_fee: e5.Func([Ne], [ye], []) });
+  let a2 = e5.Vec(e5.Nat8), E3 = e5.Record({ account: a2 }), S2 = e5.Record({ account: s2 }), U2 = e5.Record({ canister_id: e5.Principal }), M2 = e5.Record({ archives: e5.Vec(U2) }), G2 = e5.Record({ prev_spender_id: e5.Opt(s2), from_account_id: s2, take: e5.Opt(e5.Nat64) }), Q2 = e5.Vec(e5.Record({ from_account_id: s2, to_spender_id: s2, allowance: r2, expires_at: e5.Opt(e5.Nat64) })), n2 = e5.Nat, z2 = e5.Variant({ Int: e5.Int, Nat: e5.Nat, Blob: e5.Vec(e5.Nat8), Text: e5.Text }), u2 = e5.Nat64, H2 = e5.Record({ to: t3, fee: e5.Opt(n2), memo: e5.Opt(e5.Vec(e5.Nat8)), from_subaccount: e5.Opt(c2), created_at_time: e5.Opt(u2), amount: n2 }), l3 = e5.Nat, J2 = e5.Variant({ GenericError: e5.Record({ message: e5.Text, error_code: e5.Nat }), TemporarilyUnavailable: e5.Null, BadBurn: e5.Record({ min_burn_amount: n2 }), Duplicate: e5.Record({ duplicate_of: l3 }), BadFee: e5.Record({ expected_fee: n2 }), CreatedInFuture: e5.Record({ ledger_time: e5.Nat64 }), TooOld: e5.Null, InsufficientFunds: e5.Record({ balance: n2 }) }), $2 = e5.Variant({ Ok: l3, Err: J2 }), y2 = e5.Record({ utc_offset_minutes: e5.Opt(e5.Int16), language: e5.Text }), K2 = e5.Record({ metadata: y2, device_spec: e5.Opt(e5.Variant({ GenericDisplay: e5.Null, FieldsDisplay: e5.Null })) }), Y2 = e5.Record({ arg: e5.Vec(e5.Nat8), method: e5.Text, user_preferences: K2 }), j2 = e5.Variant({ Text: e5.Record({ content: e5.Text }), TokenAmount: e5.Record({ decimals: e5.Nat8, amount: e5.Nat64, symbol: e5.Text }), TimestampSeconds: e5.Record({ amount: e5.Nat64 }), DurationSeconds: e5.Record({ amount: e5.Nat64 }) }), W2 = e5.Record({ fields: e5.Vec(e5.Tuple(e5.Text, j2)), intent: e5.Text }), X2 = e5.Variant({ FieldsDisplayMessage: W2, GenericDisplayMessage: e5.Text }), Z2 = e5.Record({ metadata: y2, consent_message: X2 }), g2 = e5.Record({ description: e5.Text }), I2 = e5.Variant({ GenericError: e5.Record({ description: e5.Text, error_code: e5.Nat }), InsufficientPayment: g2, UnsupportedCanisterCall: g2, ConsentMessageUnavailable: g2 }), D2 = e5.Variant({ Ok: Z2, Err: I2 }), L2 = e5.Record({ account: t3, spender: t3 }), ee = e5.Record({ allowance: n2, expires_at: e5.Opt(u2) }), te = e5.Record({ fee: e5.Opt(n2), memo: e5.Opt(e5.Vec(e5.Nat8)), from_subaccount: e5.Opt(c2), created_at_time: e5.Opt(u2), amount: n2, expected_allowance: e5.Opt(n2), expires_at: e5.Opt(u2), spender: t3 }), ce = e5.Variant({ GenericError: e5.Record({ message: e5.Text, error_code: e5.Nat }), TemporarilyUnavailable: e5.Null, Duplicate: e5.Record({ duplicate_of: l3 }), BadFee: e5.Record({ expected_fee: n2 }), AllowanceChanged: e5.Record({ current_allowance: n2 }), CreatedInFuture: e5.Record({ ledger_time: e5.Nat64 }), TooOld: e5.Null, Expired: e5.Record({ ledger_time: e5.Nat64 }), InsufficientFunds: e5.Record({ balance: n2 }) }), F2 = e5.Variant({ Ok: l3, Err: ce }), re = e5.Record({ to: t3, fee: e5.Opt(n2), spender_subaccount: e5.Opt(c2), from: t3, memo: e5.Opt(e5.Vec(e5.Nat8)), created_at_time: e5.Opt(u2), amount: n2 }), ne2 = e5.Variant({ GenericError: e5.Record({ message: e5.Text, error_code: e5.Nat }), TemporarilyUnavailable: e5.Null, InsufficientAllowance: e5.Record({ allowance: n2 }), BadBurn: e5.Record({ min_burn_amount: n2 }), Duplicate: e5.Record({ duplicate_of: l3 }), BadFee: e5.Record({ expected_fee: n2 }), CreatedInFuture: e5.Record({ ledger_time: u2 }), TooOld: e5.Null, InsufficientFunds: e5.Record({ balance: n2 }) }), oe = e5.Variant({ Ok: l3, Err: ne2 }), i3 = e5.Nat64, f2 = e5.Record({ start: i3, length: e5.Nat64 }), x3 = e5.Nat64, _2 = e5.Record({ timestamp_nanos: e5.Nat64 }), ae = e5.Variant({ Approve: e5.Record({ fee: r2, from: a2, allowance_e8s: e5.Int, allowance: r2, expected_allowance: e5.Opt(r2), expires_at: e5.Opt(_2), spender: a2 }), Burn: e5.Record({ from: a2, amount: r2, spender: e5.Opt(a2) }), Mint: e5.Record({ to: a2, amount: r2 }), Transfer: e5.Record({ to: a2, fee: r2, from: a2, amount: r2, spender: e5.Opt(e5.Vec(e5.Nat8)) }) }), se = e5.Record({ memo: x3, icrc1_memo: e5.Opt(e5.Vec(e5.Nat8)), operation: e5.Opt(ae), created_at_time: _2 }), b2 = e5.Record({ transaction: se, timestamp: _2, parent_hash: e5.Opt(e5.Vec(e5.Nat8)) }), ie = e5.Record({ blocks: e5.Vec(b2) }), V2 = e5.Variant({ BadFirstBlockIndex: e5.Record({ requested_index: i3, first_valid_index: i3 }), Other: e5.Record({ error_message: e5.Text, error_code: e5.Nat64 }) }), de = e5.Variant({ Ok: ie, Err: V2 }), ue = e5.Func([f2], [de], []), le = e5.Record({ callback: ue, start: i3, length: e5.Nat64 }), pe = e5.Record({ certificate: e5.Opt(e5.Vec(e5.Nat8)), blocks: e5.Vec(b2), chain_length: e5.Nat64, first_block_index: i3, archived_blocks: e5.Vec(le) }), _e = e5.Record({ callback: e5.Func([f2], [e5.Variant({ Ok: e5.Vec(e5.Vec(e5.Nat8)), Err: V2 })], []), start: e5.Nat64, length: e5.Nat64 }), me = e5.Record({ certificate: e5.Opt(e5.Vec(e5.Nat8)), blocks: e5.Vec(e5.Vec(e5.Nat8)), chain_length: e5.Nat64, first_block_index: e5.Nat64, archived_blocks: e5.Vec(_e) }), fe = e5.Record({ fee: e5.Opt(n2), from_subaccount: e5.Opt(c2), spender: a2 }), Re = e5.Record({ to: s2, fee: r2, memo: x3, from_subaccount: e5.Opt(c2), created_at_time: e5.Opt(_2), amount: r2 }), ge = e5.Record({ certification: e5.Opt(e5.Vec(e5.Nat8)), tip_index: i3 }), xe = e5.Record({ to: a2, fee: r2, memo: x3, from_subaccount: e5.Opt(c2), created_at_time: e5.Opt(_2), amount: r2 }), Oe = e5.Variant({ TxTooOld: e5.Record({ allowed_window_nanos: e5.Nat64 }), BadFee: e5.Record({ expected_fee: r2 }), TxDuplicate: e5.Record({ duplicate_of: i3 }), TxCreatedInFuture: e5.Null, InsufficientFunds: e5.Record({ balance: r2 }) }), Te = e5.Variant({ Ok: i3, Err: Oe }), Ne = e5.Record({}), ye = e5.Record({ transfer_fee: r2 });
+  return e5.Service({ account_balance: e5.Func([E3], [r2], []), account_balance_dfx: e5.Func([S2], [r2], []), account_identifier: e5.Func([t3], [a2], []), archives: e5.Func([], [M2], []), decimals: e5.Func([], [e5.Record({ decimals: e5.Nat32 })], []), get_allowances: e5.Func([G2], [Q2], []), icrc10_supported_standards: e5.Func([], [e5.Vec(e5.Record({ url: e5.Text, name: e5.Text }))], []), icrc1_balance_of: e5.Func([t3], [n2], []), icrc1_decimals: e5.Func([], [e5.Nat8], []), icrc1_fee: e5.Func([], [n2], []), icrc1_metadata: e5.Func([], [e5.Vec(e5.Tuple(e5.Text, z2))], []), icrc1_minting_account: e5.Func([], [e5.Opt(t3)], []), icrc1_name: e5.Func([], [e5.Text], []), icrc1_supported_standards: e5.Func([], [e5.Vec(e5.Record({ url: e5.Text, name: e5.Text }))], []), icrc1_symbol: e5.Func([], [e5.Text], []), icrc1_total_supply: e5.Func([], [n2], []), icrc1_transfer: e5.Func([H2], [$2], []), icrc21_canister_call_consent_message: e5.Func([Y2], [D2], []), icrc2_allowance: e5.Func([L2], [ee], []), icrc2_approve: e5.Func([te], [F2], []), icrc2_transfer_from: e5.Func([re], [oe], []), is_ledger_ready: e5.Func([], [e5.Bool], ["query"]), name: e5.Func([], [e5.Record({ name: e5.Text })], []), query_blocks: e5.Func([f2], [pe], []), query_encoded_blocks: e5.Func([f2], [me], []), remove_approval: e5.Func([fe], [F2], []), send_dfx: e5.Func([Re], [i3], []), symbol: e5.Func([], [e5.Record({ symbol: e5.Text })], []), tip_of_chain: e5.Func([], [ge], []), transfer: e5.Func([xe], [Te], []), transfer_fee: e5.Func([Ne], [ye], []) });
 };
 var Ee = ({ IDL: e5 }) => {
   let c2 = e5.Vec(e5.Nat8), t3 = e5.Record({ owner: e5.Principal, subaccount: e5.Opt(c2) }), o3 = e5.Record({ icrc2: e5.Bool }), d2 = e5.Record({ icrc1_minting_account: e5.Opt(t3), feature_flags: e5.Opt(o3) }), r2 = e5.Record({ e8s: e5.Nat64 }), s2 = e5.Text, N2 = e5.Record({ secs: e5.Nat64, nanos: e5.Nat32 }), C2 = e5.Record({ num_blocks_to_archive: e5.Nat64, max_transactions_per_response: e5.Opt(e5.Nat64), trigger_threshold: e5.Nat64, more_controller_ids: e5.Opt(e5.Vec(e5.Principal)), max_message_size_bytes: e5.Opt(e5.Nat64), cycles_for_archive_creation: e5.Opt(e5.Nat64), node_max_memory_size_bytes: e5.Opt(e5.Nat64), controller_id: e5.Principal }), P2 = e5.Record({ send_whitelist: e5.Vec(e5.Principal), token_symbol: e5.Opt(e5.Text), transfer_fee: e5.Opt(r2), minting_account: s2, transaction_window: e5.Opt(N2), max_message_size_bytes: e5.Opt(e5.Nat64), icrc1_minting_account: e5.Opt(t3), archive_options: e5.Opt(C2), initial_values: e5.Vec(e5.Tuple(s2, r2)), token_name: e5.Opt(e5.Text), feature_flags: e5.Opt(o3) });
   e5.Variant({ Upgrade: e5.Opt(d2), Init: P2 });
-  let a2 = e5.Vec(e5.Nat8), E2 = e5.Record({ account: a2 }), S2 = e5.Record({ account: s2 }), U2 = e5.Record({ canister_id: e5.Principal }), M2 = e5.Record({ archives: e5.Vec(U2) }), G2 = e5.Record({ prev_spender_id: e5.Opt(s2), from_account_id: s2, take: e5.Opt(e5.Nat64) }), Q2 = e5.Vec(e5.Record({ from_account_id: s2, to_spender_id: s2, allowance: r2, expires_at: e5.Opt(e5.Nat64) })), n2 = e5.Nat, z2 = e5.Variant({ Int: e5.Int, Nat: e5.Nat, Blob: e5.Vec(e5.Nat8), Text: e5.Text }), u2 = e5.Nat64, H2 = e5.Record({ to: t3, fee: e5.Opt(n2), memo: e5.Opt(e5.Vec(e5.Nat8)), from_subaccount: e5.Opt(c2), created_at_time: e5.Opt(u2), amount: n2 }), l3 = e5.Nat, J2 = e5.Variant({ GenericError: e5.Record({ message: e5.Text, error_code: e5.Nat }), TemporarilyUnavailable: e5.Null, BadBurn: e5.Record({ min_burn_amount: n2 }), Duplicate: e5.Record({ duplicate_of: l3 }), BadFee: e5.Record({ expected_fee: n2 }), CreatedInFuture: e5.Record({ ledger_time: e5.Nat64 }), TooOld: e5.Null, InsufficientFunds: e5.Record({ balance: n2 }) }), $2 = e5.Variant({ Ok: l3, Err: J2 }), y2 = e5.Record({ utc_offset_minutes: e5.Opt(e5.Int16), language: e5.Text }), K2 = e5.Record({ metadata: y2, device_spec: e5.Opt(e5.Variant({ GenericDisplay: e5.Null, FieldsDisplay: e5.Null })) }), Y2 = e5.Record({ arg: e5.Vec(e5.Nat8), method: e5.Text, user_preferences: K2 }), j2 = e5.Variant({ Text: e5.Record({ content: e5.Text }), TokenAmount: e5.Record({ decimals: e5.Nat8, amount: e5.Nat64, symbol: e5.Text }), TimestampSeconds: e5.Record({ amount: e5.Nat64 }), DurationSeconds: e5.Record({ amount: e5.Nat64 }) }), W2 = e5.Record({ fields: e5.Vec(e5.Tuple(e5.Text, j2)), intent: e5.Text }), X2 = e5.Variant({ FieldsDisplayMessage: W2, GenericDisplayMessage: e5.Text }), Z2 = e5.Record({ metadata: y2, consent_message: X2 }), g2 = e5.Record({ description: e5.Text }), I2 = e5.Variant({ GenericError: e5.Record({ description: e5.Text, error_code: e5.Nat }), InsufficientPayment: g2, UnsupportedCanisterCall: g2, ConsentMessageUnavailable: g2 }), D2 = e5.Variant({ Ok: Z2, Err: I2 }), L2 = e5.Record({ account: t3, spender: t3 }), ee = e5.Record({ allowance: n2, expires_at: e5.Opt(u2) }), te = e5.Record({ fee: e5.Opt(n2), memo: e5.Opt(e5.Vec(e5.Nat8)), from_subaccount: e5.Opt(c2), created_at_time: e5.Opt(u2), amount: n2, expected_allowance: e5.Opt(n2), expires_at: e5.Opt(u2), spender: t3 }), ce = e5.Variant({ GenericError: e5.Record({ message: e5.Text, error_code: e5.Nat }), TemporarilyUnavailable: e5.Null, Duplicate: e5.Record({ duplicate_of: l3 }), BadFee: e5.Record({ expected_fee: n2 }), AllowanceChanged: e5.Record({ current_allowance: n2 }), CreatedInFuture: e5.Record({ ledger_time: e5.Nat64 }), TooOld: e5.Null, Expired: e5.Record({ ledger_time: e5.Nat64 }), InsufficientFunds: e5.Record({ balance: n2 }) }), F2 = e5.Variant({ Ok: l3, Err: ce }), re2 = e5.Record({ to: t3, fee: e5.Opt(n2), spender_subaccount: e5.Opt(c2), from: t3, memo: e5.Opt(e5.Vec(e5.Nat8)), created_at_time: e5.Opt(u2), amount: n2 }), ne = e5.Variant({ GenericError: e5.Record({ message: e5.Text, error_code: e5.Nat }), TemporarilyUnavailable: e5.Null, InsufficientAllowance: e5.Record({ allowance: n2 }), BadBurn: e5.Record({ min_burn_amount: n2 }), Duplicate: e5.Record({ duplicate_of: l3 }), BadFee: e5.Record({ expected_fee: n2 }), CreatedInFuture: e5.Record({ ledger_time: u2 }), TooOld: e5.Null, InsufficientFunds: e5.Record({ balance: n2 }) }), oe = e5.Variant({ Ok: l3, Err: ne }), i3 = e5.Nat64, f2 = e5.Record({ start: i3, length: e5.Nat64 }), x3 = e5.Nat64, _2 = e5.Record({ timestamp_nanos: e5.Nat64 }), ae = e5.Variant({ Approve: e5.Record({ fee: r2, from: a2, allowance_e8s: e5.Int, allowance: r2, expected_allowance: e5.Opt(r2), expires_at: e5.Opt(_2), spender: a2 }), Burn: e5.Record({ from: a2, amount: r2, spender: e5.Opt(a2) }), Mint: e5.Record({ to: a2, amount: r2 }), Transfer: e5.Record({ to: a2, fee: r2, from: a2, amount: r2, spender: e5.Opt(e5.Vec(e5.Nat8)) }) }), se = e5.Record({ memo: x3, icrc1_memo: e5.Opt(e5.Vec(e5.Nat8)), operation: e5.Opt(ae), created_at_time: _2 }), b2 = e5.Record({ transaction: se, timestamp: _2, parent_hash: e5.Opt(e5.Vec(e5.Nat8)) }), ie = e5.Record({ blocks: e5.Vec(b2) }), V2 = e5.Variant({ BadFirstBlockIndex: e5.Record({ requested_index: i3, first_valid_index: i3 }), Other: e5.Record({ error_message: e5.Text, error_code: e5.Nat64 }) }), de = e5.Variant({ Ok: ie, Err: V2 }), ue = e5.Func([f2], [de], ["query"]), le = e5.Record({ callback: ue, start: i3, length: e5.Nat64 }), pe = e5.Record({ certificate: e5.Opt(e5.Vec(e5.Nat8)), blocks: e5.Vec(b2), chain_length: e5.Nat64, first_block_index: i3, archived_blocks: e5.Vec(le) }), _e = e5.Record({ callback: e5.Func([f2], [e5.Variant({ Ok: e5.Vec(e5.Vec(e5.Nat8)), Err: V2 })], ["query"]), start: e5.Nat64, length: e5.Nat64 }), me = e5.Record({ certificate: e5.Opt(e5.Vec(e5.Nat8)), blocks: e5.Vec(e5.Vec(e5.Nat8)), chain_length: e5.Nat64, first_block_index: e5.Nat64, archived_blocks: e5.Vec(_e) }), fe = e5.Record({ fee: e5.Opt(n2), from_subaccount: e5.Opt(c2), spender: a2 }), Re = e5.Record({ to: s2, fee: r2, memo: x3, from_subaccount: e5.Opt(c2), created_at_time: e5.Opt(_2), amount: r2 }), ge = e5.Record({ certification: e5.Opt(e5.Vec(e5.Nat8)), tip_index: i3 }), xe = e5.Record({ to: a2, fee: r2, memo: x3, from_subaccount: e5.Opt(c2), created_at_time: e5.Opt(_2), amount: r2 }), Oe = e5.Variant({ TxTooOld: e5.Record({ allowed_window_nanos: e5.Nat64 }), BadFee: e5.Record({ expected_fee: r2 }), TxDuplicate: e5.Record({ duplicate_of: i3 }), TxCreatedInFuture: e5.Null, InsufficientFunds: e5.Record({ balance: r2 }) }), Te = e5.Variant({ Ok: i3, Err: Oe }), Ne = e5.Record({}), ye = e5.Record({ transfer_fee: r2 });
-  return e5.Service({ account_balance: e5.Func([E2], [r2], ["query"]), account_balance_dfx: e5.Func([S2], [r2], ["query"]), account_identifier: e5.Func([t3], [a2], ["query"]), archives: e5.Func([], [M2], ["query"]), decimals: e5.Func([], [e5.Record({ decimals: e5.Nat32 })], ["query"]), get_allowances: e5.Func([G2], [Q2], ["query"]), icrc10_supported_standards: e5.Func([], [e5.Vec(e5.Record({ url: e5.Text, name: e5.Text }))], ["query"]), icrc1_balance_of: e5.Func([t3], [n2], ["query"]), icrc1_decimals: e5.Func([], [e5.Nat8], ["query"]), icrc1_fee: e5.Func([], [n2], ["query"]), icrc1_metadata: e5.Func([], [e5.Vec(e5.Tuple(e5.Text, z2))], ["query"]), icrc1_minting_account: e5.Func([], [e5.Opt(t3)], ["query"]), icrc1_name: e5.Func([], [e5.Text], ["query"]), icrc1_supported_standards: e5.Func([], [e5.Vec(e5.Record({ url: e5.Text, name: e5.Text }))], ["query"]), icrc1_symbol: e5.Func([], [e5.Text], ["query"]), icrc1_total_supply: e5.Func([], [n2], ["query"]), icrc1_transfer: e5.Func([H2], [$2], []), icrc21_canister_call_consent_message: e5.Func([Y2], [D2], []), icrc2_allowance: e5.Func([L2], [ee], ["query"]), icrc2_approve: e5.Func([te], [F2], []), icrc2_transfer_from: e5.Func([re2], [oe], []), is_ledger_ready: e5.Func([], [e5.Bool], ["query"]), name: e5.Func([], [e5.Record({ name: e5.Text })], ["query"]), query_blocks: e5.Func([f2], [pe], ["query"]), query_encoded_blocks: e5.Func([f2], [me], ["query"]), remove_approval: e5.Func([fe], [F2], []), send_dfx: e5.Func([Re], [i3], []), symbol: e5.Func([], [e5.Record({ symbol: e5.Text })], ["query"]), tip_of_chain: e5.Func([], [ge], ["query"]), transfer: e5.Func([xe], [Te], []), transfer_fee: e5.Func([Ne], [ye], ["query"]) });
+  let a2 = e5.Vec(e5.Nat8), E3 = e5.Record({ account: a2 }), S2 = e5.Record({ account: s2 }), U2 = e5.Record({ canister_id: e5.Principal }), M2 = e5.Record({ archives: e5.Vec(U2) }), G2 = e5.Record({ prev_spender_id: e5.Opt(s2), from_account_id: s2, take: e5.Opt(e5.Nat64) }), Q2 = e5.Vec(e5.Record({ from_account_id: s2, to_spender_id: s2, allowance: r2, expires_at: e5.Opt(e5.Nat64) })), n2 = e5.Nat, z2 = e5.Variant({ Int: e5.Int, Nat: e5.Nat, Blob: e5.Vec(e5.Nat8), Text: e5.Text }), u2 = e5.Nat64, H2 = e5.Record({ to: t3, fee: e5.Opt(n2), memo: e5.Opt(e5.Vec(e5.Nat8)), from_subaccount: e5.Opt(c2), created_at_time: e5.Opt(u2), amount: n2 }), l3 = e5.Nat, J2 = e5.Variant({ GenericError: e5.Record({ message: e5.Text, error_code: e5.Nat }), TemporarilyUnavailable: e5.Null, BadBurn: e5.Record({ min_burn_amount: n2 }), Duplicate: e5.Record({ duplicate_of: l3 }), BadFee: e5.Record({ expected_fee: n2 }), CreatedInFuture: e5.Record({ ledger_time: e5.Nat64 }), TooOld: e5.Null, InsufficientFunds: e5.Record({ balance: n2 }) }), $2 = e5.Variant({ Ok: l3, Err: J2 }), y2 = e5.Record({ utc_offset_minutes: e5.Opt(e5.Int16), language: e5.Text }), K2 = e5.Record({ metadata: y2, device_spec: e5.Opt(e5.Variant({ GenericDisplay: e5.Null, FieldsDisplay: e5.Null })) }), Y2 = e5.Record({ arg: e5.Vec(e5.Nat8), method: e5.Text, user_preferences: K2 }), j2 = e5.Variant({ Text: e5.Record({ content: e5.Text }), TokenAmount: e5.Record({ decimals: e5.Nat8, amount: e5.Nat64, symbol: e5.Text }), TimestampSeconds: e5.Record({ amount: e5.Nat64 }), DurationSeconds: e5.Record({ amount: e5.Nat64 }) }), W2 = e5.Record({ fields: e5.Vec(e5.Tuple(e5.Text, j2)), intent: e5.Text }), X2 = e5.Variant({ FieldsDisplayMessage: W2, GenericDisplayMessage: e5.Text }), Z2 = e5.Record({ metadata: y2, consent_message: X2 }), g2 = e5.Record({ description: e5.Text }), I2 = e5.Variant({ GenericError: e5.Record({ description: e5.Text, error_code: e5.Nat }), InsufficientPayment: g2, UnsupportedCanisterCall: g2, ConsentMessageUnavailable: g2 }), D2 = e5.Variant({ Ok: Z2, Err: I2 }), L2 = e5.Record({ account: t3, spender: t3 }), ee = e5.Record({ allowance: n2, expires_at: e5.Opt(u2) }), te = e5.Record({ fee: e5.Opt(n2), memo: e5.Opt(e5.Vec(e5.Nat8)), from_subaccount: e5.Opt(c2), created_at_time: e5.Opt(u2), amount: n2, expected_allowance: e5.Opt(n2), expires_at: e5.Opt(u2), spender: t3 }), ce = e5.Variant({ GenericError: e5.Record({ message: e5.Text, error_code: e5.Nat }), TemporarilyUnavailable: e5.Null, Duplicate: e5.Record({ duplicate_of: l3 }), BadFee: e5.Record({ expected_fee: n2 }), AllowanceChanged: e5.Record({ current_allowance: n2 }), CreatedInFuture: e5.Record({ ledger_time: e5.Nat64 }), TooOld: e5.Null, Expired: e5.Record({ ledger_time: e5.Nat64 }), InsufficientFunds: e5.Record({ balance: n2 }) }), F2 = e5.Variant({ Ok: l3, Err: ce }), re = e5.Record({ to: t3, fee: e5.Opt(n2), spender_subaccount: e5.Opt(c2), from: t3, memo: e5.Opt(e5.Vec(e5.Nat8)), created_at_time: e5.Opt(u2), amount: n2 }), ne2 = e5.Variant({ GenericError: e5.Record({ message: e5.Text, error_code: e5.Nat }), TemporarilyUnavailable: e5.Null, InsufficientAllowance: e5.Record({ allowance: n2 }), BadBurn: e5.Record({ min_burn_amount: n2 }), Duplicate: e5.Record({ duplicate_of: l3 }), BadFee: e5.Record({ expected_fee: n2 }), CreatedInFuture: e5.Record({ ledger_time: u2 }), TooOld: e5.Null, InsufficientFunds: e5.Record({ balance: n2 }) }), oe = e5.Variant({ Ok: l3, Err: ne2 }), i3 = e5.Nat64, f2 = e5.Record({ start: i3, length: e5.Nat64 }), x3 = e5.Nat64, _2 = e5.Record({ timestamp_nanos: e5.Nat64 }), ae = e5.Variant({ Approve: e5.Record({ fee: r2, from: a2, allowance_e8s: e5.Int, allowance: r2, expected_allowance: e5.Opt(r2), expires_at: e5.Opt(_2), spender: a2 }), Burn: e5.Record({ from: a2, amount: r2, spender: e5.Opt(a2) }), Mint: e5.Record({ to: a2, amount: r2 }), Transfer: e5.Record({ to: a2, fee: r2, from: a2, amount: r2, spender: e5.Opt(e5.Vec(e5.Nat8)) }) }), se = e5.Record({ memo: x3, icrc1_memo: e5.Opt(e5.Vec(e5.Nat8)), operation: e5.Opt(ae), created_at_time: _2 }), b2 = e5.Record({ transaction: se, timestamp: _2, parent_hash: e5.Opt(e5.Vec(e5.Nat8)) }), ie = e5.Record({ blocks: e5.Vec(b2) }), V2 = e5.Variant({ BadFirstBlockIndex: e5.Record({ requested_index: i3, first_valid_index: i3 }), Other: e5.Record({ error_message: e5.Text, error_code: e5.Nat64 }) }), de = e5.Variant({ Ok: ie, Err: V2 }), ue = e5.Func([f2], [de], ["query"]), le = e5.Record({ callback: ue, start: i3, length: e5.Nat64 }), pe = e5.Record({ certificate: e5.Opt(e5.Vec(e5.Nat8)), blocks: e5.Vec(b2), chain_length: e5.Nat64, first_block_index: i3, archived_blocks: e5.Vec(le) }), _e = e5.Record({ callback: e5.Func([f2], [e5.Variant({ Ok: e5.Vec(e5.Vec(e5.Nat8)), Err: V2 })], ["query"]), start: e5.Nat64, length: e5.Nat64 }), me = e5.Record({ certificate: e5.Opt(e5.Vec(e5.Nat8)), blocks: e5.Vec(e5.Vec(e5.Nat8)), chain_length: e5.Nat64, first_block_index: e5.Nat64, archived_blocks: e5.Vec(_e) }), fe = e5.Record({ fee: e5.Opt(n2), from_subaccount: e5.Opt(c2), spender: a2 }), Re = e5.Record({ to: s2, fee: r2, memo: x3, from_subaccount: e5.Opt(c2), created_at_time: e5.Opt(_2), amount: r2 }), ge = e5.Record({ certification: e5.Opt(e5.Vec(e5.Nat8)), tip_index: i3 }), xe = e5.Record({ to: a2, fee: r2, memo: x3, from_subaccount: e5.Opt(c2), created_at_time: e5.Opt(_2), amount: r2 }), Oe = e5.Variant({ TxTooOld: e5.Record({ allowed_window_nanos: e5.Nat64 }), BadFee: e5.Record({ expected_fee: r2 }), TxDuplicate: e5.Record({ duplicate_of: i3 }), TxCreatedInFuture: e5.Null, InsufficientFunds: e5.Record({ balance: r2 }) }), Te = e5.Variant({ Ok: i3, Err: Oe }), Ne = e5.Record({}), ye = e5.Record({ transfer_fee: r2 });
+  return e5.Service({ account_balance: e5.Func([E3], [r2], ["query"]), account_balance_dfx: e5.Func([S2], [r2], ["query"]), account_identifier: e5.Func([t3], [a2], ["query"]), archives: e5.Func([], [M2], ["query"]), decimals: e5.Func([], [e5.Record({ decimals: e5.Nat32 })], ["query"]), get_allowances: e5.Func([G2], [Q2], ["query"]), icrc10_supported_standards: e5.Func([], [e5.Vec(e5.Record({ url: e5.Text, name: e5.Text }))], ["query"]), icrc1_balance_of: e5.Func([t3], [n2], ["query"]), icrc1_decimals: e5.Func([], [e5.Nat8], ["query"]), icrc1_fee: e5.Func([], [n2], ["query"]), icrc1_metadata: e5.Func([], [e5.Vec(e5.Tuple(e5.Text, z2))], ["query"]), icrc1_minting_account: e5.Func([], [e5.Opt(t3)], ["query"]), icrc1_name: e5.Func([], [e5.Text], ["query"]), icrc1_supported_standards: e5.Func([], [e5.Vec(e5.Record({ url: e5.Text, name: e5.Text }))], ["query"]), icrc1_symbol: e5.Func([], [e5.Text], ["query"]), icrc1_total_supply: e5.Func([], [n2], ["query"]), icrc1_transfer: e5.Func([H2], [$2], []), icrc21_canister_call_consent_message: e5.Func([Y2], [D2], []), icrc2_allowance: e5.Func([L2], [ee], ["query"]), icrc2_approve: e5.Func([te], [F2], []), icrc2_transfer_from: e5.Func([re], [oe], []), is_ledger_ready: e5.Func([], [e5.Bool], ["query"]), name: e5.Func([], [e5.Record({ name: e5.Text })], ["query"]), query_blocks: e5.Func([f2], [pe], ["query"]), query_encoded_blocks: e5.Func([f2], [me], ["query"]), remove_approval: e5.Func([fe], [F2], []), send_dfx: e5.Func([Re], [i3], []), symbol: e5.Func([], [e5.Record({ symbol: e5.Text })], ["query"]), tip_of_chain: e5.Func([], [ge], ["query"]), transfer: e5.Func([xe], [Te], []), transfer_fee: e5.Func([Ne], [ye], ["query"]) });
 };
 BigInt(1095062083);
 BigInt(1347768404);
 var h$1 = BigInt(1e4);
 BigInt(1e8);
-var Se = (e5) => ({ e8s: e5 }), Ue = ({ to: e5, amount: c2, memo: t3, fee: o3, fromSubAccount: d2, createdAt: r2 }) => ({ to: e5.toUint8Array(), fee: Se(o3 ?? h$1), amount: Se(c2), memo: t3 ?? BigInt(0), created_at_time: r2 !== void 0 ? [{ timestamp_nanos: r2 }] : [], from_subaccount: d2 === void 0 ? [] : [_t(d2)] }), Me = ({ fromSubAccount: e5, to: c2, amount: t3, fee: o3, icrc1Memo: d2, createdAt: r2 }) => ({ to: c2, fee: re(o3 ?? h$1), amount: t3, memo: re(d2), created_at_time: re(r2), from_subaccount: re(e5) }), Ge = ({ fee: e5, createdAt: c2, icrc1Memo: t3, fromSubAccount: o3, expected_allowance: d2, expires_at: r2, amount: s2, ...N2 }) => ({ ...N2, fee: re(e5 ?? h$1), memo: re(t3), from_subaccount: re(o3), created_at_time: re(c2), amount: s2, expected_allowance: re(d2), expires_at: re(r2) }), Qe = ({ userPreferences: { metadata: { utcOffsetMinutes: e5, language: c2 }, deriveSpec: t3 }, ...o3 }) => ({ ...o3, user_preferences: { metadata: { language: c2, utc_offset_minutes: re(e5) }, device_spec: u$2(t3) ? re() : re("GenericDisplay" in t3 ? { GenericDisplay: null } : { FieldsDisplay: null }) } });
+var Se = (e5) => ({ e8s: e5 }), Ue = ({ to: e5, amount: c2, memo: t3, fee: o3, fromSubAccount: d2, createdAt: r2 }) => ({ to: e5.toUint8Array(), fee: Se(o3 ?? h$1), amount: Se(c2), memo: t3 ?? BigInt(0), created_at_time: r2 !== void 0 ? [{ timestamp_nanos: r2 }] : [], from_subaccount: d2 === void 0 ? [] : [St(d2)] }), Me = ({ fromSubAccount: e5, to: c2, amount: t3, fee: o3, icrc1Memo: d2, createdAt: r2 }) => ({ to: c2, fee: ne(o3 ?? h$1), amount: t3, memo: ne(d2), created_at_time: ne(r2), from_subaccount: ne(e5) }), Ge = ({ fee: e5, createdAt: c2, icrc1Memo: t3, fromSubAccount: o3, expected_allowance: d2, expires_at: r2, amount: s2, ...N2 }) => ({ ...N2, fee: ne(e5 ?? h$1), memo: ne(t3), from_subaccount: ne(o3), created_at_time: ne(c2), amount: s2, expected_allowance: ne(d2), expires_at: ne(r2) }), Qe = ({ userPreferences: { metadata: { utcOffsetMinutes: e5, language: c2 }, deriveSpec: t3 }, ...o3 }) => ({ ...o3, user_preferences: { metadata: { language: c2, utc_offset_minutes: ne(e5) }, device_spec: u$2(t3) ? ne() : ne("GenericDisplay" in t3 ? { GenericDisplay: null } : { FieldsDisplay: null }) } });
 var O = class extends Error {
 }, R = class extends O {
 }, m = class extends O {
@@ -12953,7 +13011,7 @@ var O = class extends Error {
     super();
     this.balance = t3;
   }
-}, w3 = class extends R {
+}, w2 = class extends R {
   constructor(t3) {
     super();
     this.allowed_window_secs = t3;
@@ -12996,8 +13054,8 @@ var O = class extends Error {
 }, we = class extends T {
 }, ve = class extends T {
 }, Be = class extends T {
-}, Je = (e5) => "TxDuplicate" in e5 ? new B2(e5.TxDuplicate.duplicate_of) : "InsufficientFunds" in e5 ? new A3(e5.InsufficientFunds.balance.e8s) : "TxCreatedInFuture" in e5 ? new v$1() : "TxTooOld" in e5 ? new w3(Number(e5.TxTooOld.allowed_window_nanos)) : "BadFee" in e5 ? new k(e5.BadFee.expected_fee.e8s) : new R(`Unknown error type ${JSON.stringify(e5)}`), $e = (e5) => "Duplicate" in e5 ? new B2(e5.Duplicate.duplicate_of) : "InsufficientFunds" in e5 ? new A3(e5.InsufficientFunds.balance) : "CreatedInFuture" in e5 ? new v$1() : "TooOld" in e5 ? new w3() : "BadFee" in e5 ? new k(e5.BadFee.expected_fee) : new R(`Unknown error type ${JSON.stringify(e5)}`), Ke = (e5) => "GenericError" in e5 ? new q(e5.GenericError.message, e5.GenericError.error_code) : "TemporarilyUnavailable" in e5 ? new Fe() : "Duplicate" in e5 ? new be(e5.Duplicate.duplicate_of) : "BadFee" in e5 ? new k(e5.BadFee.expected_fee) : "AllowanceChanged" in e5 ? new Ve(e5.AllowanceChanged.current_allowance) : "CreatedInFuture" in e5 ? new Ae() : "TooOld" in e5 ? new ke() : "Expired" in e5 ? new he(e5.Expired.ledger_time) : "InsufficientFunds" in e5 ? new A3(e5.InsufficientFunds.balance) : new m(`Unknown error type ${JSON.stringify(e5)}`), Ye = (e5) => "GenericError" in e5 ? new q(e5.GenericError.description, e5.GenericError.error_code) : "InsufficientPayment" in e5 ? new we(e5.InsufficientPayment.description) : "UnsupportedCanisterCall" in e5 ? new ve(e5.UnsupportedCanisterCall.description) : "ConsentMessageUnavailable" in e5 ? new Be(e5.ConsentMessageUnavailable.description) : new T(`Unknown error type ${JSON.stringify(e5)}`);
-var je = class e3 extends w$3 {
+}, Je = (e5) => "TxDuplicate" in e5 ? new B2(e5.TxDuplicate.duplicate_of) : "InsufficientFunds" in e5 ? new A3(e5.InsufficientFunds.balance.e8s) : "TxCreatedInFuture" in e5 ? new v$1() : "TxTooOld" in e5 ? new w2(Number(e5.TxTooOld.allowed_window_nanos)) : "BadFee" in e5 ? new k(e5.BadFee.expected_fee.e8s) : new R(`Unknown error type ${JSON.stringify(e5)}`), $e = (e5) => "Duplicate" in e5 ? new B2(e5.Duplicate.duplicate_of) : "InsufficientFunds" in e5 ? new A3(e5.InsufficientFunds.balance) : "CreatedInFuture" in e5 ? new v$1() : "TooOld" in e5 ? new w2() : "BadFee" in e5 ? new k(e5.BadFee.expected_fee) : new R(`Unknown error type ${JSON.stringify(e5)}`), Ke = (e5) => "GenericError" in e5 ? new q(e5.GenericError.message, e5.GenericError.error_code) : "TemporarilyUnavailable" in e5 ? new Fe() : "Duplicate" in e5 ? new be(e5.Duplicate.duplicate_of) : "BadFee" in e5 ? new k(e5.BadFee.expected_fee) : "AllowanceChanged" in e5 ? new Ve(e5.AllowanceChanged.current_allowance) : "CreatedInFuture" in e5 ? new Ae() : "TooOld" in e5 ? new ke() : "Expired" in e5 ? new he(e5.Expired.ledger_time) : "InsufficientFunds" in e5 ? new A3(e5.InsufficientFunds.balance) : new m(`Unknown error type ${JSON.stringify(e5)}`), Ye = (e5) => "GenericError" in e5 ? new q(e5.GenericError.description, e5.GenericError.error_code) : "InsufficientPayment" in e5 ? new we(e5.InsufficientPayment.description) : "UnsupportedCanisterCall" in e5 ? new ve(e5.UnsupportedCanisterCall.description) : "ConsentMessageUnavailable" in e5 ? new Be(e5.ConsentMessageUnavailable.description) : new T(`Unknown error type ${JSON.stringify(e5)}`);
+var je = class e3 extends E$1 {
   static create(c2 = {}) {
     let t3 = c2.canisterId ?? r$1, { service: o3, certifiedService: d2 } = lt({ options: { ...c2, canisterId: t3 }, idlFactory: Ee, certifiedIdlFactory: Pe });
     return new e3(t3, o3, d2);
@@ -13111,7 +13169,7 @@ var v2 = ({ IDL: t3 }) => {
   let c2 = t3.Record({ subnet_type: t3.Opt(t3.Text) }), a2 = t3.Variant({ Filter: c2, Subnet: t3.Record({ subnet: t3.Principal }) }), p2 = t3.Variant({ controllers: t3.Null, public: t3.Null }), o3 = t3.Record({ freezing_threshold: t3.Opt(t3.Nat), wasm_memory_threshold: t3.Opt(t3.Nat), controllers: t3.Opt(t3.Vec(t3.Principal)), reserved_cycles_limit: t3.Opt(t3.Nat), log_visibility: t3.Opt(p2), wasm_memory_limit: t3.Opt(t3.Nat), memory_allocation: t3.Opt(t3.Nat), compute_allocation: t3.Opt(t3.Nat) }), l3 = t3.Record({ subnet_selection: t3.Opt(a2), settings: t3.Opt(o3), subnet_type: t3.Opt(t3.Text) }), _2 = t3.Variant({ Refunded: t3.Record({ create_error: t3.Text, refund_amount: t3.Nat }) }), d2 = t3.Variant({ Ok: t3.Principal, Err: _2 }), u2 = t3.Record({ xdr_permyriad_per_icp: t3.Nat64, timestamp_seconds: t3.Nat64 }), y2 = t3.Record({ certificate: t3.Vec(t3.Nat8), data: u2, hash_tree: t3.Vec(t3.Nat8) }), O2 = t3.Record({ data: t3.Vec(t3.Tuple(t3.Principal, t3.Vec(t3.Principal))) }), C2 = t3.Record({ data: t3.Vec(t3.Tuple(t3.Text, t3.Vec(t3.Principal))) }), r2 = t3.Nat64, g2 = t3.Record({ controller: t3.Principal, block_index: r2, subnet_selection: t3.Opt(a2), settings: t3.Opt(o3), subnet_type: t3.Opt(t3.Text) }), i3 = t3.Variant({ Refunded: t3.Record({ block_index: t3.Opt(r2), reason: t3.Text }), InvalidTransaction: t3.Text, Other: t3.Record({ error_message: t3.Text, error_code: t3.Nat64 }), Processing: t3.Null, TransactionTooOld: r2 }), N2 = t3.Variant({ Ok: t3.Principal, Err: i3 }), m2 = t3.Opt(t3.Vec(t3.Nat8)), b2 = t3.Opt(t3.Vec(t3.Nat8)), f2 = t3.Record({ block_index: r2, deposit_memo: m2, to_subaccount: b2 }), R2 = t3.Record({ balance: t3.Nat, block_index: t3.Nat, minted: t3.Nat }), P2 = t3.Variant({ Ok: R2, Err: i3 }), T2 = t3.Record({ block_index: r2, canister_id: t3.Principal }), x3 = t3.Nat, S2 = t3.Variant({ Ok: x3, Err: i3 });
   return t3.Service({ create_canister: t3.Func([l3], [d2], []), get_build_metadata: t3.Func([], [t3.Text], ["query"]), get_default_subnets: t3.Func([], [t3.Vec(t3.Principal)], ["query"]), get_icp_xdr_conversion_rate: t3.Func([], [y2], ["query"]), get_principals_authorized_to_create_canisters_to_subnets: t3.Func([], [O2], ["query"]), get_subnet_types_to_subnets: t3.Func([], [C2], ["query"]), notify_create_canister: t3.Func([g2], [N2], []), notify_mint_cycles: t3.Func([f2], [P2], []), notify_top_up: t3.Func([T2], [S2], []) });
 };
-var F = class t2 extends w$3 {
+var F = class t2 extends E$1 {
   static create(n2) {
     let { service: e5, certifiedService: s2, canisterId: c2 } = lt({ options: n2, idlFactory: v2, certifiedIdlFactory: h });
     return new t2(c2, e5, s2);
