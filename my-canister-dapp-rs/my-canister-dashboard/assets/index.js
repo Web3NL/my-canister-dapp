@@ -12230,37 +12230,6 @@ function M$1() {
   }
   throw new Error(`Could not infer canister ID from hostname: ${t3}`);
 }
-const PRODUCTION_CONFIG = {
-  canisterId: void 0,
-  identityProvider: "https://identity.internetcomputer.org",
-  dfxHost: "https://icp-api.io"
-};
-let configCache = null;
-let devModeCache = null;
-async function getConfig() {
-  if (configCache !== null) {
-    return configCache;
-  }
-  try {
-    const response = await fetch("/canister-dashboard-dev-config.json");
-    if (response.ok) {
-      const devConfig = await response.json();
-      configCache = devConfig;
-      devModeCache = true;
-      return devConfig;
-    }
-  } catch {
-  }
-  configCache = PRODUCTION_CONFIG;
-  devModeCache = false;
-  return configCache;
-}
-function isDevMode() {
-  if (devModeCache !== null) {
-    return devModeCache;
-  }
-  return false;
-}
 const MAX_TIME_TO_LIVE = BigInt(15) * BigInt(60) * BigInt(1e9);
 const CMC_CANISTER_ID = "rkp4c-7iaaa-aaaaa-aaaca-cai";
 const ICP_TX_FEE = BigInt(1e4);
@@ -12275,6 +12244,50 @@ const TPUP_MEMO = new Uint8Array([
   0,
   0
 ]);
+var define_CANISTER_DAPP_DEV_CONFIG_default = { host: "http://localhost:8080", identityProvider: "http://rdmx6-jaaaa-aaaaa-aaadq-cai.localhost:8080" };
+var define_CANISTER_DAPP_PROD_CONFIG_default = { host: "https://icp-api.io", identityProvider: "https://identity.internetcomputer.org" };
+const DEFAULT_DEV_CONFIG = {
+  host: "http://localhost:8080",
+  identityProvider: "http://rdmx6-jaaaa-aaaaa-aaadq-cai.localhost:8080"
+};
+const DEFAULT_PROD_CONFIG = {
+  host: "https://icp-api.io",
+  identityProvider: "https://identity.internetcomputer.org"
+};
+let configCache = null;
+let devModeCache = null;
+function detectDevModeFromOrigin() {
+  if (typeof window === "undefined" || !window.location) {
+    return false;
+  }
+  const origin = window.location.origin.toLowerCase();
+  return origin.startsWith("http://") || origin.includes("localhost") || origin.includes("127.0.0.1");
+}
+function inferEnvironment() {
+  if (configCache !== null) {
+    return configCache;
+  }
+  const isDev = detectDevModeFromOrigin();
+  const config = isDev ? typeof define_CANISTER_DAPP_DEV_CONFIG_default !== "undefined" ? define_CANISTER_DAPP_DEV_CONFIG_default : DEFAULT_DEV_CONFIG : typeof define_CANISTER_DAPP_PROD_CONFIG_default !== "undefined" ? define_CANISTER_DAPP_PROD_CONFIG_default : DEFAULT_PROD_CONFIG;
+  configCache = config;
+  return config;
+}
+function isDevMode() {
+  if (devModeCache !== null) {
+    return devModeCache;
+  }
+  devModeCache = detectDevModeFromOrigin();
+  return devModeCache;
+}
+function inferCanisterId() {
+  try {
+    return M$1();
+  } catch {
+    {
+      return Principal$1.fromText("22ajg-aqaaa-aaaap-adukq-cai");
+    }
+  }
+}
 function getElement(id) {
   const element = document.getElementById(id);
   if (!element) {
@@ -12433,26 +12446,25 @@ function reportError(message, error) {
   } catch {
   }
 }
-async function canisterId() {
+function getConfig() {
+  return inferEnvironment();
+}
+function canisterId() {
   try {
-    return M$1();
-  } catch {
-    const config = await getConfig();
-    if (config.canisterId !== void 0) {
-      return Principal$1.fromText(config.canisterId);
-    }
-    reportError(CANISTER_ID_ERROR_MESSAGE);
+    return inferCanisterId();
+  } catch (error) {
+    reportError(CANISTER_ID_ERROR_MESSAGE, error);
     throw new Error(CANISTER_ID_ERROR_MESSAGE);
   }
 }
 async function createHttpAgent() {
   try {
     const authClient = await AuthClient.create();
-    const config = await getConfig();
+    const config = getConfig();
     const identity = authClient.getIdentity();
     const agent = await HttpAgent.create({
       identity,
-      host: config.dfxHost
+      host: config.host
     });
     if (isDevMode()) {
       await agent.fetchRootKey();
@@ -12502,7 +12514,7 @@ class AuthManager {
         return false;
       }
       const agent = await createHttpAgent();
-      const canister = await canisterId();
+      const canister = canisterId();
       const dashboard = l$1.create(agent, canister);
       return await dashboard.isAuthenticated();
     } catch (error) {
@@ -12521,7 +12533,7 @@ class AuthManager {
       await client.logout();
       this.authClient = null;
     }
-    const config = await getConfig();
+    const config = getConfig();
     const freshClient = await this.ensureAuthClient();
     await new Promise((resolve, reject) => {
       freshClient.login({
@@ -12576,7 +12588,7 @@ class ManagementApi {
   async getCanisterStatus() {
     try {
       const icManagement = await this.managmentApi();
-      const canisterIdPrincipal = await canisterId();
+      const canisterIdPrincipal = canisterId();
       return await icManagement.canisterStatus(canisterIdPrincipal);
     } catch (error) {
       reportError(NETWORK_ERROR_MESSAGE, error);
@@ -12586,7 +12598,7 @@ class ManagementApi {
   async updateControllers(controllers) {
     try {
       const icManagement = await this.managmentApi();
-      const canisterIdPrincipal = await canisterId();
+      const canisterIdPrincipal = canisterId();
       await icManagement.updateSettings({
         canisterId: canisterIdPrincipal,
         settings: {
@@ -12601,7 +12613,7 @@ class ManagementApi {
   async getCanisterLogs() {
     try {
       const icManagement = await this.managmentApi();
-      const canisterIdPrincipal = await canisterId();
+      const canisterIdPrincipal = canisterId();
       return await icManagement.fetchCanisterLogs(canisterIdPrincipal);
     } catch (error) {
       reportError(NETWORK_ERROR_MESSAGE, error);
@@ -13048,7 +13060,7 @@ class LedgerApi {
   }
   async canisterBalance() {
     try {
-      const canister = await canisterId();
+      const canister = canisterId();
       const accountIdentifier = O$1.fromPrincipal({
         principal: canister
       });
@@ -13197,7 +13209,7 @@ class TopupManager {
       const transferAmount = balance - ICP_TX_FEE;
       const blockHeight = await this.transferToCMC(transferAmount);
       const cmcApi = new CMCApi();
-      const canisterIdPrincipal = await canisterId();
+      const canisterIdPrincipal = canisterId();
       const canisterIdString = canisterIdPrincipal.toString();
       await cmcApi.notifyTopUp(canisterIdString, blockHeight);
       await this.updateBalanceAndStatus();
@@ -13219,7 +13231,7 @@ class TopupManager {
   }
   async transferToCMC(amount) {
     const ledgerApi = new LedgerApi();
-    const canisterIdPrincipal = await canisterId();
+    const canisterIdPrincipal = canisterId();
     const subaccount = principalToSubaccount(canisterIdPrincipal);
     const cmcPrincipal = Principal$1.fromText(CMC_CANISTER_ID);
     const blockHeight = await ledgerApi.transfer(
@@ -13358,7 +13370,7 @@ class CanisterApi {
   }
   async create() {
     const agent = await createHttpAgent();
-    const canisterIdPrincipal = await canisterId();
+    const canisterIdPrincipal = canisterId();
     this.canisterApi = N$1({
       agent,
       canisterId: canisterIdPrincipal
@@ -13558,7 +13570,7 @@ class TopUpRuleManager {
     return instance;
   }
   async renderCanisterInfo() {
-    const canisterIdPrincipal = await canisterId();
+    const canisterIdPrincipal = canisterId();
     const canisterBalance = await new LedgerApi().canisterBalance();
     const canisterIdText = canisterIdPrincipal.toString();
     const formattedCanisterBalance = formatIcpBalance(canisterBalance);
@@ -13708,7 +13720,7 @@ class Dashboard {
       const iiPrincipal = await this.authManager.getPrincipal();
       const principalText = iiPrincipal.toText();
       setLoggedInState(principalText, () => this.handleLogout());
-      const canisterIdPrincipal = await canisterId();
+      const canisterIdPrincipal = canisterId();
       await this.initializeManagers(canisterIdPrincipal, iiPrincipal);
     } catch (error) {
       console.error("Failed to transition to logged in state:", error);
