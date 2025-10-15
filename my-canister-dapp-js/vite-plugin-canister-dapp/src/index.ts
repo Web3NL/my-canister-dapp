@@ -307,3 +307,13 @@ export function canisterDashboardDevConfig(
 function notEmptyString(value: unknown): value is string {
   return typeof value === 'string' && value.length > 0;
 }
+
+// Export new general-purpose canister dapp environment config plugin
+export {
+  canisterDappEnvironmentConfig,
+  inferEnvironment,
+  isDevMode,
+  inferCanisterId,
+  type CanisterDappEnvironmentConfig,
+  type CanisterDappEnvironmentPluginConfig,
+} from './canister-dapp-environment-config.js';
