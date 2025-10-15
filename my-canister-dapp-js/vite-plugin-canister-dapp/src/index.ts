@@ -316,4 +316,4 @@ export {
   canisterDappEnvironmentConfig,
   type CanisterDappEnvironmentConfig,
   type CanisterDappEnvironmentPluginConfig,
-} from './plugin';
+} from './plugin.js';
