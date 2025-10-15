@@ -1,5 +1,11 @@
 # @web3nl/vite-plugin-canister-dapp
 
+## 0.4.0
+
+### Minor Changes
+
+- [#181](https://github.com/Web3NL/my-canister-dapp/pull/181) [`93e22ac`](https://github.com/Web3NL/my-canister-dapp/commit/93e22acc9f48cf864f2a9f9909807e213ffad7ad) Thanks [@Web3NL](https://github.com/Web3NL)! - New CanisterDappEnvironmentConfig plugin for browser runtime inference of environment for Canister Dapps. Replaces older CanisterDashboardDevConfig.
+
 ## 0.3.2
 
 ### Patch Changes

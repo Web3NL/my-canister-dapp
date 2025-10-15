@@ -6,7 +6,7 @@
     "@web3nl/my-canister-dashboard": "0.8.0"
   },
   "devDependencies": {
-    "@web3nl/vite-plugin-canister-dapp": "0.3.2"
+    "@web3nl/vite-plugin-canister-dapp": "0.4.0"
   },
   "engines": {
     "node": ">=22.0.0"
