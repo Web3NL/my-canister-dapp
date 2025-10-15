@@ -5,7 +5,7 @@
   "author": "Web3NL",
   "bugs": "https://github.com/Web3NL/my-canister-dapp/issues",
   "dependencies": {
-    "@dfinity/principal": "3.2.4",
+    "@dfinity/principal": "^3.2.4",
     "@web3nl/my-canister-dashboard": "0.8.0"
   },
   "devDependencies": {
