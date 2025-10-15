@@ -1,9 +1,8 @@
 import { AuthClient } from '@dfinity/auth-client';
 import type { Principal } from '@dfinity/principal';
 import { MyCanisterDashboard } from '@web3nl/my-canister-dashboard';
-import { getConfig } from '../environment';
 import { MAX_TIME_TO_LIVE } from '../constants';
-import { createHttpAgent, canisterId } from '../utils';
+import { createHttpAgent, canisterId, getConfig } from '../utils';
 import {
   showError,
   NOT_AUTHORIZED_MESSAGE,
@@ -39,7 +38,7 @@ export class AuthManager {
       }
 
       const agent = await createHttpAgent();
-      const canister = await canisterId();
+      const canister = canisterId();
       const dashboard = MyCanisterDashboard.create(agent, canister);
 
       return await dashboard.isAuthenticated();
@@ -66,7 +65,7 @@ export class AuthManager {
       this.authClient = null;
     }
 
-    const config = await getConfig();
+    const config = getConfig();
 
     // Ensure we have a fresh AuthClient after a potential logout above
     const freshClient = await this.ensureAuthClient();

@@ -1,25 +1,27 @@
 import { Principal } from '@dfinity/principal';
 import { HttpAgent } from '@dfinity/agent';
-import { getConfig, isDevMode } from './environment';
 import { AuthClient } from '@dfinity/auth-client';
-import { inferCanisterIdFromLocation } from '@web3nl/my-canister-dashboard';
+import {
+  inferCanisterId,
+  inferEnvironment,
+  isDevMode,
+} from '@web3nl/vite-plugin-canister-dapp/runtime';
+import type { CanisterDappEnvironmentConfig } from '@web3nl/vite-plugin-canister-dapp';
 import {
   reportError,
   CANISTER_ID_ERROR_MESSAGE,
   HTTP_AGENT_ERROR_MESSAGE,
 } from './error';
 
-export async function canisterId(): Promise<Principal> {
-  try {
-    return inferCanisterIdFromLocation();
-  } catch {
-    // When in dev server inference fails and we use local canister ID
-    const config = await getConfig();
-    if (config.canisterId !== undefined) {
-      return Principal.fromText(config.canisterId);
-    }
+export function getConfig(): CanisterDappEnvironmentConfig {
+  return inferEnvironment();
+}
 
-    reportError(CANISTER_ID_ERROR_MESSAGE);
+export function canisterId(): Principal {
+  try {
+    return inferCanisterId();
+  } catch (error) {
+    reportError(CANISTER_ID_ERROR_MESSAGE, error);
     throw new Error(CANISTER_ID_ERROR_MESSAGE);
   }
 }
@@ -27,13 +29,13 @@ export async function canisterId(): Promise<Principal> {
 export async function createHttpAgent(): Promise<HttpAgent> {
   try {
     const authClient = await AuthClient.create();
-    const config = await getConfig();
+    const config = getConfig();
 
     const identity = authClient.getIdentity();
 
     const agent = await HttpAgent.create({
       identity,
-      host: config.dfxHost,
+      host: config.host,
     });
 
     if (isDevMode()) {

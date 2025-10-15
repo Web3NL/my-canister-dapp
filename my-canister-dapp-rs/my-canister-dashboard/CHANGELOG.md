@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Changed
+
+- Use `CanisterDappEnvironmentConfig` for environment config in stead of `CanisterDashboardDevConfig`
+
 ### Added
 
 - Canister dashboard frontend: implemented `canisterStatusStore` and used it in `controllers` and `status` components.

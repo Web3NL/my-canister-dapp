@@ -1,6 +1,6 @@
 import { defineConfig } from 'vite';
 import path from 'path';
-import { canisterDashboardDevConfig } from '@web3nl/vite-plugin-canister-dapp';
+import { canisterDappEnvironmentConfig } from '@web3nl/vite-plugin-canister-dapp';
 
 export default defineConfig(() => {
   return {
@@ -8,8 +8,8 @@ export default defineConfig(() => {
     base: '/canister-dashboard',
     publicDir: false as const,
     plugins: [
-      canisterDashboardDevConfig({
-        root: '.',
+      canisterDappEnvironmentConfig({
+        viteDevCanisterId: '22ajg-aqaaa-aaaap-adukq-cai',
         serverProxies: {
           canisterDashboard: false,
         }

@@ -22,7 +22,7 @@ export class CanisterApi {
 
   private async create(): Promise<void> {
     const agent = await createHttpAgent();
-    const canisterIdPrincipal = await canisterId();
+    const canisterIdPrincipal = canisterId();
 
     this.canisterApi = createMyCanisterActor({
       agent: agent as HttpAgent,
