@@ -1,4 +1,4 @@
-import type { CanisterDappEnvironmentConfig } from './canister-dapp-environment-config';
+import type { CanisterDappEnvironmentConfig } from './plugin';
 
 declare global {
   /**
