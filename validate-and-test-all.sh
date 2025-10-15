@@ -28,9 +28,6 @@ if [ "$CLEAN_FLAG" = "true" ]; then
     ./scripts/clean.sh
 fi
 
-# Generate the .env files upfront
-./scripts/generate-env.sh
-
 # Format, lint, typecheck, build
 if [ "$SKIP_CHECKS_FLAG" != "true" ]; then
     ./scripts/check.sh
