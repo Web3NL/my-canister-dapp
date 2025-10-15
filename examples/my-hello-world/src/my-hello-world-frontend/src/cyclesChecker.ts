@@ -1,6 +1,6 @@
 import type { HttpAgent } from '@dfinity/agent';
 import { MyCanisterDashboard } from '@web3nl/my-canister-dashboard';
-import { getCanisterId } from './utils';
+import { inferCanisterId } from '@web3nl/vite-plugin-canister-dapp/runtime';
 import { showError, showWarning } from './errorHandler';
 
 const DEFAULT_THRESHOLD = 1_000_000_000_000n; // 1T cycles
@@ -15,7 +15,7 @@ export class CyclesChecker {
 
   async checkCyclesBalance(agent: HttpAgent): Promise<CyclesResult | null> {
     try {
-      const canisterId = await getCanisterId();
+      const canisterId = inferCanisterId();
       const dashboard = MyCanisterDashboard.create(agent, canisterId);
       const result = await dashboard.checkCyclesBalance();
 

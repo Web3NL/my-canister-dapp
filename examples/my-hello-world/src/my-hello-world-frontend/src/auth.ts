@@ -4,8 +4,11 @@ import type { Identity } from '@dfinity/agent';
 import type { Principal } from '@dfinity/principal';
 import { MyDashboardBackend } from '@web3nl/my-canister-dashboard';
 import { showError } from './errorHandler';
-import { getCanisterId } from './utils';
-import { getConfig, isDevMode } from './environment';
+import {
+  inferCanisterId,
+  inferEnvironment,
+  isDevMode,
+} from '@web3nl/vite-plugin-canister-dapp/runtime';
 
 interface AuthorizationResult {
   Ok?: Principal;
@@ -34,7 +37,7 @@ class AuthManager {
       await this.init();
     }
 
-    const config = await getConfig();
+    const config = inferEnvironment();
 
     return new Promise((resolve, reject) => {
       this.authClient!.login({
@@ -66,11 +69,11 @@ class AuthManager {
     this.isAuthenticated = !this.principal.isAnonymous();
 
     if (this.isAuthenticated) {
-      const config = await getConfig();
+      const config = inferEnvironment();
 
       this.agent = new HttpAgent({
         identity: this.identity,
-        host: config.dfxHost,
+        host: config.host,
       });
 
       // Fetch root key for certificate validation during development
@@ -105,7 +108,7 @@ class AuthManager {
     }
 
     try {
-      const canisterId = await getCanisterId();
+      const canisterId = inferCanisterId();
       const backend = MyDashboardBackend.create({
         agent: this.agent,
         canisterId: canisterId,

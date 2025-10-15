@@ -2,7 +2,7 @@ import { html, render } from 'lit-html';
 import { createActor } from '$declarations/index.js';
 import { createCyclesChecker } from './cyclesChecker';
 import { authManager } from './auth';
-import { getCanisterId } from './utils';
+import { inferCanisterId } from '@web3nl/vite-plugin-canister-dapp/runtime';
 import { showError, clearAllNotifications } from './errorHandler';
 import logo from './logo2.svg';
 
@@ -110,8 +110,8 @@ export default class App {
     const name = nameInput.value;
 
     try {
-      // Get canister ID using our utility function
-      const canisterId = await getCanisterId();
+      // Get canister ID using plugin runtime
+      const canisterId = inferCanisterId();
       const agent = authManager.getAgent();
       if (!agent) {
         throw new Error('No authenticated agent available');
