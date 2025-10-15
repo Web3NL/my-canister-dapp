@@ -32,10 +32,9 @@
     // Ensure consistent cross-platform behavior
     "preserveSymlinks": false,
     "preserveWatchOutput": true,
-    "baseUrl": ".",
     "paths": {
       "$declarations/*": [
-        "declarations/*"
+        "./declarations/*"
       ]
     }
   },
