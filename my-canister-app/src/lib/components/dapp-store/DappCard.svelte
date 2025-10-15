@@ -8,7 +8,7 @@
   export let memo: string;
 
   function handleInstall() {
-    goto(`/install?id=${id}&name=${name}`);
+    goto(`/install?source=registry&id=${id}&name=${name}`);
   }
 </script>
 

@@ -23,6 +23,7 @@
   import ConnectIICard from '$lib/components/install/ConnectIICard.svelte';
   import FundAccountCard from '$lib/components/install/FundAccountCard.svelte';
   import { goto } from '$app/navigation';
+  import { fetchWasmModule, type WasmSource } from '$lib/utils/fetch';
 
   const principalText = $authStore ? $authStore.toText() : '';
   let requiredBalanceE8s: bigint = 0n;
@@ -35,6 +36,12 @@
   let balanceFetchFailedToastShown = false;
   let lowDepositWarnShown = false;
 
+  // Installation mode detection
+  type InstallMode = 'registry' | 'file' | 'remote';
+  let installMode: InstallMode = 'registry';
+  let wasmModule: Uint8Array | null = null;
+  let wasmFetchError: string | null = null;
+
   $: wasmId = $page.url.searchParams.get('id');
   $: wasmIdNumber = wasmId != null ? parseInt(wasmId, 10) : null;
 
@@ -42,7 +49,38 @@
   $: dappNameText =
     dappName != null && dappName.length > 0 ? dappName.toString() : null;
 
+  $: source = $page.url.searchParams.get('source');
+  $: remoteUrl = $page.url.searchParams.get('url');
+
   const CANISTER_STORAGE_KEY = 'pendingCanisterId';
+
+  async function handleFileSelect(event: Event) {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+
+    if (!file) {
+      wasmModule = null;
+      return;
+    }
+
+    if (!file.name.endsWith('.wasm.gz')) {
+      wasmFetchError = 'Please select a valid .wasm.gz file';
+      wasmModule = null;
+      showErrorToast('Please select a valid .wasm.gz file');
+      return;
+    }
+
+    try {
+      const arrayBuffer = await file.arrayBuffer();
+      wasmModule = new Uint8Array(arrayBuffer);
+      wasmFetchError = null;
+    } catch (err) {
+      console.error('Failed to read file', err);
+      wasmFetchError = 'Failed to read file';
+      wasmModule = null;
+      showErrorToast('Failed to read file');
+    }
+  }
 
   async function loadBalance() {
     try {
@@ -134,8 +172,8 @@
   }
 
   async function createCanister() {
-    if (wasmIdNumber == null) {
-      goto('/dapp-store');
+    if (!wasmModule) {
+      showErrorToast('WASM module not loaded');
       return;
     }
 
@@ -145,7 +183,7 @@
     });
 
     try {
-      canisterPrincipal = await createNewCanister(wasmIdNumber);
+      canisterPrincipal = await createNewCanister(wasmModule);
 
       if (browser) {
         localStorage.setItem(CANISTER_STORAGE_KEY, canisterPrincipal.toText());
@@ -185,7 +223,47 @@
   }
 
   onMount(async () => {
-    if (!wasmIdNumber || !dappNameText) {
+    // Determine installation mode from URL parameters
+    if (source === 'file') {
+      installMode = 'file';
+      if (!dappNameText) {
+        showWarnToast('No dapp name provided in URL');
+      }
+      // For file mode, wasmModule will be set when user selects a file
+    } else if (source === 'remote' && remoteUrl) {
+      installMode = 'remote';
+      if (!dappNameText) {
+        showWarnToast('No dapp name provided in URL');
+      }
+      // Fetch WASM from remote URL
+      try {
+        const wasmSource: WasmSource = { type: 'remote', url: remoteUrl };
+        wasmModule = await fetchWasmModule(wasmSource);
+      } catch (err) {
+        console.error('Failed to fetch WASM from remote URL', err);
+        wasmFetchError =
+          err instanceof Error ? err.message : 'Failed to fetch WASM';
+        showErrorToast('Failed to fetch WASM from remote URL');
+      }
+    } else if (
+      (source === 'registry' || source === null) &&
+      wasmIdNumber &&
+      dappNameText
+    ) {
+      // Support both ?source=registry&id=X&name=Y and ?id=X&name=Y (backward compatibility)
+      installMode = 'registry';
+      // Fetch WASM from registry
+      try {
+        const wasmSource: WasmSource = { type: 'registry', id: wasmIdNumber };
+        wasmModule = await fetchWasmModule(wasmSource);
+      } catch (err) {
+        console.error('Failed to fetch WASM from registry', err);
+        wasmFetchError =
+          err instanceof Error ? err.message : 'Failed to fetch WASM';
+        showErrorToast('Failed to fetch WASM from registry');
+      }
+    } else {
+      // Invalid parameters, redirect to dapp store
       goto('/dapp-store');
       return;
     }
@@ -218,7 +296,38 @@
 </svelte:head>
 
 <h1>Install Dapp</h1>
-<h3>{dappNameText}</h3>
+<h3>{dappNameText || 'Custom Dapp'}</h3>
+
+{#if installMode === 'file'}
+  <div class="file-picker">
+    <label for="wasm-file">Select WASM file (.wasm.gz):</label>
+    <input
+      id="wasm-file"
+      type="file"
+      accept=".wasm.gz"
+      on:change={handleFileSelect}
+    />
+    {#if wasmModule}
+      <p class="success">File loaded successfully</p>
+    {:else if wasmFetchError}
+      <p class="error">{wasmFetchError}</p>
+    {/if}
+  </div>
+{/if}
+
+{#if installMode === 'remote'}
+  <div class="remote-info">
+    <p>Installing from remote URL: <code>{remoteUrl}</code></p>
+    {#if wasmModule}
+      <p class="success">WASM loaded successfully</p>
+    {:else if wasmFetchError}
+      <p class="error">{wasmFetchError}</p>
+    {:else}
+      <p>Loading WASM...</p>
+    {/if}
+  </div>
+{/if}
+
 <div id="progress-steps">
   <ProgressSteps {steps} />
 </div>
@@ -229,7 +338,9 @@
     {minimumBalance}
     {formattedBalance}
     showSpinner={balanceTimer !== null}
-    disabled={requiredBalanceE8s === 0n || currentBalance < requiredBalanceE8s}
+    disabled={requiredBalanceE8s === 0n ||
+      currentBalance < requiredBalanceE8s ||
+      !wasmModule}
     onCreate={createCanister}
   />
 {:else if currentStep === 3}
@@ -242,6 +353,44 @@
 {/if}
 
 <style>
+  .file-picker {
+    margin: 1rem 0;
+    padding: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+
+  .file-picker label {
+    display: block;
+    margin-bottom: 0.5rem;
+    font-weight: 500;
+  }
+
+  .file-picker input[type='file'] {
+    width: 100%;
+  }
+
+  .remote-info {
+    margin: 1rem 0;
+    padding: 1rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+  }
+
+  .remote-info code {
+    word-break: break-all;
+  }
+
+  .success {
+    color: green;
+    margin-top: 0.5rem;
+  }
+
+  .error {
+    color: red;
+    margin-top: 0.5rem;
+  }
+
   #progress-steps {
     margin: 1rem 0 1rem 0;
   }
