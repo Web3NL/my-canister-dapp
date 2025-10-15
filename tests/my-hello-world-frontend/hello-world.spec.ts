@@ -1,5 +1,5 @@
 import { test } from '@playwright/test';
-import { installedHelloWorldExampleCanisterFrontendUrl, loadDfxEnv, readTestData } from '../helpers';
+import { installedHelloWorldExampleCanisterFrontendUrl, loadDfxEnv, readTestData } from '../helpers.js';
 
 // Load global dfx environment variables
 loadDfxEnv();

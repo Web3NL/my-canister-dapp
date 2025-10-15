@@ -1,9 +1,9 @@
 import { defineConfig, devices } from '@playwright/test';
 import dotenv from 'dotenv';
-import { installedHelloWorldExampleCanisterDashboardUrl } from './tests/helpers';
+import { installedHelloWorldExampleCanisterDashboardUrl } from './tests/helpers.js';
 
-// Load dfx environment variables from .env.development
-dotenv.config({ path: '.env.development' });
+// Load test environment variables from tests/test.env
+dotenv.config({ path: './tests/test.env' });
 
 export default defineConfig({
   testDir: './tests',
