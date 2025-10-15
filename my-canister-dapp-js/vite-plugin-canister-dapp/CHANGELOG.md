@@ -1,5 +1,11 @@
 # @web3nl/vite-plugin-canister-dapp
 
+## 0.4.2
+
+### Patch Changes
+
+- [`6115ee0`](https://github.com/Web3NL/my-canister-dapp/commit/6115ee0e8fa843dcfdc27f2abb6a64061c43c072) Thanks [@Web3NL](https://github.com/Web3NL)! - fix: split runtime functions from build time plugin
+
 ## 0.4.1
 
 ### Patch Changes
