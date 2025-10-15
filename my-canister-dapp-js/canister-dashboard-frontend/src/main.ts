@@ -99,7 +99,7 @@ class Dashboard {
       setLoggedInState(principalText, () => this.handleLogout());
 
       // Initialize dashboard components
-      const canisterIdPrincipal = await canisterId();
+      const canisterIdPrincipal = canisterId();
       await this.initializeManagers(canisterIdPrincipal, iiPrincipal);
     } catch (error) {
       console.error('Failed to transition to logged in state:', error);

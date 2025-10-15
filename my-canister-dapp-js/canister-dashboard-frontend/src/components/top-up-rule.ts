@@ -43,7 +43,7 @@ export class TopUpRuleManager {
   }
 
   private async renderCanisterInfo(): Promise<void> {
-    const canisterIdPrincipal = await canisterId();
+    const canisterIdPrincipal = canisterId();
     const canisterBalance = await new LedgerApi().canisterBalance();
     const canisterIdText = canisterIdPrincipal.toString();
     const formattedCanisterBalance = formatIcpBalance(canisterBalance);

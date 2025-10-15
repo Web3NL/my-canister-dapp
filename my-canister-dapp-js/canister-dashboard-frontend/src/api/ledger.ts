@@ -30,7 +30,7 @@ export class LedgerApi {
 
   async canisterBalance(): Promise<bigint> {
     try {
-      const canister = await canisterId();
+      const canister = canisterId();
       const accountIdentifier = AccountIdentifier.fromPrincipal({
         principal: canister,
       });
