@@ -55,7 +55,7 @@ async fn main() -> Result<()> {
     println!("{}", "Starting Vite development server...".yellow());
 
     let child = TokioCommand::new("npm")
-        .args(&["run", "dev:app"])
+        .args(["run", "dev:app"])
         .stdout(Stdio::piped())
         .stderr(Stdio::piped())
         .spawn()
