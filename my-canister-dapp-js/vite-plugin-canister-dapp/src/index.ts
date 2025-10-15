@@ -314,9 +314,6 @@ function notEmptyString(value: unknown): value is string {
 // Export new general-purpose canister dapp environment config plugin
 export {
   canisterDappEnvironmentConfig,
-  inferEnvironment,
-  isDevMode,
-  inferCanisterId,
   type CanisterDappEnvironmentConfig,
   type CanisterDappEnvironmentPluginConfig,
-} from './canister-dapp-environment-config.js';
+} from './plugin';
