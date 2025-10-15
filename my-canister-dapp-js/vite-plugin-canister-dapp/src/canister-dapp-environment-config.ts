@@ -159,7 +159,9 @@ export function canisterDappEnvironmentConfig(
         ...viteConfig.define,
         __CANISTER_DAPP_DEV_CONFIG__: JSON.stringify(devConfig),
         __CANISTER_DAPP_PROD_CONFIG__: JSON.stringify(prodConfig),
-        __VITE_DEV_CANISTER_ID__: JSON.stringify(config.viteDevCanisterId ?? null),
+        __VITE_DEV_CANISTER_ID__: JSON.stringify(
+          config.viteDevCanisterId || null
+        ),
       };
 
       // Setup proxy only in development mode (Vite dev server)
@@ -241,7 +243,8 @@ export function canisterDappEnvironmentConfig(
           newProxyConfig['/canister-dashboard'] = {
             target: proxyTarget,
             changeOrigin: true,
-            rewrite: (path: string) => `${path}?canisterId=${viteDevCanisterId}`,
+            rewrite: (path: string) =>
+              `${path}?canisterId=${viteDevCanisterId}`,
           };
         }
 
@@ -252,7 +255,8 @@ export function canisterDappEnvironmentConfig(
           newProxyConfig['/.well-known/ii-alternative-origins'] = {
             target: proxyTarget,
             changeOrigin: true,
-            rewrite: (path: string) => `${path}?canisterId=${viteDevCanisterId}`,
+            rewrite: (path: string) =>
+              `${path}?canisterId=${viteDevCanisterId}`,
           };
         }
       }
@@ -424,11 +428,6 @@ let configCache: CanisterDappEnvironmentConfig | null = null;
 
 // Cache for dev mode detection
 let devModeCache: boolean | null = null;
-
-// Global type declarations for injected constants
-declare const __CANISTER_DAPP_DEV_CONFIG__: CanisterDappEnvironmentConfig;
-declare const __CANISTER_DAPP_PROD_CONFIG__: CanisterDappEnvironmentConfig;
-declare const __VITE_DEV_CANISTER_ID__: string | null;
 
 function notEmptyString(value: unknown): value is string {
   return typeof value === 'string' && value.length > 0;

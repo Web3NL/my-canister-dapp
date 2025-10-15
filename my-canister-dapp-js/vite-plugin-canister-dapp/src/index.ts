@@ -17,6 +17,7 @@ export interface CanisterDashboardDevConfig {
 
 /**
  * Plugin configuration interface for enabling/disabling features
+ * @deprecated Use CanisterDappEnvironmentPluginConfig instead
  */
 export interface CanisterDashboardPluginConfig {
   /** Directory to load Vite environment variables from (defaults to config.root, otherwise current working directory) */
@@ -76,6 +77,8 @@ function loadCanisterDappDevEnv(
 
 /**
  * Vite plugin that provides Internet Computer Canister Dapp configuration for development
+ *
+ * @deprecated Use canisterDappEnvironmentConfig instead
  *
  * Features:
  * - Development-only operation (does nothing in production)
