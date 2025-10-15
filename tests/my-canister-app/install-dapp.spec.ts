@@ -11,7 +11,7 @@ import { Principal } from '@dfinity/principal';
 // Load global dfx environment variables
 loadDfxEnv();
 
-const maintenanceMode = false;
+const maintenanceMode = true;
 
 test('My Canister App E2E Suite', async ({ page }) => {
   test.setTimeout(60000); // 1 minute timeout
