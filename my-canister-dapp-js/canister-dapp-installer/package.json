@@ -1,8 +1,11 @@
 {
   "name": "canister-dapp-installer",
   "version": "0.1.0",
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "license": "MIT",
   "private": true,
-  "type": "module",
   "scripts": {
     "build": "vite build",
     "dev": "vite",
@@ -13,8 +16,5 @@
     "test": "vitest --run",
     "typecheck": "tsc --noEmit"
   },
-  "engines": {
-    "node": ">=22.0.0"
-  },
-  "license": "MIT"
+  "type": "module"
 }
