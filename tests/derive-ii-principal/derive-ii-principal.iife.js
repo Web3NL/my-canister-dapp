@@ -3852,7 +3852,7 @@ Call context:
     // Initializes a KeyVal on first request
     initializedDb;
     get _db() {
-      return new Promise((resolve) => {
+      return new Promise((resolve, reject) => {
         if (this.initializedDb) {
           resolve(this.initializedDb);
           return;
@@ -3860,7 +3860,7 @@ Call context:
         IdbKeyVal.create(this.#options).then((db) => {
           this.initializedDb = db;
           resolve(db);
-        });
+        }).catch(reject);
       });
     }
     async get(key) {
