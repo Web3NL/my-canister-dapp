@@ -7,9 +7,9 @@
     "@dfinity/ic-management": "7.0.1"
   },
   "devDependencies": {
-    "@dfinity/agent": "^3.2.4",
-    "@dfinity/candid": "^3.2.4",
-    "@dfinity/principal": "^3.2.4"
+    "@dfinity/agent": "^3.4.0",
+    "@dfinity/candid": "^3.4.0",
+    "@dfinity/principal": "^3.4.0"
   },
   "engines": {
     "node": ">=22.0.0"
@@ -38,8 +38,8 @@
   "main": "dist/index.js",
   "module": "dist/index.js",
   "peerDependencies": {
-    "@dfinity/agent": "^3.2.4",
-    "@dfinity/principal": "^3.2.4"
+    "@dfinity/agent": "^3.4.0",
+    "@dfinity/principal": "^3.4.0"
   },
   "publishConfig": {
     "access": "public"
