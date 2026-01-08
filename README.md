@@ -1,51 +1,102 @@
-# ![My Canister](./my-canister-app/static/favicon.svg) My Canister Dapp
+# My Canister Dapp
+
+Build dapps that anyone can install and own—no CLI, no dev tools, just a browser and Internet Identity.
 
 [![Build Status](https://github.com/Web3NL/my-canister-dapp/workflows/Release/badge.svg)](https://github.com/Web3NL/my-canister-dapp/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
 
-This project provides libraries and tools to build Canister Dapps on the [Internet Computer](https://internetcomputer.org). A **Canister Dapp** is a single canister decentralized application that can be created and fully controlled with [Internet Identity](https://identity.internetcomputer.org).
+## The Problem
 
-Canister Dapps are developed as single canister applications that include both backend logic and frontend assets. Users can create, manage, and be the sole controller of these canisters without relying on any third-party services.
+On the Internet Computer, canisters are deployed using the `dfx` CLI. This works well for developers, but creates a barrier for everyone else.
 
-Visit the [FAQ](https://mycanister.app/faq) for more info on Canister Dapps.
+Canisters have a unique capability: they can serve their own frontend—like a self-contained HTTP server. This means a single canister can be a complete application. But non-technical users have no easy way to create and control one of these canisters using just a browser and their Internet Identity.
 
-> **Warning:** This project is in development.  
-> For a DEMO visit [mycanister.app](https://mycanister.app) to create and manage your canister dapps.
+There's also a subtle challenge: Internet Identity derives a *different principal* for each domain. If a user authenticates at `mycanister.app` to create a canister, they get one principal. But when they visit their new canister at `abc123.icp0.io`, II gives them a *different* principal. How do you hand off ownership?
 
-## 🦀 My Canister Dashboard
+## The Solution
 
-Dashboard assets and management utilities for Internet Computer Canister Dapps. A standard dashboard is provided to manage the Canister Dapp in the browser.
+This repository provides libraries for developers to create **user-owned canisters**—dapps that:
 
-**Package:** [Crates.io](https://crates.io/crates/my-canister-dashboard) | [Repository](https://github.com/Web3NL/my-canister-dapp/tree/main/my-canister-dapp-rs/my-canister-dashboard) | [Documentation](https://docs.rs/my-canister-dashboard)
+- Can be created from a browser using only ICP and Internet Identity
+- Include a built-in dashboard for management (cycles, upgrades, controllers)
+- Are fully controlled by the user's II principal *at their canister's domain*
 
-## 📦 My Canister Dashboard
+**The key insight**: After creating a canister, we re-authenticate the user with Internet Identity using the new canister's domain as the `derivationOrigin`. This produces the principal they'll use when visiting their dapp directly—and that principal becomes the controller.
 
-Utility functions for canisters using My Canister Dashboard.
-Provides client-side utilities for interacting with canister dashboards and managing Canister Dapps.
+## How It Works
 
-**Package:** [npm](https://www.npmjs.com/package/@web3nl/my-canister-dashboard) | [Repository](https://github.com/Web3NL/my-canister-dapp/tree/main/my-canister-dapp-js/my-canister-dashboard-js) | [Documentation](https://web3nl.github.io/my-canister-dapp/web3nl-my-canister-dashboard-js/)
+1. **Fund**: User sends ICP to their account at the installer app
+2. **Create**: ICP is sent to the Cycles Minting Canister, which creates a new canister
+3. **Install**: The dapp's wasm is installed into the canister
+4. **Transfer Control**: User re-authenticates with II using the new canister domain
+5. **Own**: That II principal is set as the canister controller
 
-## ⚡ Vite Plugin Canister Dapp
+The user now fully owns their canister. They can manage it directly at `<canister-id>.icp0.io/canister-dashboard`.
 
-Vite plugin for Internet Computer Canister Dapp development configuration.
+## For Developers
 
-**Package:** [npm](https://www.npmjs.com/package/@web3nl/vite-plugin-canister-dapp) | [Repository](https://github.com/Web3NL/my-canister-dapp/tree/main/my-canister-dapp-js/vite-plugin-canister-dapp) | [Documentation](https://web3nl.github.io/my-canister-dapp/web3nl-vite-plugin-canister-dapp/)
+You build the wasm that users install. Your dapp becomes a template that anyone can instantiate as their own user-owned canister.
 
-## 🦀 My Canister Frontend
+### What to use
 
-Frontend asset utilities for Canister Dapps to simplify the process of adding 'onboard' frontends to Canister Dapps.
-Heavily relies on [ic-asset-certification](https://crates.io/crates/ic-asset-certification) and [ic-http-certification](https://crates.io/crates/ic-http-certification) crates.
+**Rust (backend)**:
+- `my-canister-dashboard` — Embeds the dashboard UI and management endpoints
+- `my-canister-frontend` — Serves certified frontend assets
 
-**Package:** [Crates.io](https://crates.io/crates/my-canister-frontend) | [Repository](https://github.com/Web3NL/my-canister-dapp/tree/main/my-canister-dapp-rs/my-canister-frontend) | [Documentation](https://docs.rs/my-canister-frontend)
+**JavaScript (frontend)**:
+- `@web3nl/vite-plugin-canister-dapp` — Vite plugin for dev/prod environment detection
+- `@web3nl/my-canister-dashboard` — Utilities for interacting with dashboard endpoints
 
-## 🌐 My Canister App Service
+### Example
 
-User controlled canister creation tool and Wasm repository.
-Provides a web interface for creating, installing, and managing decentralized applications on the Internet Computer.
+See [examples/my-hello-world](examples/my-hello-world/) for a complete implementation.
 
-**Website:** [mycanister.app](https://mycanister.app)
+```rust
+use my_canister_dashboard::setup::setup_dashboard_assets;
+use my_canister_frontend::asset_router_configs;
 
-## 🦀 Canister Dapp Test
+#[init]
+fn init() {
+    ASSET_ROUTER.with(|router| {
+        let mut router = router.borrow_mut();
 
-Testing library for Canister Dapps on the Internet Computer.
-Provides pocket-ic tests for Wasm modules and integration testing utilities.
+        // Add dashboard with allowed origins for II authentication
+        setup_dashboard_assets(&mut router, Some(vec![
+            "https://mycanister.app".to_string(),
+        ]));
+
+        // Add your frontend assets
+        let (assets, asset_configs) = asset_router_configs(&FRONTEND_DIR);
+        router.certify_assets(assets, asset_configs).unwrap();
+
+        certified_data_set(router.root_hash());
+    });
+}
+```
+
+## mycanister.app
+
+[mycanister.app](https://mycanister.app) is the reference installer and dapp registry:
+
+- **Dapp Store**: Browse available dapps to install
+- **Installer**: Create user-owned canisters with ICP + Internet Identity
+- **My Dapps**: View and access your created canisters
+
+Developers can submit their dapps to the registry, or users can install custom wasm files directly.
+
+## Packages
+
+| Package | Type | Description |
+|---------|------|-------------|
+| [my-canister-dashboard](https://crates.io/crates/my-canister-dashboard) | Rust | Dashboard assets and management endpoints |
+| [my-canister-frontend](https://crates.io/crates/my-canister-frontend) | Rust | Certified HTTP asset serving |
+| [@web3nl/my-canister-dashboard](https://www.npmjs.com/package/@web3nl/my-canister-dashboard) | npm | Dashboard interaction utilities |
+| [@web3nl/vite-plugin-canister-dapp](https://www.npmjs.com/package/@web3nl/vite-plugin-canister-dapp) | npm | Vite plugin for environment config |
+
+## Status
+
+This project is in active development. See the [FAQ](https://mycanister.app/faq) for more information.
+
+## License
+
+MIT
