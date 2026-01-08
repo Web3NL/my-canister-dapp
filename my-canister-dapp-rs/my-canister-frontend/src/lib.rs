@@ -27,17 +27,18 @@ use std::borrow::Cow;
 ///
 /// #[init]
 /// fn init() {
-///     setup_frontend(&ASSETS);
+///     setup_frontend(&ASSETS).expect("Failed to setup frontend");
 /// }
 /// ```
-pub fn setup_frontend(assets_dir: &Dir<'static>) {
+pub fn setup_frontend(assets_dir: &Dir<'static>) -> Result<(), String> {
     let (assets, configs) = asset_router::asset_router_configs(assets_dir);
     asset_router::with_asset_router_mut(|router| {
         router
             .certify_assets(assets, configs)
-            .expect("Failed to certify frontend assets");
+            .map_err(|e| format!("Failed to certify frontend assets: {e:?}"))?;
         certified_data_set(router.root_hash());
-    });
+        Ok(())
+    })
 }
 
 /// Serve certified frontend assets.

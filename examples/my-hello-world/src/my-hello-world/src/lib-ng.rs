@@ -12,7 +12,7 @@ static FRONTEND_DIR: Dir = include_dir!("$CARGO_MANIFEST_DIR/../my-hello-world-f
 
 #[init]
 fn init() {
-    setup_frontend(&FRONTEND_DIR);
+    setup_frontend(&FRONTEND_DIR).expect("Failed to setup frontend");
     my_canister_frontend::asset_router::with_asset_router_mut(|router| {
         setup_dashboard_assets(
             router,
@@ -21,7 +21,8 @@ fn init() {
                 "http://localhost:5174".to_string(),
                 "http://c7lwu-3qaaa-aaaam-qbgia-cai.localhost:8080".to_string(),
             ]),
-        );
+        )
+        .expect("Failed to setup dashboard assets");
     });
 }
 

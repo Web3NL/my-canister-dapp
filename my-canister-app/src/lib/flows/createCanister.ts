@@ -11,10 +11,33 @@ import {
   type ManageIIPrincipalArg,
 } from '@web3nl/my-canister-dashboard';
 import { createHttpAgent } from '$lib/utils/agent';
+import {
+  setPendingCanister,
+  getPendingCanister,
+  clearPendingCanister,
+  PartialCreationError,
+} from './pendingCanister';
 
+/**
+ * Creates a new canister and installs the provided WASM module.
+ *
+ * If a previous creation attempt failed during install, this will detect
+ * the pending canister and retry the installation instead of creating a new one.
+ *
+ * @throws {PartialCreationError} If canister creation succeeds but install fails
+ */
 export async function createNewCanister(
   wasmModule: Uint8Array
 ): Promise<Principal> {
+  // Check for a pending canister from a previous failed attempt
+  const pendingCanister = getPendingCanister();
+  if (pendingCanister) {
+    // Try to complete the installation on the existing canister
+    await installCodeToCanister(pendingCanister, wasmModule);
+    clearPendingCanister();
+    return pendingCanister;
+  }
+
   const ledgerApi = await LedgerApi.create();
   const balance = await ledgerApi.balance();
 
@@ -24,10 +47,32 @@ export async function createNewCanister(
 
   const blockIndex = await sendToCmc(balance);
   const canisterId = await createCanister(blockIndex);
-  await installCodeToCanister(canisterId, wasmModule);
+
+  // Store the canister ID in case install fails
+  setPendingCanister(canisterId);
+
+  try {
+    await installCodeToCanister(canisterId, wasmModule);
+    clearPendingCanister();
+  } catch (error) {
+    // Canister exists but install failed - throw recoverable error
+    throw new PartialCreationError(
+      canisterId,
+      error instanceof Error ? error : new Error(String(error))
+    );
+  }
 
   return canisterId;
 }
+
+/**
+ * Checks if there's a pending canister from a failed creation attempt.
+ */
+export {
+  getPendingCanister,
+  clearPendingCanister,
+  PartialCreationError,
+} from './pendingCanister';
 
 export async function installAndTakeControl(
   canisterPrincipal: Principal

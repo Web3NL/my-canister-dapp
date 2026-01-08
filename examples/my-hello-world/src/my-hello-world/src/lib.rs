@@ -33,7 +33,8 @@ fn init() {
                 "http://localhost:5174".to_string(),
                 "http://c7lwu-3qaaa-aaaam-qbgia-cai.localhost:8080".to_string(),
             ]),
-        );
+        )
+        .expect("Failed to setup dashboard assets");
 
         let (assets, asset_configs) = asset_router_configs(&FRONTEND_DIR);
         router
