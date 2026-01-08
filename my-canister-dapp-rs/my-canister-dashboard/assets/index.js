@@ -13722,13 +13722,35 @@ function formatRule(rule) {
     `Amount: ${formatCyclesAmount(rule.cycles_amount)} cycles`
   ].join("\n");
 }
+const CYCLES_AMOUNTS = {
+  _0_25T: { _0_25T: null },
+  _0_5T: { _0_5T: null },
+  _1T: { _1T: null },
+  _2T: { _2T: null },
+  _5T: { _5T: null },
+  _10T: { _10T: null },
+  _50T: { _50T: null },
+  _100T: { _100T: null }
+};
+const INTERVALS = {
+  Hourly: { Hourly: null },
+  Daily: { Daily: null },
+  Weekly: { Weekly: null },
+  Monthly: { Monthly: null }
+};
 function buildCyclesAmount(variantKey) {
-  return { [variantKey]: null };
+  const amount = CYCLES_AMOUNTS[variantKey];
+  if (!amount) {
+    throw new Error(`Invalid cycles amount: ${variantKey}`);
+  }
+  return amount;
 }
 function buildInterval(key) {
-  const allowed = /* @__PURE__ */ new Set(["Hourly", "Daily", "Weekly", "Monthly"]);
-  const safe = allowed.has(key) ? key : "Monthly";
-  return { [safe]: null };
+  const interval = INTERVALS[key];
+  if (!interval) {
+    return { Monthly: null };
+  }
+  return interval;
 }
 class Dashboard {
   authManager = null;
