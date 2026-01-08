@@ -1,13 +1,13 @@
 {
   "dependencies": {
-    "@dfinity/agent": "^3.4.0",
-    "@dfinity/auth-client": "^3.4.0",
-    "@dfinity/candid": "^3.4.0",
-    "@dfinity/cmc": "^6.0.6",
-    "@dfinity/ic-management": "7.0.1",
-    "@dfinity/ledger-icp": "^6.1.2",
-    "@dfinity/principal": "^3.4.0",
-    "@dfinity/utils": "^3.0.1"
+    "@dfinity/agent": "^3.4.3",
+    "@dfinity/auth-client": "^3.4.3",
+    "@dfinity/candid": "^3.4.3",
+    "@dfinity/cmc": "^9.1.0",
+    "@dfinity/ic-management": "^10.1.0",
+    "@dfinity/ledger-icp": "^9.1.0",
+    "@dfinity/principal": "^3.4.3",
+    "@dfinity/utils": "^4.1.0"
   },
   "devDependencies": {
     "@changesets/changelog-github": "^0.5.1",

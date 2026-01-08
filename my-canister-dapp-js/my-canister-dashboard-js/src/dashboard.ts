@@ -27,7 +27,9 @@ export class MyCanisterDashboard {
     private agent: HttpAgent,
     private canisterId: Principal
   ) {
-    this.icManagement = ICManagementCanister.create({ agent: this.agent });
+    // Type assertion needed due to @dfinity/principal vs @icp-sdk/core Principal mismatch
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    this.icManagement = ICManagementCanister.create({ agent: this.agent as any });
   }
 
   /**
@@ -46,7 +48,10 @@ export class MyCanisterDashboard {
     try {
       const threshold = options?.threshold ?? LOW_CYCLES_THRESHOLD;
 
-      const status = await this.icManagement.canisterStatus(this.canisterId);
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const status = await this.icManagement.canisterStatus({
+        canisterId: this.canisterId as any,
+      });
       const cycles = status.cycles;
 
       if (cycles < threshold) {

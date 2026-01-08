@@ -20,7 +20,9 @@ export class ManagementApi {
       const icManagement = await this.managmentApi();
       const canisterIdPrincipal = canisterId();
 
-      return await icManagement.canisterStatus(canisterIdPrincipal);
+      return await icManagement.canisterStatus({
+        canisterId: canisterIdPrincipal,
+      });
     } catch (error) {
       reportError(NETWORK_ERROR_MESSAGE, error);
       throw error;
@@ -49,7 +51,9 @@ export class ManagementApi {
       const icManagement = await this.managmentApi();
       const canisterIdPrincipal = canisterId();
 
-      return await icManagement.fetchCanisterLogs(canisterIdPrincipal);
+      return await icManagement.fetchCanisterLogs({
+        canisterId: canisterIdPrincipal,
+      });
     } catch (error) {
       reportError(NETWORK_ERROR_MESSAGE, error);
       throw error;
