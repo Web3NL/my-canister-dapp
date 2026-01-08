@@ -13,6 +13,7 @@
   export let showSpinner: boolean;
   export let disabled: boolean;
   export let onCreate: () => void;
+  export let onRefreshBalance: () => void;
 </script>
 
 <Card>
@@ -51,6 +52,15 @@
               ><Spinner size="small" inline={true} /></span
             >
           {/if}
+          <button
+            type="button"
+            class="refresh-button"
+            on:click={onRefreshBalance}
+            title="Refresh balance"
+            aria-label="Refresh balance"
+          >
+            ↻
+          </button>
         </Value>
       {/snippet}
     </KeyValuePair>
@@ -70,5 +80,26 @@
     width: 16px;
     height: 16px;
     margin-left: 8px;
+  }
+
+  .refresh-button {
+    background: none;
+    border: none;
+    cursor: pointer;
+    font-size: 1.1rem;
+    padding: 0 4px;
+    margin-left: 8px;
+    color: var(--text-color, #666);
+    transition: transform 0.2s;
+    vertical-align: middle;
+  }
+
+  .refresh-button:hover {
+    transform: rotate(180deg);
+    color: var(--primary-color, #333);
+  }
+
+  .refresh-button:active {
+    transform: rotate(360deg);
   }
 </style>
