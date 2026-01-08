@@ -60,6 +60,10 @@ build/
 # Claude
 .claude
 
+# direnv
+.direnv
+.envrc
+
 # Editor settings
 .vscode
 
