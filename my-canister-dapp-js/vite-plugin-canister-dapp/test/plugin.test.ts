@@ -1,6 +1,14 @@
+/**
+ * @file test/plugin.test.ts
+ *
+ * Tests for the canisterDappEnvironmentConfig Vite plugin.
+ * Verifies config injection, proxy setup, and environment configuration.
+ */
+
 import { describe, it, expect, vi, beforeEach } from 'vitest';
 import type { UserConfig } from 'vite';
 import { canisterDappEnvironmentConfig } from '../src/plugin.js';
+import { callConfigHook } from './helpers.js';
 
 describe('canisterDappEnvironmentConfig', () => {
   beforeEach(() => {
@@ -12,11 +20,7 @@ describe('canisterDappEnvironmentConfig', () => {
       const plugin = canisterDappEnvironmentConfig();
       const viteConfig: UserConfig = {};
 
-      // Call the config hook
-      (plugin.config as (config: UserConfig, env: { mode: string }) => void)(
-        viteConfig,
-        { mode: 'production' }
-      );
+      callConfigHook(plugin, viteConfig, 'production');
 
       expect(viteConfig.define?.__CANISTER_DAPP_DEV_CONFIG__).toBe(
         JSON.stringify({
@@ -43,10 +47,7 @@ describe('canisterDappEnvironmentConfig', () => {
       });
       const viteConfig: UserConfig = {};
 
-      (plugin.config as (config: UserConfig, env: { mode: string }) => void)(
-        viteConfig,
-        { mode: 'production' }
-      );
+      callConfigHook(plugin, viteConfig, 'production');
 
       expect(viteConfig.define?.__CANISTER_DAPP_DEV_CONFIG__).toBe(
         JSON.stringify({
@@ -67,10 +68,7 @@ describe('canisterDappEnvironmentConfig', () => {
       });
       const viteConfig: UserConfig = {};
 
-      (plugin.config as (config: UserConfig, env: { mode: string }) => void)(
-        viteConfig,
-        { mode: 'production' }
-      );
+      callConfigHook(plugin, viteConfig, 'production');
 
       expect(viteConfig.define?.__CANISTER_DAPP_PROD_CONFIG__).toBe(
         JSON.stringify({
@@ -86,10 +84,7 @@ describe('canisterDappEnvironmentConfig', () => {
       });
       const viteConfig: UserConfig = {};
 
-      (plugin.config as (config: UserConfig, env: { mode: string }) => void)(
-        viteConfig,
-        { mode: 'production' }
-      );
+      callConfigHook(plugin, viteConfig, 'production');
 
       expect(viteConfig.define?.__VITE_DEV_CANISTER_ID__).toBe(
         JSON.stringify('rrkah-fqaaa-aaaaa-aaaaq-cai')
@@ -100,10 +95,7 @@ describe('canisterDappEnvironmentConfig', () => {
       const plugin = canisterDappEnvironmentConfig();
       const viteConfig: UserConfig = {};
 
-      (plugin.config as (config: UserConfig, env: { mode: string }) => void)(
-        viteConfig,
-        { mode: 'production' }
-      );
+      callConfigHook(plugin, viteConfig, 'production');
 
       expect(viteConfig.define?.__VITE_DEV_CANISTER_ID__).toBe(
         JSON.stringify(null)
@@ -116,10 +108,7 @@ describe('canisterDappEnvironmentConfig', () => {
       const plugin = canisterDappEnvironmentConfig();
       const viteConfig: UserConfig = {};
 
-      (plugin.config as (config: UserConfig, env: { mode: string }) => void)(
-        viteConfig,
-        { mode: 'development' }
-      );
+      callConfigHook(plugin, viteConfig, 'development');
 
       expect(viteConfig.server?.proxy?.['/api']).toEqual({
         target: 'http://localhost:8080',
@@ -131,10 +120,7 @@ describe('canisterDappEnvironmentConfig', () => {
       const plugin = canisterDappEnvironmentConfig();
       const viteConfig: UserConfig = {};
 
-      (plugin.config as (config: UserConfig, env: { mode: string }) => void)(
-        viteConfig,
-        { mode: 'production' }
-      );
+      callConfigHook(plugin, viteConfig, 'production');
 
       expect(viteConfig.server?.proxy).toBeUndefined();
     });
@@ -146,27 +132,34 @@ describe('canisterDappEnvironmentConfig', () => {
       });
       const viteConfig: UserConfig = {};
 
-      (plugin.config as (config: UserConfig, env: { mode: string }) => void)(
-        viteConfig,
-        { mode: 'development' }
-      );
+      callConfigHook(plugin, viteConfig, 'development');
 
       expect(viteConfig.server?.proxy?.['/canister-dashboard']).toBeDefined();
       expect(
         viteConfig.server?.proxy?.['/.well-known/ii-alternative-origins']
       ).toBeDefined();
 
-      // Test the rewrite function
+      // Test the rewrite function for /canister-dashboard
       const dashboardProxy = viteConfig.server?.proxy?.['/canister-dashboard'];
-      if (dashboardProxy && typeof dashboardProxy === 'object' && 'rewrite' in dashboardProxy) {
+      if (
+        dashboardProxy &&
+        typeof dashboardProxy === 'object' &&
+        'rewrite' in dashboardProxy
+      ) {
         const rewriteFn = dashboardProxy.rewrite as (path: string) => string;
         expect(rewriteFn('/canister-dashboard')).toBe(
           `/canister-dashboard?canisterId=${canisterId}`
         );
       }
 
-      const altOriginsProxy = viteConfig.server?.proxy?.['/.well-known/ii-alternative-origins'];
-      if (altOriginsProxy && typeof altOriginsProxy === 'object' && 'rewrite' in altOriginsProxy) {
+      // Test the rewrite function for /.well-known/ii-alternative-origins
+      const altOriginsProxy =
+        viteConfig.server?.proxy?.['/.well-known/ii-alternative-origins'];
+      if (
+        altOriginsProxy &&
+        typeof altOriginsProxy === 'object' &&
+        'rewrite' in altOriginsProxy
+      ) {
         const rewriteFn = altOriginsProxy.rewrite as (path: string) => string;
         expect(rewriteFn('/.well-known/ii-alternative-origins')).toBe(
           `/.well-known/ii-alternative-origins?canisterId=${canisterId}`
@@ -175,14 +168,13 @@ describe('canisterDappEnvironmentConfig', () => {
     });
 
     it('should skip canister-specific proxies when viteDevCanisterId is not provided', () => {
-      const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+      const consoleSpy = vi
+        .spyOn(console, 'warn')
+        .mockImplementation(() => {});
       const plugin = canisterDappEnvironmentConfig();
       const viteConfig: UserConfig = {};
 
-      (plugin.config as (config: UserConfig, env: { mode: string }) => void)(
-        viteConfig,
-        { mode: 'development' }
-      );
+      callConfigHook(plugin, viteConfig, 'development');
 
       expect(viteConfig.server?.proxy?.['/canister-dashboard']).toBeUndefined();
       expect(
@@ -196,7 +188,9 @@ describe('canisterDappEnvironmentConfig', () => {
     });
 
     it('should not overwrite existing proxy configurations', () => {
-      const consoleSpy = vi.spyOn(console, 'warn').mockImplementation(() => {});
+      const consoleSpy = vi
+        .spyOn(console, 'warn')
+        .mockImplementation(() => {});
       const plugin = canisterDappEnvironmentConfig({
         viteDevCanisterId: 'rrkah-fqaaa-aaaaa-aaaaq-cai',
       });
@@ -209,10 +203,7 @@ describe('canisterDappEnvironmentConfig', () => {
         },
       };
 
-      (plugin.config as (config: UserConfig, env: { mode: string }) => void)(
-        viteConfig,
-        { mode: 'development' }
-      );
+      callConfigHook(plugin, viteConfig, 'development');
 
       expect(viteConfig.server?.proxy?.['/api']).toBe(existingProxy);
       expect(consoleSpy).toHaveBeenCalledWith(
@@ -228,10 +219,7 @@ describe('canisterDappEnvironmentConfig', () => {
       });
       const viteConfig: UserConfig = {};
 
-      (plugin.config as (config: UserConfig, env: { mode: string }) => void)(
-        viteConfig,
-        { mode: 'development' }
-      );
+      callConfigHook(plugin, viteConfig, 'development');
 
       expect(viteConfig.server?.proxy?.['/api']).toBeUndefined();
     });
@@ -243,13 +231,10 @@ describe('canisterDappEnvironmentConfig', () => {
       });
       const viteConfig: UserConfig = {};
 
-      (plugin.config as (config: UserConfig, env: { mode: string }) => void)(
-        viteConfig,
-        { mode: 'development' }
-      );
+      callConfigHook(plugin, viteConfig, 'development');
 
       expect(viteConfig.server?.proxy?.['/canister-dashboard']).toBeUndefined();
-      // But ii-alternative-origins should still be set
+      // ii-alternative-origins should still be set
       expect(
         viteConfig.server?.proxy?.['/.well-known/ii-alternative-origins']
       ).toBeDefined();
@@ -262,15 +247,12 @@ describe('canisterDappEnvironmentConfig', () => {
       });
       const viteConfig: UserConfig = {};
 
-      (plugin.config as (config: UserConfig, env: { mode: string }) => void)(
-        viteConfig,
-        { mode: 'development' }
-      );
+      callConfigHook(plugin, viteConfig, 'development');
 
       expect(
         viteConfig.server?.proxy?.['/.well-known/ii-alternative-origins']
       ).toBeUndefined();
-      // But canister-dashboard should still be set
+      // canister-dashboard should still be set
       expect(viteConfig.server?.proxy?.['/canister-dashboard']).toBeDefined();
     });
 
@@ -285,10 +267,7 @@ describe('canisterDappEnvironmentConfig', () => {
       });
       const viteConfig: UserConfig = {};
 
-      (plugin.config as (config: UserConfig, env: { mode: string }) => void)(
-        viteConfig,
-        { mode: 'development' }
-      );
+      callConfigHook(plugin, viteConfig, 'development');
 
       expect(viteConfig.server?.proxy?.['/api']).toEqual({
         target: 'http://custom:4943',

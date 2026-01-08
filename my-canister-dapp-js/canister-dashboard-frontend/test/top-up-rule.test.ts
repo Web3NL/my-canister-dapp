@@ -1,7 +1,15 @@
-import { describe, it, expect } from 'vitest';
+/**
+ * @file test/top-up-rule.test.ts
+ *
+ * Tests for top-up rule variant constructors and formatters.
+ *
+ * Note: The helper functions (variant constructors and formatters) are re-implemented
+ * in this test file because they are internal to the top-up-rule.ts component and
+ * not exported. This approach tests the logic in isolation while the actual UI
+ * component integration is covered by E2E tests.
+ */
 
-// Re-implement the variant constructors here for testing since they are not exported
-// This mirrors the implementation in top-up-rule.ts
+import { describe, it, expect } from 'vitest';
 
 type CyclesAmount =
   | { _0_25T: null }
