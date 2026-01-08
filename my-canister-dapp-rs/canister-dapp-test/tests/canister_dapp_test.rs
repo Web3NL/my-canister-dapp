@@ -1,5 +1,5 @@
 use candid::Principal;
-use canister_dapp_test::*;
+use canister_dapp_test::{AssetHashes, validate_frontend_assets, *};
 use ic_cdk::management_canister::CanisterSettings;
 use ic_http_certification::{HttpRequest, HttpResponse};
 use ic_ledger_types::{AccountIdentifier, Subaccount};
@@ -263,6 +263,19 @@ fn canister_dapp_test() {
             css_response.0.status_code()
         );
     }
+
+    // Validate asset structure and compute hashes
+    let html_body = html_response.0.body();
+    let js_body = js_response.0.body();
+    let css_body = css_response.0.body();
+
+    let asset_hashes: AssetHashes = validate_frontend_assets(html_body, js_body, css_body)
+        .expect("Frontend asset validation failed");
+
+    println!(
+        "Frontend assets validated successfully:\n  HTML hash: {}\n  JS hash: {}\n  CSS hash: {}\n",
+        asset_hashes.html_hash, asset_hashes.js_hash, asset_hashes.css_hash
+    );
 
     // Test wasm_status query - verify structure and type
     let wasm_status = query_candid::<(), (WasmStatus,)>(&pic, canister_id, "wasm_status", ())

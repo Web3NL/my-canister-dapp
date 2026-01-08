@@ -2,7 +2,7 @@
 
 use candid::Principal;
 use serde::{Deserialize, Serialize};
-// use sha2::{Digest, Sha256};
+use sha2::{Digest, Sha256};
 use std::collections::HashMap;
 use std::fs;
 use std::path::Path;
@@ -89,34 +89,109 @@ struct Assets {
     wasm: HashMap<String, String>,
 }
 
-// pub fn verify_frontend_assets(
-//     index_html: &[u8],
-//     index_js: &[u8],
-//     style_css: &[u8],
-// ) -> Result<String, String> {
-//     let html_hash = hex::encode(Sha256::digest(index_html));
-//     let js_hash = hex::encode(Sha256::digest(index_js));
-//     let css_hash = hex::encode(Sha256::digest(style_css));
+/// Computes SHA256 hash of the given data and returns it as a hex string.
+pub fn compute_asset_hash(data: &[u8]) -> String {
+    hex::encode(Sha256::digest(data))
+}
 
-//     let version_hashes_json = std::fs::read_to_string(VERSION_HASHES_FILE)
-//         .map_err(|e| format!("Failed to read version-hashes.json: {e}"))?;
+/// Asset hashes for verification and debugging.
+#[derive(Debug, Clone)]
+pub struct AssetHashes {
+    pub html_hash: String,
+    pub js_hash: String,
+    pub css_hash: String,
+}
 
-//     let version_hashes: VersionHashes = serde_json::from_str(&version_hashes_json)
-//         .map_err(|e| format!("Failed to parse version-hashes.json: {e}"))?;
+/// Computes hashes for the three main dashboard assets.
+pub fn compute_frontend_asset_hashes(
+    index_html: &[u8],
+    index_js: &[u8],
+    style_css: &[u8],
+) -> AssetHashes {
+    AssetHashes {
+        html_hash: compute_asset_hash(index_html),
+        js_hash: compute_asset_hash(index_js),
+        css_hash: compute_asset_hash(style_css),
+    }
+}
 
-//     for (version, data) in version_hashes.versions {
-//         let frontend = &data.assets.frontend;
+/// Validates that HTML content has expected structure for the canister dashboard.
+pub fn validate_html_structure(html: &[u8]) -> Result<(), String> {
+    let content = String::from_utf8_lossy(html);
 
-//         if let (Some(expected_html), Some(expected_js), Some(expected_css)) = (
-//             frontend.get("index.html"),
-//             frontend.get("index.js"),
-//             frontend.get("style.css"),
-//         ) {
-//             if html_hash == *expected_html && js_hash == *expected_js && css_hash == *expected_css {
-//                 return Ok(version);
-//             }
-//         }
-//     }
+    if !content.contains("<!DOCTYPE html>") && !content.contains("<!doctype html>") {
+        return Err("HTML missing DOCTYPE declaration".to_string());
+    }
 
-//     Err("No matching version found".to_string())
-// }
+    if !content.contains("<html") {
+        return Err("HTML missing <html> tag".to_string());
+    }
+
+    if !content.contains("</html>") {
+        return Err("HTML missing closing </html> tag".to_string());
+    }
+
+    if !content.contains("<head") || !content.contains("</head>") {
+        return Err("HTML missing <head> section".to_string());
+    }
+
+    if !content.contains("<body") || !content.contains("</body>") {
+        return Err("HTML missing <body> section".to_string());
+    }
+
+    Ok(())
+}
+
+/// Validates that JavaScript content is non-empty and doesn't contain obvious errors.
+pub fn validate_js_structure(js: &[u8]) -> Result<(), String> {
+    if js.is_empty() {
+        return Err("JavaScript file is empty".to_string());
+    }
+
+    // Check for minimum size (bundled JS should be reasonably sized)
+    if js.len() < 100 {
+        return Err(format!(
+            "JavaScript file is suspiciously small: {} bytes",
+            js.len()
+        ));
+    }
+
+    // Check it's valid UTF-8
+    if String::from_utf8(js.to_vec()).is_err() {
+        return Err("JavaScript file contains invalid UTF-8".to_string());
+    }
+
+    Ok(())
+}
+
+/// Validates that CSS content has expected structure.
+pub fn validate_css_structure(css: &[u8]) -> Result<(), String> {
+    if css.is_empty() {
+        return Err("CSS file is empty".to_string());
+    }
+
+    let content = String::from_utf8(css.to_vec())
+        .map_err(|_| "CSS file contains invalid UTF-8".to_string())?;
+
+    // CSS should contain at least one rule (selector { ... })
+    if !content.contains('{') || !content.contains('}') {
+        return Err("CSS file doesn't appear to contain any style rules".to_string());
+    }
+
+    Ok(())
+}
+
+/// Validates all three main dashboard assets.
+pub fn validate_frontend_assets(
+    index_html: &[u8],
+    index_js: &[u8],
+    style_css: &[u8],
+) -> Result<AssetHashes, String> {
+    validate_html_structure(index_html)?;
+    validate_js_structure(index_js)?;
+    validate_css_structure(style_css)?;
+
+    Ok(compute_frontend_asset_hashes(
+        index_html, index_js, style_css,
+    ))
+}

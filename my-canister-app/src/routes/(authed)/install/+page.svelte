@@ -9,6 +9,8 @@
   import {
     createNewCanister,
     installAndTakeControl,
+    getPendingCanister,
+    PartialCreationError,
   } from '$lib/flows/createCanister';
   import { onMount, onDestroy } from 'svelte';
   import { browser } from '$app/environment';
@@ -22,7 +24,7 @@
   import GoodNewsCard from '$lib/components/install/GoodNewsCard.svelte';
   import ConnectIICard from '$lib/components/install/ConnectIICard.svelte';
   import FundAccountCard from '$lib/components/install/FundAccountCard.svelte';
-  import { goto } from '$app/navigation';
+  import { goto, beforeNavigate } from '$app/navigation';
   import { fetchWasmModule, type WasmSource } from '$lib/utils/fetch';
 
   const principalText = $authStore ? $authStore.toText() : '';
@@ -35,6 +37,8 @@
   let currentBalance = BigInt(0);
   let balanceFetchFailedToastShown = false;
   let lowDepositWarnShown = false;
+  let lastFailedStep: 'create' | 'connect-ii' | null = null;
+  let recoveredCanister = false;
 
   // Installation mode detection
   type InstallMode = 'registry' | 'file' | 'remote';
@@ -89,10 +93,7 @@
       formattedBalance = formatIcpBalance(currentBalance);
       if (requiredBalanceE8s > 0n) {
         if (currentBalance >= requiredBalanceE8s) {
-          if (balanceTimer) {
-            clearInterval(balanceTimer);
-            balanceTimer = null;
-          }
+          stopBalanceTimer();
           advanceToStep(2);
         } else if (!lowDepositWarnShown) {
           showWarnToast('Balance too low.');
@@ -102,9 +103,18 @@
     } catch (err) {
       console.error('Failed to fetch balance', err);
       if (!balanceFetchFailedToastShown) {
-        showErrorToast('Failed to fetch balance. Please file issue in GitHub.');
+        showErrorToast(
+          'Failed to fetch balance. Check your internet connection and try the refresh button.'
+        );
         balanceFetchFailedToastShown = true;
       }
+    }
+  }
+
+  function stopBalanceTimer() {
+    if (balanceTimer) {
+      clearInterval(balanceTimer);
+      balanceTimer = null;
     }
   }
 
@@ -115,6 +125,11 @@
       loadBalance();
     }, 1000);
   }
+
+  // Clean up timer on navigation (SvelteKit client-side routing)
+  beforeNavigate(() => {
+    stopBalanceTimer();
+  });
 
   let steps: [ProgressStep, ...ProgressStep[]] = [
     {
@@ -169,6 +184,25 @@
           ? { ...s, state: 'next' }
           : s
     ) as typeof steps;
+    if (stepKey === 'create' || stepKey === 'connect-ii') {
+      lastFailedStep = stepKey;
+    }
+  }
+
+  function clearFailedState() {
+    lastFailedStep = null;
+  }
+
+  function retryFailedStep() {
+    if (lastFailedStep === 'create') {
+      clearFailedState();
+      advanceToStep(2);
+      createCanister();
+    } else if (lastFailedStep === 'connect-ii') {
+      clearFailedState();
+      advanceToStep(3);
+      takeControlOfCanister();
+    }
   }
 
   async function createCanister() {
@@ -193,7 +227,21 @@
     } catch (err) {
       console.error('Failed to create canister', err);
       setFailed('create');
-      showErrorToast('Failed to create Dapp: Please file issue on GitHub');
+
+      if (err instanceof PartialCreationError) {
+        // Canister was created but code installation failed
+        // The canister ID is saved and can be recovered on next attempt
+        canisterPrincipal = err.canisterId;
+        showErrorToast(
+          'Canister created but installation failed. Click "Retry" to continue.'
+        );
+      } else {
+        const errorMsg =
+          err instanceof Error ? err.message : 'Unknown error occurred';
+        showErrorToast(
+          `Failed to create Dapp: ${errorMsg}. Click "Retry" to try again.`
+        );
+      }
     } finally {
       busyStore.stopBusy('create-canister');
     }
@@ -216,7 +264,11 @@
     } catch (err) {
       console.error('Failed to install code / connect II', err);
       setFailed('connect-ii');
-      showErrorToast('Failed to connect II: Please file issue on GitHub');
+      const errorMsg =
+        err instanceof Error ? err.message : 'Unknown error occurred';
+      showErrorToast(
+        `Failed to connect II: ${errorMsg}. Click "Retry" to try again.`
+      );
     } finally {
       busyStore.stopBusy('connect-ii');
     }
@@ -274,10 +326,21 @@
     ).toFixed(8);
 
     if (browser) {
-      const storedCanisterId = localStorage.getItem(CANISTER_STORAGE_KEY);
-      if (storedCanisterId != null) {
-        canisterPrincipal = Principal.fromText(storedCanisterId);
-        advanceToStep(3);
+      // Check for pending canister from failed install (from pendingCanister module)
+      const pendingFromInstall = getPendingCanister();
+      if (pendingFromInstall) {
+        canisterPrincipal = pendingFromInstall;
+        recoveredCanister = true;
+        // Stay on step 2 to retry - createNewCanister will detect and retry install
+        advanceToStep(2);
+      } else {
+        // Check for pending canister from successful create (waiting for II connect)
+        const storedCanisterId = localStorage.getItem(CANISTER_STORAGE_KEY);
+        if (storedCanisterId != null) {
+          canisterPrincipal = Principal.fromText(storedCanisterId);
+          recoveredCanister = true;
+          advanceToStep(3);
+        }
       }
     }
 
@@ -285,9 +348,7 @@
   });
 
   onDestroy(() => {
-    if (balanceTimer) {
-      clearInterval(balanceTimer);
-    }
+    stopBalanceTimer();
   });
 </script>
 
@@ -328,11 +389,32 @@
   </div>
 {/if}
 
+{#if recoveredCanister}
+  <div class="recovery-notice">
+    <p>
+      <strong>Resuming previous installation</strong> - We found an incomplete
+      installation from a previous session. Your canister ({canisterPrincipal?.toText()})
+      was already created. Continue from where you left off.
+    </p>
+  </div>
+{/if}
+
 <div id="progress-steps">
   <ProgressSteps {steps} />
 </div>
 
-{#if currentStep === 1 || currentStep === 2}
+{#if lastFailedStep}
+  <div class="retry-section">
+    <p class="error-message">
+      {#if lastFailedStep === 'create'}
+        The canister creation step failed. Your funds are safe.
+      {:else}
+        The II connection step failed. Your canister was created successfully.
+      {/if}
+    </p>
+    <button class="primary" on:click={retryFailedStep}>Retry</button>
+  </div>
+{:else if currentStep === 1 || currentStep === 2}
   <FundAccountCard
     {principalText}
     {minimumBalance}
@@ -342,6 +424,7 @@
       currentBalance < requiredBalanceE8s ||
       !wasmModule}
     onCreate={createCanister}
+    onRefreshBalance={loadBalance}
   />
 {:else if currentStep === 3}
   <ConnectIICard onConnect={takeControlOfCanister} />
@@ -393,5 +476,36 @@
 
   #progress-steps {
     margin: 1rem 0 1rem 0;
+  }
+
+  .recovery-notice {
+    margin: 1rem 0;
+    padding: 1rem;
+    background-color: #e8f4fd;
+    border: 1px solid #b8daff;
+    border-radius: 4px;
+    color: #004085;
+  }
+
+  .recovery-notice p {
+    margin: 0;
+  }
+
+  .retry-section {
+    margin: 1rem 0;
+    padding: 1rem;
+    background-color: #fff3cd;
+    border: 1px solid #ffc107;
+    border-radius: 4px;
+    text-align: center;
+  }
+
+  .retry-section .error-message {
+    margin: 0 0 1rem 0;
+    color: #856404;
+  }
+
+  .retry-section button {
+    min-width: 120px;
   }
 </style>

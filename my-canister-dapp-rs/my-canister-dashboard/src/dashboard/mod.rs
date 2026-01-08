@@ -31,7 +31,7 @@ pub fn add_dashboard_assets_to_router(asset_router: &mut AssetRouter) -> Result<
 
         assets.push(Asset::new(path.clone(), contents.to_vec()));
 
-        let config = create_asset_config(&path);
+        let config = create_asset_config(&path)?;
         asset_configs.push(config);
     }
 
@@ -42,12 +42,12 @@ pub fn add_dashboard_assets_to_router(asset_router: &mut AssetRouter) -> Result<
 
 // Functions from dashboard_asset_configs.rs
 /// Create appropriate asset config based on file path
-pub fn create_asset_config(path: &str) -> AssetConfig {
+pub fn create_asset_config(path: &str) -> Result<AssetConfig, String> {
     match path {
-        "index.html" => canister_dashboard_html_config(),
-        "index.js" => dashboard_js_config(),
-        "style.css" => dashboard_css_config(),
-        _ => panic!("Unsupported asset type: {path}"),
+        "index.html" => Ok(canister_dashboard_html_config()),
+        "index.js" => Ok(dashboard_js_config()),
+        "style.css" => Ok(dashboard_css_config()),
+        _ => Err(format!("Unsupported asset type: {path}")),
     }
 }
 

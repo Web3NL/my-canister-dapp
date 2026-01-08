@@ -139,12 +139,37 @@ function formatRule(rule: TopUpRule): string {
   ].join('\n');
 }
 
+// Type-safe variant constructors
+const CYCLES_AMOUNTS: Record<string, CyclesAmount> = {
+  _0_25T: { _0_25T: null },
+  _0_5T: { _0_5T: null },
+  _1T: { _1T: null },
+  _2T: { _2T: null },
+  _5T: { _5T: null },
+  _10T: { _10T: null },
+  _50T: { _50T: null },
+  _100T: { _100T: null },
+};
+
+const INTERVALS: Record<string, TopUpInterval> = {
+  Hourly: { Hourly: null },
+  Daily: { Daily: null },
+  Weekly: { Weekly: null },
+  Monthly: { Monthly: null },
+};
+
 function buildCyclesAmount(variantKey: string): CyclesAmount {
-  return { [variantKey]: null } as unknown as CyclesAmount;
+  const amount = CYCLES_AMOUNTS[variantKey];
+  if (!amount) {
+    throw new Error(`Invalid cycles amount: ${variantKey}`);
+  }
+  return amount;
 }
 
 function buildInterval(key: string): TopUpInterval {
-  const allowed = new Set(['Hourly', 'Daily', 'Weekly', 'Monthly']);
-  const safe = allowed.has(key) ? key : 'Monthly';
-  return { [safe]: null } as unknown as TopUpInterval;
+  const interval = INTERVALS[key];
+  if (!interval) {
+    return { Monthly: null }; // Default fallback
+  }
+  return interval;
 }

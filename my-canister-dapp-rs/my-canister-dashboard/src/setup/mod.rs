@@ -35,7 +35,7 @@ use crate::{
 ///                 "https://mycanister.app".to_string(),
 ///                 "http://localhost:5173".to_string(),
 ///             ]),
-///         );
+///         ).expect("Failed to setup dashboard assets");
 ///         certified_data_set(router.root_hash());
 ///     });
 /// }
@@ -43,9 +43,8 @@ use crate::{
 pub fn setup_dashboard_assets(
     asset_router: &mut AssetRouter,
     alternative_origins: Option<Vec<String>>,
-) {
-    dashboard::add_dashboard_assets_to_router(asset_router)
-        .expect("Failed to add dashboard assets to router");
+) -> Result<(), String> {
+    dashboard::add_dashboard_assets_to_router(asset_router)?;
 
     if let Some(origins) = alternative_origins {
         for origin in origins {
@@ -54,6 +53,7 @@ pub fn setup_dashboard_assets(
         }
     }
 
-    alternative_origins::add_alternative_origins_to_router(asset_router)
-        .expect("Failed to add alternative origins to router");
+    alternative_origins::add_alternative_origins_to_router(asset_router)?;
+
+    Ok(())
 }
