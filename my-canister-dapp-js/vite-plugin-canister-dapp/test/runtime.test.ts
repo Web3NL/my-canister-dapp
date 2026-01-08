@@ -1,45 +1,13 @@
+/**
+ * @file test/runtime.test.ts
+ *
+ * Tests for the runtime module that provides browser-side utilities
+ * for detecting dev/prod mode and inferring canister IDs from URLs.
+ */
+
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
 import { Principal } from '@dfinity/principal';
-
-// Helper to mock window.location
-const mockLocation = (protocol: string, hostname: string, origin?: string) => {
-  const calculatedOrigin = origin ?? `${protocol}//${hostname}`;
-  Object.defineProperty(window, 'location', {
-    value: {
-      hostname,
-      protocol,
-      origin: calculatedOrigin,
-    },
-    writable: true,
-    configurable: true,
-  });
-};
-
-// Helper to mock global constants
-const mockGlobals = (config: {
-  devConfig?: object | undefined;
-  prodConfig?: object | undefined;
-  viteDevCanisterId?: string | null;
-}) => {
-  if (config.devConfig !== undefined) {
-    (globalThis as Record<string, unknown>).__CANISTER_DAPP_DEV_CONFIG__ =
-      config.devConfig;
-  }
-  if (config.prodConfig !== undefined) {
-    (globalThis as Record<string, unknown>).__CANISTER_DAPP_PROD_CONFIG__ =
-      config.prodConfig;
-  }
-  if (config.viteDevCanisterId !== undefined) {
-    (globalThis as Record<string, unknown>).__VITE_DEV_CANISTER_ID__ =
-      config.viteDevCanisterId;
-  }
-};
-
-const clearGlobals = () => {
-  delete (globalThis as Record<string, unknown>).__CANISTER_DAPP_DEV_CONFIG__;
-  delete (globalThis as Record<string, unknown>).__CANISTER_DAPP_PROD_CONFIG__;
-  delete (globalThis as Record<string, unknown>).__VITE_DEV_CANISTER_ID__;
-};
+import { mockLocation, mockGlobals, clearGlobals } from './helpers.js';
 
 describe('runtime', () => {
   beforeEach(() => {
