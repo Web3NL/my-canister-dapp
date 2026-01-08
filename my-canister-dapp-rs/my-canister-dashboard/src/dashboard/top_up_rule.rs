@@ -101,7 +101,7 @@ pub fn manage_top_up_rule(arg: ManageTopUpRuleArg) -> ManageTopUpRuleResult {
             });
             ic_cdk::println!("top-up: timer set every {}s", interval.as_secs());
             // Trigger immediately for instant feedback
-            on_top_up_interval_tick();
+            spawn(on_top_up_interval_tick());
             ManageTopUpRuleResult::Ok(current_rule())
         }
         ManageTopUpRuleArg::Clear => {
@@ -128,71 +128,69 @@ fn clear_existing_timer() {
     });
 }
 
-fn on_top_up_interval_tick() {
-    spawn(async move {
-        ic_cdk::println!("top-up: tick");
-        if let Some(rule) = current_rule() {
-            let every = interval_duration(&rule.interval).as_secs();
+async fn on_top_up_interval_tick() {
+    ic_cdk::println!("top-up: tick");
+    if let Some(rule) = current_rule() {
+        let every = interval_duration(&rule.interval).as_secs();
+        ic_cdk::println!(
+            "top-up: active rule amount={} threshold={} interval={:?} every={}s",
+            rule.cycles_amount.as_cycles(),
+            rule.cycles_threshold.as_cycles(),
+            rule.interval,
+            every
+        );
+
+        let threshold = rule.cycles_threshold.as_cycles() as u128;
+        let current_cycles = ic_cdk::api::canister_cycle_balance();
+
+        if current_cycles < threshold {
             ic_cdk::println!(
-                "top-up: active rule amount={} threshold={} interval={:?} every={}s",
-                rule.cycles_amount.as_cycles(),
-                rule.cycles_threshold.as_cycles(),
-                rule.interval,
-                every
+                "top-up: below threshold current={} threshold={}",
+                current_cycles,
+                threshold
             );
-
-            let threshold = rule.cycles_threshold.as_cycles() as u128;
-            let current_cycles = ic_cdk::api::canister_cycle_balance();
-
-            if current_cycles < threshold {
-                ic_cdk::println!(
-                    "top-up: below threshold current={} threshold={}",
-                    current_cycles,
-                    threshold
-                );
-                let needed_cycles = rule.cycles_amount.as_cycles();
-                match compute_icp_needed_e8s(&needed_cycles.into()).await {
-                    Ok(needed_icp_e8s) => {
-                        ic_cdk::println!(
-                            "top-up: convert cycles={} -> icp_e8s={}",
-                            needed_cycles,
-                            needed_icp_e8s
-                        );
-                        // Skip if previous mint is still in flight
-                        let busy = TOP_UP_MINT_INFLIGHT.with(|f| *f.borrow());
-                        if busy {
-                            ic_cdk::println!("Mint in-flight; skipping this tick");
+            let needed_cycles = rule.cycles_amount.as_cycles();
+            match compute_icp_needed_e8s(&needed_cycles.into()).await {
+                Ok(needed_icp_e8s) => {
+                    ic_cdk::println!(
+                        "top-up: convert cycles={} -> icp_e8s={}",
+                        needed_cycles,
+                        needed_icp_e8s
+                    );
+                    // Skip if previous mint is still in flight
+                    let busy = TOP_UP_MINT_INFLIGHT.with(|f| *f.borrow());
+                    if busy {
+                        ic_cdk::println!("Mint in-flight; skipping this tick");
+                    } else {
+                        TOP_UP_MINT_INFLIGHT.with(|f| *f.borrow_mut() = true);
+                        ic_cdk::println!("top-up: starting transfer + notify flow");
+                        let res = cmc_deposit_and_mint(needed_icp_e8s).await;
+                        if let Err(e) = res {
+                            ic_cdk::println!("CMC mint error: {}", e);
                         } else {
-                            TOP_UP_MINT_INFLIGHT.with(|f| *f.borrow_mut() = true);
-                            ic_cdk::println!("top-up: starting transfer + notify flow");
-                            let res = cmc_deposit_and_mint(needed_icp_e8s).await;
-                            if let Err(e) = res {
-                                ic_cdk::println!("CMC mint error: {}", e);
-                            } else {
-                                ic_cdk::println!("top-up: flow completed");
-                            }
-                            TOP_UP_MINT_INFLIGHT.with(|f| *f.borrow_mut() = false);
+                            ic_cdk::println!("top-up: flow completed");
                         }
-                    }
-                    Err(e) => {
-                        ic_cdk::println!(
-                            "top-up: failed to compute needed ICP for cycles={}: {}",
-                            needed_cycles,
-                            e
-                        );
+                        TOP_UP_MINT_INFLIGHT.with(|f| *f.borrow_mut() = false);
                     }
                 }
-            } else {
-                ic_cdk::println!(
-                    "top-up: cycles above threshold; skipping current={} threshold={}",
-                    current_cycles,
-                    threshold
-                );
+                Err(e) => {
+                    ic_cdk::println!(
+                        "top-up: failed to compute needed ICP for cycles={}: {}",
+                        needed_cycles,
+                        e
+                    );
+                }
             }
         } else {
-            ic_cdk::println!("top-up: no rule set; skipping");
+            ic_cdk::println!(
+                "top-up: cycles above threshold; skipping current={} threshold={}",
+                current_cycles,
+                threshold
+            );
         }
-    });
+    } else {
+        ic_cdk::println!("top-up: no rule set; skipping");
+    }
 }
 
 fn interval_duration(interval: &TopUpInterval) -> std::time::Duration {

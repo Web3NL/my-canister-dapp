@@ -214,6 +214,7 @@ fn canister_dapp_test() {
         log_visibility: None,
         wasm_memory_limit: None,
         wasm_memory_threshold: None,
+        environment_variables: None,
     };
 
     pic.update_canister_settings(canister_id, Some(user), new_settings)

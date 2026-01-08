@@ -122,6 +122,7 @@ async fn notify_create_canister(arg: NotifyCreateCanisterArg) -> NotifyCreateCan
             .settings
             .as_ref()
             .and_then(|s| s.wasm_memory_threshold.clone()),
+        environment_variables: None,
     };
 
     let create_arg = CreateCanisterArgs {
