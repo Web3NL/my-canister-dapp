@@ -68,11 +68,7 @@ export async function createNewCanister(
 /**
  * Checks if there's a pending canister from a failed creation attempt.
  */
-export {
-  getPendingCanister,
-  clearPendingCanister,
-  PartialCreationError,
-} from './pendingCanister';
+export { getPendingCanister, PartialCreationError } from './pendingCanister';
 
 export async function installAndTakeControl(
   canisterPrincipal: Principal

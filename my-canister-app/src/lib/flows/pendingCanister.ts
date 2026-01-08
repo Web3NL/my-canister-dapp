@@ -3,7 +3,7 @@ import { Principal as PrincipalClass } from '@dfinity/principal';
 
 const STORAGE_KEY = 'pending_canister_creation';
 
-export interface PendingCanister {
+interface PendingCanister {
   canisterId: string;
   createdAt: number;
 }

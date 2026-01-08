@@ -9,6 +9,8 @@
   import {
     createNewCanister,
     installAndTakeControl,
+    getPendingCanister,
+    PartialCreationError,
   } from '$lib/flows/createCanister';
   import { onMount, onDestroy } from 'svelte';
   import { browser } from '$app/environment';
@@ -22,7 +24,7 @@
   import GoodNewsCard from '$lib/components/install/GoodNewsCard.svelte';
   import ConnectIICard from '$lib/components/install/ConnectIICard.svelte';
   import FundAccountCard from '$lib/components/install/FundAccountCard.svelte';
-  import { goto } from '$app/navigation';
+  import { goto, beforeNavigate } from '$app/navigation';
   import { fetchWasmModule, type WasmSource } from '$lib/utils/fetch';
 
   const principalText = $authStore ? $authStore.toText() : '';
@@ -89,10 +91,7 @@
       formattedBalance = formatIcpBalance(currentBalance);
       if (requiredBalanceE8s > 0n) {
         if (currentBalance >= requiredBalanceE8s) {
-          if (balanceTimer) {
-            clearInterval(balanceTimer);
-            balanceTimer = null;
-          }
+          stopBalanceTimer();
           advanceToStep(2);
         } else if (!lowDepositWarnShown) {
           showWarnToast('Balance too low.');
@@ -108,6 +107,13 @@
     }
   }
 
+  function stopBalanceTimer() {
+    if (balanceTimer) {
+      clearInterval(balanceTimer);
+      balanceTimer = null;
+    }
+  }
+
   function startBalanceTimer() {
     loadBalance();
 
@@ -115,6 +121,11 @@
       loadBalance();
     }, 1000);
   }
+
+  // Clean up timer on navigation (SvelteKit client-side routing)
+  beforeNavigate(() => {
+    stopBalanceTimer();
+  });
 
   let steps: [ProgressStep, ...ProgressStep[]] = [
     {
@@ -193,7 +204,17 @@
     } catch (err) {
       console.error('Failed to create canister', err);
       setFailed('create');
-      showErrorToast('Failed to create Dapp: Please file issue on GitHub');
+
+      if (err instanceof PartialCreationError) {
+        // Canister was created but code installation failed
+        // The canister ID is saved and can be recovered on next attempt
+        canisterPrincipal = err.canisterId;
+        showErrorToast(
+          'Canister created but installation failed. Retry will continue from where it left off.'
+        );
+      } else {
+        showErrorToast('Failed to create Dapp: Please file issue on GitHub');
+      }
     } finally {
       busyStore.stopBusy('create-canister');
     }
@@ -274,10 +295,19 @@
     ).toFixed(8);
 
     if (browser) {
-      const storedCanisterId = localStorage.getItem(CANISTER_STORAGE_KEY);
-      if (storedCanisterId != null) {
-        canisterPrincipal = Principal.fromText(storedCanisterId);
-        advanceToStep(3);
+      // Check for pending canister from failed install (from pendingCanister module)
+      const pendingFromInstall = getPendingCanister();
+      if (pendingFromInstall) {
+        canisterPrincipal = pendingFromInstall;
+        // Stay on step 2 to retry - createNewCanister will detect and retry install
+        advanceToStep(2);
+      } else {
+        // Check for pending canister from successful create (waiting for II connect)
+        const storedCanisterId = localStorage.getItem(CANISTER_STORAGE_KEY);
+        if (storedCanisterId != null) {
+          canisterPrincipal = Principal.fromText(storedCanisterId);
+          advanceToStep(3);
+        }
       }
     }
 
@@ -285,9 +315,7 @@
   });
 
   onDestroy(() => {
-    if (balanceTimer) {
-      clearInterval(balanceTimer);
-    }
+    stopBalanceTimer();
   });
 </script>
 

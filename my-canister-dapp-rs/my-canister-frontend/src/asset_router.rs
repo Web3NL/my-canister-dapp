@@ -73,7 +73,10 @@ fn process_dir_recursive(
     asset_configs: &mut Vec<AssetConfig>,
 ) {
     for file in dir.files() {
-        let file_name = file.path().file_name().unwrap().to_string_lossy();
+        let Some(file_name) = file.path().file_name() else {
+            continue; // Skip files without valid names
+        };
+        let file_name = file_name.to_string_lossy();
         let full_path = if base_path.is_empty() {
             format!("/{file_name}")
         } else {
@@ -85,7 +88,10 @@ fn process_dir_recursive(
         asset_configs.push(config);
     }
     for subdir in dir.dirs() {
-        let subdir_name = subdir.path().file_name().unwrap().to_string_lossy();
+        let Some(subdir_name) = subdir.path().file_name() else {
+            continue; // Skip directories without valid names
+        };
+        let subdir_name = subdir_name.to_string_lossy();
         let new_base_path = if base_path.is_empty() {
             format!("/{subdir_name}")
         } else {
