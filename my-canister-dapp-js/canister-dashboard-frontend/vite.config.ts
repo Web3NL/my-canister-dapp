@@ -1,4 +1,4 @@
-import { defineConfig } from 'vite';
+import { defineConfig } from 'vitest/config';
 import path from 'path';
 import { canisterDappEnvironmentConfig } from '@web3nl/vite-plugin-canister-dapp';
 
@@ -35,6 +35,11 @@ export default defineConfig(() => {
     // Removed $declarations alias; all functionality now sourced from @web3nl/my-canister-dashboard package
     resolve: {
       alias: {},
+    },
+    test: {
+      root: path.resolve(__dirname),
+      include: ['test/**/*.{test,spec}.{js,ts}'],
+      environment: 'jsdom',
     },
   };
 });
