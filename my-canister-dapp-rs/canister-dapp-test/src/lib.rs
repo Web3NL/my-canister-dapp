@@ -191,5 +191,7 @@ pub fn validate_frontend_assets(
     validate_js_structure(index_js)?;
     validate_css_structure(style_css)?;
 
-    Ok(compute_frontend_asset_hashes(index_html, index_js, style_css))
+    Ok(compute_frontend_asset_hashes(
+        index_html, index_js, style_css,
+    ))
 }

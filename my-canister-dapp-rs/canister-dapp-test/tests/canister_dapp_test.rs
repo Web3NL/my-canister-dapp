@@ -1,7 +1,5 @@
 use candid::Principal;
-use canister_dapp_test::{
-    validate_frontend_assets, AssetHashes, *,
-};
+use canister_dapp_test::{AssetHashes, validate_frontend_assets, *};
 use ic_cdk::management_canister::CanisterSettings;
 use ic_http_certification::{HttpRequest, HttpResponse};
 use ic_ledger_types::{AccountIdentifier, Subaccount};
