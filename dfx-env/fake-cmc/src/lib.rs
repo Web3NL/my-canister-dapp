@@ -41,6 +41,7 @@ pub struct CanisterSettings {
     pub wasm_memory_limit: Option<candid::Nat>,
     pub memory_allocation: Option<candid::Nat>,
     pub compute_allocation: Option<candid::Nat>,
+    pub environment_variables: Option<Vec<(String, String)>>,
 }
 #[derive(CandidType, Deserialize)]
 pub struct NotifyCreateCanisterArg {
