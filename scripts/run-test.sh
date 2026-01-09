@@ -1,6 +1,5 @@
 #!/bin/bash
-
-set -e
+set -euo pipefail
 
 echo "Unit testing my-canister-dashboard"
 npm run test --workspace=@web3nl/my-canister-dashboard

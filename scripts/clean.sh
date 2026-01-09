@@ -1,6 +1,5 @@
 #!/bin/bash
-
-set -e
+set -euo pipefail
 
 echo "🧹 Cleaning gitignored files and directories..."
 

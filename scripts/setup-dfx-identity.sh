@@ -1,6 +1,5 @@
 #!/bin/bash
-
-set -e
+set -euo pipefail
 
 # Setup DFX identity for testing
 # Reference: https://internetcomputer.org/docs/building-apps/developer-tools/dfx/dfx-nns#example-accessing-icp-on-the-command-line

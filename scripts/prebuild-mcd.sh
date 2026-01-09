@@ -1,6 +1,5 @@
 #!/bin/bash
-
-set -e
+set -euo pipefail
 
 # Ensure we're in the project root directory
 cd "$(dirname "$0")/.."
