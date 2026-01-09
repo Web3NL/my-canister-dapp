@@ -1,16 +1,16 @@
 import type {
   CanisterStatusResponse,
   FetchCanisterLogsResponse,
-} from '@dfinity/ic-management';
-import { ICManagementCanister } from '@dfinity/ic-management';
-import type { Principal } from '@dfinity/principal';
+} from '@icp-sdk/canisters/ic-management';
+import { IcManagementCanister } from '@icp-sdk/canisters/ic-management';
+import type { Principal } from '@icp-sdk/core/principal';
 import { createHttpAgent, canisterId } from '../utils';
 import { reportError, NETWORK_ERROR_MESSAGE } from '../error';
 
 export class ManagementApi {
-  private async managmentApi(): Promise<ICManagementCanister> {
+  private async managmentApi(): Promise<IcManagementCanister> {
     const agent = await createHttpAgent();
-    return ICManagementCanister.create({
+    return IcManagementCanister.create({
       agent,
     });
   }
@@ -51,9 +51,7 @@ export class ManagementApi {
       const icManagement = await this.managmentApi();
       const canisterIdPrincipal = canisterId();
 
-      return await icManagement.fetchCanisterLogs({
-        canisterId: canisterIdPrincipal,
-      });
+      return await icManagement.fetchCanisterLogs(canisterIdPrincipal);
     } catch (error) {
       reportError(NETWORK_ERROR_MESSAGE, error);
       throw error;

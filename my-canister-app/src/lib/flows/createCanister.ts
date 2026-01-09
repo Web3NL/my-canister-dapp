@@ -3,7 +3,7 @@ import { CmcApi } from '$lib/api/cmc';
 import { IcManagementApi } from '$lib/api/icManagement';
 import { TRANSACTION_FEE } from '$lib/constants';
 import { authStore } from '$lib/stores/auth';
-import type { Principal } from '@dfinity/principal';
+import type { Principal } from '@icp-sdk/core/principal';
 import { remoteAuthStore } from '$lib/stores/remoteAuth';
 import { hasSufficientBalanceForCanisterCreation } from '$lib/utils/balance';
 import {

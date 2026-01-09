@@ -100,8 +100,8 @@
       <p>
         A user can use a service like <a href="https://mycanister.app"
           >mycanister.app</a
-        > to create a new canister with their own funds, install a Canister Dapp
-        and be the sole controller. The user can use the Canister Dashboard to top-up
+        > to create a new canister with their own funds, install a Canister Dapp and
+        be the sole controller. The user can use the Canister Dashboard to top-up
         their Dapp with cycles and perform other management tasks.
       </p>
     </Collapsible>

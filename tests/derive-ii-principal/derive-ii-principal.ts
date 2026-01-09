@@ -1,5 +1,5 @@
-import { AuthClient, type AuthClientLoginOptions } from '@dfinity/auth-client';
-import { Principal } from '@dfinity/principal';
+import { AuthClient, type AuthClientLoginOptions } from '@icp-sdk/auth/client';
+import { Principal } from '@icp-sdk/core/principal';
 
 declare global {
   interface Window {

@@ -1,4 +1,4 @@
-import type { CanisterStatusResponse } from '@dfinity/ic-management';
+import type { CanisterStatusResponse } from '@icp-sdk/canisters/ic-management';
 import { ManagementApi } from '../api/management';
 
 interface StatusStore {

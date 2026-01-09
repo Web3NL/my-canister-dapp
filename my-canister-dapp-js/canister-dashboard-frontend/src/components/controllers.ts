@@ -1,6 +1,6 @@
 import { ManagementApi } from '../api/management';
 import { canisterStatusStore } from '../store/statusStore';
-import { Principal } from '@dfinity/principal';
+import { Principal } from '@icp-sdk/core/principal';
 import {
   INVALID_PRINCIPAL_MESSAGE,
   DUPLICATE_CONTROLLER_MESSAGE,

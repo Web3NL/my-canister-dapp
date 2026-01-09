@@ -6,7 +6,7 @@
  */
 
 import { describe, it, expect, beforeEach, vi, afterEach } from 'vitest';
-import { Principal } from '@dfinity/principal';
+import { Principal } from '@icp-sdk/core/principal';
 import { mockLocation, mockGlobals, clearGlobals } from './helpers.js';
 
 describe('runtime', () => {

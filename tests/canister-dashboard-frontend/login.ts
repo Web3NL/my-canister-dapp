@@ -1,6 +1,6 @@
 import { Page, expect } from '@playwright/test';
 import { readTestData } from '../helpers.js';
-import { Principal } from '@dfinity/principal';
+import { Principal } from '@icp-sdk/core/principal';
 export const login = async (page: Page): Promise<void> => {
     const iiAnchor = readTestData('ii-anchor.txt');
 

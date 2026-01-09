@@ -1,4 +1,4 @@
-import { Principal } from '@dfinity/principal';
+import { Principal } from '@icp-sdk/core/principal';
 import { inferCanisterIdFromLocation } from '@web3nl/my-canister-dashboard';
 import type { CanisterDappEnvironmentConfig } from './plugin';
 

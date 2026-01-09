@@ -11,12 +11,7 @@ export default defineConfig({
       fileName: 'index',
     },
     rollupOptions: {
-      external: [
-        '@dfinity/agent',
-        '@dfinity/ic-management',
-        '@dfinity/principal',
-        '@dfinity/candid',
-      ],
+      external: [/^@icp-sdk\/.*/],
     },
     outDir: 'dist',
     sourcemap: true,

@@ -1,4 +1,4 @@
-import type { HttpAgent } from '@dfinity/agent';
+import type { HttpAgent } from '@icp-sdk/core/agent';
 import { MyCanisterDashboard } from '@web3nl/my-canister-dashboard';
 import { inferCanisterId } from '@web3nl/vite-plugin-canister-dapp/runtime';
 import { showError, showWarning } from './errorHandler';
@@ -10,7 +10,7 @@ interface CyclesResult {
   error?: string;
 }
 
-export class CyclesChecker {
+class CyclesChecker {
   constructor(private readonly threshold: bigint = DEFAULT_THRESHOLD) {}
 
   async checkCyclesBalance(agent: HttpAgent): Promise<CyclesResult | null> {

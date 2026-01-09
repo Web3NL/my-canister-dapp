@@ -1,4 +1,4 @@
-import { HttpAgent } from '@dfinity/agent';
+import { HttpAgent } from '@icp-sdk/core/agent';
 import { HOST } from '$lib/constants';
 import { authStore } from '$lib/stores/auth';
 

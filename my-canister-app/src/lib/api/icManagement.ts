@@ -1,17 +1,17 @@
-import { ICManagementCanister } from '@dfinity/ic-management';
-import type { Principal } from '@dfinity/principal';
+import { IcManagementCanister } from '@icp-sdk/canisters/ic-management';
+import type { Principal } from '@icp-sdk/core/principal';
 import { createHttpAgent } from '$lib/utils/agent';
 
 export class IcManagementApi {
-  private icManagement: ICManagementCanister;
+  private icManagement: IcManagementCanister;
 
-  private constructor(icManagement: ICManagementCanister) {
+  private constructor(icManagement: IcManagementCanister) {
     this.icManagement = icManagement;
   }
 
   static async create(): Promise<IcManagementApi> {
     const agent = await createHttpAgent();
-    const icManagement = ICManagementCanister.create({
+    const icManagement = IcManagementCanister.create({
       agent,
     });
     return new IcManagementApi(icManagement);

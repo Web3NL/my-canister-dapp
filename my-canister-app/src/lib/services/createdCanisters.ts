@@ -3,7 +3,7 @@ import { filterCreateCanisterTransactions } from '$lib/utils/transactions';
 import { CmcApi } from '$lib/api/cmc';
 import { authStore } from '$lib/stores/auth';
 import { createDerivationOrigin } from '$lib/remoteAuthentication/derivationOrigin';
-import type { TransactionWithId } from '@dfinity/ledger-icp';
+import type { TransactionWithId } from '$declarations/icp-index/icp-index.did.d.ts';
 import { MyDashboardBackend } from '@web3nl/my-canister-dashboard';
 import { createHttpAgent } from '$lib/utils/agent';
 

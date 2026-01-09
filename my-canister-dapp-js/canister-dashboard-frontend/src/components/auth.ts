@@ -1,5 +1,5 @@
-import { AuthClient } from '@dfinity/auth-client';
-import type { Principal } from '@dfinity/principal';
+import { AuthClient } from '@icp-sdk/auth/client';
+import type { Principal } from '@icp-sdk/core/principal';
 import { MyCanisterDashboard } from '@web3nl/my-canister-dashboard';
 import { MAX_TIME_TO_LIVE } from '../constants';
 import { createHttpAgent, canisterId, getConfig } from '../utils';

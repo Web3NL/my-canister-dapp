@@ -1,7 +1,7 @@
 import { canisterStatusStore } from '../store/statusStore';
 import { uint8ArrayToHexString } from '@dfinity/utils';
 import { formatMemorySize, formatCycles } from '../helpers';
-import type { CanisterStatusResponse } from '@dfinity/ic-management';
+import type { CanisterStatusResponse } from '@icp-sdk/canisters/ic-management';
 import { updateStatusDisplay } from '../dom';
 import { NETWORK_ERROR_MESSAGE, reportError } from '../error';
 

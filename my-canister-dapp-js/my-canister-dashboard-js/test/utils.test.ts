@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { inferCanisterIdFromLocation } from '../src/index.js';
-import { Principal } from '@dfinity/principal';
+import { Principal } from '@icp-sdk/core/principal';
 
 describe('inferCanisterIdFromLocation', () => {
   const TEST_PRINCIPAL = 'rdmx6-jaaaa-aaaaa-aaadq-cai';

@@ -1,4 +1,4 @@
-import type { Principal } from '@dfinity/principal';
+import type { Principal } from '@icp-sdk/core/principal';
 import { E8S } from './constants';
 
 export function principalToSubaccount(principal: Principal): Uint8Array {

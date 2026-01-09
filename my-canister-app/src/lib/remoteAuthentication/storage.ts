@@ -1,4 +1,4 @@
-import type { AuthClientStorage } from '@dfinity/auth-client';
+import type { AuthClientStorage } from '@icp-sdk/auth/client';
 
 type StoredKey = string | CryptoKeyPair;
 

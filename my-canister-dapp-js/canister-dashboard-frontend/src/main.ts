@@ -20,7 +20,7 @@ import {
   clearErrors,
 } from './dom';
 import { TopUpRuleManager } from './components/top-up-rule';
-import type { Principal } from '@dfinity/principal';
+import type { Principal } from '@icp-sdk/core/principal';
 
 enum DashboardState {
   INITIALIZING = 'initializing',

@@ -1,6 +1,6 @@
-import type { HttpAgent, ActorSubclass } from '@dfinity/agent';
-import { Actor } from '@dfinity/agent';
-import type { Principal } from '@dfinity/principal';
+import type { HttpAgent, ActorSubclass } from '@icp-sdk/core/agent';
+import { Actor } from '@icp-sdk/core/agent';
+import type { Principal } from '@icp-sdk/core/principal';
 import { idlFactory } from '../declarations/my-canister-dashboard.did.js';
 import type {
   _SERVICE as MyDashboardService,

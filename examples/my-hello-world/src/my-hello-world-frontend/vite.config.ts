@@ -27,6 +27,10 @@ export default defineConfig(() => {
             new URL("../declarations/", import.meta.url)
           ),
         },
+        // Map @dfinity imports (from dfx-generated declarations) to @icp-sdk
+        { find: "@dfinity/agent", replacement: "@icp-sdk/core/agent" },
+        { find: "@dfinity/principal", replacement: "@icp-sdk/core/principal" },
+        { find: "@dfinity/candid", replacement: "@icp-sdk/core/candid" },
       ]
     },
   };

@@ -1,6 +1,6 @@
-import { Principal } from '@dfinity/principal';
-import { HttpAgent } from '@dfinity/agent';
-import { AuthClient } from '@dfinity/auth-client';
+import { Principal } from '@icp-sdk/core/principal';
+import { HttpAgent } from '@icp-sdk/core/agent';
+import { AuthClient } from '@icp-sdk/auth/client';
 import {
   inferCanisterId,
   inferEnvironment,

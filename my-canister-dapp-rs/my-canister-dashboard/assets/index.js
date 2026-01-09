@@ -59,13 +59,13 @@ var QueryResponseStatus;
 function isV2ResponseBody(body) {
   return body !== null && body !== void 0 && "reject_code" in body;
 }
-function isV3ResponseBody(body) {
+function isV4ResponseBody(body) {
   return body !== null && body !== void 0 && "certificate" in body;
 }
 const alphabet = "abcdefghijklmnopqrstuvwxyz234567";
 const lookupTable = /* @__PURE__ */ Object.create(null);
-for (let i3 = 0; i3 < alphabet.length; i3++) {
-  lookupTable[alphabet[i3]] = i3;
+for (let i2 = 0; i2 < alphabet.length; i2++) {
+  lookupTable[alphabet[i2]] = i2;
 }
 lookupTable["0"] = lookupTable.o;
 lookupTable["1"] = lookupTable.i;
@@ -89,8 +89,8 @@ function base32Encode(input) {
     }
     return 0;
   }
-  for (let i3 = 0; i3 < input.length; ) {
-    i3 += encodeByte(input[i3]);
+  for (let i2 = 0; i2 < input.length; ) {
+    i2 += encodeByte(input[i2]);
   }
   return output + (skip < 0 ? alphabet[bits >> 3] : "");
 }
@@ -117,8 +117,8 @@ function base32Decode(input) {
       }
     }
   }
-  for (const c2 of input) {
-    decodeChar(c2);
+  for (const c3 of input) {
+    decodeChar(c3);
   }
   return output.slice(0, o3);
 }
@@ -382,21 +382,20 @@ const lookUpTable = new Uint32Array([
 ]);
 function getCrc32(buf) {
   let crc = -1;
-  for (let i3 = 0; i3 < buf.length; i3++) {
-    const byte = buf[i3];
-    const t3 = (byte ^ crc) & 255;
-    crc = lookUpTable[t3] ^ crc >>> 8;
+  for (let i2 = 0; i2 < buf.length; i2++) {
+    const byte = buf[i2];
+    const t2 = (byte ^ crc) & 255;
+    crc = lookUpTable[t2] ^ crc >>> 8;
   }
   return (crc ^ -1) >>> 0;
 }
 const crypto$1 = typeof globalThis === "object" && "crypto" in globalThis ? globalThis.crypto : void 0;
-/*! noble-hashes - MIT License (c) 2022 Paul Miller (paulmillr.com) */
-function isBytes(a2) {
-  return a2 instanceof Uint8Array || ArrayBuffer.isView(a2) && a2.constructor.name === "Uint8Array";
+function isBytes(a3) {
+  return a3 instanceof Uint8Array || ArrayBuffer.isView(a3) && a3.constructor.name === "Uint8Array";
 }
-function anumber(n2) {
-  if (!Number.isSafeInteger(n2) || n2 < 0)
-    throw new Error("positive integer expected, got " + n2);
+function anumber(n3) {
+  if (!Number.isSafeInteger(n3) || n3 < 0)
+    throw new Error("positive integer expected, got " + n3);
 }
 function abytes(b2, ...lengths) {
   if (!isBytes(b2))
@@ -418,8 +417,8 @@ function aoutput(out, instance) {
   }
 }
 function clean(...arrays) {
-  for (let i3 = 0; i3 < arrays.length; i3++) {
-    arrays[i3].fill(0);
+  for (let i2 = 0; i2 < arrays.length; i2++) {
+    arrays[i2].fill(0);
   }
 }
 function createView(arr) {
@@ -432,14 +431,14 @@ const hasHexBuiltin = /* @__PURE__ */ (() => (
   // @ts-ignore
   typeof Uint8Array.from([]).toHex === "function" && typeof Uint8Array.fromHex === "function"
 ))();
-const hexes = /* @__PURE__ */ Array.from({ length: 256 }, (_2, i3) => i3.toString(16).padStart(2, "0"));
+const hexes = /* @__PURE__ */ Array.from({ length: 256 }, (_2, i2) => i2.toString(16).padStart(2, "0"));
 function bytesToHex(bytes) {
   abytes(bytes);
   if (hasHexBuiltin)
     return bytes.toHex();
   let hex = "";
-  for (let i3 = 0; i3 < bytes.length; i3++) {
-    hex += hexes[bytes[i3]];
+  for (let i2 = 0; i2 < bytes.length; i2++) {
+    hex += hexes[bytes[i2]];
   }
   return hex;
 }
@@ -465,12 +464,12 @@ function hexToBytes(hex) {
   const array = new Uint8Array(al);
   for (let ai = 0, hi = 0; ai < al; ai++, hi += 2) {
     const n1 = asciiToBase16(hex.charCodeAt(hi));
-    const n2 = asciiToBase16(hex.charCodeAt(hi + 1));
-    if (n1 === void 0 || n2 === void 0) {
+    const n22 = asciiToBase16(hex.charCodeAt(hi + 1));
+    if (n1 === void 0 || n22 === void 0) {
       const char = hex[hi] + hex[hi + 1];
       throw new Error('hex string expected, got non-hex character "' + char + '" at index ' + hi);
     }
-    array[ai] = n1 * 16 + n2;
+    array[ai] = n1 * 16 + n22;
   }
   return array;
 }
@@ -487,16 +486,16 @@ function toBytes(data) {
 }
 function concatBytes(...arrays) {
   let sum = 0;
-  for (let i3 = 0; i3 < arrays.length; i3++) {
-    const a2 = arrays[i3];
-    abytes(a2);
-    sum += a2.length;
+  for (let i2 = 0; i2 < arrays.length; i2++) {
+    const a3 = arrays[i2];
+    abytes(a3);
+    sum += a3.length;
   }
   const res = new Uint8Array(sum);
-  for (let i3 = 0, pad = 0; i3 < arrays.length; i3++) {
-    const a2 = arrays[i3];
-    res.set(a2, pad);
-    pad += a2.length;
+  for (let i2 = 0, pad = 0; i2 < arrays.length; i2++) {
+    const a3 = arrays[i2];
+    res.set(a3, pad);
+    pad += a3.length;
   }
   return res;
 }
@@ -531,11 +530,11 @@ function setBigUint64(view, byteOffset, value, isLE) {
   view.setUint32(byteOffset + h2, wh, isLE);
   view.setUint32(byteOffset + l3, wl, isLE);
 }
-function Chi(a2, b2, c2) {
-  return a2 & b2 ^ ~a2 & c2;
+function Chi(a3, b2, c3) {
+  return a3 & b2 ^ ~a3 & c3;
 }
-function Maj(a2, b2, c2) {
-  return a2 & b2 ^ a2 & c2 ^ b2 & c2;
+function Maj(a3, b2, c3) {
+  return a3 & b2 ^ a3 & c3 ^ b2 & c3;
 }
 class HashMD extends Hash {
   constructor(blockLen, outputLen, padOffset, isLE) {
@@ -589,8 +588,8 @@ class HashMD extends Hash {
       this.process(view, 0);
       pos = 0;
     }
-    for (let i3 = pos; i3 < blockLen; i3++)
-      buffer[i3] = 0;
+    for (let i2 = pos; i2 < blockLen; i2++)
+      buffer[i2] = 0;
     setBigUint64(view, blockLen - 8, BigInt(this.length * 8), isLE);
     this.process(view, 0);
     const oview = createView(out);
@@ -601,8 +600,8 @@ class HashMD extends Hash {
     const state = this.get();
     if (outLen > state.length)
       throw new Error("_sha2: outputLen bigger than state");
-    for (let i3 = 0; i3 < outLen; i3++)
-      oview.setUint32(4 * i3, state[i3], isLE);
+    for (let i2 = 0; i2 < outLen; i2++)
+      oview.setUint32(4 * i2, state[i2], isLE);
   }
   digest() {
     const { buffer, outputLen } = this;
@@ -667,18 +666,18 @@ const SHA512_IV = /* @__PURE__ */ Uint32Array.from([
 ]);
 const U32_MASK64 = /* @__PURE__ */ BigInt(2 ** 32 - 1);
 const _32n = /* @__PURE__ */ BigInt(32);
-function fromBig(n2, le = false) {
+function fromBig(n3, le = false) {
   if (le)
-    return { h: Number(n2 & U32_MASK64), l: Number(n2 >> _32n & U32_MASK64) };
-  return { h: Number(n2 >> _32n & U32_MASK64) | 0, l: Number(n2 & U32_MASK64) | 0 };
+    return { h: Number(n3 & U32_MASK64), l: Number(n3 >> _32n & U32_MASK64) };
+  return { h: Number(n3 >> _32n & U32_MASK64) | 0, l: Number(n3 & U32_MASK64) | 0 };
 }
 function split(lst, le = false) {
   const len = lst.length;
   let Ah = new Uint32Array(len);
   let Al = new Uint32Array(len);
-  for (let i3 = 0; i3 < len; i3++) {
-    const { h: h2, l: l3 } = fromBig(lst[i3], le);
-    [Ah[i3], Al[i3]] = [h2, l3];
+  for (let i2 = 0; i2 < len; i2++) {
+    const { h: h2, l: l3 } = fromBig(lst[i2], le);
+    [Ah[i2], Al[i2]] = [h2, l3];
   }
   return [Ah, Al];
 }
@@ -778,14 +777,14 @@ class SHA256 extends HashMD {
     this.H = SHA256_IV[7] | 0;
   }
   get() {
-    const { A: A4, B: B2, C: C2, D: D2, E: E3, F: F2, G: G2, H: H2 } = this;
-    return [A4, B2, C2, D2, E3, F2, G2, H2];
+    const { A: A3, B: B3, C: C3, D: D2, E: E3, F: F2, G: G2, H: H2 } = this;
+    return [A3, B3, C3, D2, E3, F2, G2, H2];
   }
   // prettier-ignore
-  set(A4, B2, C2, D2, E3, F2, G2, H2) {
-    this.A = A4 | 0;
-    this.B = B2 | 0;
-    this.C = C2 | 0;
+  set(A3, B3, C3, D2, E3, F2, G2, H2) {
+    this.A = A3 | 0;
+    this.B = B3 | 0;
+    this.C = C3 | 0;
     this.D = D2 | 0;
     this.E = E3 | 0;
     this.F = F2 | 0;
@@ -793,39 +792,39 @@ class SHA256 extends HashMD {
     this.H = H2 | 0;
   }
   process(view, offset) {
-    for (let i3 = 0; i3 < 16; i3++, offset += 4)
-      SHA256_W[i3] = view.getUint32(offset, false);
-    for (let i3 = 16; i3 < 64; i3++) {
-      const W15 = SHA256_W[i3 - 15];
-      const W2 = SHA256_W[i3 - 2];
+    for (let i2 = 0; i2 < 16; i2++, offset += 4)
+      SHA256_W[i2] = view.getUint32(offset, false);
+    for (let i2 = 16; i2 < 64; i2++) {
+      const W15 = SHA256_W[i2 - 15];
+      const W2 = SHA256_W[i2 - 2];
       const s0 = rotr(W15, 7) ^ rotr(W15, 18) ^ W15 >>> 3;
       const s1 = rotr(W2, 17) ^ rotr(W2, 19) ^ W2 >>> 10;
-      SHA256_W[i3] = s1 + SHA256_W[i3 - 7] + s0 + SHA256_W[i3 - 16] | 0;
+      SHA256_W[i2] = s1 + SHA256_W[i2 - 7] + s0 + SHA256_W[i2 - 16] | 0;
     }
-    let { A: A4, B: B2, C: C2, D: D2, E: E3, F: F2, G: G2, H: H2 } = this;
-    for (let i3 = 0; i3 < 64; i3++) {
+    let { A: A3, B: B3, C: C3, D: D2, E: E3, F: F2, G: G2, H: H2 } = this;
+    for (let i2 = 0; i2 < 64; i2++) {
       const sigma1 = rotr(E3, 6) ^ rotr(E3, 11) ^ rotr(E3, 25);
-      const T1 = H2 + sigma1 + Chi(E3, F2, G2) + SHA256_K[i3] + SHA256_W[i3] | 0;
-      const sigma0 = rotr(A4, 2) ^ rotr(A4, 13) ^ rotr(A4, 22);
-      const T2 = sigma0 + Maj(A4, B2, C2) | 0;
+      const T1 = H2 + sigma1 + Chi(E3, F2, G2) + SHA256_K[i2] + SHA256_W[i2] | 0;
+      const sigma0 = rotr(A3, 2) ^ rotr(A3, 13) ^ rotr(A3, 22);
+      const T2 = sigma0 + Maj(A3, B3, C3) | 0;
       H2 = G2;
       G2 = F2;
       F2 = E3;
       E3 = D2 + T1 | 0;
-      D2 = C2;
-      C2 = B2;
-      B2 = A4;
-      A4 = T1 + T2 | 0;
+      D2 = C3;
+      C3 = B3;
+      B3 = A3;
+      A3 = T1 + T2 | 0;
     }
-    A4 = A4 + this.A | 0;
-    B2 = B2 + this.B | 0;
-    C2 = C2 + this.C | 0;
+    A3 = A3 + this.A | 0;
+    B3 = B3 + this.B | 0;
+    C3 = C3 + this.C | 0;
     D2 = D2 + this.D | 0;
     E3 = E3 + this.E | 0;
     F2 = F2 + this.F | 0;
     G2 = G2 + this.G | 0;
     H2 = H2 + this.H | 0;
-    this.set(A4, B2, C2, D2, E3, F2, G2, H2);
+    this.set(A3, B3, C3, D2, E3, F2, G2, H2);
   }
   roundClean() {
     clean(SHA256_W);
@@ -929,7 +928,7 @@ const K512 = /* @__PURE__ */ (() => split([
   "0x597f299cfc657e2a",
   "0x5fcb6fab3ad6faec",
   "0x6c44198c4a475817"
-].map((n2) => BigInt(n2))))();
+].map((n3) => BigInt(n3))))();
 const SHA512_Kh = /* @__PURE__ */ (() => K512[0])();
 const SHA512_Kl = /* @__PURE__ */ (() => K512[1])();
 const SHA512_W_H = /* @__PURE__ */ new Uint32Array(80);
@@ -979,32 +978,32 @@ class SHA512 extends HashMD {
     this.Hl = Hl | 0;
   }
   process(view, offset) {
-    for (let i3 = 0; i3 < 16; i3++, offset += 4) {
-      SHA512_W_H[i3] = view.getUint32(offset);
-      SHA512_W_L[i3] = view.getUint32(offset += 4);
+    for (let i2 = 0; i2 < 16; i2++, offset += 4) {
+      SHA512_W_H[i2] = view.getUint32(offset);
+      SHA512_W_L[i2] = view.getUint32(offset += 4);
     }
-    for (let i3 = 16; i3 < 80; i3++) {
-      const W15h = SHA512_W_H[i3 - 15] | 0;
-      const W15l = SHA512_W_L[i3 - 15] | 0;
+    for (let i2 = 16; i2 < 80; i2++) {
+      const W15h = SHA512_W_H[i2 - 15] | 0;
+      const W15l = SHA512_W_L[i2 - 15] | 0;
       const s0h = rotrSH(W15h, W15l, 1) ^ rotrSH(W15h, W15l, 8) ^ shrSH(W15h, W15l, 7);
       const s0l = rotrSL(W15h, W15l, 1) ^ rotrSL(W15h, W15l, 8) ^ shrSL(W15h, W15l, 7);
-      const W2h = SHA512_W_H[i3 - 2] | 0;
-      const W2l = SHA512_W_L[i3 - 2] | 0;
+      const W2h = SHA512_W_H[i2 - 2] | 0;
+      const W2l = SHA512_W_L[i2 - 2] | 0;
       const s1h = rotrSH(W2h, W2l, 19) ^ rotrBH(W2h, W2l, 61) ^ shrSH(W2h, W2l, 6);
       const s1l = rotrSL(W2h, W2l, 19) ^ rotrBL(W2h, W2l, 61) ^ shrSL(W2h, W2l, 6);
-      const SUMl = add4L(s0l, s1l, SHA512_W_L[i3 - 7], SHA512_W_L[i3 - 16]);
-      const SUMh = add4H(SUMl, s0h, s1h, SHA512_W_H[i3 - 7], SHA512_W_H[i3 - 16]);
-      SHA512_W_H[i3] = SUMh | 0;
-      SHA512_W_L[i3] = SUMl | 0;
+      const SUMl = add4L(s0l, s1l, SHA512_W_L[i2 - 7], SHA512_W_L[i2 - 16]);
+      const SUMh = add4H(SUMl, s0h, s1h, SHA512_W_H[i2 - 7], SHA512_W_H[i2 - 16]);
+      SHA512_W_H[i2] = SUMh | 0;
+      SHA512_W_L[i2] = SUMl | 0;
     }
     let { Ah, Al, Bh, Bl, Ch, Cl, Dh, Dl, Eh, El, Fh, Fl, Gh, Gl, Hh, Hl } = this;
-    for (let i3 = 0; i3 < 80; i3++) {
+    for (let i2 = 0; i2 < 80; i2++) {
       const sigma1h = rotrSH(Eh, El, 14) ^ rotrSH(Eh, El, 18) ^ rotrBH(Eh, El, 41);
       const sigma1l = rotrSL(Eh, El, 14) ^ rotrSL(Eh, El, 18) ^ rotrBL(Eh, El, 41);
       const CHIh = Eh & Fh ^ ~Eh & Gh;
       const CHIl = El & Fl ^ ~El & Gl;
-      const T1ll = add5L(Hl, sigma1l, CHIl, SHA512_Kl[i3], SHA512_W_L[i3]);
-      const T1h = add5H(T1ll, Hh, sigma1h, CHIh, SHA512_Kh[i3], SHA512_W_H[i3]);
+      const T1ll = add5L(Hl, sigma1l, CHIl, SHA512_Kl[i2], SHA512_W_L[i2]);
+      const T1h = add5H(T1ll, Hh, sigma1h, CHIh, SHA512_Kh[i2], SHA512_W_H[i2]);
       const T1l = T1ll | 0;
       const sigma0h = rotrSH(Ah, Al, 28) ^ rotrBH(Ah, Al, 34) ^ rotrBH(Ah, Al, 39);
       const sigma0l = rotrSL(Ah, Al, 28) ^ rotrBL(Ah, Al, 34) ^ rotrBL(Ah, Al, 39);
@@ -1145,10 +1144,10 @@ let Principal$1 = class Principal {
    * @returns {'lt' | 'eq' | 'gt'} `'lt' | 'eq' | 'gt'` a string, representing less than, equal to, or greater than
    */
   compareTo(other) {
-    for (let i3 = 0; i3 < Math.min(this._arr.length, other._arr.length); i3++) {
-      if (this._arr[i3] < other._arr[i3])
+    for (let i2 = 0; i2 < Math.min(this._arr.length, other._arr.length); i2++) {
+      if (this._arr[i2] < other._arr[i2])
         return "lt";
-      else if (this._arr[i3] > other._arr[i3])
+      else if (this._arr[i2] > other._arr[i2])
         return "gt";
     }
     if (this._arr.length < other._arr.length)
@@ -1349,6 +1348,17 @@ class CertificateNotAuthorizedErrorCode extends ErrorCode {
   }
   toErrorMessage() {
     return `The certificate contains a delegation that does not include the canister ${this.canisterId.toText()} in the canister_ranges field. Subnet ID: ${this.subnetId.toText()}`;
+  }
+}
+class CertificateNotAuthorizedForSubnetErrorCode extends ErrorCode {
+  constructor(subnetId) {
+    super();
+    this.subnetId = subnetId;
+    this.name = "CertificateNotAuthorizedForSubnetErrorCode";
+    Object.setPrototypeOf(this, CertificateNotAuthorizedForSubnetErrorCode.prototype);
+  }
+  toErrorMessage() {
+    return `The certificate is not authorized for subnet ${this.subnetId.toText()}`;
   }
 }
 class LookupErrorCode extends ErrorCode {
@@ -1734,14 +1744,14 @@ class HttpErrorCode extends ErrorCode {
     return errorMessage;
   }
 }
-class HttpV3ApiNotSupportedErrorCode extends ErrorCode {
+class HttpV4ApiNotSupportedErrorCode extends ErrorCode {
   constructor() {
     super();
-    this.name = "HttpV3ApiNotSupportedErrorCode";
-    Object.setPrototypeOf(this, HttpV3ApiNotSupportedErrorCode.prototype);
+    this.name = "HttpV4ApiNotSupportedErrorCode";
+    Object.setPrototypeOf(this, HttpV4ApiNotSupportedErrorCode.prototype);
   }
   toErrorMessage() {
-    return "HTTP request failed: v3 API is not supported";
+    return "HTTP request failed: v4 API is not supported";
   }
 }
 class HttpFetchErrorCode extends ErrorCode {
@@ -1901,10 +1911,10 @@ class PipeArrayBuffer {
       throw new Error("Amount must be a positive integer");
     }
     const b2 = new Uint8Array((this._buffer.byteLength + amount) * 1.2 | 0);
-    const v3 = new Uint8Array(b2.buffer, 0, this._view.byteLength + amount);
-    v3.set(this._view);
+    const v2 = new Uint8Array(b2.buffer, 0, this._view.byteLength + amount);
+    v2.set(this._view);
     this._buffer = b2;
-    this._view = v3;
+    this._view = v2;
   }
 }
 function uint8FromBufLike$1(bufLike) {
@@ -1929,9 +1939,9 @@ function compare(u1, u2) {
   if (u1.byteLength !== u2.byteLength) {
     return u1.byteLength - u2.byteLength;
   }
-  for (let i3 = 0; i3 < u1.length; i3++) {
-    if (u1[i3] !== u2[i3]) {
-      return u1[i3] - u2[i3];
+  for (let i2 = 0; i2 < u1.length; i2++) {
+    if (u1[i2] !== u2[i2]) {
+      return u1[i2] - u2[i2];
     }
   }
   return 0;
@@ -1949,8 +1959,8 @@ function idlHash(s2) {
   const utf8encoder = new TextEncoder();
   const array = utf8encoder.encode(s2);
   let h2 = 0;
-  for (const c2 of array) {
-    h2 = (h2 * 223 + c2) % 2 ** 32;
+  for (const c3 of array) {
+    h2 = (h2 * 223 + c3) % 2 ** 32;
   }
   return h2;
 }
@@ -1963,16 +1973,16 @@ function idlLabelToId(label) {
   }
   return idlHash(label);
 }
-function ilog2(n2) {
-  const nBig = BigInt(n2);
-  if (n2 <= 0) {
+function ilog2(n3) {
+  const nBig = BigInt(n3);
+  if (n3 <= 0) {
     throw new RangeError("Input must be positive");
   }
   return nBig.toString(2).length - 1;
 }
-function iexp2(n2) {
-  const nBig = BigInt(n2);
-  if (n2 < 0) {
+function iexp2(n3) {
+  const nBig = BigInt(n3);
+  if (n3 < 0) {
     throw new RangeError("Input must be non-negative");
   }
   return BigInt(1) << nBig;
@@ -2003,13 +2013,13 @@ function lebEncode(value) {
   const byteLength = (value === BigInt(0) ? 0 : ilog2(value)) + 1;
   const pipe = new PipeArrayBuffer(new Uint8Array(byteLength), 0);
   while (true) {
-    const i3 = Number(value & BigInt(127));
+    const i2 = Number(value & BigInt(127));
     value /= BigInt(128);
     if (value === BigInt(0)) {
-      pipe.write(new Uint8Array([i3]));
+      pipe.write(new Uint8Array([i2]));
       break;
     } else {
-      pipe.write(new Uint8Array([i3 | 128]));
+      pipe.write(new Uint8Array([i2 | 128]));
     }
   }
   return pipe.buffer;
@@ -2036,13 +2046,13 @@ function slebEncode(value) {
   const byteLength = (value === BigInt(0) ? 0 : ilog2(value)) + 1;
   const pipe = new PipeArrayBuffer(new Uint8Array(byteLength), 0);
   while (true) {
-    const i3 = getLowerBytes(value);
+    const i2 = getLowerBytes(value);
     value /= BigInt(128);
-    if (isNeg && value === BigInt(0) && (i3 & 64) !== 0 || !isNeg && value === BigInt(0) && (i3 & 64) === 0) {
-      pipe.write(new Uint8Array([i3]));
+    if (isNeg && value === BigInt(0) && (i2 & 64) !== 0 || !isNeg && value === BigInt(0) && (i2 & 64) === 0) {
+      pipe.write(new Uint8Array([i2]));
       break;
     } else {
-      pipe.write(new Uint8Array([i3 | 128]));
+      pipe.write(new Uint8Array([i2 | 128]));
     }
   }
   function getLowerBytes(num) {
@@ -2068,8 +2078,8 @@ function slebDecode(pipe) {
   }
   const bytes = new Uint8Array(safeRead(pipe, len + 1));
   let value = BigInt(0);
-  for (let i3 = bytes.byteLength - 1; i3 >= 0; i3--) {
-    value = value * BigInt(128) + BigInt(128 - (bytes[i3] & 127) - 1);
+  for (let i2 = bytes.byteLength - 1; i2 >= 0; i2--) {
+    value = value * BigInt(128) + BigInt(128 - (bytes[i2] & 127) - 1);
   }
   return -value - BigInt(1);
 }
@@ -2082,12 +2092,12 @@ function writeUIntLE(value, byteLength) {
 function writeIntLE(value, byteLength) {
   value = BigInt(value);
   const pipe = new PipeArrayBuffer(new Uint8Array(Math.min(1, byteLength)), 0);
-  let i3 = 0;
+  let i2 = 0;
   let mul = BigInt(256);
   let sub = BigInt(0);
   let byte = Number(value % mul);
   pipe.write(new Uint8Array([byte]));
-  while (++i3 < byteLength) {
+  while (++i2 < byteLength) {
     if (value < 0 && sub === BigInt(0) && byte !== 0) {
       sub = BigInt(1);
     }
@@ -2103,8 +2113,8 @@ function readUIntLE(pipe, byteLength) {
   }
   let val = BigInt(safeReadUint8(pipe));
   let mul = BigInt(1);
-  let i3 = 0;
-  while (++i3 < byteLength) {
+  let i2 = 0;
+  while (++i2 < byteLength) {
     mul *= BigInt(256);
     const byte = BigInt(safeReadUint8(pipe));
     val = val + mul * byte;
@@ -2142,9 +2152,10 @@ var IDLTypeIds;
   IDLTypeIds2[IDLTypeIds2["Principal"] = -24] = "Principal";
 })(IDLTypeIds || (IDLTypeIds = {}));
 const magicNumber = "DIDL";
+const magicNumberBytes = new TextEncoder().encode(magicNumber);
 const toReadableString_max = 400;
 function zipWith(xs, ys, f2) {
-  return xs.map((x3, i3) => f2(x3, ys[i3]));
+  return xs.map((x3, i2) => f2(x3, ys[i2]));
 }
 class TypeTable {
   constructor() {
@@ -2207,72 +2218,72 @@ class Visitor {
   visitType(_t, _data) {
     throw new Error("Not implemented");
   }
-  visitPrimitive(t3, data) {
-    return this.visitType(t3, data);
+  visitPrimitive(t2, data) {
+    return this.visitType(t2, data);
   }
-  visitEmpty(t3, data) {
-    return this.visitPrimitive(t3, data);
+  visitEmpty(t2, data) {
+    return this.visitPrimitive(t2, data);
   }
-  visitBool(t3, data) {
-    return this.visitPrimitive(t3, data);
+  visitBool(t2, data) {
+    return this.visitPrimitive(t2, data);
   }
-  visitNull(t3, data) {
-    return this.visitPrimitive(t3, data);
+  visitNull(t2, data) {
+    return this.visitPrimitive(t2, data);
   }
-  visitReserved(t3, data) {
-    return this.visitPrimitive(t3, data);
+  visitReserved(t2, data) {
+    return this.visitPrimitive(t2, data);
   }
-  visitText(t3, data) {
-    return this.visitPrimitive(t3, data);
+  visitText(t2, data) {
+    return this.visitPrimitive(t2, data);
   }
-  visitNumber(t3, data) {
-    return this.visitPrimitive(t3, data);
+  visitNumber(t2, data) {
+    return this.visitPrimitive(t2, data);
   }
-  visitInt(t3, data) {
-    return this.visitNumber(t3, data);
+  visitInt(t2, data) {
+    return this.visitNumber(t2, data);
   }
-  visitNat(t3, data) {
-    return this.visitNumber(t3, data);
+  visitNat(t2, data) {
+    return this.visitNumber(t2, data);
   }
-  visitFloat(t3, data) {
-    return this.visitPrimitive(t3, data);
+  visitFloat(t2, data) {
+    return this.visitPrimitive(t2, data);
   }
-  visitFixedInt(t3, data) {
-    return this.visitNumber(t3, data);
+  visitFixedInt(t2, data) {
+    return this.visitNumber(t2, data);
   }
-  visitFixedNat(t3, data) {
-    return this.visitNumber(t3, data);
+  visitFixedNat(t2, data) {
+    return this.visitNumber(t2, data);
   }
-  visitPrincipal(t3, data) {
-    return this.visitPrimitive(t3, data);
+  visitPrincipal(t2, data) {
+    return this.visitPrimitive(t2, data);
   }
-  visitConstruct(t3, data) {
-    return this.visitType(t3, data);
+  visitConstruct(t2, data) {
+    return this.visitType(t2, data);
   }
-  visitVec(t3, _ty, data) {
-    return this.visitConstruct(t3, data);
+  visitVec(t2, _ty, data) {
+    return this.visitConstruct(t2, data);
   }
-  visitOpt(t3, _ty, data) {
-    return this.visitConstruct(t3, data);
+  visitOpt(t2, _ty, data) {
+    return this.visitConstruct(t2, data);
   }
-  visitRecord(t3, _fields, data) {
-    return this.visitConstruct(t3, data);
+  visitRecord(t2, _fields, data) {
+    return this.visitConstruct(t2, data);
   }
-  visitTuple(t3, components, data) {
-    const fields = components.map((ty, i3) => [`_${i3}_`, ty]);
-    return this.visitRecord(t3, fields, data);
+  visitTuple(t2, components, data) {
+    const fields = components.map((ty, i2) => [`_${i2}_`, ty]);
+    return this.visitRecord(t2, fields, data);
   }
-  visitVariant(t3, _fields, data) {
-    return this.visitConstruct(t3, data);
+  visitVariant(t2, _fields, data) {
+    return this.visitConstruct(t2, data);
   }
   visitRec(_t, ty, data) {
     return this.visitConstruct(ty, data);
   }
-  visitFunc(t3, data) {
-    return this.visitConstruct(t3, data);
+  visitFunc(t2, data) {
+    return this.visitConstruct(t2, data);
   }
-  visitService(t3, data) {
-    return this.visitConstruct(t3, data);
+  visitService(t2, data) {
+    return this.visitConstruct(t2, data);
   }
 }
 var IdlTypeName;
@@ -2314,26 +2325,26 @@ class Type {
   }
 }
 class PrimitiveType extends Type {
-  checkType(t3) {
-    if (this.name !== t3.name) {
-      throw new Error(`type mismatch: type on the wire ${t3.name}, expect type ${this.name}`);
+  checkType(t2) {
+    if (this.name !== t2.name) {
+      throw new Error(`type mismatch: type on the wire ${t2.name}, expect type ${this.name}`);
     }
-    return t3;
+    return t2;
   }
   _buildTypeTableImpl(_typeTable) {
     return;
   }
 }
 class ConstructType extends Type {
-  checkType(t3) {
-    if (t3 instanceof RecClass) {
-      const ty = t3.getType();
+  checkType(t2) {
+    if (t2 instanceof RecClass) {
+      const ty = t2.getType();
       if (typeof ty === "undefined") {
         throw new Error("type mismatch with uninitialized type");
       }
       return ty;
     }
-    throw new Error(`type mismatch: type on the wire ${t3.name}, expect type ${this.name}`);
+    throw new Error(`type mismatch: type on the wire ${t2.name}, expect type ${this.name}`);
   }
   encodeType(typeTable) {
     return typeTable.indexOf(this.name);
@@ -2346,8 +2357,8 @@ class EmptyClass extends PrimitiveType {
   static [Symbol.hasInstance](instance) {
     return instance.typeName === IdlTypeName.EmptyClass;
   }
-  accept(v3, d2) {
-    return v3.visitEmpty(this, d2);
+  accept(v2, d2) {
+    return v2.visitEmpty(this, d2);
   }
   covariant(x3) {
     throw new Error(`Invalid ${this.display()} argument: ${toReadableString(x3)}`);
@@ -2378,8 +2389,8 @@ class UnknownClass extends Type {
   checkType(_t) {
     throw new Error("Method not implemented for unknown.");
   }
-  accept(v3, d2) {
-    throw v3.visitType(this, d2);
+  accept(v2, d2) {
+    throw v2.visitType(this, d2);
   }
   covariant(x3) {
     throw new Error(`Invalid ${this.display()} argument: ${toReadableString(x3)}`);
@@ -2393,16 +2404,16 @@ class UnknownClass extends Type {
   encodeType() {
     throw new Error("Unknown cannot be serialized");
   }
-  decodeValue(b2, t3) {
-    let decodedValue = t3.decodeValue(b2, t3);
+  decodeValue(b2, t2) {
+    let decodedValue = t2.decodeValue(b2, t2);
     if (Object(decodedValue) !== decodedValue) {
       decodedValue = Object(decodedValue);
     }
     let typeFunc;
-    if (t3 instanceof RecClass) {
-      typeFunc = () => t3.getType();
+    if (t2 instanceof RecClass) {
+      typeFunc = () => t2.getType();
     } else {
-      typeFunc = () => t3;
+      typeFunc = () => t2;
     }
     Object.defineProperty(decodedValue, "type", {
       value: typeFunc,
@@ -2426,8 +2437,8 @@ class BoolClass extends PrimitiveType {
   static [Symbol.hasInstance](instance) {
     return instance.typeName === IdlTypeName.BoolClass;
   }
-  accept(v3, d2) {
-    return v3.visitBool(this, d2);
+  accept(v2, d2) {
+    return v2.visitBool(this, d2);
   }
   covariant(x3) {
     if (typeof x3 === "boolean")
@@ -2440,8 +2451,8 @@ class BoolClass extends PrimitiveType {
   encodeType() {
     return slebEncode(IDLTypeIds.Bool);
   }
-  decodeValue(b2, t3) {
-    this.checkType(t3);
+  decodeValue(b2, t2) {
+    this.checkType(t2);
     switch (safeReadUint8(b2)) {
       case 0:
         return false;
@@ -2462,8 +2473,8 @@ class NullClass extends PrimitiveType {
   static [Symbol.hasInstance](instance) {
     return instance.typeName === IdlTypeName.NullClass;
   }
-  accept(v3, d2) {
-    return v3.visitNull(this, d2);
+  accept(v2, d2) {
+    return v2.visitNull(this, d2);
   }
   covariant(x3) {
     if (x3 === null)
@@ -2476,8 +2487,8 @@ class NullClass extends PrimitiveType {
   encodeType() {
     return slebEncode(IDLTypeIds.Null);
   }
-  decodeValue(_b2, t3) {
-    this.checkType(t3);
+  decodeValue(_b2, t2) {
+    this.checkType(t2);
     return null;
   }
   get name() {
@@ -2491,8 +2502,8 @@ class ReservedClass extends PrimitiveType {
   static [Symbol.hasInstance](instance) {
     return instance.typeName === IdlTypeName.ReservedClass;
   }
-  accept(v3, d2) {
-    return v3.visitReserved(this, d2);
+  accept(v2, d2) {
+    return v2.visitReserved(this, d2);
   }
   covariant(_x) {
     return true;
@@ -2503,9 +2514,9 @@ class ReservedClass extends PrimitiveType {
   encodeType() {
     return slebEncode(IDLTypeIds.Reserved);
   }
-  decodeValue(b2, t3) {
-    if (t3.name !== this.name) {
-      t3.decodeValue(b2, t3);
+  decodeValue(b2, t2) {
+    if (t2.name !== this.name) {
+      t2.decodeValue(b2, t2);
     }
     return null;
   }
@@ -2520,8 +2531,8 @@ class TextClass extends PrimitiveType {
   static [Symbol.hasInstance](instance) {
     return instance.typeName === IdlTypeName.TextClass;
   }
-  accept(v3, d2) {
-    return v3.visitText(this, d2);
+  accept(v2, d2) {
+    return v2.visitText(this, d2);
   }
   covariant(x3) {
     if (typeof x3 === "string")
@@ -2536,8 +2547,8 @@ class TextClass extends PrimitiveType {
   encodeType() {
     return slebEncode(IDLTypeIds.Text);
   }
-  decodeValue(b2, t3) {
-    this.checkType(t3);
+  decodeValue(b2, t2) {
+    this.checkType(t2);
     const len = lebDecode(b2);
     const buf = safeRead(b2, Number(len));
     const decoder = new TextDecoder("utf8", { fatal: true });
@@ -2557,8 +2568,8 @@ class IntClass extends PrimitiveType {
   static [Symbol.hasInstance](instance) {
     return instance.typeName === IdlTypeName.IntClass;
   }
-  accept(v3, d2) {
-    return v3.visitInt(this, d2);
+  accept(v2, d2) {
+    return v2.visitInt(this, d2);
   }
   covariant(x3) {
     if (typeof x3 === "bigint" || Number.isInteger(x3))
@@ -2571,8 +2582,8 @@ class IntClass extends PrimitiveType {
   encodeType() {
     return slebEncode(IDLTypeIds.Int);
   }
-  decodeValue(b2, t3) {
-    this.checkType(t3);
+  decodeValue(b2, t2) {
+    this.checkType(t2);
     return slebDecode(b2);
   }
   get name() {
@@ -2589,8 +2600,8 @@ class NatClass extends PrimitiveType {
   static [Symbol.hasInstance](instance) {
     return instance.typeName === IdlTypeName.NatClass;
   }
-  accept(v3, d2) {
-    return v3.visitNat(this, d2);
+  accept(v2, d2) {
+    return v2.visitNat(this, d2);
   }
   covariant(x3) {
     if (typeof x3 === "bigint" && x3 >= BigInt(0) || Number.isInteger(x3) && x3 >= 0)
@@ -2603,8 +2614,8 @@ class NatClass extends PrimitiveType {
   encodeType() {
     return slebEncode(IDLTypeIds.Nat);
   }
-  decodeValue(b2, t3) {
-    this.checkType(t3);
+  decodeValue(b2, t2) {
+    this.checkType(t2);
     return lebDecode(b2);
   }
   get name() {
@@ -2628,8 +2639,8 @@ class FloatClass extends PrimitiveType {
       throw new Error("not a valid float type");
     }
   }
-  accept(v3, d2) {
-    return v3.visitFloat(this, d2);
+  accept(v2, d2) {
+    return v2.visitFloat(this, d2);
   }
   covariant(x3) {
     if (typeof x3 === "number" || x3 instanceof Number)
@@ -2650,8 +2661,8 @@ class FloatClass extends PrimitiveType {
     const opcode = this._bits === 32 ? IDLTypeIds.Float32 : IDLTypeIds.Float64;
     return slebEncode(opcode);
   }
-  decodeValue(b2, t3) {
-    this.checkType(t3);
+  decodeValue(b2, t2) {
+    this.checkType(t2);
     const bytes = safeRead(b2, this._bits / 8);
     const view = uint8ToDataView(bytes);
     if (this._bits === 32) {
@@ -2678,8 +2689,8 @@ class FixedIntClass extends PrimitiveType {
     super();
     this._bits = _bits;
   }
-  accept(v3, d2) {
-    return v3.visitFixedInt(this, d2);
+  accept(v2, d2) {
+    return v2.visitFixedInt(this, d2);
   }
   covariant(x3) {
     const min = iexp2(this._bits - 1) * BigInt(-1);
@@ -2688,8 +2699,8 @@ class FixedIntClass extends PrimitiveType {
     if (typeof x3 === "bigint") {
       ok = x3 >= min && x3 <= max;
     } else if (Number.isInteger(x3)) {
-      const v3 = BigInt(x3);
-      ok = v3 >= min && v3 <= max;
+      const v2 = BigInt(x3);
+      ok = v2 >= min && v2 <= max;
     } else {
       ok = false;
     }
@@ -2704,8 +2715,8 @@ class FixedIntClass extends PrimitiveType {
     const offset = Math.log2(this._bits) - 3;
     return slebEncode(-9 - offset);
   }
-  decodeValue(b2, t3) {
-    this.checkType(t3);
+  decodeValue(b2, t2) {
+    this.checkType(t2);
     const num = readIntLE(b2, this._bits / 8);
     if (this._bits <= 32) {
       return Number(num);
@@ -2731,8 +2742,8 @@ class FixedNatClass extends PrimitiveType {
     super();
     this._bits = _bits;
   }
-  accept(v3, d2) {
-    return v3.visitFixedNat(this, d2);
+  accept(v2, d2) {
+    return v2.visitFixedNat(this, d2);
   }
   covariant(x3) {
     const max = iexp2(this._bits);
@@ -2740,8 +2751,8 @@ class FixedNatClass extends PrimitiveType {
     if (typeof x3 === "bigint" && x3 >= BigInt(0)) {
       ok = x3 < max;
     } else if (Number.isInteger(x3) && x3 >= 0) {
-      const v3 = BigInt(x3);
-      ok = v3 < max;
+      const v2 = BigInt(x3);
+      ok = v2 < max;
     } else {
       ok = false;
     }
@@ -2756,8 +2767,8 @@ class FixedNatClass extends PrimitiveType {
     const offset = Math.log2(this._bits) - 3;
     return slebEncode(-5 - offset);
   }
-  decodeValue(b2, t3) {
-    this.checkType(t3);
+  decodeValue(b2, t2) {
+    this.checkType(t2);
     const num = readUIntLE(b2, this._bits / 8);
     if (this._bits <= 32) {
       return Number(num);
@@ -2787,18 +2798,18 @@ class VecClass extends ConstructType {
       this._blobOptimization = true;
     }
   }
-  accept(v3, d2) {
-    return v3.visitVec(this, this._type, d2);
+  accept(v2, d2) {
+    return v2.visitVec(this, this._type, d2);
   }
   covariant(x3) {
     const bits = this._type instanceof FixedNatClass ? this._type._bits : this._type instanceof FixedIntClass ? this._type._bits : 0;
-    if (ArrayBuffer.isView(x3) && bits == x3.BYTES_PER_ELEMENT * 8 || Array.isArray(x3) && x3.every((v3, idx) => {
+    if (ArrayBuffer.isView(x3) && bits == x3.BYTES_PER_ELEMENT * 8 || Array.isArray(x3) && x3.every((v2, idx) => {
       try {
-        return this._type.covariant(v3);
-      } catch (e5) {
+        return this._type.covariant(v2);
+      } catch (e4) {
         throw new Error(`Invalid ${this.display()} argument: 
 
-index ${idx} -> ${e5.message}`);
+index ${idx} -> ${e4.message}`);
       }
     }))
       return true;
@@ -2812,31 +2823,31 @@ index ${idx} -> ${e5.message}`);
     if (ArrayBuffer.isView(x3)) {
       if (x3 instanceof Int16Array || x3 instanceof Uint16Array) {
         const buffer = new DataView(new ArrayBuffer(x3.length * 2));
-        for (let i3 = 0; i3 < x3.length; i3++) {
+        for (let i2 = 0; i2 < x3.length; i2++) {
           if (x3 instanceof Int16Array) {
-            buffer.setInt16(i3 * 2, x3[i3], true);
+            buffer.setInt16(i2 * 2, x3[i2], true);
           } else {
-            buffer.setUint16(i3 * 2, x3[i3], true);
+            buffer.setUint16(i2 * 2, x3[i2], true);
           }
         }
         return concat(len, new Uint8Array(buffer.buffer));
       } else if (x3 instanceof Int32Array || x3 instanceof Uint32Array) {
         const buffer = new DataView(new ArrayBuffer(x3.length * 4));
-        for (let i3 = 0; i3 < x3.length; i3++) {
+        for (let i2 = 0; i2 < x3.length; i2++) {
           if (x3 instanceof Int32Array) {
-            buffer.setInt32(i3 * 4, x3[i3], true);
+            buffer.setInt32(i2 * 4, x3[i2], true);
           } else {
-            buffer.setUint32(i3 * 4, x3[i3], true);
+            buffer.setUint32(i2 * 4, x3[i2], true);
           }
         }
         return concat(len, new Uint8Array(buffer.buffer));
       } else if (x3 instanceof BigInt64Array || x3 instanceof BigUint64Array) {
         const buffer = new DataView(new ArrayBuffer(x3.length * 8));
-        for (let i3 = 0; i3 < x3.length; i3++) {
+        for (let i2 = 0; i2 < x3.length; i2++) {
           if (x3 instanceof BigInt64Array) {
-            buffer.setBigInt64(i3 * 8, x3[i3], true);
+            buffer.setBigInt64(i2 * 8, x3[i2], true);
           } else {
-            buffer.setBigUint64(i3 * 8, x3[i3], true);
+            buffer.setBigUint64(i2 * 8, x3[i2], true);
           }
         }
         return concat(len, new Uint8Array(buffer.buffer));
@@ -2858,8 +2869,8 @@ index ${idx} -> ${e5.message}`);
     const buffer = this._type.encodeType(typeTable);
     typeTable.add(this, concat(opCode, buffer));
   }
-  decodeValue(b2, t3) {
-    const vec = this.checkType(t3);
+  decodeValue(b2, t2) {
+    const vec = this.checkType(t2);
     if (!(vec instanceof VecClass)) {
       throw new Error("Not a vector type");
     }
@@ -2890,8 +2901,8 @@ index ${idx} -> ${e5.message}`);
         const bytes = b2.read(len * 2);
         const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
         const result = new Int16Array(len);
-        for (let i3 = 0; i3 < len; i3++) {
-          result[i3] = view.getInt16(i3 * 2, true);
+        for (let i2 = 0; i2 < len; i2++) {
+          result[i2] = view.getInt16(i2 * 2, true);
         }
         return result;
       }
@@ -2899,8 +2910,8 @@ index ${idx} -> ${e5.message}`);
         const bytes = b2.read(len * 4);
         const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
         const result = new Int32Array(len);
-        for (let i3 = 0; i3 < len; i3++) {
-          result[i3] = view.getInt32(i3 * 4, true);
+        for (let i2 = 0; i2 < len; i2++) {
+          result[i2] = view.getInt32(i2 * 4, true);
         }
         return result;
       }
@@ -2908,14 +2919,14 @@ index ${idx} -> ${e5.message}`);
         const bytes = b2.read(len * 8);
         const view = new DataView(bytes.buffer, bytes.byteOffset, bytes.byteLength);
         const result = new BigInt64Array(len);
-        for (let i3 = 0; i3 < len; i3++) {
-          result[i3] = view.getBigInt64(i3 * 8, true);
+        for (let i2 = 0; i2 < len; i2++) {
+          result[i2] = view.getBigInt64(i2 * 8, true);
         }
         return result;
       }
     }
     const rets = [];
-    for (let i3 = 0; i3 < len; i3++) {
+    for (let i2 = 0; i2 < len; i2++) {
       rets.push(this._type.decodeValue(b2, vec._type));
     }
     return rets;
@@ -2927,7 +2938,7 @@ index ${idx} -> ${e5.message}`);
     return `vec ${this._type.display()}`;
   }
   valueToString(x3) {
-    const elements = x3.map((e5) => this._type.valueToString(e5));
+    const elements = x3.map((e4) => this._type.valueToString(e4));
     return "vec {" + elements.join("; ") + "}";
   }
 }
@@ -2942,17 +2953,17 @@ class OptClass extends ConstructType {
     super();
     this._type = _type;
   }
-  accept(v3, d2) {
-    return v3.visitOpt(this, this._type, d2);
+  accept(v2, d2) {
+    return v2.visitOpt(this, this._type, d2);
   }
   covariant(x3) {
     try {
       if (Array.isArray(x3) && (x3.length === 0 || x3.length === 1 && this._type.covariant(x3[0])))
         return true;
-    } catch (e5) {
+    } catch (e4) {
       throw new Error(`Invalid ${this.display()} argument: ${toReadableString(x3)} 
 
--> ${e5.message}`);
+-> ${e4.message}`);
     }
     throw new Error(`Invalid ${this.display()} argument: ${toReadableString(x3)}`);
   }
@@ -2969,16 +2980,16 @@ class OptClass extends ConstructType {
     const buffer = this._type.encodeType(typeTable);
     typeTable.add(this, concat(opCode, buffer));
   }
-  decodeValue(b2, t3) {
-    if (t3 instanceof NullClass) {
+  decodeValue(b2, t2) {
+    if (t2 instanceof NullClass) {
       return [];
     }
-    if (t3 instanceof ReservedClass) {
+    if (t2 instanceof ReservedClass) {
       return [];
     }
-    let wireType = t3;
-    if (t3 instanceof RecClass) {
-      const ty = t3.getType();
+    let wireType = t2;
+    if (t2 instanceof RecClass) {
+      const ty = t2.getType();
       if (typeof ty === "undefined") {
         throw new Error("type mismatch with uninitialized type");
       } else
@@ -2991,9 +3002,9 @@ class OptClass extends ConstructType {
         case 1: {
           const checkpoint = b2.save();
           try {
-            const v3 = this._type.decodeValue(b2, wireType._type);
-            return [v3];
-          } catch (e5) {
+            const v2 = this._type.decodeValue(b2, wireType._type);
+            return [v2];
+          } catch (e4) {
             b2.restore(checkpoint);
             wireType._type.decodeValue(b2, wireType._type);
             return [];
@@ -3011,11 +3022,11 @@ class OptClass extends ConstructType {
     } else {
       const checkpoint = b2.save();
       try {
-        const v3 = this._type.decodeValue(b2, t3);
-        return [v3];
-      } catch (e5) {
+        const v2 = this._type.decodeValue(b2, t2);
+        return [v2];
+      } catch (e4) {
         b2.restore(checkpoint);
-        wireType.decodeValue(b2, t3);
+        wireType.decodeValue(b2, t2);
         return [];
       }
     }
@@ -3043,16 +3054,16 @@ class RecordClass extends ConstructType {
   }
   constructor(fields = {}) {
     super();
-    this._fields = Object.entries(fields).sort((a2, b2) => idlLabelToId(a2[0]) - idlLabelToId(b2[0]));
+    this._fields = Object.entries(fields).sort((a3, b2) => idlLabelToId(a3[0]) - idlLabelToId(b2[0]));
   }
-  accept(v3, d2) {
-    return v3.visitRecord(this, this._fields, d2);
+  accept(v2, d2) {
+    return v2.visitRecord(this, this._fields, d2);
   }
   tryAsTuple() {
     const res = [];
-    for (let i3 = 0; i3 < this._fields.length; i3++) {
-      const [key, type] = this._fields[i3];
-      if (key !== `_${i3}_`) {
+    for (let i2 = 0; i2 < this._fields.length; i2++) {
+      const [key, type] = this._fields[i2];
+      if (key !== `_${i2}_`) {
         return null;
       }
       res.push(type);
@@ -3060,16 +3071,16 @@ class RecordClass extends ConstructType {
     return res;
   }
   covariant(x3) {
-    if (typeof x3 === "object" && this._fields.every(([k2, t3]) => {
+    if (typeof x3 === "object" && this._fields.every(([k2, t2]) => {
       if (!x3.hasOwnProperty(k2)) {
         throw new Error(`Record is missing key "${k2}".`);
       }
       try {
-        return t3.covariant(x3[k2]);
-      } catch (e5) {
+        return t2.covariant(x3[k2]);
+      } catch (e4) {
         throw new Error(`Invalid ${this.display()} argument: 
 
-field ${k2} -> ${e5.message}`);
+field ${k2} -> ${e4.message}`);
       }
     }))
       return true;
@@ -3077,7 +3088,7 @@ field ${k2} -> ${e5.message}`);
   }
   encodeValue(x3) {
     const values = this._fields.map(([key]) => x3[key]);
-    const bufs = zipWith(this._fields, values, ([, c2], d2) => c2.encodeValue(d2));
+    const bufs = zipWith(this._fields, values, ([, c3], d2) => c3.encodeValue(d2));
     return concat(...bufs);
   }
   _buildTypeTableImpl(T2) {
@@ -3087,8 +3098,8 @@ field ${k2} -> ${e5.message}`);
     const fields = this._fields.map(([key, value]) => concat(lebEncode(idlLabelToId(key)), value.encodeType(T2)));
     T2.add(this, concat(opCode, len, concat(...fields)));
   }
-  decodeValue(b2, t3) {
-    const record = this.checkType(t3);
+  decodeValue(b2, t2) {
+    const record = this.checkType(t2);
     if (!(record instanceof RecordClass)) {
       throw new Error("Not a record type");
     }
@@ -3147,7 +3158,7 @@ field ${k2} -> ${e5.message}`);
   }
   valueToString(x3) {
     const values = this._fields.map(([key]) => x3[key]);
-    const fields = zipWith(this._fields, values, ([k2, c2], d2) => k2 + "=" + c2.valueToString(d2));
+    const fields = zipWith(this._fields, values, ([k2, c3], d2) => k2 + "=" + c3.valueToString(d2));
     return `record {${fields.join("; ")}}`;
   }
 }
@@ -3160,32 +3171,32 @@ class TupleClass extends RecordClass {
   }
   constructor(_components) {
     const x3 = {};
-    _components.forEach((e5, i3) => x3["_" + i3 + "_"] = e5);
+    _components.forEach((e4, i2) => x3["_" + i2 + "_"] = e4);
     super(x3);
     this._components = _components;
   }
-  accept(v3, d2) {
-    return v3.visitTuple(this, this._components, d2);
+  accept(v2, d2) {
+    return v2.visitTuple(this, this._components, d2);
   }
   covariant(x3) {
-    if (Array.isArray(x3) && x3.length >= this._fields.length && this._components.every((t3, i3) => {
+    if (Array.isArray(x3) && x3.length >= this._fields.length && this._components.every((t2, i2) => {
       try {
-        return t3.covariant(x3[i3]);
-      } catch (e5) {
+        return t2.covariant(x3[i2]);
+      } catch (e4) {
         throw new Error(`Invalid ${this.display()} argument: 
 
-index ${i3} -> ${e5.message}`);
+index ${i2} -> ${e4.message}`);
       }
     }))
       return true;
     throw new Error(`Invalid ${this.display()} argument: ${toReadableString(x3)}`);
   }
   encodeValue(x3) {
-    const bufs = zipWith(this._components, x3, (c2, d2) => c2.encodeValue(d2));
+    const bufs = zipWith(this._components, x3, (c3, d2) => c3.encodeValue(d2));
     return concat(...bufs);
   }
-  decodeValue(b2, t3) {
-    const tuple = this.checkType(t3);
+  decodeValue(b2, t2) {
+    const tuple = this.checkType(t2);
     if (!(tuple instanceof TupleClass)) {
       throw new Error("not a tuple type");
     }
@@ -3193,11 +3204,11 @@ index ${i3} -> ${e5.message}`);
       throw new Error("tuple mismatch");
     }
     const res = [];
-    for (const [i3, wireType] of tuple._components.entries()) {
-      if (i3 >= this._components.length) {
+    for (const [i2, wireType] of tuple._components.entries()) {
+      if (i2 >= this._components.length) {
         wireType.decodeValue(b2, wireType);
       } else {
-        res.push(this._components[i3].decodeValue(b2, wireType));
+        res.push(this._components[i2].decodeValue(b2, wireType));
       }
     }
     return res;
@@ -3207,7 +3218,7 @@ index ${i3} -> ${e5.message}`);
     return `record {${fields.join("; ")}}`;
   }
   valueToString(values) {
-    const fields = zipWith(this._components, values, (c2, d2) => c2.valueToString(d2));
+    const fields = zipWith(this._components, values, (c3, d2) => c3.valueToString(d2));
     return `record {${fields.join("; ")}}`;
   }
 }
@@ -3220,29 +3231,29 @@ class VariantClass extends ConstructType {
   }
   constructor(fields = {}) {
     super();
-    this._fields = Object.entries(fields).sort((a2, b2) => idlLabelToId(a2[0]) - idlLabelToId(b2[0]));
+    this._fields = Object.entries(fields).sort((a3, b2) => idlLabelToId(a3[0]) - idlLabelToId(b2[0]));
   }
-  accept(v3, d2) {
-    return v3.visitVariant(this, this._fields, d2);
+  accept(v2, d2) {
+    return v2.visitVariant(this, this._fields, d2);
   }
   covariant(x3) {
-    if (typeof x3 === "object" && Object.entries(x3).length === 1 && this._fields.every(([k2, v3]) => {
+    if (typeof x3 === "object" && Object.entries(x3).length === 1 && this._fields.every(([k2, v2]) => {
       try {
-        return !x3.hasOwnProperty(k2) || v3.covariant(x3[k2]);
-      } catch (e5) {
+        return !x3.hasOwnProperty(k2) || v2.covariant(x3[k2]);
+      } catch (e4) {
         throw new Error(`Invalid ${this.display()} argument: 
 
-variant ${k2} -> ${e5.message}`);
+variant ${k2} -> ${e4.message}`);
       }
     }))
       return true;
     throw new Error(`Invalid ${this.display()} argument: ${toReadableString(x3)}`);
   }
   encodeValue(x3) {
-    for (let i3 = 0; i3 < this._fields.length; i3++) {
-      const [name, type] = this._fields[i3];
+    for (let i2 = 0; i2 < this._fields.length; i2++) {
+      const [name, type] = this._fields[i2];
       if (x3.hasOwnProperty(name)) {
-        const idx = lebEncode(i3);
+        const idx = lebEncode(i2);
         const buf = type.encodeValue(x3[name]);
         return concat(idx, buf);
       }
@@ -3258,8 +3269,8 @@ variant ${k2} -> ${e5.message}`);
     const fields = this._fields.map(([key, value]) => concat(lebEncode(idlLabelToId(key)), value.encodeType(typeTable)));
     typeTable.add(this, concat(opCode, len, ...fields));
   }
-  decodeValue(b2, t3) {
-    const variant = this.checkType(t3);
+  decodeValue(b2, t2) {
+    const variant = this.checkType(t2);
     if (!(variant instanceof VariantClass)) {
       throw new Error("Not a variant type");
     }
@@ -3316,14 +3327,14 @@ const _RecClass = class _RecClass extends ConstructType {
   static [Symbol.hasInstance](instance) {
     return instance.typeName === IdlTypeName.RecClass;
   }
-  accept(v3, d2) {
+  accept(v2, d2) {
     if (!this._type) {
       throw Error("Recursive type uninitialized.");
     }
-    return v3.visitRec(this, this._type, d2);
+    return v2.visitRec(this, this._type, d2);
   }
-  fill(t3) {
-    this._type = t3;
+  fill(t2) {
+    this._type = t2;
   }
   getType() {
     return this._type;
@@ -3347,11 +3358,11 @@ const _RecClass = class _RecClass extends ConstructType {
     this._type.buildTypeTable(typeTable);
     typeTable.merge(this, this._type.name);
   }
-  decodeValue(b2, t3) {
+  decodeValue(b2, t2) {
     if (!this._type) {
       throw Error("Recursive type uninitialized.");
     }
-    return this._type.decodeValue(b2, t3);
+    return this._type.decodeValue(b2, t2);
   }
   get name() {
     return `rec_${this._id}`;
@@ -3386,8 +3397,8 @@ class PrincipalClass extends PrimitiveType {
   static [Symbol.hasInstance](instance) {
     return instance.typeName === IdlTypeName.PrincipalClass;
   }
-  accept(v3, d2) {
-    return v3.visitPrincipal(this, d2);
+  accept(v2, d2) {
+    return v2.visitPrincipal(this, d2);
   }
   covariant(x3) {
     if (x3 && x3._isPrincipal)
@@ -3402,8 +3413,8 @@ class PrincipalClass extends PrimitiveType {
   encodeType() {
     return slebEncode(IDLTypeIds.Principal);
   }
-  decodeValue(b2, t3) {
-    this.checkType(t3);
+  decodeValue(b2, t2) {
+    this.checkType(t2);
     return decodePrincipalId(b2);
   }
   get name() {
@@ -3420,11 +3431,11 @@ class FuncClass extends ConstructType {
   static [Symbol.hasInstance](instance) {
     return instance.typeName === IdlTypeName.FuncClass;
   }
-  static argsToString(types, v3) {
-    if (types.length !== v3.length) {
+  static argsToString(types, v2) {
+    if (types.length !== v2.length) {
       throw new Error("arity mismatch");
     }
-    return "(" + types.map((t3, i3) => t3.valueToString(v3[i3])).join(", ") + ")";
+    return "(" + types.map((t2, i2) => t2.valueToString(v2[i2])).join(", ") + ")";
   }
   constructor(argTypes, retTypes, annotations = []) {
     super();
@@ -3432,8 +3443,8 @@ class FuncClass extends ConstructType {
     this.retTypes = retTypes;
     this.annotations = annotations;
   }
-  accept(v3, d2) {
-    return v3.visitFunc(this, d2);
+  accept(v2, d2) {
+    return v2.visitFunc(this, d2);
   }
   covariant(x3) {
     if (Array.isArray(x3) && x3.length === 2 && x3[0] && x3[0]._isPrincipal && typeof x3[1] === "string")
@@ -3457,11 +3468,11 @@ class FuncClass extends ConstructType {
     const retLen = lebEncode(this.retTypes.length);
     const rets = concat(...this.retTypes.map((arg) => arg.encodeType(T2)));
     const annLen = lebEncode(this.annotations.length);
-    const anns = concat(...this.annotations.map((a2) => this.encodeAnnotation(a2)));
+    const anns = concat(...this.annotations.map((a3) => this.encodeAnnotation(a3)));
     T2.add(this, concat(opCode, argLen, args, retLen, rets, annLen, anns));
   }
-  decodeValue(b2, t3) {
-    const tt2 = t3 instanceof RecClass ? t3.getType() ?? t3 : t3;
+  decodeValue(b2, t2) {
+    const tt2 = t2 instanceof RecClass ? t2.getType() ?? t2 : t2;
     if (!subtype(tt2, this)) {
       throw new Error(`Cannot decode function reference at type ${this.display()} from wire type ${tt2.display()}`);
     }
@@ -3512,18 +3523,18 @@ class ServiceClass extends ConstructType {
   }
   constructor(fields) {
     super();
-    this._fields = Object.entries(fields).sort((a2, b2) => {
-      if (a2[0] < b2[0]) {
+    this._fields = Object.entries(fields).sort((a3, b2) => {
+      if (a3[0] < b2[0]) {
         return -1;
       }
-      if (a2[0] > b2[0]) {
+      if (a3[0] > b2[0]) {
         return 1;
       }
       return 0;
     });
   }
-  accept(v3, d2) {
-    return v3.visitService(this, d2);
+  accept(v2, d2) {
+    return v2.visitService(this, d2);
   }
   covariant(x3) {
     if (x3 && x3._isPrincipal)
@@ -3546,8 +3557,8 @@ class ServiceClass extends ConstructType {
     });
     T2.add(this, concat(opCode, len, ...meths));
   }
-  decodeValue(b2, t3) {
-    const tt2 = t3 instanceof RecClass ? t3.getType() ?? t3 : t3;
+  decodeValue(b2, t2) {
+    const tt2 = t2 instanceof RecClass ? t2.getType() ?? t2 : t2;
     if (!subtype(tt2, this)) {
       throw new Error(`Cannot decode service reference at type ${this.display()} from wire type ${tt2.display()}`);
     }
@@ -3577,21 +3588,20 @@ function encode$1(argTypes, args) {
     throw Error("Wrong number of message arguments");
   }
   const typeTable = new TypeTable();
-  argTypes.forEach((t3) => t3.buildTypeTable(typeTable));
-  const magic = new TextEncoder().encode(magicNumber);
+  argTypes.forEach((t2) => t2.buildTypeTable(typeTable));
   const table = typeTable.encode();
   const len = lebEncode(args.length);
-  const typs = concat(...argTypes.map((t3) => t3.encodeType(typeTable)));
-  const vals = concat(...zipWith(argTypes, args, (t3, x3) => {
+  const typs = concat(...argTypes.map((t2) => t2.encodeType(typeTable)));
+  const vals = concat(...zipWith(argTypes, args, (t2, x3) => {
     try {
-      t3.covariant(x3);
-    } catch (e5) {
-      const err = new Error(e5.message + "\n\n");
+      t2.covariant(x3);
+    } catch (e4) {
+      const err = new Error(e4.message + "\n\n");
       throw err;
     }
-    return t3.encodeValue(x3);
+    return t2.encodeValue(x3);
   }));
-  return concat(magic, table, len, typs, vals);
+  return concat(magicNumberBytes, table, len, typs, vals);
 }
 function decode$1(retTypes, bytes) {
   const b2 = new PipeArrayBuffer(bytes);
@@ -3606,13 +3616,13 @@ function decode$1(retTypes, bytes) {
   function readTypeTable(pipe) {
     const typeTable = [];
     const len = Number(lebDecode(pipe));
-    for (let i3 = 0; i3 < len; i3++) {
+    for (let i2 = 0; i2 < len; i2++) {
       const ty = Number(slebDecode(pipe));
       switch (ty) {
         case IDLTypeIds.Opt:
         case IDLTypeIds.Vector: {
-          const t3 = Number(slebDecode(pipe));
-          typeTable.push([ty, t3]);
+          const t2 = Number(slebDecode(pipe));
+          typeTable.push([ty, t2]);
           break;
         }
         case IDLTypeIds.Record:
@@ -3629,8 +3639,8 @@ function decode$1(retTypes, bytes) {
               throw new Error("field id collision or not sorted");
             }
             prevHash = hash;
-            const t3 = Number(slebDecode(pipe));
-            fields.push([hash, t3]);
+            const t2 = Number(slebDecode(pipe));
+            fields.push([hash, t2]);
           }
           typeTable.push([ty, fields]);
           break;
@@ -3688,7 +3698,7 @@ function decode$1(retTypes, bytes) {
     }
     const rawList = [];
     const length = Number(lebDecode(pipe));
-    for (let i3 = 0; i3 < length; i3++) {
+    for (let i2 = 0; i2 < length; i2++) {
       rawList.push(Number(slebDecode(pipe)));
     }
     return [typeTable, rawList];
@@ -3698,12 +3708,12 @@ function decode$1(retTypes, bytes) {
     throw new Error("Wrong number of return values");
   }
   const table = rawTable.map((_2) => Rec());
-  function getType(t3) {
-    if (t3 < -24) {
+  function getType(t2) {
+    if (t2 < -24) {
       throw new Error("future value not supported");
     }
-    if (t3 < 0) {
-      switch (t3) {
+    if (t2 < 0) {
+      switch (t2) {
         case -1:
           return Null;
         case -2:
@@ -3741,13 +3751,13 @@ function decode$1(retTypes, bytes) {
         case -24:
           return Principal2;
         default:
-          throw new Error("Illegal op_code: " + t3);
+          throw new Error("Illegal op_code: " + t2);
       }
     }
-    if (t3 >= rawTable.length) {
+    if (t2 >= rawTable.length) {
       throw new Error("type index out of range");
     }
-    return table[t3];
+    return table[t2];
   }
   function buildType(entry) {
     switch (entry[0]) {
@@ -3783,7 +3793,7 @@ function decode$1(retTypes, bytes) {
       }
       case IDLTypeIds.Func: {
         const [args, returnValues, annotations] = entry[1];
-        return Func(args.map((t3) => getType(t3)), returnValues.map((t3) => getType(t3)), annotations);
+        return Func(args.map((t2) => getType(t2)), returnValues.map((t2) => getType(t2)), annotations);
       }
       case IDLTypeIds.Service: {
         const rec = {};
@@ -3804,23 +3814,23 @@ function decode$1(retTypes, bytes) {
         throw new Error("Illegal op_code: " + entry[0]);
     }
   }
-  rawTable.forEach((entry, i3) => {
+  rawTable.forEach((entry, i2) => {
     if (entry[0] === IDLTypeIds.Func) {
-      const t3 = buildType(entry);
-      table[i3].fill(t3);
+      const t2 = buildType(entry);
+      table[i2].fill(t2);
     }
   });
-  rawTable.forEach((entry, i3) => {
+  rawTable.forEach((entry, i2) => {
     if (entry[0] !== IDLTypeIds.Func) {
-      const t3 = buildType(entry);
-      table[i3].fill(t3);
+      const t2 = buildType(entry);
+      table[i2].fill(t2);
     }
   });
   resetSubtypeCache();
-  const types = rawTypes.map((t3) => getType(t3));
+  const types = rawTypes.map((t2) => getType(t2));
   try {
-    const output = retTypes.map((t3, i3) => {
-      return t3.decodeValue(b2, types[i3]);
+    const output = retTypes.map((t2, i2) => {
+      return t2.decodeValue(b2, types[i2]);
     });
     for (let ind = retTypes.length; ind < types.length; ind++) {
       types[ind].decodeValue(b2, types[ind]);
@@ -3855,14 +3865,14 @@ const Principal2 = new PrincipalClass();
 function Tuple(...types) {
   return new TupleClass(types);
 }
-function Vec(t3) {
-  return new VecClass(t3);
+function Vec(t2) {
+  return new VecClass(t2);
 }
-function Opt(t3) {
-  return new OptClass(t3);
+function Opt(t2) {
+  return new OptClass(t2);
 }
-function Record(t3) {
-  return new RecordClass(t3);
+function Record(t2) {
+  return new RecordClass(t2);
 }
 function Variant(fields) {
   return new VariantClass(fields);
@@ -3873,8 +3883,8 @@ function Rec() {
 function Func(args, ret, annotations = []) {
   return new FuncClass(args, ret, annotations);
 }
-function Service(t3) {
-  return new ServiceClass(t3);
+function Service(t2) {
+  return new ServiceClass(t2);
 }
 class Relations {
   constructor(relations = /* @__PURE__ */ new Map()) {
@@ -3890,34 +3900,34 @@ class Relations {
   }
   /// Returns whether we know for sure that a relation holds or doesn't (`true` or `false`), or
   /// if we don't know yet (`undefined`)
-  known(t1, t22) {
-    return this.rels.get(t1.name)?.get(t22.name);
+  known(t1, t2) {
+    return this.rels.get(t1.name)?.get(t2.name);
   }
-  addNegative(t1, t22) {
-    this.addNames(t1.name, t22.name, false);
+  addNegative(t1, t2) {
+    this.addNames(t1.name, t2.name, false);
   }
-  add(t1, t22) {
-    this.addNames(t1.name, t22.name, true);
+  add(t1, t2) {
+    this.addNames(t1.name, t2.name, true);
   }
   display() {
     let result = "";
-    for (const [t1, v3] of this.rels) {
-      for (const [t22, known] of v3) {
+    for (const [t1, v2] of this.rels) {
+      for (const [t2, known] of v2) {
         const subty = known ? ":<" : "!<:";
-        result += `${t1} ${subty} ${t22}
+        result += `${t1} ${subty} ${t2}
 `;
       }
     }
     return result;
   }
-  addNames(t1, t22, isSubtype) {
+  addNames(t1, t2, isSubtype) {
     const t1Map = this.rels.get(t1);
     if (t1Map == void 0) {
       const newMap = /* @__PURE__ */ new Map();
-      newMap.set(t22, isSubtype);
+      newMap.set(t2, isSubtype);
       this.rels.set(t1, newMap);
     } else {
-      t1Map.set(t22, isSubtype);
+      t1Map.set(t2, isSubtype);
     }
   }
 }
@@ -3925,51 +3935,51 @@ let subtypeCache = new Relations();
 function resetSubtypeCache() {
   subtypeCache = new Relations();
 }
-function eqFunctionAnnotations(t1, t22) {
+function eqFunctionAnnotations(t1, t2) {
   const t1Annotations = new Set(t1.annotations);
-  const t2Annotations = new Set(t22.annotations);
+  const t2Annotations = new Set(t2.annotations);
   if (t1Annotations.size !== t2Annotations.size) {
     return false;
   }
-  for (const a2 of t1Annotations) {
-    if (!t2Annotations.has(a2))
+  for (const a3 of t1Annotations) {
+    if (!t2Annotations.has(a3))
       return false;
   }
   return true;
 }
-function canBeOmmitted(t3) {
-  return t3 instanceof OptClass || t3 instanceof NullClass || t3 instanceof ReservedClass;
+function canBeOmmitted(t2) {
+  return t2 instanceof OptClass || t2 instanceof NullClass || t2 instanceof ReservedClass;
 }
-function subtype(t1, t22) {
+function subtype(t1, t2) {
   const relations = subtypeCache.copy();
-  const isSubtype = subtype_(relations, t1, t22);
+  const isSubtype = subtype_(relations, t1, t2);
   if (isSubtype) {
-    subtypeCache.add(t1, t22);
+    subtypeCache.add(t1, t2);
   } else {
-    subtypeCache.addNegative(t1, t22);
+    subtypeCache.addNegative(t1, t2);
   }
   return isSubtype;
 }
-function subtype_(relations, t1, t22) {
-  if (t1.name === t22.name)
+function subtype_(relations, t1, t2) {
+  if (t1.name === t2.name)
     return true;
-  const known = relations.known(t1, t22);
+  const known = relations.known(t1, t2);
   if (known !== void 0)
     return known;
-  relations.add(t1, t22);
-  if (t22 instanceof ReservedClass)
+  relations.add(t1, t2);
+  if (t2 instanceof ReservedClass)
     return true;
   if (t1 instanceof EmptyClass)
     return true;
-  if (t1 instanceof NatClass && t22 instanceof IntClass)
+  if (t1 instanceof NatClass && t2 instanceof IntClass)
     return true;
-  if (t1 instanceof VecClass && t22 instanceof VecClass)
-    return subtype_(relations, t1._type, t22._type);
-  if (t22 instanceof OptClass)
+  if (t1 instanceof VecClass && t2 instanceof VecClass)
+    return subtype_(relations, t1._type, t2._type);
+  if (t2 instanceof OptClass)
     return true;
-  if (t1 instanceof RecordClass && t22 instanceof RecordClass) {
+  if (t1 instanceof RecordClass && t2 instanceof RecordClass) {
     const t1Object = t1.fieldsAsObject;
-    for (const [label, ty2] of t22._fields) {
+    for (const [label, ty2] of t2._fields) {
       const ty1 = t1Object[idlLabelToId(label)];
       if (!ty1) {
         if (!canBeOmmitted(ty2))
@@ -3981,23 +3991,23 @@ function subtype_(relations, t1, t22) {
     }
     return true;
   }
-  if (t1 instanceof FuncClass && t22 instanceof FuncClass) {
-    if (!eqFunctionAnnotations(t1, t22))
+  if (t1 instanceof FuncClass && t2 instanceof FuncClass) {
+    if (!eqFunctionAnnotations(t1, t2))
       return false;
-    for (let i3 = 0; i3 < t1.argTypes.length; i3++) {
-      const argTy1 = t1.argTypes[i3];
-      if (i3 < t22.argTypes.length) {
-        if (!subtype_(relations, t22.argTypes[i3], argTy1))
+    for (let i2 = 0; i2 < t1.argTypes.length; i2++) {
+      const argTy1 = t1.argTypes[i2];
+      if (i2 < t2.argTypes.length) {
+        if (!subtype_(relations, t2.argTypes[i2], argTy1))
           return false;
       } else {
         if (!canBeOmmitted(argTy1))
           return false;
       }
     }
-    for (let i3 = 0; i3 < t22.retTypes.length; i3++) {
-      const retTy2 = t22.retTypes[i3];
-      if (i3 < t1.retTypes.length) {
-        if (!subtype_(relations, t1.retTypes[i3], retTy2))
+    for (let i2 = 0; i2 < t2.retTypes.length; i2++) {
+      const retTy2 = t2.retTypes[i2];
+      if (i2 < t1.retTypes.length) {
+        if (!subtype_(relations, t1.retTypes[i2], retTy2))
           return false;
       } else {
         if (!canBeOmmitted(retTy2))
@@ -4006,8 +4016,8 @@ function subtype_(relations, t1, t22) {
     }
     return true;
   }
-  if (t1 instanceof VariantClass && t22 instanceof VariantClass) {
-    const t2Object = t22.alternativesAsObject;
+  if (t1 instanceof VariantClass && t2 instanceof VariantClass) {
+    const t2Object = t2.alternativesAsObject;
     for (const [label, ty1] of t1._fields) {
       const ty2 = t2Object[idlLabelToId(label)];
       if (!ty2)
@@ -4017,9 +4027,9 @@ function subtype_(relations, t1, t22) {
     }
     return true;
   }
-  if (t1 instanceof ServiceClass && t22 instanceof ServiceClass) {
+  if (t1 instanceof ServiceClass && t2 instanceof ServiceClass) {
     const t1Object = t1.fieldsAsObject();
-    for (const [name, ty2] of t22._fields) {
+    for (const [name, ty2] of t2._fields) {
       const ty1 = t1Object[name];
       if (!ty1)
         return false;
@@ -4029,10 +4039,10 @@ function subtype_(relations, t1, t22) {
     return true;
   }
   if (t1 instanceof RecClass) {
-    return subtype_(relations, t1.getType(), t22);
+    return subtype_(relations, t1.getType(), t2);
   }
-  if (t22 instanceof RecClass) {
-    return subtype_(relations, t1, t22.getType());
+  if (t2 instanceof RecClass) {
+    return subtype_(relations, t1, t2.getType());
   }
   return false;
 }
@@ -4112,11 +4122,11 @@ function uint8FromBufLike(bufLike) {
   }
   return new Uint8Array(bufLike);
 }
-function uint8Equals(a2, b2) {
-  if (a2.length !== b2.length)
+function uint8Equals(a3, b2) {
+  if (a3.length !== b2.length)
     return false;
-  for (let i3 = 0; i3 < a2.length; i3++) {
-    if (a2[i3] !== b2[i3])
+  for (let i2 = 0; i2 < a3.length; i2++) {
+    if (a3[i2] !== b2[i2])
       return false;
   }
   return true;
@@ -4163,6 +4173,7 @@ function hashOfMap(map) {
   const result = sha256(concatenated);
   return result;
 }
+const IC_STATE_ROOT_DOMAIN_SEPARATOR = new TextEncoder().encode("\ric-state-root");
 const IC_REQUEST_DOMAIN_SEPARATOR = new TextEncoder().encode("\nic-request");
 const IC_RESPONSE_DOMAIN_SEPARATOR = new TextEncoder().encode("\vic-response");
 const IC_REQUEST_AUTH_DELEGATION_DOMAIN_SEPARATOR = new TextEncoder().encode("ic-request-auth-delegation");
@@ -4208,287 +4219,287 @@ class AnonymousIdentity {
   }
 }
 let w$3 = class w extends Error {
-  constructor(n2) {
-    super(n2), this.name = "DecodingError";
+  constructor(n3) {
+    super(n3), this.name = "DecodingError";
   }
 };
-const m$2 = 55799, L$1 = Symbol("CBOR_STOP_CODE");
-var g$2 = /* @__PURE__ */ ((t3) => (t3[t3.False = 20] = "False", t3[t3.True = 21] = "True", t3[t3.Null = 22] = "Null", t3[t3.Undefined = 23] = "Undefined", t3[t3.Break = 31] = "Break", t3))(g$2 || {}), c = /* @__PURE__ */ ((t3) => (t3[t3.UnsignedInteger = 0] = "UnsignedInteger", t3[t3.NegativeInteger = 1] = "NegativeInteger", t3[t3.ByteString = 2] = "ByteString", t3[t3.TextString = 3] = "TextString", t3[t3.Array = 4] = "Array", t3[t3.Map = 5] = "Map", t3[t3.Tag = 6] = "Tag", t3[t3.Simple = 7] = "Simple", t3))(c || {});
-const z = 23, Y = 255, G$1 = 65535, P$1 = 4294967295, H$1 = BigInt("0xffffffffffffffff");
-var d = /* @__PURE__ */ ((t3) => (t3[t3.Value = 23] = "Value", t3[t3.OneByte = 24] = "OneByte", t3[t3.TwoBytes = 25] = "TwoBytes", t3[t3.FourBytes = 26] = "FourBytes", t3[t3.EightBytes = 27] = "EightBytes", t3[t3.Indefinite = 31] = "Indefinite", t3))(d || {});
-const h$2 = false;
-function W$1(t3) {
-  return t3 == null;
+const m$2 = 55799, L = /* @__PURE__ */ Symbol("CBOR_STOP_CODE");
+var g$3 = /* @__PURE__ */ ((t2) => (t2[t2.False = 20] = "False", t2[t2.True = 21] = "True", t2[t2.Null = 22] = "Null", t2[t2.Undefined = 23] = "Undefined", t2[t2.Break = 31] = "Break", t2))(g$3 || {}), c$2 = /* @__PURE__ */ ((t2) => (t2[t2.UnsignedInteger = 0] = "UnsignedInteger", t2[t2.NegativeInteger = 1] = "NegativeInteger", t2[t2.ByteString = 2] = "ByteString", t2[t2.TextString = 3] = "TextString", t2[t2.Array = 4] = "Array", t2[t2.Map = 5] = "Map", t2[t2.Tag = 6] = "Tag", t2[t2.Simple = 7] = "Simple", t2))(c$2 || {});
+const z$1 = 23, Y$1 = 255, G$1 = 65535, P$3 = 4294967295, H$1 = BigInt("0xffffffffffffffff");
+var d$2 = /* @__PURE__ */ ((t2) => (t2[t2.Value = 23] = "Value", t2[t2.OneByte = 24] = "OneByte", t2[t2.TwoBytes = 25] = "TwoBytes", t2[t2.FourBytes = 26] = "FourBytes", t2[t2.EightBytes = 27] = "EightBytes", t2[t2.Indefinite = 31] = "Indefinite", t2))(d$2 || {});
+const h$1 = false;
+function W$1(t2) {
+  return t2 == null;
 }
-function R$2(t3, n2) {
-  const e5 = new Uint8Array(n2);
-  return e5.set(t3), e5;
+function R$1(t2, n3) {
+  const e4 = new Uint8Array(n3);
+  return e4.set(t2), e4;
 }
-const K = new TextDecoder();
-function Z(t3) {
-  return (t3 & 224) >> 5;
+const K$2 = new TextDecoder();
+function Z(t2) {
+  return (t2 & 224) >> 5;
 }
-function q$1(t3) {
-  return t3 & 31;
+function q$1(t2) {
+  return t2 & 31;
 }
-let A$3 = new Uint8Array(), y$1, a = 0;
-function ut(t3, n2) {
-  A$3 = t3, a = 0;
-  const e5 = B$1();
-  return (n2 == null ? void 0 : n2(e5)) ?? e5;
+let A$2 = new Uint8Array(), y$4, a$3 = 0;
+function ut(t2, n3) {
+  A$2 = t2, a$3 = 0;
+  const e4 = B$2();
+  return (n3 == null ? void 0 : n3(e4)) ?? e4;
 }
-function B$1(t3) {
-  const [n2, e5] = N$3();
-  switch (n2) {
-    case c.UnsignedInteger:
-      return E$2(e5);
-    case c.NegativeInteger:
-      return j$1(e5);
-    case c.ByteString:
-      return $$1(e5);
-    case c.TextString:
-      return F$2(e5);
-    case c.Array:
-      return J$1(e5);
-    case c.Map:
-      return b$3(e5);
-    case c.Tag:
-      return M$2(e5);
-    case c.Simple:
-      return Q(e5);
+function B$2(t2) {
+  const [n3, e4] = N$3();
+  switch (n3) {
+    case c$2.UnsignedInteger:
+      return E$2(e4);
+    case c$2.NegativeInteger:
+      return j$1(e4);
+    case c$2.ByteString:
+      return $$2(e4);
+    case c$2.TextString:
+      return F$1(e4);
+    case c$2.Array:
+      return J$2(e4);
+    case c$2.Map:
+      return b$4(e4);
+    case c$2.Tag:
+      return M$2(e4);
+    case c$2.Simple:
+      return Q$1(e4);
   }
-  throw new w$3(`Unsupported major type: ${n2}`);
+  throw new w$3(`Unsupported major type: ${n3}`);
 }
 function N$3() {
-  const t3 = A$3.at(a);
-  if (W$1(t3))
+  const t2 = A$2.at(a$3);
+  if (W$1(t2))
     throw new w$3("Provided CBOR data is empty");
-  const n2 = Z(t3), e5 = q$1(t3);
-  return a++, [n2, e5];
+  const n3 = Z(t2), e4 = q$1(t2);
+  return a$3++, [n3, e4];
 }
-function J$1(t3, n2) {
-  const e5 = E$2(t3);
-  if (e5 === 1 / 0) {
+function J$2(t2, n3) {
+  const e4 = E$2(t2);
+  if (e4 === 1 / 0) {
     const u2 = [];
-    let f2 = B$1();
-    for (; f2 !== L$1; )
-      u2.push(f2), f2 = B$1();
+    let f2 = B$2();
+    for (; f2 !== L; )
+      u2.push(f2), f2 = B$2();
     return u2;
   }
-  const i3 = new Array(e5);
-  for (let u2 = 0; u2 < e5; u2++) {
-    const f2 = B$1();
-    i3[u2] = f2;
+  const i2 = new Array(e4);
+  for (let u2 = 0; u2 < e4; u2++) {
+    const f2 = B$2();
+    i2[u2] = f2;
   }
-  return i3;
+  return i2;
 }
-function Q(t3) {
-  switch (t3) {
-    case g$2.False:
+function Q$1(t2) {
+  switch (t2) {
+    case g$3.False:
       return false;
-    case g$2.True:
+    case g$3.True:
       return true;
-    case g$2.Null:
+    case g$3.Null:
       return null;
-    case g$2.Undefined:
+    case g$3.Undefined:
       return;
-    case g$2.Break:
-      return L$1;
+    case g$3.Break:
+      return L;
   }
-  throw new w$3(`Unrecognized simple type: ${t3.toString(2)}`);
+  throw new w$3(`Unrecognized simple type: ${t2.toString(2)}`);
 }
-function b$3(t3, n2) {
-  const e5 = E$2(t3), i3 = {};
-  if (e5 === 1 / 0) {
+function b$4(t2, n3) {
+  const e4 = E$2(t2), i2 = {};
+  if (e4 === 1 / 0) {
     let [u2, f2] = N$3();
-    for (; u2 !== c.Simple && f2 !== g$2.Break; ) {
-      const l3 = F$2(f2), U2 = B$1();
-      i3[l3] = U2, [u2, f2] = N$3();
+    for (; u2 !== c$2.Simple && f2 !== g$3.Break; ) {
+      const l3 = F$1(f2), U2 = B$2();
+      i2[l3] = U2, [u2, f2] = N$3();
     }
-    return i3;
+    return i2;
   }
-  for (let u2 = 0; u2 < e5; u2++) {
+  for (let u2 = 0; u2 < e4; u2++) {
     const [f2, l3] = N$3();
-    if (f2 !== c.TextString)
+    if (f2 !== c$2.TextString)
       throw new w$3("Map keys must be text strings");
-    const U2 = F$2(l3), D2 = B$1();
-    i3[U2] = D2;
+    const U2 = F$1(l3), D2 = B$2();
+    i2[U2] = D2;
   }
-  return i3;
+  return i2;
 }
-function E$2(t3) {
-  if (t3 <= d.Value)
-    return t3;
-  switch (y$1 = new DataView(A$3.buffer, A$3.byteOffset + a), t3) {
-    case d.OneByte:
-      return a++, y$1.getUint8(0);
-    case d.TwoBytes:
-      return a += 2, y$1.getUint16(0, h$2);
-    case d.FourBytes:
-      return a += 4, y$1.getUint32(0, h$2);
-    case d.EightBytes:
-      return a += 8, y$1.getBigUint64(0, h$2);
-    case d.Indefinite:
+function E$2(t2) {
+  if (t2 <= d$2.Value)
+    return t2;
+  switch (y$4 = new DataView(A$2.buffer, A$2.byteOffset + a$3), t2) {
+    case d$2.OneByte:
+      return a$3++, y$4.getUint8(0);
+    case d$2.TwoBytes:
+      return a$3 += 2, y$4.getUint16(0, h$1);
+    case d$2.FourBytes:
+      return a$3 += 4, y$4.getUint32(0, h$1);
+    case d$2.EightBytes:
+      return a$3 += 8, y$4.getBigUint64(0, h$1);
+    case d$2.Indefinite:
       return 1 / 0;
     default:
-      throw new w$3(`Unsupported integer info: ${t3.toString(2)}`);
+      throw new w$3(`Unsupported integer info: ${t2.toString(2)}`);
   }
 }
-function j$1(t3) {
-  const n2 = E$2(t3);
-  return typeof n2 == "number" ? -1 - n2 : -1n - n2;
+function j$1(t2) {
+  const n3 = E$2(t2);
+  return typeof n3 == "number" ? -1 - n3 : -1n - n3;
 }
-function $$1(t3) {
-  const n2 = E$2(t3);
-  if (n2 > Number.MAX_SAFE_INTEGER)
+function $$2(t2) {
+  const n3 = E$2(t2);
+  if (n3 > Number.MAX_SAFE_INTEGER)
     throw new w$3("Byte length is too large");
-  const e5 = Number(n2);
-  return a += e5, A$3.slice(a - e5, a);
+  const e4 = Number(n3);
+  return a$3 += e4, A$2.slice(a$3 - e4, a$3);
 }
-function F$2(t3) {
-  const n2 = $$1(t3);
-  return K.decode(n2);
+function F$1(t2) {
+  const n3 = $$2(t2);
+  return K$2.decode(n3);
 }
-function M$2(t3, n2) {
-  const e5 = E$2(t3);
-  if (e5 === m$2)
-    return B$1();
-  throw new w$3(`Unsupported tag: ${e5}.`);
+function M$2(t2, n3) {
+  const e4 = E$2(t2);
+  if (e4 === m$2)
+    return B$2();
+  throw new w$3(`Unsupported tag: ${e4}.`);
 }
 let x$1 = class x extends Error {
-  constructor(n2) {
-    super(n2), this.name = "SerializationError";
+  constructor(n3) {
+    super(n3), this.name = "SerializationError";
   }
 };
-const p$1 = 2 * 1024, C$1 = 100, v$3 = new TextEncoder();
-function S$1(t3) {
-  return t3 << 5;
+const p$3 = 2 * 1024, C$2 = 100, v$2 = new TextEncoder();
+function S$2(t2) {
+  return t2 << 5;
 }
-let o$2 = new Uint8Array(p$1), r$1 = new DataView(o$2.buffer), s$2 = 0, O$3 = [];
-function dt(t3, n2) {
+let o$2 = new Uint8Array(p$3), r = new DataView(o$2.buffer), s$2 = 0, O$1 = [];
+function dt(t2, n3) {
   s$2 = 0;
-  const e5 = (n2 == null ? void 0 : n2(t3)) ?? t3;
-  return it(m$2, e5, n2), o$2.slice(0, s$2);
+  const e4 = (n3 == null ? void 0 : n3(t2)) ?? t2;
+  return it(m$2, e4, n3), o$2.slice(0, s$2);
 }
-function _(t3, n2) {
-  if (s$2 > o$2.length - C$1 && (o$2 = R$2(o$2, o$2.length * 2), r$1 = new DataView(o$2.buffer)), t3 === false || t3 === true || t3 === null || t3 === void 0) {
-    et(t3);
+function _$1(t2, n3) {
+  if (s$2 > o$2.length - C$2 && (o$2 = R$1(o$2, o$2.length * 2), r = new DataView(o$2.buffer)), t2 === false || t2 === true || t2 === null || t2 === void 0) {
+    et(t2);
     return;
   }
-  if (typeof t3 == "number" || typeof t3 == "bigint") {
-    ft(t3);
+  if (typeof t2 == "number" || typeof t2 == "bigint") {
+    ft(t2);
     return;
   }
-  if (typeof t3 == "string") {
-    X(t3);
+  if (typeof t2 == "string") {
+    X$2(t2);
     return;
   }
-  if (t3 instanceof Uint8Array) {
-    V$1(t3);
+  if (t2 instanceof Uint8Array) {
+    V$2(t2);
     return;
   }
-  if (t3 instanceof ArrayBuffer) {
-    V$1(new Uint8Array(t3));
+  if (t2 instanceof ArrayBuffer) {
+    V$2(new Uint8Array(t2));
     return;
   }
-  if (Array.isArray(t3)) {
-    tt(t3, n2);
+  if (Array.isArray(t2)) {
+    tt(t2, n3);
     return;
   }
-  if (typeof t3 == "object") {
-    nt(t3, n2);
+  if (typeof t2 == "object") {
+    nt(t2, n3);
     return;
   }
-  throw new x$1(`Unsupported type: ${typeof t3}`);
+  throw new x$1(`Unsupported type: ${typeof t2}`);
 }
-function tt(t3, n2) {
-  I$1(c.Array, t3.length), t3.forEach((e5, i3) => {
-    _((n2 == null ? void 0 : n2(e5, i3.toString())) ?? e5, n2);
+function tt(t2, n3) {
+  I$3(c$2.Array, t2.length), t2.forEach((e4, i2) => {
+    _$1((n3 == null ? void 0 : n3(e4, i2.toString())) ?? e4, n3);
   });
 }
-function nt(t3, n2) {
-  O$3 = Object.entries(t3), I$1(c.Map, O$3.length), O$3.forEach(([e5, i3]) => {
-    X(e5), _((n2 == null ? void 0 : n2(i3, e5)) ?? i3, n2);
+function nt(t2, n3) {
+  O$1 = Object.entries(t2), I$3(c$2.Map, O$1.length), O$1.forEach(([e4, i2]) => {
+    X$2(e4), _$1((n3 == null ? void 0 : n3(i2, e4)) ?? i2, n3);
   });
 }
-function I$1(t3, n2) {
-  if (n2 <= z) {
-    r$1.setUint8(
+function I$3(t2, n3) {
+  if (n3 <= z$1) {
+    r.setUint8(
       s$2++,
-      S$1(t3) | Number(n2)
+      S$2(t2) | Number(n3)
     );
     return;
   }
-  if (n2 <= Y) {
-    r$1.setUint8(
+  if (n3 <= Y$1) {
+    r.setUint8(
       s$2++,
-      S$1(t3) | d.OneByte
-    ), r$1.setUint8(s$2, Number(n2)), s$2 += 1;
+      S$2(t2) | d$2.OneByte
+    ), r.setUint8(s$2, Number(n3)), s$2 += 1;
     return;
   }
-  if (n2 <= G$1) {
-    r$1.setUint8(
+  if (n3 <= G$1) {
+    r.setUint8(
       s$2++,
-      S$1(t3) | d.TwoBytes
-    ), r$1.setUint16(s$2, Number(n2), h$2), s$2 += 2;
+      S$2(t2) | d$2.TwoBytes
+    ), r.setUint16(s$2, Number(n3), h$1), s$2 += 2;
     return;
   }
-  if (n2 <= P$1) {
-    r$1.setUint8(
+  if (n3 <= P$3) {
+    r.setUint8(
       s$2++,
-      S$1(t3) | d.FourBytes
-    ), r$1.setUint32(s$2, Number(n2), h$2), s$2 += 4;
+      S$2(t2) | d$2.FourBytes
+    ), r.setUint32(s$2, Number(n3), h$1), s$2 += 4;
     return;
   }
-  if (n2 <= H$1) {
-    r$1.setUint8(
+  if (n3 <= H$1) {
+    r.setUint8(
       s$2++,
-      S$1(t3) | d.EightBytes
-    ), r$1.setBigUint64(s$2, BigInt(n2), h$2), s$2 += 8;
+      S$2(t2) | d$2.EightBytes
+    ), r.setBigUint64(s$2, BigInt(n3), h$1), s$2 += 8;
     return;
   }
-  throw new x$1(`Value too large to encode: ${n2}`);
+  throw new x$1(`Value too large to encode: ${n3}`);
 }
-function et(t3) {
-  I$1(c.Simple, st(t3));
+function et(t2) {
+  I$3(c$2.Simple, st(t2));
 }
-function st(t3) {
-  if (t3 === false)
-    return g$2.False;
-  if (t3 === true)
-    return g$2.True;
-  if (t3 === null)
-    return g$2.Null;
-  if (t3 === void 0)
-    return g$2.Undefined;
-  throw new x$1(`Unrecognized simple value: ${t3.toString()}`);
+function st(t2) {
+  if (t2 === false)
+    return g$3.False;
+  if (t2 === true)
+    return g$3.True;
+  if (t2 === null)
+    return g$3.Null;
+  if (t2 === void 0)
+    return g$3.Undefined;
+  throw new x$1(`Unrecognized simple value: ${t2.toString()}`);
 }
-function k$1(t3, n2) {
-  I$1(t3, n2.length), s$2 > o$2.length - n2.length && (o$2 = R$2(o$2, o$2.length + n2.length), r$1 = new DataView(o$2.buffer)), o$2.set(n2, s$2), s$2 += n2.length;
+function k$3(t2, n3) {
+  I$3(t2, n3.length), s$2 > o$2.length - n3.length && (o$2 = R$1(o$2, o$2.length + n3.length), r = new DataView(o$2.buffer)), o$2.set(n3, s$2), s$2 += n3.length;
 }
-function T$3(t3, n2) {
-  I$1(t3, n2);
+function T$3(t2, n3) {
+  I$3(t2, n3);
 }
-function ct(t3) {
-  T$3(c.UnsignedInteger, t3);
+function ct(t2) {
+  T$3(c$2.UnsignedInteger, t2);
 }
-function ot(t3) {
+function ot(t2) {
   T$3(
-    c.NegativeInteger,
-    typeof t3 == "bigint" ? -1n - t3 : -1 - t3
+    c$2.NegativeInteger,
+    typeof t2 == "bigint" ? -1n - t2 : -1 - t2
   );
 }
-function ft(t3) {
-  t3 >= 0 ? ct(t3) : ot(t3);
+function ft(t2) {
+  t2 >= 0 ? ct(t2) : ot(t2);
 }
-function X(t3) {
-  k$1(c.TextString, v$3.encode(t3));
+function X$2(t2) {
+  k$3(c$2.TextString, v$2.encode(t2));
 }
-function V$1(t3) {
-  k$1(c.ByteString, t3);
+function V$2(t2) {
+  k$3(c$2.ByteString, t2);
 }
-function it(t3, n2, e5) {
-  I$1(c.Tag, t3), _(n2, e5);
+function it(t2, n3, e4) {
+  I$3(c$2.Tag, t2), _$1(n3, e4);
 }
 function hasCborValueMethod(value) {
   return typeof value === "object" && value !== null && "toCborValue" in value;
@@ -4566,12 +4577,13 @@ const JSON_KEY_EXPIRY = "__expiry__";
 const SECONDS_TO_MILLISECONDS = BigInt(1e3);
 const MILLISECONDS_TO_NANOSECONDS = BigInt(1e6);
 const MINUTES_TO_SECONDS = BigInt(60);
-const EXPIRY_DELTA_THRESHOLD_MILLISECONDS = BigInt(90) * SECONDS_TO_MILLISECONDS;
-function roundMillisToSeconds(millis) {
-  return millis / SECONDS_TO_MILLISECONDS;
+const MINUTES_TO_MILLISECONDS = MINUTES_TO_SECONDS * SECONDS_TO_MILLISECONDS;
+const EXPIRY_DELTA_THRESHOLD_MILLISECONDS = BigInt(1) * MINUTES_TO_MILLISECONDS;
+function roundToSecond(millis) {
+  return millis / SECONDS_TO_MILLISECONDS * SECONDS_TO_MILLISECONDS;
 }
-function roundMillisToMinutes(millis) {
-  return roundMillisToSeconds(millis) / MINUTES_TO_SECONDS;
+function roundToMinute(millis) {
+  return millis / MINUTES_TO_MILLISECONDS * MINUTES_TO_MILLISECONDS;
 }
 class Expiry {
   constructor(__expiry__) {
@@ -4580,23 +4592,26 @@ class Expiry {
   }
   /**
    * Creates an Expiry object from a delta in milliseconds.
-   * If the delta is less than 90 seconds, the expiry is rounded down to the nearest second.
-   * Otherwise, the expiry is rounded down to the nearest minute.
+   * The expiry is calculated as: current_time + delta + clock_drift
+   * The resulting expiry is then rounded:
+   * - If rounding down to the nearest minute still provides at least 60 seconds in the future, use minute precision
+   * - Otherwise, use second precision
    * @param deltaInMs The milliseconds to add to the current time.
-   * @param clockDriftMs The milliseconds to add to the current time, typically the clock drift between IC network clock and the client's clock. Defaults to `0` if not provided.
+   * @param clockDriftInMs The milliseconds to add to the current time, typically the clock drift between IC network clock and the client's clock. Defaults to `0` if not provided.
    * @returns {Expiry} The constructed Expiry object.
    */
-  static fromDeltaInMilliseconds(deltaInMs, clockDriftMs = 0) {
-    const deltaMs = BigInt(deltaInMs);
-    const expiryMs = BigInt(Date.now()) + deltaMs + BigInt(clockDriftMs);
-    let roundedExpirySeconds;
-    if (deltaMs < EXPIRY_DELTA_THRESHOLD_MILLISECONDS) {
-      roundedExpirySeconds = roundMillisToSeconds(expiryMs);
+  static fromDeltaInMilliseconds(deltaInMs, clockDriftInMs = 0) {
+    const correctedNowMs = BigInt(Date.now()) + BigInt(clockDriftInMs);
+    const expiryMs = correctedNowMs + BigInt(deltaInMs);
+    const roundedToMinute = roundToMinute(expiryMs);
+    let roundedExpiryMs;
+    if (roundedToMinute >= correctedNowMs + EXPIRY_DELTA_THRESHOLD_MILLISECONDS) {
+      roundedExpiryMs = roundedToMinute;
     } else {
-      const roundedExpiryMinutes = roundMillisToMinutes(expiryMs);
-      roundedExpirySeconds = roundedExpiryMinutes * MINUTES_TO_SECONDS;
+      const roundedToSecond = roundToSecond(expiryMs);
+      roundedExpiryMs = roundedToSecond;
     }
-    return new Expiry(roundedExpirySeconds * SECONDS_TO_MILLISECONDS * MILLISECONDS_TO_NANOSECONDS);
+    return new Expiry(roundedExpiryMs * MILLISECONDS_TO_NANOSECONDS);
   }
   toBigInt() {
     return this.__expiry__;
@@ -4651,7 +4666,6 @@ function httpHeadersTransform(headers) {
   });
   return headerFields;
 }
-/*! noble-curves - MIT License (c) 2022 Paul Miller (paulmillr.com) */
 const _0n$7 = /* @__PURE__ */ BigInt(0);
 const _1n$8 = /* @__PURE__ */ BigInt(1);
 function _abool2(value, title = "") {
@@ -4685,19 +4699,19 @@ function bytesToNumberLE(bytes) {
   abytes(bytes);
   return hexToNumber(bytesToHex(Uint8Array.from(bytes).reverse()));
 }
-function numberToBytesBE(n2, len) {
-  return hexToBytes(n2.toString(16).padStart(len * 2, "0"));
+function numberToBytesBE(n3, len) {
+  return hexToBytes(n3.toString(16).padStart(len * 2, "0"));
 }
-function numberToBytesLE(n2, len) {
-  return numberToBytesBE(n2, len).reverse();
+function numberToBytesLE(n3, len) {
+  return numberToBytesBE(n3, len).reverse();
 }
 function ensureBytes(title, hex, expectedLength) {
   let res;
   if (typeof hex === "string") {
     try {
       res = hexToBytes(hex);
-    } catch (e5) {
-      throw new Error(title + " must be hex string or Uint8Array, cause: " + e5);
+    } catch (e4) {
+      throw new Error(title + " must be hex string or Uint8Array, cause: " + e4);
     }
   } else if (isBytes(hex)) {
     res = Uint8Array.from(hex);
@@ -4712,24 +4726,24 @@ function ensureBytes(title, hex, expectedLength) {
 function copyBytes(bytes) {
   return Uint8Array.from(bytes);
 }
-const isPosBig = (n2) => typeof n2 === "bigint" && _0n$7 <= n2;
-function inRange(n2, min, max) {
-  return isPosBig(n2) && isPosBig(min) && isPosBig(max) && min <= n2 && n2 < max;
+const isPosBig = (n3) => typeof n3 === "bigint" && _0n$7 <= n3;
+function inRange(n3, min, max) {
+  return isPosBig(n3) && isPosBig(min) && isPosBig(max) && min <= n3 && n3 < max;
 }
-function aInRange(title, n2, min, max) {
-  if (!inRange(n2, min, max))
-    throw new Error("expected valid " + title + ": " + min + " <= n < " + max + ", got " + n2);
+function aInRange(title, n3, min, max) {
+  if (!inRange(n3, min, max))
+    throw new Error("expected valid " + title + ": " + min + " <= n < " + max + ", got " + n3);
 }
-function bitLen(n2) {
+function bitLen(n3) {
   let len;
-  for (len = 0; n2 > _0n$7; n2 >>= _1n$8, len += 1)
+  for (len = 0; n3 > _0n$7; n3 >>= _1n$8, len += 1)
     ;
   return len;
 }
-function bitGet(n2, pos) {
-  return n2 >> BigInt(pos) & _1n$8;
+function bitGet(n3, pos) {
+  return n3 >> BigInt(pos) & _1n$8;
 }
-const bitMask = (n2) => (_1n$8 << BigInt(n2)) - _1n$8;
+const bitMask = (n3) => (_1n$8 << BigInt(n3)) - _1n$8;
 function isHash(val) {
   return typeof val === "function" && Number.isSafeInteger(val.outputLen);
 }
@@ -4744,8 +4758,8 @@ function _validateObject(object, fields, optFields = {}) {
     if (current !== expectedType || val === null)
       throw new Error(`param "${fieldName}" is invalid: expected ${expectedType}, got ${current}`);
   }
-  Object.entries(fields).forEach(([k2, v3]) => checkField(k2, v3, false));
-  Object.entries(optFields).forEach(([k2, v3]) => checkField(k2, v3, true));
+  Object.entries(fields).forEach(([k2, v2]) => checkField(k2, v2, false));
+  Object.entries(optFields).forEach(([k2, v2]) => checkField(k2, v2, true));
 }
 const notImplemented = () => {
   throw new Error("not implemented");
@@ -4761,12 +4775,11 @@ function memoized(fn) {
     return computed;
   };
 }
-/*! noble-curves - MIT License (c) 2022 Paul Miller (paulmillr.com) */
 const _0n$6 = BigInt(0), _1n$7 = BigInt(1), _2n$6 = /* @__PURE__ */ BigInt(2), _3n$4 = /* @__PURE__ */ BigInt(3);
 const _4n$2 = /* @__PURE__ */ BigInt(4), _5n$1 = /* @__PURE__ */ BigInt(5), _7n = /* @__PURE__ */ BigInt(7);
 const _8n$2 = /* @__PURE__ */ BigInt(8), _9n = /* @__PURE__ */ BigInt(9), _16n = /* @__PURE__ */ BigInt(16);
-function mod(a2, b2) {
-  const result = a2 % b2;
+function mod(a3, b2) {
+  const result = a3 % b2;
   return result >= _0n$6 ? result : b2 + result;
 }
 function pow2(x3, power, modulo) {
@@ -4782,59 +4795,59 @@ function invert(number, modulo) {
     throw new Error("invert: expected non-zero number");
   if (modulo <= _0n$6)
     throw new Error("invert: expected positive modulus, got " + modulo);
-  let a2 = mod(number, modulo);
+  let a3 = mod(number, modulo);
   let b2 = modulo;
   let x3 = _0n$6, u2 = _1n$7;
-  while (a2 !== _0n$6) {
-    const q2 = b2 / a2;
-    const r2 = b2 % a2;
-    const m2 = x3 - u2 * q2;
-    b2 = a2, a2 = r2, x3 = u2, u2 = m2;
+  while (a3 !== _0n$6) {
+    const q2 = b2 / a3;
+    const r2 = b2 % a3;
+    const m3 = x3 - u2 * q2;
+    b2 = a3, a3 = r2, x3 = u2, u2 = m3;
   }
   const gcd = b2;
   if (gcd !== _1n$7)
     throw new Error("invert: does not exist");
   return mod(x3, modulo);
 }
-function assertIsSquare(Fp3, root, n2) {
-  if (!Fp3.eql(Fp3.sqr(root), n2))
+function assertIsSquare(Fp3, root, n3) {
+  if (!Fp3.eql(Fp3.sqr(root), n3))
     throw new Error("Cannot find square root");
 }
-function sqrt3mod4(Fp3, n2) {
+function sqrt3mod4(Fp3, n3) {
   const p1div4 = (Fp3.ORDER + _1n$7) / _4n$2;
-  const root = Fp3.pow(n2, p1div4);
-  assertIsSquare(Fp3, root, n2);
+  const root = Fp3.pow(n3, p1div4);
+  assertIsSquare(Fp3, root, n3);
   return root;
 }
-function sqrt5mod8(Fp3, n2) {
+function sqrt5mod8(Fp3, n3) {
   const p5div8 = (Fp3.ORDER - _5n$1) / _8n$2;
-  const n22 = Fp3.mul(n2, _2n$6);
-  const v3 = Fp3.pow(n22, p5div8);
-  const nv = Fp3.mul(n2, v3);
-  const i3 = Fp3.mul(Fp3.mul(nv, _2n$6), v3);
-  const root = Fp3.mul(nv, Fp3.sub(i3, Fp3.ONE));
-  assertIsSquare(Fp3, root, n2);
+  const n22 = Fp3.mul(n3, _2n$6);
+  const v2 = Fp3.pow(n22, p5div8);
+  const nv = Fp3.mul(n3, v2);
+  const i2 = Fp3.mul(Fp3.mul(nv, _2n$6), v2);
+  const root = Fp3.mul(nv, Fp3.sub(i2, Fp3.ONE));
+  assertIsSquare(Fp3, root, n3);
   return root;
 }
 function sqrt9mod16(P2) {
   const Fp_ = Field(P2);
   const tn = tonelliShanks(P2);
   const c1 = tn(Fp_, Fp_.neg(Fp_.ONE));
-  const c2 = tn(Fp_, c1);
+  const c22 = tn(Fp_, c1);
   const c3 = tn(Fp_, Fp_.neg(c1));
   const c4 = (P2 + _7n) / _16n;
-  return (Fp3, n2) => {
-    let tv1 = Fp3.pow(n2, c4);
+  return (Fp3, n3) => {
+    let tv1 = Fp3.pow(n3, c4);
     let tv2 = Fp3.mul(tv1, c1);
-    const tv3 = Fp3.mul(tv1, c2);
+    const tv3 = Fp3.mul(tv1, c22);
     const tv4 = Fp3.mul(tv1, c3);
-    const e1 = Fp3.eql(Fp3.sqr(tv2), n2);
-    const e22 = Fp3.eql(Fp3.sqr(tv3), n2);
+    const e1 = Fp3.eql(Fp3.sqr(tv2), n3);
+    const e22 = Fp3.eql(Fp3.sqr(tv3), n3);
     tv1 = Fp3.cmov(tv1, tv2, e1);
     tv2 = Fp3.cmov(tv4, tv3, e22);
-    const e32 = Fp3.eql(Fp3.sqr(tv2), n2);
+    const e32 = Fp3.eql(Fp3.sqr(tv2), n3);
     const root = Fp3.cmov(tv1, tv2, e32);
-    assertIsSquare(Fp3, root, n2);
+    assertIsSquare(Fp3, root, n3);
     return root;
   };
 }
@@ -4857,31 +4870,31 @@ function tonelliShanks(P2) {
     return sqrt3mod4;
   let cc = _Fp.pow(Z2, Q2);
   const Q1div2 = (Q2 + _1n$7) / _2n$6;
-  return function tonelliSlow(Fp3, n2) {
-    if (Fp3.is0(n2))
-      return n2;
-    if (FpLegendre(Fp3, n2) !== 1)
+  return function tonelliSlow(Fp3, n3) {
+    if (Fp3.is0(n3))
+      return n3;
+    if (FpLegendre(Fp3, n3) !== 1)
       throw new Error("Cannot find square root");
     let M2 = S2;
-    let c2 = Fp3.mul(Fp3.ONE, cc);
-    let t3 = Fp3.pow(n2, Q2);
-    let R2 = Fp3.pow(n2, Q1div2);
-    while (!Fp3.eql(t3, Fp3.ONE)) {
-      if (Fp3.is0(t3))
+    let c3 = Fp3.mul(Fp3.ONE, cc);
+    let t2 = Fp3.pow(n3, Q2);
+    let R2 = Fp3.pow(n3, Q1div2);
+    while (!Fp3.eql(t2, Fp3.ONE)) {
+      if (Fp3.is0(t2))
         return Fp3.ZERO;
-      let i3 = 1;
-      let t_tmp = Fp3.sqr(t3);
+      let i2 = 1;
+      let t_tmp = Fp3.sqr(t2);
       while (!Fp3.eql(t_tmp, Fp3.ONE)) {
-        i3++;
+        i2++;
         t_tmp = Fp3.sqr(t_tmp);
-        if (i3 === M2)
+        if (i2 === M2)
           throw new Error("Cannot find square root");
       }
-      const exponent = _1n$7 << BigInt(M2 - i3 - 1);
-      const b2 = Fp3.pow(c2, exponent);
-      M2 = i3;
-      c2 = Fp3.sqr(b2);
-      t3 = Fp3.mul(t3, c2);
+      const exponent = _1n$7 << BigInt(M2 - i2 - 1);
+      const b2 = Fp3.pow(c3, exponent);
+      M2 = i2;
+      c3 = Fp3.sqr(b2);
+      t2 = Fp3.mul(t2, c3);
       R2 = Fp3.mul(R2, b2);
     }
     return R2;
@@ -4949,24 +4962,24 @@ function FpPow(Fp3, num, power) {
 }
 function FpInvertBatch(Fp3, nums, passZero = false) {
   const inverted = new Array(nums.length).fill(passZero ? Fp3.ZERO : void 0);
-  const multipliedAcc = nums.reduce((acc, num, i3) => {
+  const multipliedAcc = nums.reduce((acc, num, i2) => {
     if (Fp3.is0(num))
       return acc;
-    inverted[i3] = acc;
+    inverted[i2] = acc;
     return Fp3.mul(acc, num);
   }, Fp3.ONE);
   const invertedAcc = Fp3.inv(multipliedAcc);
-  nums.reduceRight((acc, num, i3) => {
+  nums.reduceRight((acc, num, i2) => {
     if (Fp3.is0(num))
       return acc;
-    inverted[i3] = Fp3.mul(acc, inverted[i3]);
+    inverted[i2] = Fp3.mul(acc, inverted[i2]);
     return Fp3.mul(acc, num);
   }, invertedAcc);
   return inverted;
 }
-function FpLegendre(Fp3, n2) {
+function FpLegendre(Fp3, n3) {
   const p1mod2 = (Fp3.ORDER - _1n$7) / _2n$6;
-  const powered = Fp3.pow(n2, p1mod2);
+  const powered = Fp3.pow(n3, p1mod2);
   const yes = Fp3.eql(powered, Fp3.ONE);
   const zero = Fp3.eql(powered, Fp3.ZERO);
   const no = Fp3.eql(powered, Fp3.neg(Fp3.ONE));
@@ -4974,10 +4987,10 @@ function FpLegendre(Fp3, n2) {
     throw new Error("invalid Legendre symbol result");
   return yes ? 1 : zero ? 0 : -1;
 }
-function nLength(n2, nBitLength) {
+function nLength(n3, nBitLength) {
   if (nBitLength !== void 0)
     anumber(nBitLength);
-  const _nBitLength = nBitLength !== void 0 ? nBitLength : n2.toString(2).length;
+  const _nBitLength = nBitLength !== void 0 ? nBitLength : n3.toString(2).length;
   const nByteLength = Math.ceil(_nBitLength / 8);
   return { nBitLength: _nBitLength, nByteLength };
 }
@@ -5044,10 +5057,10 @@ function Field(ORDER, bitLenOrOpts, isLE = false, opts = {}) {
     subN: (lhs, rhs) => lhs - rhs,
     mulN: (lhs, rhs) => lhs * rhs,
     inv: (num) => invert(num, ORDER),
-    sqrt: _sqrt || ((n2) => {
+    sqrt: _sqrt || ((n3) => {
       if (!sqrtP)
         sqrtP = FpSqrt(ORDER);
-      return sqrtP(f2, n2);
+      return sqrtP(f2, n3);
     }),
     toBytes: (num) => isLE ? numberToBytesLE(num, BYTES) : numberToBytesBE(num, BYTES),
     fromBytes: (bytes, skipValidation = true) => {
@@ -5074,7 +5087,7 @@ function Field(ORDER, bitLenOrOpts, isLE = false, opts = {}) {
     invertBatch: (lst) => FpInvertBatch(f2, lst),
     // We can't move this out because Fp6, Fp12 implement it
     // and it's unclear what to return in there.
-    cmov: (a2, b2, c2) => c2 ? b2 : a2
+    cmov: (a3, b2, c3) => c3 ? b2 : a3
   });
   return Object.freeze(f2);
 }
@@ -5098,16 +5111,15 @@ function mapHashToField(key, fieldOrder, isLE = false) {
   const reduced = mod(num, fieldOrder - _1n$7) + _1n$7;
   return isLE ? numberToBytesLE(reduced, fieldLen) : numberToBytesBE(reduced, fieldLen);
 }
-/*! noble-curves - MIT License (c) 2022 Paul Miller (paulmillr.com) */
 const _0n$5 = BigInt(0);
 const _1n$6 = BigInt(1);
 function negateCt(condition, item) {
   const neg = item.negate();
   return condition ? neg : item;
 }
-function normalizeZ(c2, points) {
-  const invertedZs = FpInvertBatch(c2.Fp, points.map((p2) => p2.Z));
-  return points.map((p2, i3) => c2.fromAffine(p2.toAffine(invertedZs[i3])));
+function normalizeZ(c3, points) {
+  const invertedZs = FpInvertBatch(c3.Fp, points.map((p2) => p2.Z));
+  return points.map((p2, i2) => c3.fromAffine(p2.toAffine(invertedZs[i2])));
 }
 function validateW(W2, bits) {
   if (!Number.isSafeInteger(W2) || W2 <= 0 || W2 > bits)
@@ -5122,10 +5134,10 @@ function calcWOpts(W2, scalarBits) {
   const shiftBy = BigInt(W2);
   return { windows, windowSize, mask, maxNumber, shiftBy };
 }
-function calcOffsets(n2, window2, wOpts) {
+function calcOffsets(n3, window2, wOpts) {
   const { windowSize, mask, maxNumber, shiftBy } = wOpts;
-  let wbits = Number(n2 & mask);
-  let nextN = n2 >> shiftBy;
+  let wbits = Number(n3 & mask);
+  let nextN = n3 >> shiftBy;
   if (wbits > windowSize) {
     wbits -= maxNumber;
     nextN += _1n$6;
@@ -5138,20 +5150,20 @@ function calcOffsets(n2, window2, wOpts) {
   const offsetF = offsetStart;
   return { nextN, offset, isZero, isNeg, isNegF, offsetF };
 }
-function validateMSMPoints(points, c2) {
+function validateMSMPoints(points, c3) {
   if (!Array.isArray(points))
     throw new Error("array expected");
-  points.forEach((p2, i3) => {
-    if (!(p2 instanceof c2))
-      throw new Error("invalid point at index " + i3);
+  points.forEach((p2, i2) => {
+    if (!(p2 instanceof c3))
+      throw new Error("invalid point at index " + i2);
   });
 }
 function validateMSMScalars(scalars, field) {
   if (!Array.isArray(scalars))
     throw new Error("array of scalars expected");
-  scalars.forEach((s2, i3) => {
+  scalars.forEach((s2, i2) => {
     if (!field.isValid(s2))
-      throw new Error("invalid scalar at index " + i3);
+      throw new Error("invalid scalar at index " + i2);
   });
 }
 const pointPrecomputes = /* @__PURE__ */ new WeakMap();
@@ -5159,8 +5171,8 @@ const pointWindowSizes = /* @__PURE__ */ new WeakMap();
 function getW(P2) {
   return pointWindowSizes.get(P2) || 1;
 }
-function assert0(n2) {
-  if (n2 !== _0n$5)
+function assert0(n3) {
+  if (n3 !== _0n$5)
     throw new Error("invalid wNAF");
 }
 class wNAF {
@@ -5172,13 +5184,13 @@ class wNAF {
     this.bits = bits;
   }
   // non-const time multiplication ladder
-  _unsafeLadder(elm, n2, p2 = this.ZERO) {
+  _unsafeLadder(elm, n3, p2 = this.ZERO) {
     let d2 = elm;
-    while (n2 > _0n$5) {
-      if (n2 & _1n$6)
+    while (n3 > _0n$5) {
+      if (n3 & _1n$6)
         p2 = p2.add(d2);
       d2 = d2.double();
-      n2 >>= _1n$6;
+      n3 >>= _1n$6;
     }
     return p2;
   }
@@ -5202,7 +5214,7 @@ class wNAF {
     for (let window2 = 0; window2 < windows; window2++) {
       base = p2;
       points.push(base);
-      for (let i3 = 1; i3 < windowSize; i3++) {
+      for (let i2 = 1; i2 < windowSize; i2++) {
         base = base.add(p2);
         points.push(base);
       }
@@ -5216,22 +5228,22 @@ class wNAF {
    * https://github.com/paulmillr/noble-secp256k1/blob/47cb1669b6e506ad66b35fe7d76132ae97465da2/index.ts#L502-L541
    * @returns real and fake (for const-time) points
    */
-  wNAF(W2, precomputes, n2) {
-    if (!this.Fn.isValid(n2))
+  wNAF(W2, precomputes, n3) {
+    if (!this.Fn.isValid(n3))
       throw new Error("invalid scalar");
     let p2 = this.ZERO;
     let f2 = this.BASE;
     const wo = calcWOpts(W2, this.bits);
     for (let window2 = 0; window2 < wo.windows; window2++) {
-      const { nextN, offset, isZero, isNeg, isNegF, offsetF } = calcOffsets(n2, window2, wo);
-      n2 = nextN;
+      const { nextN, offset, isZero, isNeg, isNegF, offsetF } = calcOffsets(n3, window2, wo);
+      n3 = nextN;
       if (isZero) {
         f2 = f2.add(negateCt(isNegF, precomputes[offsetF]));
       } else {
         p2 = p2.add(negateCt(isNeg, precomputes[offset]));
       }
     }
-    assert0(n2);
+    assert0(n3);
     return { p: p2, f: f2 };
   }
   /**
@@ -5239,13 +5251,13 @@ class wNAF {
    * @param acc accumulator point to add result of multiplication
    * @returns point
    */
-  wNAFUnsafe(W2, precomputes, n2, acc = this.ZERO) {
+  wNAFUnsafe(W2, precomputes, n3, acc = this.ZERO) {
     const wo = calcWOpts(W2, this.bits);
     for (let window2 = 0; window2 < wo.windows; window2++) {
-      if (n2 === _0n$5)
+      if (n3 === _0n$5)
         break;
-      const { nextN, offset, isZero, isNeg } = calcOffsets(n2, window2, wo);
-      n2 = nextN;
+      const { nextN, offset, isZero, isNeg } = calcOffsets(n3, window2, wo);
+      n3 = nextN;
       if (isZero) {
         continue;
       } else {
@@ -5253,7 +5265,7 @@ class wNAF {
         acc = acc.add(isNeg ? item.negate() : item);
       }
     }
-    assert0(n2);
+    assert0(n3);
     return acc;
   }
   getPrecomputes(W2, point, transform) {
@@ -5305,14 +5317,14 @@ function mulEndoUnsafe(Point, point, k1, k2) {
   }
   return { p1, p2 };
 }
-function pippenger(c2, fieldN, points, scalars) {
-  validateMSMPoints(points, c2);
+function pippenger(c3, fieldN, points, scalars) {
+  validateMSMPoints(points, c3);
   validateMSMScalars(scalars, fieldN);
   const plength = points.length;
   const slength = scalars.length;
   if (plength !== slength)
     throw new Error("arrays of points and scalars must have equal length");
-  const zero = c2.ZERO;
+  const zero = c3.ZERO;
   const wbits = bitLen(BigInt(plength));
   let windowSize = 1;
   if (wbits > 12)
@@ -5325,11 +5337,11 @@ function pippenger(c2, fieldN, points, scalars) {
   const buckets = new Array(Number(MASK) + 1).fill(zero);
   const lastBits = Math.floor((fieldN.BITS - 1) / windowSize) * windowSize;
   let sum = zero;
-  for (let i3 = lastBits; i3 >= 0; i3 -= windowSize) {
+  for (let i2 = lastBits; i2 >= 0; i2 -= windowSize) {
     buckets.fill(zero);
     for (let j2 = 0; j2 < slength; j2++) {
       const scalar = scalars[j2];
-      const wbits2 = Number(scalar >> BigInt(i3) & MASK);
+      const wbits2 = Number(scalar >> BigInt(i2) & MASK);
       buckets[wbits2] = buckets[wbits2].add(points[j2]);
     }
     let resI = zero;
@@ -5338,7 +5350,7 @@ function pippenger(c2, fieldN, points, scalars) {
       resI = resI.add(sumI);
     }
     sum = sum.add(resI);
-    if (i3 !== 0)
+    if (i2 !== 0)
       for (let j2 = 0; j2 < windowSize; j2++)
         sum = sum.double();
   }
@@ -5382,16 +5394,16 @@ function i2osp(value, length) {
   if (value < 0 || value >= 1 << 8 * length)
     throw new Error("invalid I2OSP input: " + value);
   const res = Array.from({ length }).fill(0);
-  for (let i3 = length - 1; i3 >= 0; i3--) {
-    res[i3] = value & 255;
+  for (let i2 = length - 1; i2 >= 0; i2--) {
+    res[i2] = value & 255;
     value >>>= 8;
   }
   return new Uint8Array(res);
 }
-function strxor(a2, b2) {
-  const arr = new Uint8Array(a2.length);
-  for (let i3 = 0; i3 < a2.length; i3++) {
-    arr[i3] = a2[i3] ^ b2[i3];
+function strxor(a3, b2) {
+  const arr = new Uint8Array(a3.length);
+  for (let i2 = 0; i2 < a3.length; i2++) {
+    arr[i2] = a3[i2] ^ b2[i2];
   }
   return arr;
 }
@@ -5420,9 +5432,9 @@ function expand_message_xmd(msg, DST, lenInBytes, H2) {
   const b2 = new Array(ell);
   const b_0 = H2(concatBytes(Z_pad, msg, l_i_b_str, i2osp(0, 1), DST_prime));
   b2[0] = H2(concatBytes(b_0, i2osp(1, 1), DST_prime));
-  for (let i3 = 1; i3 <= ell; i3++) {
-    const args = [strxor(b_0, b2[i3 - 1]), i2osp(i3 + 1, 1), DST_prime];
-    b2[i3] = H2(concatBytes(...args));
+  for (let i2 = 1; i2 <= ell; i2++) {
+    const args = [strxor(b_0, b2[i2 - 1]), i2osp(i2 + 1, 1), DST_prime];
+    b2[i2] = H2(concatBytes(...args));
   }
   const pseudo_random_bytes = concatBytes(...b2);
   return pseudo_random_bytes.slice(0, lenInBytes);
@@ -5446,14 +5458,14 @@ function hash_to_field(msg, count, options) {
     k: "number",
     hash: "function"
   });
-  const { p: p2, k: k2, m: m2, hash, expand, DST } = options;
+  const { p: p2, k: k2, m: m3, hash, expand, DST } = options;
   if (!isHash(options.hash))
     throw new Error("expected valid hash");
   abytes(msg);
   anum(count);
   const log2p = p2.toString(2).length;
   const L2 = Math.ceil((log2p + k2) / 8);
-  const len_in_bytes = count * m2 * L2;
+  const len_in_bytes = count * m3 * L2;
   let prb;
   if (expand === "xmd") {
     prb = expand_message_xmd(msg, DST, len_in_bytes, hash);
@@ -5465,21 +5477,21 @@ function hash_to_field(msg, count, options) {
     throw new Error('expand must be "xmd" or "xof"');
   }
   const u2 = new Array(count);
-  for (let i3 = 0; i3 < count; i3++) {
-    const e5 = new Array(m2);
-    for (let j2 = 0; j2 < m2; j2++) {
-      const elm_offset = L2 * (j2 + i3 * m2);
+  for (let i2 = 0; i2 < count; i2++) {
+    const e4 = new Array(m3);
+    for (let j2 = 0; j2 < m3; j2++) {
+      const elm_offset = L2 * (j2 + i2 * m3);
       const tv = prb.subarray(elm_offset, elm_offset + L2);
-      e5[j2] = mod(os2ip(tv), p2);
+      e4[j2] = mod(os2ip(tv), p2);
     }
-    u2[i3] = e5;
+    u2[i2] = e4;
   }
   return u2;
 }
 function isogenyMap(field, map) {
-  const coeff = map.map((i3) => Array.from(i3).reverse());
+  const coeff = map.map((i2) => Array.from(i2).reverse());
   return (x3, y2) => {
-    const [xn, xd, yn, yd] = coeff.map((val) => val.reduce((acc, i3) => field.add(field.mul(acc, x3), i3)));
+    const [xn, xd, yn, yd] = coeff.map((val) => val.reduce((acc, i2) => field.add(field.mul(acc, x3), i2)));
     const [xd_inv, yd_inv] = FpInvertBatch(field, [xd, yd], true);
     x3 = field.mul(xn, xd_inv);
     y2 = field.mul(y2, field.mul(yn, yd_inv));
@@ -5520,8 +5532,8 @@ function createHasher(Point, mapToCurve, defaults) {
     mapToCurve(scalars) {
       if (!Array.isArray(scalars))
         throw new Error("expected array of bigints");
-      for (const i3 of scalars)
-        if (typeof i3 !== "bigint")
+      for (const i2 of scalars)
+        if (typeof i2 !== "bigint")
           throw new Error("expected array of bigints");
       return clear(map(scalars));
     },
@@ -5534,21 +5546,20 @@ function createHasher(Point, mapToCurve, defaults) {
     }
   };
 }
-/*! noble-curves - MIT License (c) 2022 Paul Miller (paulmillr.com) */
 const divNearest = (num, den) => (num + (num >= 0 ? den : -den) / _2n$5) / den;
-function _splitEndoScalar(k2, basis, n2) {
-  const [[a1, b1], [a2, b2]] = basis;
-  const c1 = divNearest(b2 * k2, n2);
-  const c2 = divNearest(-b1 * k2, n2);
-  let k1 = k2 - c1 * a1 - c2 * a2;
-  let k22 = -c1 * b1 - c2 * b2;
+function _splitEndoScalar(k2, basis, n3) {
+  const [[a1, b1], [a22, b2]] = basis;
+  const c1 = divNearest(b2 * k2, n3);
+  const c22 = divNearest(-b1 * k2, n3);
+  let k1 = k2 - c1 * a1 - c22 * a22;
+  let k22 = -c1 * b1 - c22 * b2;
   const k1neg = k1 < _0n$4;
   const k2neg = k22 < _0n$4;
   if (k1neg)
     k1 = -k1;
   if (k2neg)
     k22 = -k22;
-  const MAX_NUM = bitMask(Math.ceil(bitLen(n2) / 2)) + _1n$5;
+  const MAX_NUM = bitMask(Math.ceil(bitLen(n3) / 2)) + _1n$5;
   if (k1 < _0n$4 || k1 >= MAX_NUM || k22 < _0n$4 || k22 >= MAX_NUM) {
     throw new Error("splitScalar (endomorphism): failed, k=" + k2);
   }
@@ -5662,10 +5673,10 @@ function weierstrassN(params, extraOpts = {}) {
   const _27b2 = Fp3.mul(Fp3.sqr(CURVE.b), BigInt(27));
   if (Fp3.is0(Fp3.add(_4a3, _27b2)))
     throw new Error("bad curve params: a or b");
-  function acoord(title, n2, banZero = false) {
-    if (!Fp3.isValid(n2) || banZero && Fp3.is0(n2))
+  function acoord(title, n3, banZero = false) {
+    if (!Fp3.isValid(n3) || banZero && Fp3.is0(n3))
       throw new Error(`bad point coordinate ${title}`);
-    return n2;
+    return n3;
   }
   function aprjpoint(other) {
     if (!(other instanceof Point))
@@ -5790,39 +5801,39 @@ function weierstrassN(params, extraOpts = {}) {
     // https://eprint.iacr.org/2015/1060, algorithm 3
     // Cost: 8M + 3S + 3*a + 2*b3 + 15add.
     double() {
-      const { a: a2, b: b2 } = CURVE;
+      const { a: a3, b: b2 } = CURVE;
       const b3 = Fp3.mul(b2, _3n$3);
       const { X: X1, Y: Y1, Z: Z1 } = this;
       let X3 = Fp3.ZERO, Y3 = Fp3.ZERO, Z3 = Fp3.ZERO;
       let t0 = Fp3.mul(X1, X1);
       let t1 = Fp3.mul(Y1, Y1);
-      let t22 = Fp3.mul(Z1, Z1);
+      let t2 = Fp3.mul(Z1, Z1);
       let t3 = Fp3.mul(X1, Y1);
       t3 = Fp3.add(t3, t3);
       Z3 = Fp3.mul(X1, Z1);
       Z3 = Fp3.add(Z3, Z3);
-      X3 = Fp3.mul(a2, Z3);
-      Y3 = Fp3.mul(b3, t22);
+      X3 = Fp3.mul(a3, Z3);
+      Y3 = Fp3.mul(b3, t2);
       Y3 = Fp3.add(X3, Y3);
       X3 = Fp3.sub(t1, Y3);
       Y3 = Fp3.add(t1, Y3);
       Y3 = Fp3.mul(X3, Y3);
       X3 = Fp3.mul(t3, X3);
       Z3 = Fp3.mul(b3, Z3);
-      t22 = Fp3.mul(a2, t22);
-      t3 = Fp3.sub(t0, t22);
-      t3 = Fp3.mul(a2, t3);
+      t2 = Fp3.mul(a3, t2);
+      t3 = Fp3.sub(t0, t2);
+      t3 = Fp3.mul(a3, t3);
       t3 = Fp3.add(t3, Z3);
       Z3 = Fp3.add(t0, t0);
       t0 = Fp3.add(Z3, t0);
-      t0 = Fp3.add(t0, t22);
+      t0 = Fp3.add(t0, t2);
       t0 = Fp3.mul(t0, t3);
       Y3 = Fp3.add(Y3, t0);
-      t22 = Fp3.mul(Y1, Z1);
-      t22 = Fp3.add(t22, t22);
-      t0 = Fp3.mul(t22, t3);
+      t2 = Fp3.mul(Y1, Z1);
+      t2 = Fp3.add(t2, t2);
+      t0 = Fp3.mul(t2, t3);
       X3 = Fp3.sub(X3, t0);
-      Z3 = Fp3.mul(t22, t1);
+      Z3 = Fp3.mul(t2, t1);
       Z3 = Fp3.add(Z3, Z3);
       Z3 = Fp3.add(Z3, Z3);
       return new Point(X3, Y3, Z3);
@@ -5836,11 +5847,11 @@ function weierstrassN(params, extraOpts = {}) {
       const { X: X1, Y: Y1, Z: Z1 } = this;
       const { X: X2, Y: Y2, Z: Z2 } = other;
       let X3 = Fp3.ZERO, Y3 = Fp3.ZERO, Z3 = Fp3.ZERO;
-      const a2 = CURVE.a;
+      const a3 = CURVE.a;
       const b3 = Fp3.mul(CURVE.b, _3n$3);
       let t0 = Fp3.mul(X1, X2);
       let t1 = Fp3.mul(Y1, Y2);
-      let t22 = Fp3.mul(Z1, Z2);
+      let t2 = Fp3.mul(Z1, Z2);
       let t3 = Fp3.add(X1, Y1);
       let t4 = Fp3.add(X2, Y2);
       t3 = Fp3.mul(t3, t4);
@@ -5849,27 +5860,27 @@ function weierstrassN(params, extraOpts = {}) {
       t4 = Fp3.add(X1, Z1);
       let t5 = Fp3.add(X2, Z2);
       t4 = Fp3.mul(t4, t5);
-      t5 = Fp3.add(t0, t22);
+      t5 = Fp3.add(t0, t2);
       t4 = Fp3.sub(t4, t5);
       t5 = Fp3.add(Y1, Z1);
       X3 = Fp3.add(Y2, Z2);
       t5 = Fp3.mul(t5, X3);
-      X3 = Fp3.add(t1, t22);
+      X3 = Fp3.add(t1, t2);
       t5 = Fp3.sub(t5, X3);
-      Z3 = Fp3.mul(a2, t4);
-      X3 = Fp3.mul(b3, t22);
+      Z3 = Fp3.mul(a3, t4);
+      X3 = Fp3.mul(b3, t2);
       Z3 = Fp3.add(X3, Z3);
       X3 = Fp3.sub(t1, Z3);
       Z3 = Fp3.add(t1, Z3);
       Y3 = Fp3.mul(X3, Z3);
       t1 = Fp3.add(t0, t0);
       t1 = Fp3.add(t1, t0);
-      t22 = Fp3.mul(a2, t22);
+      t2 = Fp3.mul(a3, t2);
       t4 = Fp3.mul(b3, t4);
-      t1 = Fp3.add(t1, t22);
-      t22 = Fp3.sub(t0, t22);
-      t22 = Fp3.mul(a2, t22);
-      t4 = Fp3.add(t4, t22);
+      t1 = Fp3.add(t1, t2);
+      t2 = Fp3.sub(t0, t2);
+      t2 = Fp3.mul(a3, t2);
+      t4 = Fp3.add(t4, t2);
       t0 = Fp3.mul(t1, t4);
       Y3 = Fp3.add(Y3, t0);
       t0 = Fp3.mul(t5, t4);
@@ -5900,7 +5911,7 @@ function weierstrassN(params, extraOpts = {}) {
       if (!Fn.isValidNot0(scalar))
         throw new Error("invalid scalar: out of range");
       let point, fake;
-      const mul = (n2) => wnaf.cached(this, n2, (p2) => normalizeZ(Point, p2));
+      const mul = (n3) => wnaf.cached(this, n3, (p2) => normalizeZ(Point, p2));
       if (endo2) {
         const { k1neg, k1, k2neg, k2 } = splitEndoScalarN(scalar);
         const { p: k1p, f: k1f } = mul(k1);
@@ -5938,8 +5949,8 @@ function weierstrassN(params, extraOpts = {}) {
         return wnaf.unsafe(p2, sc);
       }
     }
-    multiplyAndAddUnsafe(Q2, a2, b2) {
-      const sum = this.multiplyUnsafe(a2).add(Q2.multiplyUnsafe(b2));
+    multiplyAndAddUnsafe(Q2, a3, b2) {
+      const sum = this.multiplyUnsafe(a3).add(Q2.multiplyUnsafe(b2));
       return sum.is0() ? void 0 : sum;
     }
     /**
@@ -6029,21 +6040,21 @@ function SWUFpSqrtRatio(Fp3, Z2) {
   const c1 = l3;
   const _2n_pow_c1_1 = _2n$5 << c1 - _1n$5 - _1n$5;
   const _2n_pow_c1 = _2n_pow_c1_1 * _2n$5;
-  const c2 = (q2 - _1n$5) / _2n_pow_c1;
-  const c3 = (c2 - _1n$5) / _2n$5;
+  const c22 = (q2 - _1n$5) / _2n_pow_c1;
+  const c3 = (c22 - _1n$5) / _2n$5;
   const c4 = _2n_pow_c1 - _1n$5;
   const c5 = _2n_pow_c1_1;
-  const c6 = Fp3.pow(Z2, c2);
-  const c7 = Fp3.pow(Z2, (c2 + _1n$5) / _2n$5);
-  let sqrtRatio = (u2, v3) => {
+  const c6 = Fp3.pow(Z2, c22);
+  const c7 = Fp3.pow(Z2, (c22 + _1n$5) / _2n$5);
+  let sqrtRatio = (u2, v2) => {
     let tv1 = c6;
-    let tv2 = Fp3.pow(v3, c4);
+    let tv2 = Fp3.pow(v2, c4);
     let tv3 = Fp3.sqr(tv2);
-    tv3 = Fp3.mul(tv3, v3);
+    tv3 = Fp3.mul(tv3, v2);
     let tv5 = Fp3.mul(u2, tv3);
     tv5 = Fp3.pow(tv5, c3);
     tv5 = Fp3.mul(tv5, tv2);
-    tv2 = Fp3.mul(tv5, v3);
+    tv2 = Fp3.mul(tv5, v2);
     tv3 = Fp3.mul(tv5, u2);
     let tv4 = Fp3.mul(tv3, tv2);
     tv5 = Fp3.pow(tv4, c5);
@@ -6052,8 +6063,8 @@ function SWUFpSqrtRatio(Fp3, Z2) {
     tv5 = Fp3.mul(tv4, tv1);
     tv3 = Fp3.cmov(tv2, tv3, isQR);
     tv4 = Fp3.cmov(tv5, tv4, isQR);
-    for (let i3 = c1; i3 > _1n$5; i3--) {
-      let tv52 = i3 - _2n$5;
+    for (let i2 = c1; i2 > _1n$5; i2--) {
+      let tv52 = i2 - _2n$5;
       tv52 = _2n$5 << tv52 - _1n$5;
       let tvv5 = Fp3.pow(tv4, tv52);
       const e1 = Fp3.eql(tvv5, Fp3.ONE);
@@ -6067,15 +6078,15 @@ function SWUFpSqrtRatio(Fp3, Z2) {
   };
   if (Fp3.ORDER % _4n$1 === _3n$3) {
     const c12 = (Fp3.ORDER - _3n$3) / _4n$1;
-    const c22 = Fp3.sqrt(Fp3.neg(Z2));
-    sqrtRatio = (u2, v3) => {
-      let tv1 = Fp3.sqr(v3);
-      const tv2 = Fp3.mul(u2, v3);
+    const c23 = Fp3.sqrt(Fp3.neg(Z2));
+    sqrtRatio = (u2, v2) => {
+      let tv1 = Fp3.sqr(v2);
+      const tv2 = Fp3.mul(u2, v2);
       tv1 = Fp3.mul(tv1, tv2);
       let y1 = Fp3.pow(tv1, c12);
       y1 = Fp3.mul(y1, tv2);
-      const y2 = Fp3.mul(y1, c22);
-      const tv3 = Fp3.mul(Fp3.sqr(y1), v3);
+      const y2 = Fp3.mul(y1, c23);
+      const tv3 = Fp3.mul(Fp3.sqr(y1), v2);
       const isQR = Fp3.eql(tv3, u2);
       let y3 = Fp3.cmov(y2, y1, isQR);
       return { isValid: isQR, value: y3 };
@@ -6085,8 +6096,8 @@ function SWUFpSqrtRatio(Fp3, Z2) {
 }
 function mapToCurveSimpleSWU(Fp3, opts) {
   validateField(Fp3);
-  const { A: A4, B: B2, Z: Z2 } = opts;
-  if (!Fp3.isValid(A4) || !Fp3.isValid(B2) || !Fp3.isValid(Z2))
+  const { A: A3, B: B3, Z: Z2 } = opts;
+  if (!Fp3.isValid(A3) || !Fp3.isValid(B3) || !Fp3.isValid(Z2))
     throw new Error("mapToCurveSimpleSWU: invalid opts");
   const sqrtRatio = SWUFpSqrtRatio(Fp3, Z2);
   if (!Fp3.isOdd)
@@ -6098,16 +6109,16 @@ function mapToCurveSimpleSWU(Fp3, opts) {
     tv2 = Fp3.sqr(tv1);
     tv2 = Fp3.add(tv2, tv1);
     tv3 = Fp3.add(tv2, Fp3.ONE);
-    tv3 = Fp3.mul(tv3, B2);
+    tv3 = Fp3.mul(tv3, B3);
     tv4 = Fp3.cmov(Z2, Fp3.neg(tv2), !Fp3.eql(tv2, Fp3.ZERO));
-    tv4 = Fp3.mul(tv4, A4);
+    tv4 = Fp3.mul(tv4, A3);
     tv2 = Fp3.sqr(tv3);
     tv6 = Fp3.sqr(tv4);
-    tv5 = Fp3.mul(tv6, A4);
+    tv5 = Fp3.mul(tv6, A3);
     tv2 = Fp3.add(tv2, tv5);
     tv2 = Fp3.mul(tv2, tv3);
     tv6 = Fp3.mul(tv6, tv4);
-    tv5 = Fp3.mul(tv6, B2);
+    tv5 = Fp3.mul(tv6, B3);
     tv2 = Fp3.add(tv2, tv5);
     x3 = Fp3.mul(tv1, tv3);
     const { isValid, value } = sqrtRatio(tv2, tv6);
@@ -6131,56 +6142,56 @@ function getWLengths(Fp3, Fn) {
     signature: 2 * Fn.BYTES
   };
 }
-function weierstrassPoints(c2) {
-  const { CURVE, curveOpts } = _weierstrass_legacy_opts_to_new(c2);
+function weierstrassPoints(c3) {
+  const { CURVE, curveOpts } = _weierstrass_legacy_opts_to_new(c3);
   const Point = weierstrassN(CURVE, curveOpts);
-  return _weierstrass_new_output_to_legacy(c2, Point);
+  return _weierstrass_new_output_to_legacy(c3, Point);
 }
-function _weierstrass_legacy_opts_to_new(c2) {
+function _weierstrass_legacy_opts_to_new(c3) {
   const CURVE = {
-    a: c2.a,
-    b: c2.b,
-    p: c2.Fp.ORDER,
-    n: c2.n,
-    h: c2.h,
-    Gx: c2.Gx,
-    Gy: c2.Gy
+    a: c3.a,
+    b: c3.b,
+    p: c3.Fp.ORDER,
+    n: c3.n,
+    h: c3.h,
+    Gx: c3.Gx,
+    Gy: c3.Gy
   };
-  const Fp3 = c2.Fp;
-  let allowedLengths = c2.allowedPrivateKeyLengths ? Array.from(new Set(c2.allowedPrivateKeyLengths.map((l3) => Math.ceil(l3 / 2)))) : void 0;
+  const Fp3 = c3.Fp;
+  let allowedLengths = c3.allowedPrivateKeyLengths ? Array.from(new Set(c3.allowedPrivateKeyLengths.map((l3) => Math.ceil(l3 / 2)))) : void 0;
   const Fn = Field(CURVE.n, {
-    BITS: c2.nBitLength,
+    BITS: c3.nBitLength,
     allowedLengths,
-    modFromBytes: c2.wrapPrivateKey
+    modFromBytes: c3.wrapPrivateKey
   });
   const curveOpts = {
     Fp: Fp3,
     Fn,
-    allowInfinityPoint: c2.allowInfinityPoint,
-    endo: c2.endo,
-    isTorsionFree: c2.isTorsionFree,
-    clearCofactor: c2.clearCofactor,
-    fromBytes: c2.fromBytes,
-    toBytes: c2.toBytes
+    allowInfinityPoint: c3.allowInfinityPoint,
+    endo: c3.endo,
+    isTorsionFree: c3.isTorsionFree,
+    clearCofactor: c3.clearCofactor,
+    fromBytes: c3.fromBytes,
+    toBytes: c3.toBytes
   };
   return { CURVE, curveOpts };
 }
-function _legacyHelperEquat(Fp3, a2, b2) {
+function _legacyHelperEquat(Fp3, a3, b2) {
   function weierstrassEquation(x3) {
     const x22 = Fp3.sqr(x3);
     const x32 = Fp3.mul(x22, x3);
-    return Fp3.add(Fp3.add(x32, Fp3.mul(x3, a2)), b2);
+    return Fp3.add(Fp3.add(x32, Fp3.mul(x3, a3)), b2);
   }
   return weierstrassEquation;
 }
-function _weierstrass_new_output_to_legacy(c2, Point) {
+function _weierstrass_new_output_to_legacy(c3, Point) {
   const { Fp: Fp3, Fn } = Point;
   function isWithinCurveOrder(num) {
     return inRange(num, _1n$5, Fn.ORDER);
   }
-  const weierstrassEquation = _legacyHelperEquat(Fp3, c2.a, c2.b);
+  const weierstrassEquation = _legacyHelperEquat(Fp3, c3.a, c3.b);
   return Object.assign({}, {
-    CURVE: c2,
+    CURVE: c3,
     Point,
     ProjectivePoint: Point,
     normPrivateKeyToScalar: (key) => _normFnElement(Fn, key),
@@ -6188,16 +6199,15 @@ function _weierstrass_new_output_to_legacy(c2, Point) {
     isWithinCurveOrder
   });
 }
-/*! noble-curves - MIT License (c) 2022 Paul Miller (paulmillr.com) */
 const _0n$3 = BigInt(0), _1n$4 = BigInt(1), _2n$4 = BigInt(2), _3n$2 = BigInt(3);
-function NAfDecomposition(a2) {
+function NAfDecomposition(a3) {
   const res = [];
-  for (; a2 > _1n$4; a2 >>= _1n$4) {
-    if ((a2 & _1n$4) === _0n$3)
+  for (; a3 > _1n$4; a3 >>= _1n$4) {
+    if ((a3 & _1n$4) === _0n$3)
       res.unshift(0);
-    else if ((a2 & _3n$2) === _3n$2) {
+    else if ((a3 & _3n$2) === _3n$2) {
       res.unshift(-1);
-      a2 += _1n$4;
+      a3 += _1n$4;
     } else
       res.unshift(1);
   }
@@ -6212,24 +6222,24 @@ function createBlsPairing(fields, G1, G2, params) {
   const { twistType, ateLoopSize, xNegative, postPrecompute } = params;
   let lineFunction;
   if (twistType === "multiplicative") {
-    lineFunction = (c0, c1, c2, f2, Px, Py) => Fp122.mul014(f2, c0, Fp22.mul(c1, Px), Fp22.mul(c2, Py));
+    lineFunction = (c0, c1, c22, f2, Px, Py) => Fp122.mul014(f2, c0, Fp22.mul(c1, Px), Fp22.mul(c22, Py));
   } else if (twistType === "divisive") {
-    lineFunction = (c0, c1, c2, f2, Px, Py) => Fp122.mul034(f2, Fp22.mul(c2, Py), Fp22.mul(c1, Px), c0);
+    lineFunction = (c0, c1, c22, f2, Px, Py) => Fp122.mul034(f2, Fp22.mul(c22, Py), Fp22.mul(c1, Px), c0);
   } else
     throw new Error("bls: unknown twist type");
   const Fp2div2 = Fp22.div(Fp22.ONE, Fp22.mul(Fp22.ONE, _2n$4));
   function pointDouble(ell, Rx, Ry, Rz) {
     const t0 = Fp22.sqr(Ry);
     const t1 = Fp22.sqr(Rz);
-    const t22 = Fp22.mulByB(Fp22.mul(t1, _3n$2));
-    const t3 = Fp22.mul(t22, _3n$2);
+    const t2 = Fp22.mulByB(Fp22.mul(t1, _3n$2));
+    const t3 = Fp22.mul(t2, _3n$2);
     const t4 = Fp22.sub(Fp22.sub(Fp22.sqr(Fp22.add(Ry, Rz)), t1), t0);
-    const c0 = Fp22.sub(t22, t0);
+    const c0 = Fp22.sub(t2, t0);
     const c1 = Fp22.mul(Fp22.sqr(Rx), _3n$2);
-    const c2 = Fp22.neg(t4);
-    ell.push([c0, c1, c2]);
+    const c22 = Fp22.neg(t4);
+    ell.push([c0, c1, c22]);
     Rx = Fp22.mul(Fp22.mul(Fp22.mul(Fp22.sub(t0, t3), Rx), Ry), Fp2div2);
-    Ry = Fp22.sub(Fp22.sqr(Fp22.mul(Fp22.add(t0, t3), Fp2div2)), Fp22.mul(Fp22.sqr(t22), _3n$2));
+    Ry = Fp22.sub(Fp22.sqr(Fp22.mul(Fp22.add(t0, t3), Fp2div2)), Fp22.mul(Fp22.sqr(t2), _3n$2));
     Rz = Fp22.mul(t0, t4);
     return { Rx, Ry, Rz };
   }
@@ -6238,11 +6248,11 @@ function createBlsPairing(fields, G1, G2, params) {
     const t1 = Fp22.sub(Rx, Fp22.mul(Qx, Rz));
     const c0 = Fp22.sub(Fp22.mul(t0, Qx), Fp22.mul(t1, Qy));
     const c1 = Fp22.neg(t0);
-    const c2 = t1;
-    ell.push([c0, c1, c2]);
-    const t22 = Fp22.sqr(t1);
-    const t3 = Fp22.mul(t22, t1);
-    const t4 = Fp22.mul(t22, Rx);
+    const c22 = t1;
+    ell.push([c0, c1, c22]);
+    const t2 = Fp22.sqr(t1);
+    const t3 = Fp22.mul(t2, t1);
+    const t4 = Fp22.mul(t2, Rx);
     const t5 = Fp22.add(Fp22.sub(t3, Fp22.mul(t4, _2n$4)), Fp22.mul(Fp22.sqr(t0), Rz));
     Rx = Fp22.mul(t1, t5);
     Ry = Fp22.sub(Fp22.mul(Fp22.sub(t4, t5), t0), Fp22.mul(t3, Ry));
@@ -6273,11 +6283,11 @@ function createBlsPairing(fields, G1, G2, params) {
     let f12 = Fp122.ONE;
     if (pairs.length) {
       const ellLen = pairs[0][0].length;
-      for (let i3 = 0; i3 < ellLen; i3++) {
+      for (let i2 = 0; i2 < ellLen; i2++) {
         f12 = Fp122.sqr(f12);
         for (const [ell, Px, Py] of pairs) {
-          for (const [c0, c1, c2] of ell[i3])
-            f12 = lineFunction(c0, c1, c2, f12, Px, Py);
+          for (const [c0, c1, c22] of ell[i2])
+            f12 = lineFunction(c0, c1, c22, f12, Px, Py);
         }
       }
     }
@@ -6288,14 +6298,14 @@ function createBlsPairing(fields, G1, G2, params) {
   function pairingBatch(pairs, withFinalExponent = true) {
     const res = [];
     normalizeZ(G1, pairs.map(({ g1 }) => g1));
-    normalizeZ(G2, pairs.map(({ g2 }) => g2));
-    for (const { g1, g2 } of pairs) {
-      if (g1.is0() || g2.is0())
+    normalizeZ(G2, pairs.map(({ g2: g22 }) => g22));
+    for (const { g1, g2: g22 } of pairs) {
+      if (g1.is0() || g22.is0())
         throw new Error("pairing is not available for ZERO point");
       g1.assertValidity();
-      g2.assertValidity();
+      g22.assertValidity();
       const Qa = g1.toAffine();
-      res.push([calcPairingPrecomputes(g2), Qa.x, Qa.y]);
+      res.push([calcPairingPrecomputes(g22), Qa.x, Qa.y]);
     }
     return millerLoopBatch(res, withFinalExponent);
   }
@@ -6319,12 +6329,12 @@ function createBlsSig(blsPairing, PubCurve, SigCurve, SignatureCoder, isSigG1) {
   function normSig(point) {
     return point instanceof SigCurve.Point ? point : SigCurve.Point.fromHex(point);
   }
-  function amsg(m2) {
-    if (!(m2 instanceof SigCurve.Point))
+  function amsg(m3) {
+    if (!(m3 instanceof SigCurve.Point))
       throw new Error(`expected valid message hashed to ${!isSigG1 ? "G2" : "G1"} curve`);
-    return m2;
+    return m3;
   }
-  const pair = !isSigG1 ? (a2, b2) => ({ g1: a2, g2: b2 }) : (a2, b2) => ({ g1: b2, g2: a2 });
+  const pair = !isSigG1 ? (a3, b2) => ({ g1: a3, g2: b2 }) : (a3, b2) => ({ g1: b2, g2: a3 });
   return {
     // P = pk x G
     getPublicKey(secretKey) {
@@ -6365,9 +6375,9 @@ function createBlsSig(blsPairing, PubCurve, SigCurve, SignatureCoder, isSigG1) {
       const nMessages = messages;
       const nPublicKeys = publicKeys.map(normPub);
       const messagePubKeyMap = /* @__PURE__ */ new Map();
-      for (let i3 = 0; i3 < nPublicKeys.length; i3++) {
-        const pub = nPublicKeys[i3];
-        const msg = nMessages[i3];
+      for (let i2 = 0; i2 < nPublicKeys.length; i2++) {
+        const pub = nPublicKeys[i2];
+        const msg = nMessages[i2];
         let keys = messagePubKeyMap.get(msg);
         if (keys === void 0) {
           keys = [];
@@ -6488,7 +6498,7 @@ function bls(CURVE) {
     return signatures[0] instanceof G1.Point ? agg : ShortSignature.toBytes(agg);
   }
   function verifyBatch(signature, messages, publicKeys, htfOpts) {
-    const Hm = messages.map((m2) => normP2Hash(m2, htfOpts));
+    const Hm = messages.map((m3) => normP2Hash(m3, htfOpts));
     return longSignatures.verifyBatch(signature, Hm, publicKeys);
   }
   G1.Point.BASE.precompute(4);
@@ -6531,17 +6541,16 @@ function bls(CURVE) {
     ShortSignature
   };
 }
-/*! noble-curves - MIT License (c) 2022 Paul Miller (paulmillr.com) */
 const _0n$2 = BigInt(0), _1n$3 = BigInt(1), _2n$3 = BigInt(2), _3n$1 = BigInt(3);
 function calcFrobeniusCoefficients(Fp3, nonResidue, modulus, degree, num = 1, divisor) {
   const _divisor = BigInt(divisor === void 0 ? degree : divisor);
   const towerModulus = modulus ** BigInt(degree);
   const res = [];
-  for (let i3 = 0; i3 < num; i3++) {
-    const a2 = BigInt(i3 + 1);
+  for (let i2 = 0; i2 < num; i2++) {
+    const a3 = BigInt(i2 + 1);
     const powers = [];
     for (let j2 = 0, qPower = _1n$3; j2 < degree; j2++) {
-      const power = (a2 * qPower - a2) / _divisor % towerModulus;
+      const power = (a3 * qPower - a3) / _divisor % towerModulus;
       powers.push(Fp3.pow(nonResidue, power));
       qPower *= modulus;
     }
@@ -6564,10 +6573,10 @@ function psiFrobenius(Fp3, Fp22, base) {
   function psi2(x3, y2) {
     return [Fp22.mul(x3, PSI2_X), Fp22.neg(y2)];
   }
-  const mapAffine = (fn) => (c2, P2) => {
+  const mapAffine = (fn) => (c3, P2) => {
     const affine = P2.toAffine();
     const p2 = fn(affine.x, affine.y);
-    return c2.fromAffine({ x: p2[0], y: p2[1] });
+    return c3.fromAffine({ x: p2[0], y: p2[1] });
   };
   const G2psi3 = mapAffine(psi);
   const G2psi22 = mapAffine(psi2);
@@ -6576,7 +6585,7 @@ function psiFrobenius(Fp3, Fp22, base) {
 const Fp2fromBigTuple = (Fp3, tuple) => {
   if (tuple.length !== 2)
     throw new Error("invalid tuple");
-  const fps = tuple.map((n2) => Fp3.create(n2));
+  const fps = tuple.map((n3) => Fp3.create(n3));
   return { c0: fps[0], c1: fps[1] };
 };
 class _Field2 {
@@ -6649,40 +6658,40 @@ class _Field2 {
       return { c0: Fp3.mul(c0, rhs), c1: Fp3.mul(c1, rhs) };
     const { c0: r0, c1: r1 } = rhs;
     let t1 = Fp3.mul(c0, r0);
-    let t22 = Fp3.mul(c1, r1);
-    const o0 = Fp3.sub(t1, t22);
-    const o1 = Fp3.sub(Fp3.mul(Fp3.add(c0, c1), Fp3.add(r0, r1)), Fp3.add(t1, t22));
+    let t2 = Fp3.mul(c1, r1);
+    const o0 = Fp3.sub(t1, t2);
+    const o1 = Fp3.sub(Fp3.mul(Fp3.add(c0, c1), Fp3.add(r0, r1)), Fp3.add(t1, t2));
     return { c0: o0, c1: o1 };
   }
   sqr({ c0, c1 }) {
     const { Fp: Fp3 } = this;
-    const a2 = Fp3.add(c0, c1);
+    const a3 = Fp3.add(c0, c1);
     const b2 = Fp3.sub(c0, c1);
-    const c2 = Fp3.add(c0, c0);
-    return { c0: Fp3.mul(a2, b2), c1: Fp3.mul(c2, c1) };
+    const c3 = Fp3.add(c0, c0);
+    return { c0: Fp3.mul(a3, b2), c1: Fp3.mul(c3, c1) };
   }
   // NonNormalized stuff
-  addN(a2, b2) {
-    return this.add(a2, b2);
+  addN(a3, b2) {
+    return this.add(a3, b2);
   }
-  subN(a2, b2) {
-    return this.sub(a2, b2);
+  subN(a3, b2) {
+    return this.sub(a3, b2);
   }
-  mulN(a2, b2) {
-    return this.mul(a2, b2);
+  mulN(a3, b2) {
+    return this.mul(a3, b2);
   }
-  sqrN(a2) {
-    return this.sqr(a2);
+  sqrN(a3) {
+    return this.sqr(a3);
   }
   // Why inversion for bigint inside Fp instead of Fp2? it is even used in that context?
   div(lhs, rhs) {
     const { Fp: Fp3 } = this;
     return this.mul(lhs, typeof rhs === "bigint" ? Fp3.inv(Fp3.create(rhs)) : this.inv(rhs));
   }
-  inv({ c0: a2, c1: b2 }) {
+  inv({ c0: a3, c1: b2 }) {
     const { Fp: Fp3 } = this;
-    const factor = Fp3.inv(Fp3.create(a2 * a2 + b2 * b2));
-    return { c0: Fp3.mul(factor, Fp3.create(a2)), c1: Fp3.mul(factor, Fp3.create(-b2)) };
+    const factor = Fp3.inv(Fp3.create(a3 * a3 + b2 * b2));
+    return { c0: Fp3.mul(factor, Fp3.create(a3)), c1: Fp3.mul(factor, Fp3.create(-b2)) };
   }
   sqrt(num) {
     const { Fp: Fp3 } = this;
@@ -6694,11 +6703,11 @@ class _Field2 {
       else
         return Fp22.create({ c0: Fp3.ZERO, c1: Fp3.sqrt(Fp3.div(c0, this.Fp_NONRESIDUE)) });
     }
-    const a2 = Fp3.sqrt(Fp3.sub(Fp3.sqr(c0), Fp3.mul(Fp3.sqr(c1), this.Fp_NONRESIDUE)));
-    let d2 = Fp3.mul(Fp3.add(a2, c0), this.Fp_div2);
+    const a3 = Fp3.sqrt(Fp3.sub(Fp3.sqr(c0), Fp3.mul(Fp3.sqr(c1), this.Fp_NONRESIDUE)));
+    let d2 = Fp3.mul(Fp3.add(a3, c0), this.Fp_div2);
     const legendre = FpLegendre(Fp3, d2);
     if (legendre === -1)
-      d2 = Fp3.sub(d2, a2);
+      d2 = Fp3.sub(d2, a3);
     const a0 = Fp3.sqrt(d2);
     const candidateSqrt = Fp22.create({ c0: a0, c1: Fp3.div(Fp3.mul(c1, this.Fp_div2), a0) });
     if (!Fp22.eql(Fp22.sqr(candidateSqrt), num))
@@ -6729,23 +6738,23 @@ class _Field2 {
   toBytes({ c0, c1 }) {
     return concatBytes(this.Fp.toBytes(c0), this.Fp.toBytes(c1));
   }
-  cmov({ c0, c1 }, { c0: r0, c1: r1 }, c2) {
+  cmov({ c0, c1 }, { c0: r0, c1: r1 }, c3) {
     return {
-      c0: this.Fp.cmov(c0, r0, c2),
-      c1: this.Fp.cmov(c1, r1, c2)
+      c0: this.Fp.cmov(c0, r0, c3),
+      c1: this.Fp.cmov(c1, r1, c3)
     };
   }
   reim({ c0, c1 }) {
     return { re: c0, im: c1 };
   }
-  Fp4Square(a2, b2) {
+  Fp4Square(a3, b2) {
     const Fp22 = this;
-    const a22 = Fp22.sqr(a2);
+    const a22 = Fp22.sqr(a3);
     const b22 = Fp22.sqr(b2);
     return {
       first: Fp22.add(Fp22.mulByNonresidue(b22), a22),
       // b² * Nonresidue + a²
-      second: Fp22.sub(Fp22.sub(Fp22.sqr(Fp22.add(a2, b2)), a22), b22)
+      second: Fp22.sub(Fp22.sub(Fp22.sqr(Fp22.add(a3, b2)), a22), b22)
       // (a + b)² - a² - b²
     };
   }
@@ -6776,92 +6785,92 @@ class _Field6 {
     this.FROBENIUS_COEFFICIENTS_2 = frob[1];
     Object.seal(this);
   }
-  add({ c0, c1, c2 }, { c0: r0, c1: r1, c2: r2 }) {
+  add({ c0, c1, c2: c22 }, { c0: r0, c1: r1, c2: r2 }) {
     const { Fp2: Fp22 } = this;
     return {
       c0: Fp22.add(c0, r0),
       c1: Fp22.add(c1, r1),
-      c2: Fp22.add(c2, r2)
+      c2: Fp22.add(c22, r2)
     };
   }
-  sub({ c0, c1, c2 }, { c0: r0, c1: r1, c2: r2 }) {
+  sub({ c0, c1, c2: c22 }, { c0: r0, c1: r1, c2: r2 }) {
     const { Fp2: Fp22 } = this;
     return {
       c0: Fp22.sub(c0, r0),
       c1: Fp22.sub(c1, r1),
-      c2: Fp22.sub(c2, r2)
+      c2: Fp22.sub(c22, r2)
     };
   }
-  mul({ c0, c1, c2 }, rhs) {
+  mul({ c0, c1, c2: c22 }, rhs) {
     const { Fp2: Fp22 } = this;
     if (typeof rhs === "bigint") {
       return {
         c0: Fp22.mul(c0, rhs),
         c1: Fp22.mul(c1, rhs),
-        c2: Fp22.mul(c2, rhs)
+        c2: Fp22.mul(c22, rhs)
       };
     }
     const { c0: r0, c1: r1, c2: r2 } = rhs;
     const t0 = Fp22.mul(c0, r0);
     const t1 = Fp22.mul(c1, r1);
-    const t22 = Fp22.mul(c2, r2);
+    const t2 = Fp22.mul(c22, r2);
     return {
       // t0 + (c1 + c2) * (r1 * r2) - (T1 + T2) * (u + 1)
-      c0: Fp22.add(t0, Fp22.mulByNonresidue(Fp22.sub(Fp22.mul(Fp22.add(c1, c2), Fp22.add(r1, r2)), Fp22.add(t1, t22)))),
+      c0: Fp22.add(t0, Fp22.mulByNonresidue(Fp22.sub(Fp22.mul(Fp22.add(c1, c22), Fp22.add(r1, r2)), Fp22.add(t1, t2)))),
       // (c0 + c1) * (r0 + r1) - (T0 + T1) + T2 * (u + 1)
-      c1: Fp22.add(Fp22.sub(Fp22.mul(Fp22.add(c0, c1), Fp22.add(r0, r1)), Fp22.add(t0, t1)), Fp22.mulByNonresidue(t22)),
+      c1: Fp22.add(Fp22.sub(Fp22.mul(Fp22.add(c0, c1), Fp22.add(r0, r1)), Fp22.add(t0, t1)), Fp22.mulByNonresidue(t2)),
       // T1 + (c0 + c2) * (r0 + r2) - T0 + T2
-      c2: Fp22.sub(Fp22.add(t1, Fp22.mul(Fp22.add(c0, c2), Fp22.add(r0, r2))), Fp22.add(t0, t22))
+      c2: Fp22.sub(Fp22.add(t1, Fp22.mul(Fp22.add(c0, c22), Fp22.add(r0, r2))), Fp22.add(t0, t2))
     };
   }
-  sqr({ c0, c1, c2 }) {
+  sqr({ c0, c1, c2: c22 }) {
     const { Fp2: Fp22 } = this;
     let t0 = Fp22.sqr(c0);
     let t1 = Fp22.mul(Fp22.mul(c0, c1), _2n$3);
-    let t3 = Fp22.mul(Fp22.mul(c1, c2), _2n$3);
-    let t4 = Fp22.sqr(c2);
+    let t3 = Fp22.mul(Fp22.mul(c1, c22), _2n$3);
+    let t4 = Fp22.sqr(c22);
     return {
       c0: Fp22.add(Fp22.mulByNonresidue(t3), t0),
       // T3 * (u + 1) + T0
       c1: Fp22.add(Fp22.mulByNonresidue(t4), t1),
       // T4 * (u + 1) + T1
       // T1 + (c0 - c1 + c2)² + T3 - T0 - T4
-      c2: Fp22.sub(Fp22.sub(Fp22.add(Fp22.add(t1, Fp22.sqr(Fp22.add(Fp22.sub(c0, c1), c2))), t3), t0), t4)
+      c2: Fp22.sub(Fp22.sub(Fp22.add(Fp22.add(t1, Fp22.sqr(Fp22.add(Fp22.sub(c0, c1), c22))), t3), t0), t4)
     };
   }
-  addN(a2, b2) {
-    return this.add(a2, b2);
+  addN(a3, b2) {
+    return this.add(a3, b2);
   }
-  subN(a2, b2) {
-    return this.sub(a2, b2);
+  subN(a3, b2) {
+    return this.sub(a3, b2);
   }
-  mulN(a2, b2) {
-    return this.mul(a2, b2);
+  mulN(a3, b2) {
+    return this.mul(a3, b2);
   }
-  sqrN(a2) {
-    return this.sqr(a2);
+  sqrN(a3) {
+    return this.sqr(a3);
   }
   create(num) {
     return num;
   }
-  isValid({ c0, c1, c2 }) {
+  isValid({ c0, c1, c2: c22 }) {
     const { Fp2: Fp22 } = this;
-    return Fp22.isValid(c0) && Fp22.isValid(c1) && Fp22.isValid(c2);
+    return Fp22.isValid(c0) && Fp22.isValid(c1) && Fp22.isValid(c22);
   }
-  is0({ c0, c1, c2 }) {
+  is0({ c0, c1, c2: c22 }) {
     const { Fp2: Fp22 } = this;
-    return Fp22.is0(c0) && Fp22.is0(c1) && Fp22.is0(c2);
+    return Fp22.is0(c0) && Fp22.is0(c1) && Fp22.is0(c22);
   }
   isValidNot0(num) {
     return !this.is0(num) && this.isValid(num);
   }
-  neg({ c0, c1, c2 }) {
+  neg({ c0, c1, c2: c22 }) {
     const { Fp2: Fp22 } = this;
-    return { c0: Fp22.neg(c0), c1: Fp22.neg(c1), c2: Fp22.neg(c2) };
+    return { c0: Fp22.neg(c0), c1: Fp22.neg(c1), c2: Fp22.neg(c22) };
   }
-  eql({ c0, c1, c2 }, { c0: r0, c1: r1, c2: r2 }) {
+  eql({ c0, c1, c2: c22 }, { c0: r0, c1: r1, c2: r2 }) {
     const { Fp2: Fp22 } = this;
-    return Fp22.eql(c0, r0) && Fp22.eql(c1, r1) && Fp22.eql(c2, r2);
+    return Fp22.eql(c0, r0) && Fp22.eql(c1, r1) && Fp22.eql(c22, r2);
   }
   sqrt(_2) {
     return notImplemented();
@@ -6878,89 +6887,89 @@ class _Field6 {
   invertBatch(nums) {
     return FpInvertBatch(this, nums);
   }
-  inv({ c0, c1, c2 }) {
+  inv({ c0, c1, c2: c22 }) {
     const { Fp2: Fp22 } = this;
-    let t0 = Fp22.sub(Fp22.sqr(c0), Fp22.mulByNonresidue(Fp22.mul(c2, c1)));
-    let t1 = Fp22.sub(Fp22.mulByNonresidue(Fp22.sqr(c2)), Fp22.mul(c0, c1));
-    let t22 = Fp22.sub(Fp22.sqr(c1), Fp22.mul(c0, c2));
-    let t4 = Fp22.inv(Fp22.add(Fp22.mulByNonresidue(Fp22.add(Fp22.mul(c2, t1), Fp22.mul(c1, t22))), Fp22.mul(c0, t0)));
-    return { c0: Fp22.mul(t4, t0), c1: Fp22.mul(t4, t1), c2: Fp22.mul(t4, t22) };
+    let t0 = Fp22.sub(Fp22.sqr(c0), Fp22.mulByNonresidue(Fp22.mul(c22, c1)));
+    let t1 = Fp22.sub(Fp22.mulByNonresidue(Fp22.sqr(c22)), Fp22.mul(c0, c1));
+    let t2 = Fp22.sub(Fp22.sqr(c1), Fp22.mul(c0, c22));
+    let t4 = Fp22.inv(Fp22.add(Fp22.mulByNonresidue(Fp22.add(Fp22.mul(c22, t1), Fp22.mul(c1, t2))), Fp22.mul(c0, t0)));
+    return { c0: Fp22.mul(t4, t0), c1: Fp22.mul(t4, t1), c2: Fp22.mul(t4, t2) };
   }
   // Bytes utils
   fromBytes(b2) {
     const { Fp2: Fp22 } = this;
     if (b2.length !== this.BYTES)
       throw new Error("fromBytes invalid length=" + b2.length);
-    const B2 = Fp22.BYTES;
+    const B22 = Fp22.BYTES;
     return {
-      c0: Fp22.fromBytes(b2.subarray(0, B2)),
-      c1: Fp22.fromBytes(b2.subarray(B2, B2 * 2)),
-      c2: Fp22.fromBytes(b2.subarray(2 * B2))
+      c0: Fp22.fromBytes(b2.subarray(0, B22)),
+      c1: Fp22.fromBytes(b2.subarray(B22, B22 * 2)),
+      c2: Fp22.fromBytes(b2.subarray(2 * B22))
     };
   }
-  toBytes({ c0, c1, c2 }) {
+  toBytes({ c0, c1, c2: c22 }) {
     const { Fp2: Fp22 } = this;
-    return concatBytes(Fp22.toBytes(c0), Fp22.toBytes(c1), Fp22.toBytes(c2));
+    return concatBytes(Fp22.toBytes(c0), Fp22.toBytes(c1), Fp22.toBytes(c22));
   }
-  cmov({ c0, c1, c2 }, { c0: r0, c1: r1, c2: r2 }, c3) {
+  cmov({ c0, c1, c2: c22 }, { c0: r0, c1: r1, c2: r2 }, c3) {
     const { Fp2: Fp22 } = this;
     return {
       c0: Fp22.cmov(c0, r0, c3),
       c1: Fp22.cmov(c1, r1, c3),
-      c2: Fp22.cmov(c2, r2, c3)
+      c2: Fp22.cmov(c22, r2, c3)
     };
   }
-  fromBigSix(t3) {
+  fromBigSix(t2) {
     const { Fp2: Fp22 } = this;
-    if (!Array.isArray(t3) || t3.length !== 6)
+    if (!Array.isArray(t2) || t2.length !== 6)
       throw new Error("invalid Fp6 usage");
     return {
-      c0: Fp22.fromBigTuple(t3.slice(0, 2)),
-      c1: Fp22.fromBigTuple(t3.slice(2, 4)),
-      c2: Fp22.fromBigTuple(t3.slice(4, 6))
+      c0: Fp22.fromBigTuple(t2.slice(0, 2)),
+      c1: Fp22.fromBigTuple(t2.slice(2, 4)),
+      c2: Fp22.fromBigTuple(t2.slice(4, 6))
     };
   }
-  frobeniusMap({ c0, c1, c2 }, power) {
+  frobeniusMap({ c0, c1, c2: c22 }, power) {
     const { Fp2: Fp22 } = this;
     return {
       c0: Fp22.frobeniusMap(c0, power),
       c1: Fp22.mul(Fp22.frobeniusMap(c1, power), this.FROBENIUS_COEFFICIENTS_1[power % 6]),
-      c2: Fp22.mul(Fp22.frobeniusMap(c2, power), this.FROBENIUS_COEFFICIENTS_2[power % 6])
+      c2: Fp22.mul(Fp22.frobeniusMap(c22, power), this.FROBENIUS_COEFFICIENTS_2[power % 6])
     };
   }
-  mulByFp2({ c0, c1, c2 }, rhs) {
+  mulByFp2({ c0, c1, c2: c22 }, rhs) {
     const { Fp2: Fp22 } = this;
     return {
       c0: Fp22.mul(c0, rhs),
       c1: Fp22.mul(c1, rhs),
-      c2: Fp22.mul(c2, rhs)
+      c2: Fp22.mul(c22, rhs)
     };
   }
-  mulByNonresidue({ c0, c1, c2 }) {
+  mulByNonresidue({ c0, c1, c2: c22 }) {
     const { Fp2: Fp22 } = this;
-    return { c0: Fp22.mulByNonresidue(c2), c1: c0, c2: c1 };
+    return { c0: Fp22.mulByNonresidue(c22), c1: c0, c2: c1 };
   }
   // Sparse multiplication
-  mul1({ c0, c1, c2 }, b1) {
+  mul1({ c0, c1, c2: c22 }, b1) {
     const { Fp2: Fp22 } = this;
     return {
-      c0: Fp22.mulByNonresidue(Fp22.mul(c2, b1)),
+      c0: Fp22.mulByNonresidue(Fp22.mul(c22, b1)),
       c1: Fp22.mul(c0, b1),
       c2: Fp22.mul(c1, b1)
     };
   }
   // Sparse multiplication
-  mul01({ c0, c1, c2 }, b0, b1) {
+  mul01({ c0, c1, c2: c22 }, b0, b1) {
     const { Fp2: Fp22 } = this;
     let t0 = Fp22.mul(c0, b0);
     let t1 = Fp22.mul(c1, b1);
     return {
       // ((c1 + c2) * b1 - T1) * (u + 1) + T0
-      c0: Fp22.add(Fp22.mulByNonresidue(Fp22.sub(Fp22.mul(Fp22.add(c1, c2), b1), t1)), t0),
+      c0: Fp22.add(Fp22.mulByNonresidue(Fp22.sub(Fp22.mul(Fp22.add(c1, c22), b1), t1)), t0),
       // (b0 + b1) * (c0 + c1) - T0 - T1
       c1: Fp22.sub(Fp22.sub(Fp22.mul(Fp22.add(b0, b1), Fp22.add(c0, c1)), t0), t1),
       // (c0 + c2) * b0 - T0 + T1
-      c2: Fp22.add(Fp22.sub(Fp22.mul(Fp22.add(c0, c2), b0), t0), t1)
+      c2: Fp22.add(Fp22.sub(Fp22.mul(Fp22.add(c0, c22), b0), t0), t1)
     };
   }
 }
@@ -7007,8 +7016,8 @@ class _Field12 {
   }
   inv({ c0, c1 }) {
     const { Fp6: Fp62 } = this;
-    let t3 = Fp62.inv(Fp62.sub(Fp62.sqr(c0), Fp62.mulByNonresidue(Fp62.sqr(c1))));
-    return { c0: Fp62.mul(c0, t3), c1: Fp62.neg(Fp62.mul(c1, t3)) };
+    let t2 = Fp62.inv(Fp62.sub(Fp62.sqr(c0), Fp62.mulByNonresidue(Fp62.sqr(c1))));
+    return { c0: Fp62.mul(c0, t2), c1: Fp62.neg(Fp62.mul(c1, t2)) };
   }
   div(lhs, rhs) {
     const { Fp6: Fp62 } = this;
@@ -7043,12 +7052,12 @@ class _Field12 {
       return { c0: Fp62.mul(c0, rhs), c1: Fp62.mul(c1, rhs) };
     let { c0: r0, c1: r1 } = rhs;
     let t1 = Fp62.mul(c0, r0);
-    let t22 = Fp62.mul(c1, r1);
+    let t2 = Fp62.mul(c1, r1);
     return {
-      c0: Fp62.add(t1, Fp62.mulByNonresidue(t22)),
+      c0: Fp62.add(t1, Fp62.mulByNonresidue(t2)),
       // T1 + T2 * v
       // (c0 + c1) * (r0 + r1) - (T1 + T2)
-      c1: Fp62.sub(Fp62.mul(Fp62.add(c0, c1), Fp62.add(r0, r1)), Fp62.add(t1, t22))
+      c1: Fp62.sub(Fp62.mul(Fp62.add(c0, c1), Fp62.add(r0, r1)), Fp62.add(t1, t2))
     };
   }
   sqr({ c0, c1 }) {
@@ -7061,17 +7070,17 @@ class _Field12 {
     };
   }
   // NonNormalized stuff
-  addN(a2, b2) {
-    return this.add(a2, b2);
+  addN(a3, b2) {
+    return this.add(a3, b2);
   }
-  subN(a2, b2) {
-    return this.sub(a2, b2);
+  subN(a3, b2) {
+    return this.sub(a3, b2);
   }
-  mulN(a2, b2) {
-    return this.mul(a2, b2);
+  mulN(a3, b2) {
+    return this.mul(a3, b2);
   }
-  sqrN(a2) {
-    return this.sqr(a2);
+  sqrN(a3) {
+    return this.sqr(a3);
   }
   // Bytes utils
   fromBytes(b2) {
@@ -7087,11 +7096,11 @@ class _Field12 {
     const { Fp6: Fp62 } = this;
     return concatBytes(Fp62.toBytes(c0), Fp62.toBytes(c1));
   }
-  cmov({ c0, c1 }, { c0: r0, c1: r1 }, c2) {
+  cmov({ c0, c1 }, { c0: r0, c1: r1 }, c3) {
     const { Fp6: Fp62 } = this;
     return {
-      c0: Fp62.cmov(c0, r0, c2),
-      c1: Fp62.cmov(c1, r1, c2)
+      c0: Fp62.cmov(c0, r0, c3),
+      c1: Fp62.cmov(c1, r1, c3)
     };
   }
   // Utils
@@ -7101,25 +7110,25 @@ class _Field12 {
   // fromTuple(c: [Fp6, Fp6]) {
   //   return new Fp12(...c);
   // }
-  fromBigTwelve(t3) {
+  fromBigTwelve(t2) {
     const { Fp6: Fp62 } = this;
     return {
-      c0: Fp62.fromBigSix(t3.slice(0, 6)),
-      c1: Fp62.fromBigSix(t3.slice(6, 12))
+      c0: Fp62.fromBigSix(t2.slice(0, 6)),
+      c1: Fp62.fromBigSix(t2.slice(6, 12))
     };
   }
   // Raises to q**i -th power
   frobeniusMap(lhs, power) {
     const { Fp6: Fp62 } = this;
     const { Fp2: Fp22 } = Fp62;
-    const { c0, c1, c2 } = Fp62.frobeniusMap(lhs.c1, power);
+    const { c0, c1, c2: c22 } = Fp62.frobeniusMap(lhs.c1, power);
     const coeff = this.FROBENIUS_COEFFICIENTS[power % 12];
     return {
       c0: Fp62.frobeniusMap(lhs.c0, power),
       c1: Fp62.create({
         c0: Fp22.mul(c0, coeff),
         c1: Fp22.mul(c1, coeff),
-        c2: Fp22.mul(c2, coeff)
+        c2: Fp22.mul(c22, coeff)
       })
     };
   }
@@ -7149,16 +7158,16 @@ class _Field12 {
   mul034({ c0, c1 }, o0, o3, o4) {
     const { Fp6: Fp62 } = this;
     const { Fp2: Fp22 } = Fp62;
-    const a2 = Fp62.create({
+    const a3 = Fp62.create({
       c0: Fp22.mul(c0.c0, o0),
       c1: Fp22.mul(c0.c1, o0),
       c2: Fp22.mul(c0.c2, o0)
     });
     const b2 = Fp62.mul01(c1, o3, o4);
-    const e5 = Fp62.mul01(Fp62.add(c0, c1), Fp22.add(o0, o3), o4);
+    const e4 = Fp62.mul01(Fp62.add(c0, c1), Fp22.add(o0, o3), o4);
     return {
-      c0: Fp62.add(Fp62.mulByNonresidue(b2), a2),
-      c1: Fp62.sub(e5, Fp62.add(a2, b2))
+      c0: Fp62.add(Fp62.mulByNonresidue(b2), a3),
+      c1: Fp62.sub(e4, Fp62.add(a3, b2))
     };
   }
   // A cyclotomic group is a subgroup of Fp^n defined by
@@ -7194,11 +7203,11 @@ class _Field12 {
     };
   }
   // https://eprint.iacr.org/2009/565.pdf
-  _cyclotomicExp(num, n2) {
+  _cyclotomicExp(num, n3) {
     let z2 = this.ONE;
-    for (let i3 = this.X_LEN - 1; i3 >= 0; i3--) {
+    for (let i2 = this.X_LEN - 1; i2 >= 0; i2--) {
       z2 = this._cyclotomicSquare(z2);
-      if (bitGet(n2, i3))
+      if (bitGet(n3, i2))
         z2 = this.mul(z2, num);
     }
     return z2;
@@ -7211,7 +7220,6 @@ function tower12(opts) {
   const Fp122 = new _Field12(Fp62, opts);
   return { Fp: Fp3, Fp2: Fp22, Fp6: Fp62, Fp12: Fp122 };
 }
-/*! noble-curves - MIT License (c) 2022 Paul Miller (paulmillr.com) */
 const _0n$1 = BigInt(0), _1n$2 = BigInt(1), _2n$2 = BigInt(2), _3n = BigInt(3), _4n = BigInt(4);
 const BLS_X = BigInt("0xd201000000010000");
 const BLS_X_LEN = bitLen(BLS_X);
@@ -7243,13 +7251,13 @@ const { Fp: Fp$1, Fp2, Fp6, Fp12 } = tower12({
     const x3 = BLS_X;
     const t0 = Fp12.div(Fp12.frobeniusMap(num, 6), num);
     const t1 = Fp12.mul(Fp12.frobeniusMap(t0, 2), t0);
-    const t22 = Fp12.conjugate(Fp12._cyclotomicExp(t1, x3));
-    const t3 = Fp12.mul(Fp12.conjugate(Fp12._cyclotomicSquare(t1)), t22);
+    const t2 = Fp12.conjugate(Fp12._cyclotomicExp(t1, x3));
+    const t3 = Fp12.mul(Fp12.conjugate(Fp12._cyclotomicSquare(t1)), t2);
     const t4 = Fp12.conjugate(Fp12._cyclotomicExp(t3, x3));
     const t5 = Fp12.conjugate(Fp12._cyclotomicExp(t4, x3));
-    const t6 = Fp12.mul(Fp12.conjugate(Fp12._cyclotomicExp(t5, x3)), Fp12._cyclotomicSquare(t22));
+    const t6 = Fp12.mul(Fp12.conjugate(Fp12._cyclotomicExp(t5, x3)), Fp12._cyclotomicSquare(t2));
     const t7 = Fp12.conjugate(Fp12._cyclotomicExp(t6, x3));
-    const t2_t5_pow_q2 = Fp12.frobeniusMap(Fp12.mul(t22, t5), 2);
+    const t2_t5_pow_q2 = Fp12.frobeniusMap(Fp12.mul(t2, t5), 2);
     const t4_t1_pow_q3 = Fp12.frobeniusMap(Fp12.mul(t4, t1), 3);
     const t6_t1c_pow_q1 = Fp12.frobeniusMap(Fp12.mul(t6, Fp12.conjugate(t1)), 1);
     const t7_t3c_t1 = Fp12.mul(Fp12.mul(t7, Fp12.conjugate(t3)), t1);
@@ -7419,7 +7427,7 @@ function pointG2FromBytes(bytes) {
   const slc = (b2, from, to) => bytesToNumberBE(b2.slice(from, to));
   if (value.length === 96 && compressed) {
     if (infinity) {
-      if (value.reduce((p2, c2) => p2 !== 0 ? c2 + 1 : c2, 0) > 0) {
+      if (value.reduce((p2, c3) => p2 !== 0 ? c3 + 1 : c3, 0) > 0) {
         throw new Error("invalid G2 point: compressed");
       }
       return { x: Fp2.ZERO, y: Fp2.ZERO };
@@ -7434,7 +7442,7 @@ function pointG2FromBytes(bytes) {
     return { x: x3, y: y2 };
   } else if (value.length === 192 && !compressed) {
     if (infinity) {
-      if (value.reduce((p2, c2) => p2 !== 0 ? c2 + 1 : c2, 0) > 0) {
+      if (value.reduce((p2, c3) => p2 !== 0 ? c3 + 1 : c3, 0) > 0) {
         throw new Error("invalid G2 point: uncompressed");
       }
       return { x: Fp2.ZERO, y: Fp2.ZERO };
@@ -7496,9 +7504,9 @@ const bls12_381 = bls({
     // point.isTorsionFree() should return true for valid points
     // It returns false for shitty points.
     // https://eprint.iacr.org/2021/1130.pdf
-    isTorsionFree: (c2, point) => {
+    isTorsionFree: (c3, point) => {
       const beta = BigInt("0x5f19672fdf76ce51ba69c6076a0f77eaddb3a93be6f89688de17d813620a00022e01fffffffefffe");
-      const phi = new c2(Fp$1.mul(point.X, beta), point.Y, point.Z);
+      const phi = new c3(Fp$1.mul(point.X, beta), point.Y, point.Z);
       const xP = point.multiplyUnsafe(BLS_X).negate();
       const u2P = xP.multiplyUnsafe(BLS_X);
       return u2P.equals(phi);
@@ -7545,23 +7553,23 @@ const bls12_381 = bls({
     // It returns false for shitty points.
     // https://eprint.iacr.org/2021/1130.pdf
     // Older version: https://eprint.iacr.org/2019/814.pdf
-    isTorsionFree: (c2, P2) => {
-      return P2.multiplyUnsafe(BLS_X).negate().equals(G2psi(c2, P2));
+    isTorsionFree: (c3, P2) => {
+      return P2.multiplyUnsafe(BLS_X).negate().equals(G2psi(c3, P2));
     },
     // Maps the point into the prime-order subgroup G2.
     // clear_cofactor_bls12381_g2 from RFC 9380.
     // https://eprint.iacr.org/2017/419.pdf
     // prettier-ignore
-    clearCofactor: (c2, P2) => {
+    clearCofactor: (c3, P2) => {
       const x3 = BLS_X;
       let t1 = P2.multiplyUnsafe(x3).negate();
-      let t22 = G2psi(c2, P2);
+      let t2 = G2psi(c3, P2);
       let t3 = P2.double();
-      t3 = G2psi2(c2, t3);
-      t3 = t3.subtract(t22);
-      t22 = t1.add(t22);
-      t22 = t22.multiplyUnsafe(x3).negate();
-      t3 = t3.add(t22);
+      t3 = G2psi2(c3, t3);
+      t3 = t3.subtract(t2);
+      t2 = t1.add(t2);
+      t2 = t2.multiplyUnsafe(x3).negate();
+      t3 = t3.add(t2);
       t3 = t3.subtract(t1);
       const Q2 = t3.subtract(P2);
       return Q2;
@@ -7666,7 +7674,7 @@ const isogenyMapG2 = isogenyMap(Fp2, [
     ["0x1", "0x0"]
     // LAST 1
   ]
-].map((i3) => i3.map((pair) => Fp2.fromBigTuple(pair.map(BigInt)))));
+].map((i2) => i2.map((pair) => Fp2.fromBigTuple(pair.map(BigInt)))));
 const isogenyMapG1 = isogenyMap(Fp$1, [
   // xNum
   [
@@ -7737,7 +7745,7 @@ const isogenyMapG1 = isogenyMap(Fp$1, [
     "0x000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000001"
     // LAST 1
   ]
-].map((i3) => i3.map((j2) => BigInt(j2))));
+].map((i2) => i2.map((j2) => BigInt(j2))));
 const G1_SWU = mapToCurveSimpleSWU(Fp$1, {
   A: Fp$1.create(BigInt("0x144698a3b8e9433d693a02c96d4982b0ea985383ee66a8d8e8981aefd881ac98936f8da0e0f97f5cf428082d584c1d")),
   B: Fp$1.create(BigInt("0x12e2908d11688030018b12e8753eee3b2016c1f0f24f4070a0b9c14fcef35ef55a23215a316ceaa5d1cc48e98e172be0")),
@@ -7789,9 +7797,9 @@ var NodeType;
   NodeType2[NodeType2["Leaf"] = 3] = "Leaf";
   NodeType2[NodeType2["Pruned"] = 4] = "Pruned";
 })(NodeType || (NodeType = {}));
-function isBufferGreaterThan(a2, b2) {
-  for (let i3 = 0; i3 < a2.length; i3++) {
-    if (a2[i3] > b2[i3]) {
+function isBufferGreaterThan(a3, b2) {
+  for (let i2 = 0; i2 < a3.length; i2++) {
+    if (a3[i2] > b2[i2]) {
       return true;
     }
   }
@@ -7811,16 +7819,16 @@ class Certificate {
     return cert;
   }
   static createUnverified(options) {
-    return new Certificate(options.certificate, options.rootKey, options.canisterId, options.blsVerify ?? blsVerify, options.maxAgeInMinutes, options.disableTimeVerification, options.agent);
+    return new Certificate(options.certificate, options.rootKey, options.principal, options.blsVerify ?? blsVerify, options.maxAgeInMinutes, options.disableTimeVerification, options.agent);
   }
-  constructor(certificate, _rootKey, _canisterId, _blsVerify, _maxAgeInMinutes = DEFAULT_CERTIFICATE_MAX_AGE_IN_MINUTES, disableTimeVerification = false, agent) {
+  constructor(certificate, _rootKey, _principal, _blsVerify, _maxAgeInMinutes = DEFAULT_CERTIFICATE_MAX_AGE_IN_MINUTES, disableTimeVerification = false, agent) {
     this._rootKey = _rootKey;
-    this._canisterId = _canisterId;
+    this._principal = _principal;
     this._blsVerify = _blsVerify;
     this._maxAgeInMinutes = _maxAgeInMinutes;
     this.#disableTimeVerification = disableTimeVerification;
     this.cert = decode(certificate);
-    if (agent && "getTimeDiffMsecs" in agent && "hasSyncedTime" in agent && "syncTime" in agent) {
+    if (agent && "getTimeDiffMsecs" in agent && "hasSyncedTime" in agent && "syncTime" in agent && "syncTimeWithSubnet" in agent) {
       this.#agent = agent;
     }
   }
@@ -7845,7 +7853,7 @@ class Certificate {
     const derKey = await this._checkDelegationAndGetKey(this.cert.delegation);
     const sig = this.cert.signature;
     const key = extractDER(derKey);
-    const msg = concatBytes(domain_sep("ic-state-root"), rootHash);
+    const msg = concatBytes(IC_STATE_ROOT_DOMAIN_SEPARATOR, rootHash);
     const lookupTime = lookupResultToBuffer(this.lookup_path(["time"]));
     if (!lookupTime) {
       throw ProtocolError.fromCode(new CertificateVerificationErrorCode("Certificate does not contain a time"));
@@ -7861,7 +7869,7 @@ class Certificate {
       const isCertificateTimePast = certTime.getTime() < earliestCertificateTime;
       const isCertificateTimeFuture = certTime.getTime() > latestCertificateTime;
       if ((isCertificateTimePast || isCertificateTimeFuture) && this.#agent && !this.#agent.hasSyncedTime()) {
-        await this.#agent.syncTime(this._canisterId);
+        await this._syncTime();
         return await this.verify();
       }
       if (isCertificateTimePast) {
@@ -7889,7 +7897,7 @@ class Certificate {
     const cert = Certificate.createUnverified({
       certificate: d2.certificate,
       rootKey: this._rootKey,
-      canisterId: this._canisterId,
+      principal: this._principal,
       blsVerify: this._blsVerify,
       disableTimeVerification: this.#disableTimeVerification,
       maxAgeInMinutes: DEFAULT_CERTIFICATE_DELEGATION_MAX_AGE_IN_MINUTES,
@@ -7899,22 +7907,49 @@ class Certificate {
       throw ProtocolError.fromCode(new CertificateHasTooManyDelegationsErrorCode());
     }
     await cert.verify();
-    const subnetIdBytes = d2.subnet_id;
-    const subnetId = Principal$1.fromUint8Array(subnetIdBytes);
-    const canisterInRange = check_canister_ranges({
-      canisterId: this._canisterId,
-      subnetId,
-      tree: cert.cert.tree
-    });
-    if (!canisterInRange) {
-      throw TrustError.fromCode(new CertificateNotAuthorizedErrorCode(this._canisterId, subnetId));
+    let subnetId;
+    if (isCanisterPrincipal(this._principal)) {
+      const canisterId2 = this._principal.canisterId;
+      subnetId = Principal$1.fromUint8Array(d2.subnet_id);
+      const canisterInRange = check_canister_ranges({
+        canisterId: canisterId2,
+        subnetId,
+        tree: cert.cert.tree
+      });
+      if (!canisterInRange) {
+        throw TrustError.fromCode(new CertificateNotAuthorizedErrorCode(canisterId2, subnetId));
+      }
+    } else if (isSubnetPrincipal(this._principal)) {
+      subnetId = this._principal.subnetId;
+    } else {
+      throw UNREACHABLE_ERROR;
     }
-    const publicKeyLookup = lookupResultToBuffer(cert.lookup_path(["subnet", subnetIdBytes, "public_key"]));
+    const publicKeyLookup = lookupResultToBuffer(cert.lookup_path(["subnet", subnetId.toUint8Array(), "public_key"]));
     if (!publicKeyLookup) {
-      throw TrustError.fromCode(new MissingLookupValueErrorCode(`Could not find subnet key for subnet ID ${subnetId.toText()}`));
+      if (isSubnetPrincipal(this._principal)) {
+        throw TrustError.fromCode(new CertificateNotAuthorizedForSubnetErrorCode(subnetId));
+      } else {
+        throw TrustError.fromCode(new MissingLookupValueErrorCode(`Could not find subnet key for subnet ID ${subnetId.toText()}`));
+      }
     }
     return publicKeyLookup;
   }
+  async _syncTime() {
+    if (!this.#agent) {
+      return;
+    }
+    if (isCanisterPrincipal(this._principal)) {
+      await this.#agent.syncTime(this._principal.canisterId);
+    } else {
+      await this.#agent.syncTimeWithSubnet(this._principal.subnetId);
+    }
+  }
+}
+function isSubnetPrincipal(principal) {
+  return "subnetId" in principal;
+}
+function isCanisterPrincipal(principal) {
+  return "canisterId" in principal;
 }
 const DER_PREFIX = hexToBytes("308182301d060d2b0601040182dc7c0503010201060c2b0601040182dc7c05030201036100");
 const KEY_LENGTH = 96;
@@ -7938,18 +7973,18 @@ function lookupResultToBuffer(result) {
   }
   return void 0;
 }
-async function reconstruct(t3) {
-  switch (t3[0]) {
+async function reconstruct(t2) {
+  switch (t2[0]) {
     case NodeType.Empty:
       return sha256(domain_sep("ic-hashtree-empty"));
     case NodeType.Pruned:
-      return t3[1];
+      return t2[1];
     case NodeType.Leaf:
-      return sha256(concatBytes(domain_sep("ic-hashtree-leaf"), t3[1]));
+      return sha256(concatBytes(domain_sep("ic-hashtree-leaf"), t2[1]));
     case NodeType.Labeled:
-      return sha256(concatBytes(domain_sep("ic-hashtree-labeled"), t3[1], await reconstruct(t3[2])));
+      return sha256(concatBytes(domain_sep("ic-hashtree-labeled"), t2[1], await reconstruct(t2[2])));
     case NodeType.Fork:
-      return sha256(concatBytes(domain_sep("ic-hashtree-fork"), await reconstruct(t3[1]), await reconstruct(t3[2])));
+      return sha256(concatBytes(domain_sep("ic-hashtree-fork"), await reconstruct(t2[1]), await reconstruct(t2[2])));
     default:
       throw UNREACHABLE_ERROR;
   }
@@ -8072,14 +8107,14 @@ function lookup_subtree(path, tree) {
     }
   }
 }
-function flatten_forks(t3) {
-  switch (t3[0]) {
+function flatten_forks(t2) {
+  switch (t2[0]) {
     case NodeType.Empty:
       return [];
     case NodeType.Fork:
-      return flatten_forks(t3[1]).concat(flatten_forks(t3[2]));
+      return flatten_forks(t2[1]).concat(flatten_forks(t2[2]));
     default:
-      return [t3];
+      return [t2];
   }
 }
 function find_label(label, tree) {
@@ -8150,30 +8185,165 @@ function find_label(label, tree) {
       };
   }
 }
+function list_paths(path, tree) {
+  switch (tree[0]) {
+    case NodeType.Empty | NodeType.Pruned: {
+      return [];
+    }
+    case NodeType.Leaf: {
+      return [path];
+    }
+    case NodeType.Fork: {
+      return list_paths(path, tree[1]).concat(list_paths(path, tree[2]));
+    }
+    case NodeType.Labeled: {
+      const label = tree[1];
+      const subtree = tree[2];
+      const pathWithLabel = [...path, label];
+      return list_paths(pathWithLabel, subtree);
+    }
+    default: {
+      throw UNREACHABLE_ERROR;
+    }
+  }
+}
 function check_canister_ranges(params) {
-  const { canisterId: canisterId2, subnetId, tree } = params;
-  const rangeLookup = lookup_path(["subnet", subnetId.toUint8Array(), "canister_ranges"], tree);
-  if (rangeLookup.status !== LookupPathStatus.Found) {
-    throw ProtocolError.fromCode(new LookupErrorCode(`Could not find canister ranges for subnet ${subnetId.toText()}`, rangeLookup.status));
-  }
-  if (!(rangeLookup.value instanceof Uint8Array)) {
-    throw ProtocolError.fromCode(new MalformedLookupFoundValueErrorCode(`Could not find canister ranges for subnet ${subnetId.toText()}`));
-  }
-  const ranges_arr = decode(rangeLookup.value);
-  const ranges = ranges_arr.map((v3) => [
-    Principal$1.fromUint8Array(v3[0]),
-    Principal$1.fromUint8Array(v3[1])
-  ]);
+  const rangesLookupValue = lookupCanisterRanges(params);
+  const ranges = decodeCanisterRanges(rangesLookupValue);
+  const { canisterId: canisterId2 } = params;
   const canisterInRange = ranges.some((r2) => r2[0].ltEq(canisterId2) && r2[1].gtEq(canisterId2));
   return canisterInRange;
 }
-const request = async (options) => {
+function lookupCanisterRanges(params) {
+  const { subnetId, tree, canisterId: canisterId2 } = params;
+  const canisterRangeShardsLookup = lookup_subtree(["canister_ranges", subnetId.toUint8Array()], tree);
+  if (canisterRangeShardsLookup.status !== LookupSubtreeStatus.Found) {
+    return lookupCanisterRangesFallback(subnetId, tree);
+  }
+  const canisterRangeShards = canisterRangeShardsLookup.value;
+  const shardPaths = getCanisterRangeShardPaths(canisterRangeShards);
+  if (shardPaths.length === 0) {
+    throw ProtocolError.fromCode(new CertificateNotAuthorizedErrorCode(canisterId2, subnetId));
+  }
+  shardPaths.sort(compare);
+  const shardDivision = getCanisterRangeShardPartitionPoint(shardPaths, canisterId2);
+  const maxPotentialShard = shardPaths[shardDivision];
+  const canisterRange = getCanisterRangeFromShards(maxPotentialShard, canisterRangeShards);
+  return canisterRange;
+}
+function lookupCanisterRangesFallback(subnetId, tree) {
+  const lookupResult = lookup_path(["subnet", subnetId.toUint8Array(), "canister_ranges"], tree);
+  if (lookupResult.status !== LookupPathStatus.Found) {
+    throw ProtocolError.fromCode(new LookupErrorCode(`Could not find canister ranges for subnet ${subnetId.toText()}`, lookupResult.status));
+  }
+  return lookupResult.value;
+}
+function decodeCanisterRanges(lookupValue) {
+  const ranges_arr = decode(lookupValue);
+  const ranges = ranges_arr.map((v2) => [
+    Principal$1.fromUint8Array(v2[0]),
+    Principal$1.fromUint8Array(v2[1])
+  ]);
+  return ranges;
+}
+function getCanisterRangeShardPaths(canisterRangeShards) {
+  const shardPaths = [];
+  for (const path of list_paths([], canisterRangeShards)) {
+    const firstLabel = path[0];
+    if (!firstLabel) {
+      throw ProtocolError.fromCode(new CertificateVerificationErrorCode("Path is invalid"));
+    }
+    shardPaths.push(firstLabel);
+  }
+  return shardPaths;
+}
+function getCanisterRangeShardPartitionPoint(shardPaths, canisterId2) {
+  const canisterIdBytes = canisterId2.toUint8Array();
+  let left = 0;
+  let right = shardPaths.length - 1;
+  while (left < right) {
+    const mid = Math.floor((left + right) / 2);
+    if (compare(shardPaths[mid], canisterIdBytes) <= 0) {
+      right = mid;
+    } else {
+      left = mid + 1;
+    }
+  }
+  return left;
+}
+function getCanisterRangeFromShards(maxShardPath, canisterRangeShards) {
+  const canisterRange = lookup_path([maxShardPath], canisterRangeShards);
+  if (canisterRange.status !== LookupPathStatus.Found) {
+    throw ProtocolError.fromCode(new LookupErrorCode(`Could not find canister range for shard ${maxShardPath.toString()}`, canisterRange.status));
+  }
+  return canisterRange.value;
+}
+function getSubnetIdFromCertificate(certificate, rootKey) {
+  if (certificate.delegation) {
+    return Principal$1.fromUint8Array(certificate.delegation.subnet_id);
+  }
+  return Principal$1.selfAuthenticating(rootKey);
+}
+const IC_ROOT_SUBNET_ID = Principal$1.fromText("tdb26-jop6k-aogll-7ltgs-eruif-6kk7m-qpktf-gdiqx-mxtrf-vb5e6-eqe");
+function decodeValue(data, strategy) {
+  switch (strategy) {
+    case "raw":
+      return data;
+    case "leb128":
+      return decodeLeb128(data);
+    case "cbor":
+      return decode(data);
+    case "hex":
+      return bytesToHex(data);
+    case "utf-8":
+      return new TextDecoder().decode(data);
+  }
+}
+function decodeControllers(buf) {
+  const controllersRaw = decode(buf);
+  return controllersRaw.map((buf2) => {
+    return Principal$1.fromUint8Array(buf2);
+  });
+}
+function encodeMetadataPath(metaPath, canisterUint8Array) {
+  const encoded = typeof metaPath === "string" ? utf8ToBytes(metaPath) : metaPath;
+  return [utf8ToBytes("canister"), canisterUint8Array, utf8ToBytes("metadata"), encoded];
+}
+function isCustomPath(path) {
+  return typeof path === "object" && path !== null && "key" in path && "path" in path;
+}
+function lookupNodeKeysFromCertificate(certificate, subnetId) {
+  const subnetLookupResult = lookup_subtree(["subnet", subnetId.toUint8Array(), "node"], certificate.tree);
+  if (subnetLookupResult.status !== LookupSubtreeStatus.Found) {
+    throw ProtocolError.fromCode(new LookupErrorCode("Node not found", subnetLookupResult.status));
+  }
+  if (subnetLookupResult.value instanceof Uint8Array) {
+    throw UnknownError.fromCode(new HashTreeDecodeErrorCode("Invalid node tree"));
+  }
+  const nodeForks = flatten_forks(subnetLookupResult.value);
+  const nodeKeys = /* @__PURE__ */ new Map();
+  nodeForks.forEach((fork) => {
+    const node_id = Principal$1.from(fork[1]).toText();
+    const publicKeyLookupResult = lookup_path(["public_key"], fork[2]);
+    if (publicKeyLookupResult.status !== LookupPathStatus.Found) {
+      throw ProtocolError.fromCode(new LookupErrorCode("Public key not found", publicKeyLookupResult.status));
+    }
+    const derEncodedPublicKey = publicKeyLookupResult.value;
+    if (derEncodedPublicKey.byteLength !== 44) {
+      throw ProtocolError.fromCode(new DerKeyLengthMismatchErrorCode(44, derEncodedPublicKey.byteLength));
+    } else {
+      nodeKeys.set(node_id, derEncodedPublicKey);
+    }
+  });
+  return nodeKeys;
+}
+const request$1 = async (options) => {
   const { agent, paths, disableCertificateTimeVerification = false } = options;
   const canisterId2 = Principal$1.from(options.canisterId);
   const uniquePaths = [...new Set(paths)];
   const status = /* @__PURE__ */ new Map();
   const promises = uniquePaths.map((path, index) => {
-    const encodedPath = encodePath(path, canisterId2);
+    const encodedPath = encodePath$1(path, canisterId2);
     return (async () => {
       try {
         if (agent.rootKey === null) {
@@ -8186,7 +8356,7 @@ const request = async (options) => {
         const certificate = await Certificate.create({
           certificate: response.certificate,
           rootKey,
-          canisterId: canisterId2,
+          principal: { canisterId: canisterId2 },
           disableTimeVerification: disableCertificateTimeVerification,
           agent
         });
@@ -8206,7 +8376,6 @@ const request = async (options) => {
         };
         const { path: path2, data } = lookup(certificate, uniquePaths[index]);
         if (!data) {
-          console.warn(`Expected to find result for path ${path2}, but instead found nothing.`);
           if (typeof path2 === "string") {
             status.set(path2, null);
           } else {
@@ -8235,27 +8404,8 @@ const request = async (options) => {
               break;
             }
             default: {
-              if (typeof path2 !== "string" && "key" in path2 && "path" in path2) {
-                switch (path2.decodeStrategy) {
-                  case "raw":
-                    status.set(path2.key, data);
-                    break;
-                  case "leb128": {
-                    status.set(path2.key, decodeLeb128(data));
-                    break;
-                  }
-                  case "cbor": {
-                    status.set(path2.key, decode(data));
-                    break;
-                  }
-                  case "hex": {
-                    status.set(path2.key, bytesToHex(data));
-                    break;
-                  }
-                  case "utf-8": {
-                    status.set(path2.key, new TextDecoder().decode(data));
-                  }
-                }
+              if (isCustomPath(path2)) {
+                status.set(path2.key, decodeValue(data, path2.decodeStrategy));
               }
             }
           }
@@ -8264,15 +8414,11 @@ const request = async (options) => {
         if (error instanceof AgentError && (error.hasCode(CertificateVerificationErrorCode) || error.hasCode(CertificateTimeErrorCode))) {
           throw error;
         }
-        if (typeof path !== "string" && "key" in path && "path" in path) {
+        if (isCustomPath(path)) {
           status.set(path.key, null);
         } else {
           status.set(path, null);
         }
-        console.group();
-        console.warn(`Expected to find result for path ${path}, but instead found nothing.`);
-        console.warn(error);
-        console.groupEnd();
       }
     })();
   });
@@ -8284,56 +8430,22 @@ const fetchNodeKeys = (certificate, canisterId2, root_key) => {
     throw InputError.fromCode(new UnexpectedErrorCode("Invalid canisterId"));
   }
   const cert = decode(certificate);
-  const tree = cert.tree;
-  let delegation = cert.delegation;
+  const { delegation } = cert;
   let subnetId;
   if (delegation && delegation.subnet_id) {
     subnetId = Principal$1.fromUint8Array(new Uint8Array(delegation.subnet_id));
   } else if (!delegation && typeof root_key !== "undefined") {
     subnetId = Principal$1.selfAuthenticating(new Uint8Array(root_key));
-    delegation = {
-      subnet_id: subnetId.toUint8Array(),
-      certificate: new Uint8Array(0)
-    };
   } else {
-    subnetId = Principal$1.selfAuthenticating(Principal$1.fromText("tdb26-jop6k-aogll-7ltgs-eruif-6kk7m-qpktf-gdiqx-mxtrf-vb5e6-eqe").toUint8Array());
-    delegation = {
-      subnet_id: subnetId.toUint8Array(),
-      certificate: new Uint8Array(0)
-    };
+    subnetId = IC_ROOT_SUBNET_ID;
   }
-  const canisterInRange = check_canister_ranges({ canisterId: canisterId2, subnetId, tree });
-  if (!canisterInRange) {
-    throw TrustError.fromCode(new CertificateNotAuthorizedErrorCode(canisterId2, subnetId));
-  }
-  const subnetLookupResult = lookup_subtree(["subnet", delegation.subnet_id, "node"], tree);
-  if (subnetLookupResult.status !== LookupSubtreeStatus.Found) {
-    throw ProtocolError.fromCode(new LookupErrorCode("Node not found", subnetLookupResult.status));
-  }
-  if (subnetLookupResult.value instanceof Uint8Array) {
-    throw UnknownError.fromCode(new HashTreeDecodeErrorCode("Invalid node tree"));
-  }
-  const nodeForks = flatten_forks(subnetLookupResult.value);
-  const nodeKeys = /* @__PURE__ */ new Map();
-  nodeForks.forEach((fork) => {
-    const node_id = Principal$1.from(fork[1]).toText();
-    const publicKeyLookupResult = lookup_path(["public_key"], fork[2]);
-    if (publicKeyLookupResult.status !== LookupPathStatus.Found) {
-      throw ProtocolError.fromCode(new LookupErrorCode("Public key not found", publicKeyLookupResult.status));
-    }
-    const derEncodedPublicKey = publicKeyLookupResult.value;
-    if (derEncodedPublicKey.byteLength !== 44) {
-      throw ProtocolError.fromCode(new DerKeyLengthMismatchErrorCode(44, derEncodedPublicKey.byteLength));
-    } else {
-      nodeKeys.set(node_id, derEncodedPublicKey);
-    }
-  });
+  const nodeKeys = lookupNodeKeysFromCertificate(cert, subnetId);
   return {
-    subnetId: Principal$1.fromUint8Array(new Uint8Array(delegation.subnet_id)).toText(),
+    subnetId: subnetId.toText(),
     nodeKeys
   };
 };
-const encodePath = (path, canisterId2) => {
+const encodePath$1 = (path, canisterId2) => {
   const canisterUint8Array = canisterId2.toUint8Array();
   switch (path) {
     case "time":
@@ -8352,11 +8464,9 @@ const encodePath = (path, canisterId2) => {
         utf8ToBytes("candid:service")
       ];
     default: {
-      if ("key" in path && "path" in path) {
+      if (isCustomPath(path)) {
         if (typeof path["path"] === "string" || path["path"] instanceof Uint8Array) {
-          const metaPath = path.path;
-          const encoded = typeof metaPath === "string" ? utf8ToBytes(metaPath) : metaPath;
-          return [utf8ToBytes("canister"), canisterUint8Array, utf8ToBytes("metadata"), encoded];
+          return encodeMetadataPath(path.path, canisterUint8Array);
         } else {
           return path["path"];
         }
@@ -8365,13 +8475,114 @@ const encodePath = (path, canisterId2) => {
   }
   throw UnknownError.fromCode(new UnexpectedErrorCode(`Error while encoding your path for canister status. Please ensure that your path ${path} was formatted correctly.`));
 };
-const decodeControllers = (buf) => {
-  const controllersRaw = decode(buf);
-  return controllersRaw.map((buf2) => {
-    return Principal$1.fromUint8Array(buf2);
+async function request(options) {
+  const { agent, paths, disableCertificateTimeVerification = false } = options;
+  const subnetId = Principal$1.from(options.subnetId);
+  const uniquePaths = [...new Set(paths)];
+  const status = /* @__PURE__ */ new Map();
+  const promises = uniquePaths.map((path, index) => {
+    const encodedPath = encodePath(path, subnetId);
+    return (async () => {
+      try {
+        if (agent.rootKey === null) {
+          throw ExternalError.fromCode(new MissingRootKeyErrorCode());
+        }
+        const rootKey = agent.rootKey;
+        const response = await agent.readSubnetState(subnetId, {
+          paths: [encodedPath]
+        });
+        const certificate = await Certificate.create({
+          certificate: response.certificate,
+          rootKey,
+          principal: { subnetId },
+          disableTimeVerification: disableCertificateTimeVerification,
+          agent
+        });
+        const lookup = (cert, lookupPath) => {
+          if (lookupPath === "nodeKeys") {
+            const data2 = lookupNodeKeysFromCertificate(cert.cert, subnetId);
+            return {
+              path: lookupPath,
+              data: data2
+            };
+          } else {
+            return {
+              path: lookupPath,
+              data: lookupResultToBuffer(cert.lookup_path(encodedPath))
+            };
+          }
+        };
+        const { path: path2, data } = lookup(certificate, uniquePaths[index]);
+        if (!data) {
+          if (typeof path2 === "string") {
+            status.set(path2, null);
+          } else {
+            status.set(path2.key, null);
+          }
+        } else {
+          switch (path2) {
+            case "time": {
+              status.set(path2, decodeTime(data));
+              break;
+            }
+            case "canisterRanges": {
+              status.set(path2, decodeCanisterRanges(data));
+              break;
+            }
+            case "publicKey": {
+              status.set(path2, data);
+              break;
+            }
+            case "nodeKeys": {
+              status.set(path2, data);
+              break;
+            }
+            default: {
+              if (isCustomPath(path2)) {
+                status.set(path2.key, decodeValue(data, path2.decodeStrategy));
+              }
+            }
+          }
+        }
+      } catch (error) {
+        if (error instanceof AgentError && (error.hasCode(CertificateVerificationErrorCode) || error.hasCode(CertificateTimeErrorCode))) {
+          throw error;
+        }
+        if (isCustomPath(path)) {
+          status.set(path.key, null);
+        } else {
+          status.set(path, null);
+        }
+      }
+    })();
   });
-};
-/*! noble-curves - MIT License (c) 2022 Paul Miller (paulmillr.com) */
+  await Promise.all(promises);
+  return status;
+}
+function encodePath(path, subnetId) {
+  const subnetUint8Array = subnetId.toUint8Array();
+  switch (path) {
+    case "time":
+      return [utf8ToBytes("time")];
+    case "canisterRanges":
+      return [utf8ToBytes("canister_ranges"), subnetUint8Array];
+    case "publicKey":
+      return [utf8ToBytes("subnet"), subnetUint8Array, utf8ToBytes("public_key")];
+    case "nodeKeys":
+      return [utf8ToBytes("subnet"), subnetUint8Array, utf8ToBytes("node")];
+    default: {
+      if (isCustomPath(path)) {
+        if (typeof path["path"] === "string" || path["path"] instanceof Uint8Array) {
+          const encoded = typeof path["path"] === "string" ? utf8ToBytes(path["path"]) : path["path"];
+          return [utf8ToBytes("subnet"), subnetUint8Array, encoded];
+        } else {
+          return path["path"];
+        }
+      }
+    }
+  }
+  throw UnknownError.fromCode(new UnexpectedErrorCode(`Error while encoding your path for subnet status. Please ensure that your path ${path} was formatted correctly.`));
+}
 const _0n = BigInt(0), _1n$1 = BigInt(1), _2n$1 = BigInt(2), _8n$1 = BigInt(8);
 function isEdValidXY(Fp3, CURVE, x3, y2) {
   const x22 = Fp3.sqr(x3);
@@ -8387,20 +8598,20 @@ function edwards(params, extraOpts = {}) {
   const { h: cofactor } = CURVE;
   _validateObject(extraOpts, {}, { uvRatio: "function" });
   const MASK = _2n$1 << BigInt(Fn.BYTES * 8) - _1n$1;
-  const modP = (n2) => Fp3.create(n2);
-  const uvRatio2 = extraOpts.uvRatio || ((u2, v3) => {
+  const modP = (n3) => Fp3.create(n3);
+  const uvRatio2 = extraOpts.uvRatio || ((u2, v2) => {
     try {
-      return { isValid: true, value: Fp3.sqrt(Fp3.div(u2, v3)) };
-    } catch (e5) {
+      return { isValid: true, value: Fp3.sqrt(Fp3.div(u2, v2)) };
+    } catch (e4) {
       return { isValid: false, value: _0n };
     }
   });
   if (!isEdValidXY(Fp3, CURVE, CURVE.Gx, CURVE.Gy))
     throw new Error("bad curve params: generator point");
-  function acoord(title, n2, banZero = false) {
+  function acoord(title, n3, banZero = false) {
     const min = banZero ? _1n$1 : _0n;
-    aInRange("coordinate " + title, n2, min, MASK);
-    return n2;
+    aInRange("coordinate " + title, n3, min, MASK);
+    return n3;
   }
   function aextpoint(other) {
     if (!(other instanceof Point))
@@ -8421,7 +8632,7 @@ function edwards(params, extraOpts = {}) {
     return { x: x3, y: y2 };
   });
   const assertValidMemo = memoized((p2) => {
-    const { a: a2, d: d2 } = CURVE;
+    const { a: a3, d: d2 } = CURVE;
     if (p2.is0())
       throw new Error("bad point: ZERO");
     const { X: X2, Y: Y2, Z: Z2, T: T2 } = p2;
@@ -8429,7 +8640,7 @@ function edwards(params, extraOpts = {}) {
     const Y22 = modP(Y2 * Y2);
     const Z22 = modP(Z2 * Z2);
     const Z4 = modP(Z22 * Z22);
-    const aX2 = modP(X22 * a2);
+    const aX2 = modP(X22 * a3);
     const left = modP(Z22 * modP(aX2 + Y22));
     const right = modP(Z4 + modP(d2 * modP(X22 * Y22)));
     if (left !== right)
@@ -8462,7 +8673,7 @@ function edwards(params, extraOpts = {}) {
     // Uses algo from RFC8032 5.1.3.
     static fromBytes(bytes, zip215 = false) {
       const len = Fp3.BYTES;
-      const { a: a2, d: d2 } = CURVE;
+      const { a: a3, d: d2 } = CURVE;
       bytes = copyBytes(_abytes2(bytes, len, "point"));
       _abool2(zip215, "zip215");
       const normed = copyBytes(bytes);
@@ -8473,8 +8684,8 @@ function edwards(params, extraOpts = {}) {
       aInRange("point.y", y2, _0n, max);
       const y22 = modP(y2 * y2);
       const u2 = modP(y22 - _1n$1);
-      const v3 = modP(d2 * y22 - a2);
-      let { isValid, value: x3 } = uvRatio2(u2, v3);
+      const v2 = modP(d2 * y22 - a3);
+      let { isValid, value: x3 } = uvRatio2(u2, v2);
       if (!isValid)
         throw new Error("bad point: invalid y coordinate");
       const isXOdd = (x3 & _1n$1) === _1n$1;
@@ -8525,17 +8736,17 @@ function edwards(params, extraOpts = {}) {
     // https://hyperelliptic.org/EFD/g1p/auto-twisted-extended.html#doubling-dbl-2008-hwcd
     // Cost: 4M + 4S + 1*a + 6add + 1*2.
     double() {
-      const { a: a2 } = CURVE;
+      const { a: a3 } = CURVE;
       const { X: X1, Y: Y1, Z: Z1 } = this;
-      const A4 = modP(X1 * X1);
-      const B2 = modP(Y1 * Y1);
-      const C2 = modP(_2n$1 * modP(Z1 * Z1));
-      const D2 = modP(a2 * A4);
+      const A3 = modP(X1 * X1);
+      const B3 = modP(Y1 * Y1);
+      const C3 = modP(_2n$1 * modP(Z1 * Z1));
+      const D2 = modP(a3 * A3);
       const x1y1 = X1 + Y1;
-      const E3 = modP(modP(x1y1 * x1y1) - A4 - B2);
-      const G2 = D2 + B2;
-      const F2 = G2 - C2;
-      const H2 = D2 - B2;
+      const E3 = modP(modP(x1y1 * x1y1) - A3 - B3);
+      const G2 = D2 + B3;
+      const F2 = G2 - C3;
+      const H2 = D2 - B3;
       const X3 = modP(E3 * F2);
       const Y3 = modP(G2 * H2);
       const T3 = modP(E3 * H2);
@@ -8547,17 +8758,17 @@ function edwards(params, extraOpts = {}) {
     // Cost: 9M + 1*a + 1*d + 7add.
     add(other) {
       aextpoint(other);
-      const { a: a2, d: d2 } = CURVE;
+      const { a: a3, d: d2 } = CURVE;
       const { X: X1, Y: Y1, Z: Z1, T: T1 } = this;
       const { X: X2, Y: Y2, Z: Z2, T: T2 } = other;
-      const A4 = modP(X1 * X2);
-      const B2 = modP(Y1 * Y2);
-      const C2 = modP(T1 * d2 * T2);
+      const A3 = modP(X1 * X2);
+      const B3 = modP(Y1 * Y2);
+      const C3 = modP(T1 * d2 * T2);
       const D2 = modP(Z1 * Z2);
-      const E3 = modP((X1 + Y1) * (X2 + Y2) - A4 - B2);
-      const F2 = D2 - C2;
-      const G2 = D2 + C2;
-      const H2 = modP(B2 - a2 * A4);
+      const E3 = modP((X1 + Y1) * (X2 + Y2) - A3 - B3);
+      const F2 = D2 - C3;
+      const G2 = D2 + C3;
+      const H2 = modP(B3 - a3 * A3);
       const X3 = modP(E3 * F2);
       const Y3 = modP(G2 * H2);
       const T3 = modP(E3 * H2);
@@ -8729,18 +8940,18 @@ function eddsa(Point, cHash, eddsaOpts = {}) {
     const mid = len / 2;
     const r2 = sig.subarray(0, mid);
     const s2 = bytesToNumberLE(sig.subarray(mid, len));
-    let A4, R2, SB;
+    let A3, R2, SB;
     try {
-      A4 = Point.fromBytes(publicKey, zip215);
+      A3 = Point.fromBytes(publicKey, zip215);
       R2 = Point.fromBytes(r2, zip215);
       SB = BASE.multiplyUnsafe(s2);
     } catch (error) {
       return false;
     }
-    if (!zip215 && A4.isSmallOrder())
+    if (!zip215 && A3.isSmallOrder())
       return false;
-    const k2 = hashDomainToScalar(context, R2.toBytes(), A4.toBytes(), msg);
-    const RkA = R2.add(A4.multiplyUnsafe(k2));
+    const k2 = hashDomainToScalar(context, R2.toBytes(), A3.toBytes(), msg);
+    const RkA = R2.add(A3.multiplyUnsafe(k2));
     return RkA.subtract(SB).clearCofactor().is0();
   }
   const _size = Fp3.BYTES;
@@ -8813,45 +9024,44 @@ function eddsa(Point, cHash, eddsaOpts = {}) {
     lengths
   });
 }
-function _eddsa_legacy_opts_to_new(c2) {
+function _eddsa_legacy_opts_to_new(c3) {
   const CURVE = {
-    a: c2.a,
-    d: c2.d,
-    p: c2.Fp.ORDER,
-    n: c2.n,
-    h: c2.h,
-    Gx: c2.Gx,
-    Gy: c2.Gy
+    a: c3.a,
+    d: c3.d,
+    p: c3.Fp.ORDER,
+    n: c3.n,
+    h: c3.h,
+    Gx: c3.Gx,
+    Gy: c3.Gy
   };
-  const Fp3 = c2.Fp;
-  const Fn = Field(CURVE.n, c2.nBitLength, true);
-  const curveOpts = { Fp: Fp3, Fn, uvRatio: c2.uvRatio };
+  const Fp3 = c3.Fp;
+  const Fn = Field(CURVE.n, c3.nBitLength, true);
+  const curveOpts = { Fp: Fp3, Fn, uvRatio: c3.uvRatio };
   const eddsaOpts = {
-    randomBytes: c2.randomBytes,
-    adjustScalarBytes: c2.adjustScalarBytes,
-    domain: c2.domain,
-    prehash: c2.prehash,
-    mapToCurve: c2.mapToCurve
+    randomBytes: c3.randomBytes,
+    adjustScalarBytes: c3.adjustScalarBytes,
+    domain: c3.domain,
+    prehash: c3.prehash,
+    mapToCurve: c3.mapToCurve
   };
-  return { CURVE, curveOpts, hash: c2.hash, eddsaOpts };
+  return { CURVE, curveOpts, hash: c3.hash, eddsaOpts };
 }
-function _eddsa_new_output_to_legacy(c2, eddsa2) {
+function _eddsa_new_output_to_legacy(c3, eddsa2) {
   const Point = eddsa2.Point;
   const legacy = Object.assign({}, eddsa2, {
     ExtendedPoint: Point,
-    CURVE: c2,
+    CURVE: c3,
     nBitLength: Point.Fn.BITS,
     nByteLength: Point.Fn.BYTES
   });
   return legacy;
 }
-function twistedEdwards(c2) {
-  const { CURVE, curveOpts, hash, eddsaOpts } = _eddsa_legacy_opts_to_new(c2);
+function twistedEdwards(c3) {
+  const { CURVE, curveOpts, hash, eddsaOpts } = _eddsa_legacy_opts_to_new(c3);
   const Point = edwards(CURVE, curveOpts);
   const EDDSA = eddsa(Point, hash, eddsaOpts);
-  return _eddsa_new_output_to_legacy(c2, EDDSA);
+  return _eddsa_new_output_to_legacy(c3, EDDSA);
 }
-/*! noble-curves - MIT License (c) 2022 Paul Miller (paulmillr.com) */
 const _1n = BigInt(1), _2n = BigInt(2);
 BigInt(3);
 const _5n = BigInt(5), _8n = BigInt(8);
@@ -8889,13 +9099,13 @@ function adjustScalarBytes(bytes) {
   return bytes;
 }
 const ED25519_SQRT_M1 = /* @__PURE__ */ BigInt("19681161376707505956807079304988542015446066515923890162744021073123829784752");
-function uvRatio(u2, v3) {
+function uvRatio(u2, v2) {
   const P2 = ed25519_CURVE_p;
-  const v32 = mod(v3 * v3 * v3, P2);
-  const v7 = mod(v32 * v32 * v3, P2);
+  const v3 = mod(v2 * v2 * v2, P2);
+  const v7 = mod(v3 * v3 * v2, P2);
   const pow = ed25519_pow_2_252_3(u2 * v7).pow_p_5_8;
-  let x3 = mod(u2 * v32 * pow, P2);
-  const vx2 = mod(v3 * x3 * x3, P2);
+  let x3 = mod(u2 * v3 * pow, P2);
+  const vx2 = mod(v2 * x3 * x3, P2);
   const root1 = x3;
   const root2 = mod(x3 * ED25519_SQRT_M1, P2);
   const useRoot1 = vx2 === u2;
@@ -9178,8 +9388,8 @@ function wrapDER(payload, oid) {
 }
 const unwrapDER = (derEncoded, oid) => {
   let offset = 0;
-  const expect = (n2, msg) => {
-    if (buf[offset++] !== n2) {
+  const expect = (n3, msg) => {
+    if (buf[offset++] !== n3) {
       throw InputError.fromCode(new DerDecodeErrorCode(`Expected ${msg} at offset ${offset}`));
     }
   };
@@ -9465,7 +9675,7 @@ class HttpAgent {
       expirationTime: 5 * MINUTE_TO_MSECS
     });
     this.#verifyQuerySignatures = true;
-    this.#verifyQueryResponse = (queryResponse, subnetStatus) => {
+    this.#verifyQueryResponse = (queryResponse, subnetNodeKeys) => {
       if (this.#verifyQuerySignatures === false) {
         return queryResponse;
       }
@@ -9496,15 +9706,15 @@ class HttpAgent {
           throw UnknownError.fromCode(new UnexpectedErrorCode(`Unknown status: ${status}`));
         }
         const separatorWithHash = concatBytes(IC_RESPONSE_DOMAIN_SEPARATOR, hash);
-        const pubKey = subnetStatus.nodeKeys.get(nodeId);
+        const pubKey = subnetNodeKeys.get(nodeId);
         if (!pubKey) {
           throw ProtocolError.fromCode(new MalformedPublicKeyErrorCode());
         }
         const rawKey = Ed25519PublicKey$1.fromDer(pubKey).rawKey;
         const valid = ed25519.verify(sig.signature, separatorWithHash, rawKey);
-        if (valid)
-          return queryResponse;
-        throw TrustError.fromCode(new QuerySignatureVerificationFailedErrorCode(nodeId));
+        if (!valid) {
+          throw TrustError.fromCode(new QuerySignatureVerificationFailedErrorCode(nodeId));
+        }
       }
       return queryResponse;
     };
@@ -9596,11 +9806,11 @@ class HttpAgent {
   }
   addTransform(type, fn, priority = fn.priority || 0) {
     if (type === "update") {
-      const i3 = this.#updatePipeline.findIndex((x3) => (x3.priority || 0) < priority);
-      this.#updatePipeline.splice(i3 >= 0 ? i3 : this.#updatePipeline.length, 0, Object.assign(fn, { priority }));
+      const i2 = this.#updatePipeline.findIndex((x3) => (x3.priority || 0) < priority);
+      this.#updatePipeline.splice(i2 >= 0 ? i2 : this.#updatePipeline.length, 0, Object.assign(fn, { priority }));
     } else if (type === "query") {
-      const i3 = this.#queryPipeline.findIndex((x3) => (x3.priority || 0) < priority);
-      this.#queryPipeline.splice(i3 >= 0 ? i3 : this.#queryPipeline.length, 0, Object.assign(fn, { priority }));
+      const i2 = this.#queryPipeline.findIndex((x3) => (x3.priority || 0) < priority);
+      this.#queryPipeline.splice(i2 >= 0 ? i2 : this.#queryPipeline.length, 0, Object.assign(fn, { priority }));
     }
   }
   async getPrincipal() {
@@ -9670,16 +9880,18 @@ class HttpAgent {
     const requestId = requestIdOf(submit);
     try {
       const requestSync = () => {
-        this.log.print(`fetching "/api/v3/canister/${ecid.toText()}/call" with request:`, transformedRequest);
-        return this.#fetch("" + new URL(`/api/v3/canister/${ecid.toText()}/call`, this.host), {
+        const url = new URL(`/api/v4/canister/${ecid.toText()}/call`, this.host);
+        this.log.print(`fetching "${url.pathname}" with request:`, transformedRequest);
+        return this.#fetch(url, {
           ...this.#callOptions,
           ...transformedRequest.request,
           body
         });
       };
       const requestAsync = () => {
-        this.log.print(`fetching "/api/v2/canister/${ecid.toText()}/call" with request:`, transformedRequest);
-        return this.#fetch("" + new URL(`/api/v2/canister/${ecid.toText()}/call`, this.host), {
+        const url = new URL(`/api/v2/canister/${ecid.toText()}/call`, this.host);
+        this.log.print(`fetching "${url.pathname}" with request:`, transformedRequest);
+        return this.#fetch(url, {
           ...this.#callOptions,
           ...transformedRequest.request,
           body
@@ -9703,11 +9915,11 @@ class HttpAgent {
     } catch (error) {
       let callError;
       if (error instanceof AgentError) {
-        if (error.hasCode(HttpV3ApiNotSupportedErrorCode)) {
-          this.log.warn("v3 api not supported. Fall back to v2");
+        if (error.hasCode(HttpV4ApiNotSupportedErrorCode)) {
+          this.log.warn("v4 api not supported. Fall back to v2");
           return this.call(canisterId2, {
             ...options,
-            // disable v3 api
+            // disable v4 api
             callSync: false
           }, identity);
         } else if (error.hasCode(IngressExpiryInvalidErrorCode) && !this.#hasSyncedTime) {
@@ -9732,7 +9944,8 @@ class HttpAgent {
   async #requestAndRetryQuery(args) {
     const { ecid, transformedRequest, body, requestId, backoff: backoff2, tries } = args;
     const delay = tries === 0 ? 0 : backoff2.next();
-    this.log.print(`fetching "/api/v2/canister/${ecid.toString()}/query" with tries:`, {
+    const url = new URL(`/api/v3/canister/${ecid.toString()}/query`, this.host);
+    this.log.print(`fetching "${url.pathname}" with tries:`, {
       tries,
       backoff: backoff2,
       delay
@@ -9743,29 +9956,14 @@ class HttpAgent {
     if (delay > 0) {
       await new Promise((resolve) => setTimeout(resolve, delay));
     }
-    let response;
+    let fetchResponse;
     try {
-      this.log.print(`fetching "/api/v2/canister/${ecid.toString()}/query" with request:`, transformedRequest);
-      const fetchResponse = await this.#fetch("" + new URL(`/api/v2/canister/${ecid.toString()}/query`, this.host), {
+      this.log.print(`fetching "${url.pathname}" with request:`, transformedRequest);
+      fetchResponse = await this.#fetch(url, {
         ...this.#fetchOptions,
         ...transformedRequest.request,
         body
       });
-      if (fetchResponse.status === HTTP_STATUS_OK) {
-        const queryResponse = decode(uint8FromBufLike(await fetchResponse.arrayBuffer()));
-        response = {
-          ...queryResponse,
-          httpDetails: {
-            ok: fetchResponse.ok,
-            status: fetchResponse.status,
-            statusText: fetchResponse.statusText,
-            headers: httpHeadersTransform(fetchResponse.headers)
-          },
-          requestId
-        };
-      } else {
-        throw ProtocolError.fromCode(new HttpErrorCode(fetchResponse.status, fetchResponse.statusText, httpHeadersTransform(fetchResponse.headers), await fetchResponse.text()));
-      }
     } catch (error) {
       if (tries < this.#retryTimes) {
         this.log.warn(`Caught exception while attempting to make query:
@@ -9773,11 +9971,30 @@ class HttpAgent {
   Retrying query.`);
         return await this.#requestAndRetryQuery({ ...args, tries: tries + 1 });
       }
-      if (error instanceof AgentError) {
-        throw error;
-      }
       throw TransportError.fromCode(new HttpFetchErrorCode(error));
     }
+    const headers = httpHeadersTransform(fetchResponse.headers);
+    if (fetchResponse.status !== HTTP_STATUS_OK) {
+      const responseText = await fetchResponse.text();
+      if (isIngressExpiryInvalidResponse(responseText)) {
+        throw InputError.fromCode(new IngressExpiryInvalidErrorCode(responseText, this.#maxIngressExpiryInMinutes));
+      }
+      if (tries < this.#retryTimes) {
+        return await this.#requestAndRetryQuery({ ...args, tries: tries + 1 });
+      }
+      throw ProtocolError.fromCode(new HttpErrorCode(fetchResponse.status, fetchResponse.statusText, headers, responseText));
+    }
+    const queryResponse = decode(uint8FromBufLike(await fetchResponse.arrayBuffer()));
+    const response = {
+      ...queryResponse,
+      httpDetails: {
+        ok: fetchResponse.ok,
+        status: fetchResponse.status,
+        statusText: fetchResponse.statusText,
+        headers
+      },
+      requestId
+    };
     if (!this.#verifyQuerySignatures) {
       return response;
     }
@@ -9793,6 +10010,7 @@ class HttpAgent {
           requestId,
           signatureTimestampMs
         });
+        await this.syncTime(ecid);
         return await this.#requestAndRetryQuery({ ...args, tries: tries + 1 });
       }
       throw TrustError.fromCode(new CertificateOutdatedErrorCode(this.#maxIngressExpiryInMinutes, requestId, tries));
@@ -9847,10 +10065,10 @@ class HttpAgent {
       };
     }
     const responseText = await response.text();
-    if (response.status === HTTP_STATUS_NOT_FOUND && response.url.includes("api/v3")) {
-      throw ProtocolError.fromCode(new HttpV3ApiNotSupportedErrorCode());
+    if (response.status === HTTP_STATUS_NOT_FOUND && response.url.includes("api/v4")) {
+      throw ProtocolError.fromCode(new HttpV4ApiNotSupportedErrorCode());
     }
-    if (responseText.startsWith("Invalid request expiry: ")) {
+    if (isIngressExpiryInvalidResponse(responseText)) {
       throw InputError.fromCode(new IngressExpiryInvalidErrorCode(responseText, this.#maxIngressExpiryInMinutes));
     }
     if (tries < this.#retryTimes) {
@@ -9910,34 +10128,41 @@ class HttpAgent {
         ...query
       };
     };
-    const getSubnetStatus = async () => {
-      const cachedSubnetStatus = this.#subnetKeys.get(ecid.toString());
-      if (cachedSubnetStatus) {
-        return cachedSubnetStatus;
+    const getSubnetNodeKeys = async () => {
+      const cachedSubnetNodeKeys = this.#subnetKeys.get(ecid.toString());
+      if (cachedSubnetNodeKeys) {
+        return cachedSubnetNodeKeys;
       }
       await this.fetchSubnetKeys(ecid.toString());
-      const subnetStatus = this.#subnetKeys.get(ecid.toString());
-      if (!subnetStatus) {
+      const subnetNodeKeys = this.#subnetKeys.get(ecid.toString());
+      if (!subnetNodeKeys) {
         throw TrustError.fromCode(new MissingSignatureErrorCode());
       }
-      return subnetStatus;
+      return subnetNodeKeys;
     };
     try {
       if (!this.#verifyQuerySignatures) {
         return await makeQuery();
       }
-      const [queryWithDetails, subnetStatus] = await Promise.all([makeQuery(), getSubnetStatus()]);
+      const [queryWithDetails, subnetNodeKeys] = await Promise.all([
+        makeQuery(),
+        getSubnetNodeKeys()
+      ]);
       try {
-        return this.#verifyQueryResponse(queryWithDetails, subnetStatus);
+        return this.#verifyQueryResponse(queryWithDetails, subnetNodeKeys);
       } catch {
         this.log.warn("Query response verification failed. Retrying with fresh subnet keys.");
         this.#subnetKeys.delete(ecid.toString());
-        const updatedSubnetStatus = await getSubnetStatus();
-        return this.#verifyQueryResponse(queryWithDetails, updatedSubnetStatus);
+        const updatedSubnetNodeKeys = await getSubnetNodeKeys();
+        return this.#verifyQueryResponse(queryWithDetails, updatedSubnetNodeKeys);
       }
     } catch (error) {
       let queryError;
       if (error instanceof AgentError) {
+        if (error.hasCode(IngressExpiryInvalidErrorCode) && !this.#hasSyncedTime) {
+          await this.syncTime(ecid);
+          return this.query(canisterId2, fields, identity);
+        }
         error.code.requestContext = {
           requestId,
           senderPubKey: transformedRequest.body.sender_pubkey,
@@ -9955,7 +10180,7 @@ class HttpAgent {
   /**
    * See https://internetcomputer.org/docs/current/references/ic-interface-spec/#http-query for details on validation
    * @param queryResponse - The response from the query
-   * @param subnetStatus - The subnet status, including all node keys
+   * @param subnetNodeKeys - The subnet node keys
    * @returns ApiQueryResponse
    */
   #verifyQueryResponse;
@@ -10000,7 +10225,6 @@ class HttpAgent {
     let requestId;
     if (request2) {
       transformedRequest = request2;
-      requestId = requestIdOf(transformedRequest);
     } else {
       requestId = getRequestId(fields);
       const identity = await this.#identity;
@@ -10009,11 +10233,27 @@ class HttpAgent {
       }
       transformedRequest = await this.createReadStateRequest(fields, identity);
     }
-    this.log.print(`fetching "/api/v2/canister/${canister}/read_state" with request:`, transformedRequest);
+    const url = new URL(`/api/v3/canister/${canister.toString()}/read_state`, this.host);
+    return await this.#readStateInner(url, { canisterId: canister }, transformedRequest, requestId);
+  }
+  /**
+   * Reads the state of a subnet from the `/api/v3/subnet/{subnetId}/read_state` endpoint.
+   * @param subnetId The ID of the subnet to read the state of. If you have a canister ID, you can use {@link HttpAgent.getSubnetIdFromCanister | getSubnetIdFromCanister} to get the subnet ID.
+   * @param options The options for the read state request.
+   * @returns The response from the read state request.
+   */
+  async readSubnetState(subnetId, options) {
+    await this.#rootKeyGuard();
+    const subnet = Principal$1.from(subnetId);
+    const url = new URL(`/api/v3/subnet/${subnet.toString()}/read_state`, this.host);
+    const transformedRequest = await this.createReadStateRequest(options, this.#identity ?? void 0);
+    return await this.#readStateInner(url, { subnetId: subnet }, transformedRequest);
+  }
+  async #readStateInner(url, principal, transformedRequest, requestId) {
     const backoff2 = this.#backoffStrategy();
     try {
       const { responseBodyBytes } = await this.#requestAndRetry({
-        requestFn: () => this.#fetch("" + new URL(`/api/v2/canister/${canister.toString()}/read_state`, this.host), {
+        requestFn: () => this.#fetch(url, {
           ...this.#fetchOptions,
           ...transformedRequest.request,
           body: encode(transformedRequest.body)
@@ -10022,13 +10262,22 @@ class HttpAgent {
         tries: 0
       });
       const decodedResponse = decode(responseBodyBytes);
-      this.log.print("Read state response:", decodedResponse);
       return decodedResponse;
     } catch (error) {
       let readStateError;
       if (error instanceof AgentError) {
+        if (error.hasCode(IngressExpiryInvalidErrorCode) && !this.#hasSyncedTime) {
+          if ("canisterId" in principal) {
+            await this.syncTime(principal.canisterId);
+          } else if ("subnetId" in principal) {
+            await this.syncTimeWithSubnet(principal.subnetId);
+          } else {
+            throw UNREACHABLE_ERROR;
+          }
+          return await this.#readStateInner(url, principal, transformedRequest, requestId);
+        }
         error.code.requestContext = {
-          requestId,
+          requestId: requestId ?? requestIdOf(transformedRequest),
           senderPubKey: transformedRequest.body.sender_pubkey,
           senderSignature: transformedRequest.body.sender_sig,
           ingressExpiry: transformedRequest.body.content.ingress_expiry
@@ -10067,7 +10316,7 @@ class HttpAgent {
     return 0;
   }
   /**
-   * Allows agent to sync its time with the network. Can be called during intialization or mid-lifecycle if the device's clock has drifted away from the network time. This is necessary to set the Expiry for a request
+   * Allows agent to sync its time with the network. Can be called during initialization or mid-lifecycle if the device's clock has drifted away from the network time. This is necessary to set the Expiry for a request
    * @param {Principal} canisterIdOverride - Pass a canister ID if you need to sync the time with a particular subnet. Uses the ICP ledger canister by default.
    */
   async syncTime(canisterIdOverride) {
@@ -10088,7 +10337,7 @@ class HttpAgent {
           shouldSyncTime: false
         });
         const replicaTimes = await Promise.all(Array(3).fill(null).map(async () => {
-          const status = await request({
+          const status = await request$1({
             canisterId: canisterId2,
             agent: anonymousAgent,
             paths: ["time"],
@@ -10100,17 +10349,7 @@ class HttpAgent {
             return date.getTime();
           }
         }, []));
-        const maxReplicaTime = replicaTimes.reduce((max, current) => {
-          return typeof current === "number" && current > max ? current : max;
-        }, 0);
-        if (maxReplicaTime > 0) {
-          this.#timeDiffMsecs = maxReplicaTime - callTime;
-          this.#hasSyncedTime = true;
-          this.log.notify({
-            message: `Syncing time: offset of ${this.#timeDiffMsecs}`,
-            level: "info"
-          });
-        }
+        this.#setTimeDiffMsecs(callTime, replicaTimes);
       } catch (error) {
         const syncTimeError = error instanceof AgentError ? error : UnknownError.fromCode(new UnexpectedErrorCode(error));
         this.log.error("Caught exception while attempting to sync time", syncTimeError);
@@ -10121,15 +10360,65 @@ class HttpAgent {
       this.#syncTimePromise = null;
     });
   }
+  /**
+   * Allows agent to sync its time with the network.
+   * @param {Principal} subnetId - Pass the subnet ID you need to sync the time with.
+   */
+  async syncTimeWithSubnet(subnetId) {
+    await this.#rootKeyGuard();
+    const callTime = Date.now();
+    try {
+      const anonymousAgent = HttpAgent.createSync({
+        identity: new AnonymousIdentity(),
+        host: this.host.toString(),
+        fetch: this.#fetch,
+        retryTimes: 0,
+        rootKey: this.rootKey ?? void 0,
+        shouldSyncTime: false
+      });
+      const replicaTimes = await Promise.all(Array(3).fill(null).map(async () => {
+        const status = await request({
+          subnetId,
+          agent: anonymousAgent,
+          paths: ["time"],
+          disableCertificateTimeVerification: true
+          // avoid recursive calls to syncTime
+        });
+        const date = status.get("time");
+        if (date instanceof Date) {
+          return date.getTime();
+        }
+      }, []));
+      this.#setTimeDiffMsecs(callTime, replicaTimes);
+    } catch (error) {
+      const syncTimeError = error instanceof AgentError ? error : UnknownError.fromCode(new UnexpectedErrorCode(error));
+      this.log.error("Caught exception while attempting to sync time with subnet", syncTimeError);
+      throw syncTimeError;
+    }
+  }
+  #setTimeDiffMsecs(callTime, replicaTimes) {
+    const maxReplicaTime = replicaTimes.reduce((max, current) => {
+      return typeof current === "number" && current > max ? current : max;
+    }, 0);
+    if (maxReplicaTime > 0) {
+      this.#timeDiffMsecs = maxReplicaTime - callTime;
+      this.#hasSyncedTime = true;
+      this.log.notify({
+        message: `Syncing time: offset of ${this.#timeDiffMsecs}`,
+        level: "info"
+      });
+    }
+  }
   async status() {
     const headers = this.#credentials ? {
       Authorization: "Basic " + btoa(this.#credentials)
     } : {};
-    this.log.print(`fetching "/api/v2/status"`);
+    const url = new URL(`/api/v2/status`, this.host);
+    this.log.print(`fetching "${url.pathname}"`);
     const backoff2 = this.#backoffStrategy();
     const { responseBodyBytes } = await this.#requestAndRetry({
       backoff: backoff2,
-      requestFn: () => this.#fetch("" + new URL(`/api/v2/status`, this.host), { headers, ...this.#fetchOptions }),
+      requestFn: () => this.#fetch(url, { headers, ...this.#fetchOptions }),
       tries: 0
     });
     return decode(responseBodyBytes);
@@ -10170,17 +10459,51 @@ class HttpAgent {
   async fetchSubnetKeys(canisterId2) {
     const effectiveCanisterId = Principal$1.from(canisterId2);
     await this.#asyncGuard(effectiveCanisterId);
-    const response = await request({
-      canisterId: effectiveCanisterId,
-      paths: ["subnet"],
+    const rootKey = this.rootKey;
+    const canisterReadState = await this.readState(effectiveCanisterId, {
+      paths: [[utf8ToBytes("subnet")]]
+    });
+    const canisterCertificate = await Certificate.create({
+      certificate: canisterReadState.certificate,
+      rootKey,
+      principal: { canisterId: effectiveCanisterId },
       agent: this
     });
-    const subnetResponse = response.get("subnet");
-    if (subnetResponse && typeof subnetResponse === "object" && "nodeKeys" in subnetResponse) {
-      this.#subnetKeys.set(effectiveCanisterId.toText(), subnetResponse);
-      return subnetResponse;
+    if (!canisterCertificate.cert.delegation) {
+      const subnetId2 = Principal$1.selfAuthenticating(rootKey);
+      const canisterInRange = check_canister_ranges({
+        canisterId: effectiveCanisterId,
+        subnetId: subnetId2,
+        tree: canisterCertificate.cert.tree
+      });
+      if (!canisterInRange) {
+        throw TrustError.fromCode(new CertificateNotAuthorizedErrorCode(effectiveCanisterId, subnetId2));
+      }
     }
-    return void 0;
+    const subnetId = getSubnetIdFromCertificate(canisterCertificate.cert, rootKey);
+    const nodeKeys = lookupNodeKeysFromCertificate(canisterCertificate.cert, subnetId);
+    this.#subnetKeys.set(effectiveCanisterId.toText(), nodeKeys);
+    return nodeKeys;
+  }
+  /**
+   * Returns the subnet ID for a given canister ID, by looking at the certificate delegation
+   * returned by the canister's state obtained by requesting the `/time` path with {@link HttpAgent.readState | readState}.
+   * @param canisterId The canister ID to get the subnet ID for.
+   * @returns The subnet ID for the given canister ID.
+   */
+  async getSubnetIdFromCanister(canisterId2) {
+    const effectiveCanisterId = Principal$1.from(canisterId2);
+    await this.#asyncGuard(effectiveCanisterId);
+    const canisterReadState = await this.readState(effectiveCanisterId, {
+      paths: [[utf8ToBytes("time")]]
+    });
+    const canisterCertificate = await Certificate.create({
+      certificate: canisterReadState.certificate,
+      rootKey: this.rootKey,
+      principal: { canisterId: effectiveCanisterId },
+      agent: this
+    });
+    return getSubnetIdFromCertificate(canisterCertificate.cert, this.rootKey);
   }
   _transform(request2) {
     let p2 = Promise.resolve(request2);
@@ -10214,6 +10537,9 @@ class HttpAgent {
 function calculateIngressExpiry(maxIngressExpiryInMinutes, timeDiffMsecs) {
   const ingressExpiryMs = maxIngressExpiryInMinutes * MINUTE_TO_MSECS;
   return Expiry.fromDeltaInMilliseconds(ingressExpiryMs, timeDiffMsecs);
+}
+function isIngressExpiryInvalidResponse(responseText) {
+  return responseText.includes("Invalid request expiry: ");
 }
 const FIVE_MINUTES_IN_MSEC = 5 * 60 * 1e3;
 function defaultStrategy() {
@@ -10253,8 +10579,8 @@ function backoff(startingThrottleInMsec, backoffFactor) {
 }
 function chain(...strategies) {
   return async (canisterId2, requestId, status) => {
-    for (const a2 of strategies) {
-      await a2(canisterId2, requestId, status);
+    for (const a3 of strategies) {
+      await a3(canisterId2, requestId, status);
     }
   };
 }
@@ -10294,7 +10620,7 @@ async function pollForResponse(agent, canisterId2, requestId, options = {}) {
   const cert = await Certificate.create({
     certificate: state.certificate,
     rootKey: agent.rootKey,
-    canisterId: canisterId2,
+    principal: { canisterId: canisterId2 },
     blsVerify: options.blsVerify,
     agent
   });
@@ -10349,7 +10675,7 @@ async function constructRequest(options) {
   }
   return request2;
 }
-const metadataSymbol = Symbol.for("ic-agent-metadata");
+const metadataSymbol = /* @__PURE__ */ Symbol.for("ic-agent-metadata");
 class Actor {
   /**
    * Get the Agent class this Actor would call, or undefined if the Actor would use
@@ -10565,7 +10891,7 @@ function _createActorMethod(actor, methodName, func, blsVerify2) {
       });
       let reply;
       let certificate;
-      if (isV3ResponseBody(response.body)) {
+      if (isV4ResponseBody(response.body)) {
         if (agent.rootKey == null) {
           throw ExternalError.fromCode(new MissingRootKeyErrorCode());
         }
@@ -10573,7 +10899,7 @@ function _createActorMethod(actor, methodName, func, blsVerify2) {
         certificate = await Certificate.create({
           certificate: cert,
           rootKey: agent.rootKey,
-          canisterId: ecid,
+          principal: { canisterId: ecid },
           blsVerify: blsVerify2,
           agent
         });
@@ -10639,7 +10965,7 @@ function _createActorMethod(actor, methodName, func, blsVerify2) {
         }
         return decodeReturnValue(func.retTypes, reply);
       } else {
-        const errorCode = new UnexpectedErrorCode(`Call was returned undefined. We cannot determine if the call was successful or not. Return types: [${func.retTypes.map((t3) => t3.display()).join(",")}].`);
+        const errorCode = new UnexpectedErrorCode(`Call was returned undefined. We cannot determine if the call was successful or not. Return types: [${func.retTypes.map((t2) => t2.display()).join(",")}].`);
         errorCode.callContext = {
           canisterId: cid,
           methodName,
@@ -10746,8 +11072,8 @@ class Ed25519KeyIdentity extends SignIdentity {
       console.warn("Seed is all zeros. This is not a secure seed. Please provide a seed with sufficient entropy if this is a production environment.");
     }
     const sk = new Uint8Array(32);
-    for (let i3 = 0; i3 < 32; i3++) {
-      sk[i3] = seed[i3];
+    for (let i2 = 0; i2 < 32; i2++) {
+      sk[i2] = seed[i2];
     }
     const pk = ed25519.getPublicKey(sk);
     return Ed25519KeyIdentity.fromKeyPair(pk, sk);
@@ -11081,11 +11407,11 @@ class DelegationChain {
           _parseBlob(pubkey),
           BigInt("0x" + expiration),
           // expiration in JSON is an hexa string (See toJSON() below).
-          targets && targets.map((t3) => {
-            if (typeof t3 !== "string") {
+          targets && targets.map((t2) => {
+            if (typeof t2 !== "string") {
               throw new Error("Invalid target.");
             }
-            return Principal$1.fromHex(t3);
+            return Principal$1.fromHex(t2);
           })
         ),
         signature: _parseBlob(signature)
@@ -11115,7 +11441,7 @@ class DelegationChain {
             expiration: delegation.expiration.toString(16),
             pubkey: safeBytesToHex(delegation.pubkey),
             ...targets && {
-              targets: targets.map((t3) => t3.toHex())
+              targets: targets.map((t2) => t2.toHex())
             }
           },
           signature: safeBytesToHex(signature)
@@ -11228,7 +11554,7 @@ class IdleManager {
    * @param options.scrollDebounce scroll debounce time in ms
    */
   static create(options = {}) {
-    return new this(options);
+    return new IdleManager(options);
   }
   /**
    * @protected
@@ -11240,14 +11566,14 @@ class IdleManager {
     this.idleTimeout = idleTimeout;
     const _resetTimer = this._resetTimer.bind(this);
     window.addEventListener("load", _resetTimer, true);
-    events.forEach(function(name) {
+    events.forEach((name) => {
       document.addEventListener(name, _resetTimer, true);
     });
     const debounce = (func, wait) => {
       let timeout2;
       return (...args) => {
         const context = this;
-        const later = function() {
+        const later = () => {
           timeout2 = void 0;
           func.apply(context, args);
         };
@@ -11274,10 +11600,12 @@ class IdleManager {
     clearTimeout(this.timeoutID);
     window.removeEventListener("load", this._resetTimer, true);
     const _resetTimer = this._resetTimer.bind(this);
-    events.forEach(function(name) {
+    events.forEach((name) => {
       document.removeEventListener(name, _resetTimer, true);
     });
-    this.callbacks.forEach((cb) => cb());
+    this.callbacks.forEach((cb) => {
+      cb();
+    });
   }
   /**
    * Resets the timeouts during cleanup
@@ -11288,7 +11616,7 @@ class IdleManager {
     this.timeoutID = window.setTimeout(exit, this.idleTimeout);
   }
 }
-const instanceOfAny = (object, constructors) => constructors.some((c2) => object instanceof c2);
+const instanceOfAny = (object, constructors) => constructors.some((c3) => object instanceof c3);
 let idbProxyableTypes;
 let cursorAdvanceMethods;
 function getIdbProxyableTypes() {
@@ -11494,9 +11822,9 @@ replaceTraps((oldTraps) => ({
 const AUTH_DB_NAME = "auth-client-db";
 const OBJECT_STORE_NAME = "ic-keyval";
 const _openDbStore = async (dbName = AUTH_DB_NAME, storeName = OBJECT_STORE_NAME, version) => {
-  if (isBrowser && localStorage?.getItem(KEY_STORAGE_DELEGATION)) {
-    localStorage.removeItem(KEY_STORAGE_DELEGATION);
-    localStorage.removeItem(KEY_STORAGE_KEY);
+  if (globalThis.localStorage?.getItem(KEY_STORAGE_DELEGATION)) {
+    globalThis.localStorage.removeItem(KEY_STORAGE_DELEGATION);
+    globalThis.localStorage.removeItem(KEY_STORAGE_KEY);
   }
   return await openDB(dbName, version, {
     upgrade: (database) => {
@@ -11517,8 +11845,11 @@ async function _removeValue(db, storeName, key) {
   return await db.delete(storeName, key);
 }
 class IdbKeyVal {
-  _db;
-  _storeName;
+  // Do not use - instead prefer create
+  constructor(_db, _storeName) {
+    this._db = _db;
+    this._storeName = _storeName;
+  }
   /**
    * @param {DBCreateOptions} options - DBCreateOptions
    * @param {DBCreateOptions['dbName']} options.dbName name for the indexeddb database
@@ -11528,14 +11859,13 @@ class IdbKeyVal {
    * @param {DBCreateOptions['version']} options.version version of the database. Increment to safely upgrade
    */
   static async create(options) {
-    const { dbName = AUTH_DB_NAME, storeName = OBJECT_STORE_NAME, version = DB_VERSION } = options ?? {};
+    const {
+      dbName = AUTH_DB_NAME,
+      storeName = OBJECT_STORE_NAME,
+      version = DB_VERSION
+    } = options ?? {};
     const db = await _openDbStore(dbName, storeName, version);
     return new IdbKeyVal(db, storeName);
-  }
-  // Do not use - instead prefer create
-  constructor(_db, _storeName) {
-    this._db = _db;
-    this._storeName = _storeName;
   }
   /**
    * Basic setter
@@ -11570,10 +11900,7 @@ const KEY_STORAGE_KEY = "identity";
 const KEY_STORAGE_DELEGATION = "delegation";
 const KEY_VECTOR = "iv";
 const DB_VERSION = 1;
-const isBrowser = typeof window !== "undefined";
 class LocalStorage {
-  prefix;
-  _localStorage;
   constructor(prefix = "ic-", _localStorage) {
     this.prefix = prefix;
     this._localStorage = _localStorage;
@@ -11593,7 +11920,7 @@ class LocalStorage {
     if (this._localStorage) {
       return this._localStorage;
     }
-    const ls = typeof window === "undefined" ? typeof globalThis === "undefined" ? typeof self === "undefined" ? void 0 : self.localStorage : globalThis.localStorage : window.localStorage;
+    const ls = globalThis.localStorage;
     if (!ls) {
       throw new Error("Could not find local storage.");
     }
@@ -11653,14 +11980,17 @@ const ED25519_KEY_LABEL = "Ed25519";
 const INTERRUPT_CHECK_INTERVAL = 500;
 const ERROR_USER_INTERRUPT = "UserInterrupt";
 class AuthClient {
-  _identity;
-  _key;
-  _chain;
-  _storage;
-  idleManager;
-  _createOptions;
-  _idpWindow;
-  _eventHandler;
+  constructor(_identity, _key, _chain, _storage, idleManager, _createOptions, _idpWindow, _eventHandler) {
+    this._identity = _identity;
+    this._key = _key;
+    this._chain = _chain;
+    this._storage = _storage;
+    this.idleManager = idleManager;
+    this._createOptions = _createOptions;
+    this._idpWindow = _idpWindow;
+    this._eventHandler = _eventHandler;
+    this._registerDefaultIdleCallback();
+  }
   /**
    * Create an AuthClient to manage authentication and identity
    * @param {AuthClientCreateOptions} options - Options for creating an {@link AuthClient}
@@ -11688,7 +12018,7 @@ class AuthClient {
       key = options.identity;
     } else {
       let maybeIdentityStorage = await storage.get(KEY_STORAGE_KEY);
-      if (!maybeIdentityStorage && isBrowser) {
+      if (!maybeIdentityStorage) {
         try {
           const fallbackLocalStorage = new LocalStorage();
           const localChain = await fallbackLocalStorage.get(KEY_STORAGE_DELEGATION);
@@ -11702,7 +12032,7 @@ class AuthClient {
             await fallbackLocalStorage.remove(KEY_STORAGE_KEY);
           }
         } catch (error) {
-          console.error("error while attempting to recover localstorage: " + error);
+          console.error(`error while attempting to recover localstorage: ${error}`);
         }
       }
       if (maybeIdentityStorage) {
@@ -11726,7 +12056,9 @@ class AuthClient {
       try {
         const chainStorage = await storage.get(KEY_STORAGE_DELEGATION);
         if (typeof chainStorage === "object" && chainStorage !== null) {
-          throw new Error("Delegation chain is incorrectly stored. A delegation chain should be stored as a string.");
+          throw new Error(
+            "Delegation chain is incorrectly stored. A delegation chain should be stored as a string."
+          );
         }
         if (options.identity) {
           identity = options.identity;
@@ -11743,8 +12075,8 @@ class AuthClient {
             }
           }
         }
-      } catch (e5) {
-        console.error(e5);
+      } catch (e4) {
+        console.error(e4);
         await _deleteStorage(storage);
         key = null;
       }
@@ -11758,27 +12090,17 @@ class AuthClient {
     if (!key) {
       if (keyType === ED25519_KEY_LABEL) {
         key = Ed25519KeyIdentity.generate();
-        await storage.set(KEY_STORAGE_KEY, JSON.stringify(key.toJSON()));
       } else {
         if (options.storage && keyType === ECDSA_KEY_LABEL) {
-          console.warn(`You are using a custom storage provider that may not support CryptoKey storage. If you are using a custom storage provider that does not support CryptoKey storage, you should use '${ED25519_KEY_LABEL}' as the key type, as it can serialize to a string`);
+          console.warn(
+            `You are using a custom storage provider that may not support CryptoKey storage. If you are using a custom storage provider that does not support CryptoKey storage, you should use '${ED25519_KEY_LABEL}' as the key type, as it can serialize to a string`
+          );
         }
         key = await ECDSAKeyIdentity.generate();
-        await storage.set(KEY_STORAGE_KEY, key.getKeyPair());
       }
+      await persistKey(storage, key);
     }
-    return new this(identity, key, chain2, storage, idleManager, options);
-  }
-  constructor(_identity, _key, _chain, _storage, idleManager, _createOptions, _idpWindow, _eventHandler) {
-    this._identity = _identity;
-    this._key = _key;
-    this._chain = _chain;
-    this._storage = _storage;
-    this.idleManager = idleManager;
-    this._createOptions = _createOptions;
-    this._idpWindow = _idpWindow;
-    this._eventHandler = _eventHandler;
-    this._registerDefaultIdleCallback();
+    return new AuthClient(identity, key, chain2, storage, idleManager, options);
   }
   _registerDefaultIdleCallback() {
     const idleOptions = this._createOptions?.idleOptions;
@@ -11792,11 +12114,18 @@ class AuthClient {
   async _handleSuccess(message, onSuccess) {
     const delegations = message.delegations.map((signedDelegation) => {
       return {
-        delegation: new Delegation(signedDelegation.delegation.pubkey, signedDelegation.delegation.expiration, signedDelegation.delegation.targets),
+        delegation: new Delegation(
+          signedDelegation.delegation.pubkey,
+          signedDelegation.delegation.expiration,
+          signedDelegation.delegation.targets
+        ),
         signature: signedDelegation.signature
       };
     });
-    const delegationChain = DelegationChain.fromDelegations(delegations, message.userPublicKey);
+    const delegationChain = DelegationChain.fromDelegations(
+      delegations,
+      message.userPublicKey
+    );
     const key = this._key;
     if (!key) {
       return;
@@ -11818,6 +12147,7 @@ class AuthClient {
     if (this._chain) {
       await this._storage.set(KEY_STORAGE_DELEGATION, JSON.stringify(this._chain.toJSON()));
     }
+    await persistKey(this._storage, this._key);
     onSuccess?.(message);
   }
   getIdentity() {
@@ -11854,7 +12184,9 @@ class AuthClient {
   async login(options) {
     const loginOptions = mergeLoginOptions(this._createOptions?.loginOptions, options);
     const maxTimeToLive = loginOptions?.maxTimeToLive ?? DEFAULT_MAX_TIME_TO_LIVE;
-    const identityProviderUrl = new URL(loginOptions?.identityProvider?.toString() || IDENTITY_PROVIDER_DEFAULT);
+    const identityProviderUrl = new URL(
+      loginOptions?.identityProvider?.toString() || IDENTITY_PROVIDER_DEFAULT
+    );
     identityProviderUrl.hash = IDENTITY_PROVIDER_ENDPOINT;
     this._idpWindow?.close();
     this._removeEventListener();
@@ -11863,7 +12195,11 @@ class AuthClient {
       ...loginOptions
     });
     window.addEventListener("message", this._eventHandler);
-    this._idpWindow = window.open(identityProviderUrl.toString(), "idpWindow", loginOptions?.windowOpenerFeatures) ?? void 0;
+    this._idpWindow = window.open(
+      identityProviderUrl.toString(),
+      "idpWindow",
+      loginOptions?.windowOpenerFeatures
+    ) ?? void 0;
     const checkInterruption = () => {
       if (this._idpWindow) {
         if (this._idpWindow.closed) {
@@ -11952,278 +12288,368 @@ function mergeLoginOptions(loginOptions, otherLoginOptions) {
     customValues
   };
 }
-var U$1 = ((n2) => (n2[n2.FractionalMoreThan8Decimals = 0] = "FractionalMoreThan8Decimals", n2[n2.InvalidFormat = 1] = "InvalidFormat", n2[n2.FractionalTooManyDecimals = 2] = "FractionalTooManyDecimals", n2))(U$1 || {});
+function toStoredKey(key) {
+  if (key instanceof ECDSAKeyIdentity) {
+    return key.getKeyPair();
+  }
+  if (key instanceof Ed25519KeyIdentity) {
+    return JSON.stringify(key.toJSON());
+  }
+  throw new Error("Unsupported key type");
+}
+async function persistKey(storage, key) {
+  const serialized = toStoredKey(key);
+  await storage.set(KEY_STORAGE_KEY, serialized);
+}
+((t2) => typeof require < "u" ? require : typeof Proxy < "u" ? new Proxy(t2, { get: (e4, c3) => (typeof require < "u" ? require : e4)[c3] }) : t2)(function(t2) {
+  if (typeof require < "u") return require.apply(this, arguments);
+  throw Error('Dynamic require of "' + t2 + '" is not supported');
+});
+var qo = ({ IDL: t2 }) => {
+  let e4 = t2.Variant({ Set: t2.Principal, Unset: t2.Null }), c3 = t2.Text;
+  t2.Record({ exchange_rate_canister: t2.Opt(e4), cycles_ledger_canister_id: t2.Opt(t2.Principal), last_purged_notification: t2.Opt(t2.Nat64), governance_canister_id: t2.Opt(t2.Principal), minting_account_id: t2.Opt(c3), ledger_canister_id: t2.Opt(t2.Principal) });
+  let o3 = t2.Record({ subnets: t2.Vec(t2.Principal), subnet_type: t2.Text }), r2 = t2.Variant({ Add: o3, Remove: o3 }), _2 = t2.Record({ subnet_type: t2.Opt(t2.Text) }), a3 = t2.Variant({ Filter: _2, Subnet: t2.Record({ subnet: t2.Principal }) }), R2 = t2.Record({ value: t2.Text, name: t2.Text }), N2 = t2.Variant({ controllers: t2.Null, public: t2.Null, allowed_viewers: t2.Vec(t2.Principal) }), f2 = t2.Record({ freezing_threshold: t2.Opt(t2.Nat), wasm_memory_threshold: t2.Opt(t2.Nat), environment_variables: t2.Opt(t2.Vec(R2)), controllers: t2.Opt(t2.Vec(t2.Principal)), reserved_cycles_limit: t2.Opt(t2.Nat), log_visibility: t2.Opt(N2), log_memory_limit: t2.Opt(t2.Nat), wasm_memory_limit: t2.Opt(t2.Nat), memory_allocation: t2.Opt(t2.Nat), compute_allocation: t2.Opt(t2.Nat) }), m3 = t2.Record({ subnet_selection: t2.Opt(a3), settings: t2.Opt(f2), subnet_type: t2.Opt(t2.Text) }), v2 = t2.Variant({ Refunded: t2.Record({ create_error: t2.Text, refund_amount: t2.Nat }) }), p2 = t2.Variant({ Ok: t2.Principal, Err: v2 }), u2 = t2.Record({ xdr_permyriad_per_icp: t2.Nat64, timestamp_seconds: t2.Nat64 }), O2 = t2.Record({ certificate: t2.Vec(t2.Nat8), data: u2, hash_tree: t2.Vec(t2.Nat8) }), h2 = t2.Record({ data: t2.Vec(t2.Tuple(t2.Principal, t2.Vec(t2.Principal))) }), V2 = t2.Record({ data: t2.Vec(t2.Tuple(t2.Text, t2.Vec(t2.Principal))) }), d2 = t2.Nat64, s2 = t2.Record({ controller: t2.Principal, block_index: d2, subnet_selection: t2.Opt(a3), settings: t2.Opt(f2), subnet_type: t2.Opt(t2.Text) }), b2 = t2.Variant({ Refunded: t2.Record({ block_index: t2.Opt(d2), reason: t2.Text }), InvalidTransaction: t2.Text, Other: t2.Record({ error_message: t2.Text, error_code: t2.Nat64 }), Processing: t2.Null, TransactionTooOld: d2 }), x3 = t2.Variant({ Ok: t2.Principal, Err: b2 }), g3 = t2.Opt(t2.Vec(t2.Nat8)), C3 = t2.Opt(t2.Vec(t2.Nat8)), y2 = t2.Record({ block_index: d2, deposit_memo: g3, to_subaccount: C3 }), i2 = t2.Record({ balance: t2.Nat, block_index: t2.Nat, minted: t2.Nat }), k2 = t2.Variant({ Ok: i2, Err: b2 }), E3 = t2.Record({ block_index: d2, canister_id: t2.Principal }), l3 = t2.Nat, B3 = t2.Variant({ Ok: l3, Err: b2 }), w3 = t2.Record({ who: t2.Opt(t2.Principal), subnets: t2.Vec(t2.Principal) }), q2 = t2.Variant({ Add: t2.Text, Remove: t2.Text });
+  return t2.Service({ change_subnet_type_assignment: t2.Func([r2], [], []), create_canister: t2.Func([m3], [p2], []), get_build_metadata: t2.Func([], [t2.Text], []), get_default_subnets: t2.Func([], [t2.Vec(t2.Principal)], []), get_icp_xdr_conversion_rate: t2.Func([], [O2], []), get_principals_authorized_to_create_canisters_to_subnets: t2.Func([], [h2], []), get_subnet_types_to_subnets: t2.Func([], [V2], []), notify_create_canister: t2.Func([s2], [x3], []), notify_mint_cycles: t2.Func([y2], [k2], []), notify_top_up: t2.Func([E3], [B3], []), set_authorized_subnetwork_list: t2.Func([w3], [], []), update_subnet_type: t2.Func([q2], [], []) });
+};
+var Eo = ({ IDL: t2 }) => {
+  let e4 = t2.Variant({ Set: t2.Principal, Unset: t2.Null }), c3 = t2.Text;
+  t2.Record({ exchange_rate_canister: t2.Opt(e4), cycles_ledger_canister_id: t2.Opt(t2.Principal), last_purged_notification: t2.Opt(t2.Nat64), governance_canister_id: t2.Opt(t2.Principal), minting_account_id: t2.Opt(c3), ledger_canister_id: t2.Opt(t2.Principal) });
+  let o3 = t2.Record({ subnets: t2.Vec(t2.Principal), subnet_type: t2.Text }), r2 = t2.Variant({ Add: o3, Remove: o3 }), _2 = t2.Record({ subnet_type: t2.Opt(t2.Text) }), a3 = t2.Variant({ Filter: _2, Subnet: t2.Record({ subnet: t2.Principal }) }), R2 = t2.Record({ value: t2.Text, name: t2.Text }), N2 = t2.Variant({ controllers: t2.Null, public: t2.Null, allowed_viewers: t2.Vec(t2.Principal) }), f2 = t2.Record({ freezing_threshold: t2.Opt(t2.Nat), wasm_memory_threshold: t2.Opt(t2.Nat), environment_variables: t2.Opt(t2.Vec(R2)), controllers: t2.Opt(t2.Vec(t2.Principal)), reserved_cycles_limit: t2.Opt(t2.Nat), log_visibility: t2.Opt(N2), log_memory_limit: t2.Opt(t2.Nat), wasm_memory_limit: t2.Opt(t2.Nat), memory_allocation: t2.Opt(t2.Nat), compute_allocation: t2.Opt(t2.Nat) }), m3 = t2.Record({ subnet_selection: t2.Opt(a3), settings: t2.Opt(f2), subnet_type: t2.Opt(t2.Text) }), v2 = t2.Variant({ Refunded: t2.Record({ create_error: t2.Text, refund_amount: t2.Nat }) }), p2 = t2.Variant({ Ok: t2.Principal, Err: v2 }), u2 = t2.Record({ xdr_permyriad_per_icp: t2.Nat64, timestamp_seconds: t2.Nat64 }), O2 = t2.Record({ certificate: t2.Vec(t2.Nat8), data: u2, hash_tree: t2.Vec(t2.Nat8) }), h2 = t2.Record({ data: t2.Vec(t2.Tuple(t2.Principal, t2.Vec(t2.Principal))) }), V2 = t2.Record({ data: t2.Vec(t2.Tuple(t2.Text, t2.Vec(t2.Principal))) }), d2 = t2.Nat64, s2 = t2.Record({ controller: t2.Principal, block_index: d2, subnet_selection: t2.Opt(a3), settings: t2.Opt(f2), subnet_type: t2.Opt(t2.Text) }), b2 = t2.Variant({ Refunded: t2.Record({ block_index: t2.Opt(d2), reason: t2.Text }), InvalidTransaction: t2.Text, Other: t2.Record({ error_message: t2.Text, error_code: t2.Nat64 }), Processing: t2.Null, TransactionTooOld: d2 }), x3 = t2.Variant({ Ok: t2.Principal, Err: b2 }), g3 = t2.Opt(t2.Vec(t2.Nat8)), C3 = t2.Opt(t2.Vec(t2.Nat8)), y2 = t2.Record({ block_index: d2, deposit_memo: g3, to_subaccount: C3 }), i2 = t2.Record({ balance: t2.Nat, block_index: t2.Nat, minted: t2.Nat }), k2 = t2.Variant({ Ok: i2, Err: b2 }), E3 = t2.Record({ block_index: d2, canister_id: t2.Principal }), l3 = t2.Nat, B3 = t2.Variant({ Ok: l3, Err: b2 }), w3 = t2.Record({ who: t2.Opt(t2.Principal), subnets: t2.Vec(t2.Principal) }), q2 = t2.Variant({ Add: t2.Text, Remove: t2.Text });
+  return t2.Service({ change_subnet_type_assignment: t2.Func([r2], [], []), create_canister: t2.Func([m3], [p2], []), get_build_metadata: t2.Func([], [t2.Text], ["query"]), get_default_subnets: t2.Func([], [t2.Vec(t2.Principal)], ["query"]), get_icp_xdr_conversion_rate: t2.Func([], [O2], ["query"]), get_principals_authorized_to_create_canisters_to_subnets: t2.Func([], [h2], ["query"]), get_subnet_types_to_subnets: t2.Func([], [V2], ["query"]), notify_create_canister: t2.Func([s2], [x3], []), notify_mint_cycles: t2.Func([y2], [k2], []), notify_top_up: t2.Func([E3], [B3], []), set_authorized_subnetwork_list: t2.Func([w3], [], []), update_subnet_type: t2.Func([q2], [], []) });
+};
+var Uo = ({ IDL: t2 }) => {
+  let e4 = t2.Variant({ mainnet: t2.Null, testnet: t2.Null }), c3 = t2.Text, n3 = t2.Record({ network: e4, address: c3, min_confirmations: t2.Opt(t2.Nat32) }), o3 = t2.Nat64, r2 = o3, _2 = t2.Nat32, a3 = t2.Record({ start_height: _2, end_height: t2.Opt(_2), network: e4 }), R2 = t2.Vec(t2.Nat8), N2 = t2.Record({ tip_height: _2, block_headers: t2.Vec(R2) }), f2 = t2.Record({ network: e4 }), m3 = t2.Nat64, v2 = t2.Vec(m3), p2 = t2.Record({ network: e4, filter: t2.Opt(t2.Variant({ page: t2.Vec(t2.Nat8), min_confirmations: t2.Nat32 })), address: c3 }), u2 = t2.Vec(t2.Nat8), O2 = t2.Record({ txid: t2.Vec(t2.Nat8), vout: t2.Nat32 }), h2 = t2.Record({ height: t2.Nat32, value: o3, outpoint: O2 }), V2 = t2.Record({ next_page: t2.Opt(t2.Vec(t2.Nat8)), tip_height: _2, tip_block_hash: u2, utxos: t2.Vec(h2) }), d2 = t2.Record({ transaction: t2.Vec(t2.Nat8), network: e4 }), s2 = t2.Principal, b2 = t2.Record({ canister_id: s2, num_requested_changes: t2.Opt(t2.Nat64) }), x3 = t2.Variant({ from_user: t2.Record({ user_id: t2.Principal }), from_canister: t2.Record({ canister_version: t2.Opt(t2.Nat64), canister_id: t2.Principal }) }), g3 = t2.Vec(t2.Nat8), C3 = t2.Variant({ creation: t2.Record({ controllers: t2.Vec(t2.Principal), environment_variables_hash: t2.Opt(t2.Vec(t2.Nat8)) }), code_deployment: t2.Record({ mode: t2.Variant({ reinstall: t2.Null, upgrade: t2.Null, install: t2.Null }), module_hash: t2.Vec(t2.Nat8) }), load_snapshot: t2.Record({ canister_version: t2.Nat64, source: t2.Variant({ metadata_upload: t2.Reserved, taken_from_canister: t2.Reserved }), from_canister_id: t2.Opt(t2.Principal), taken_at_timestamp: t2.Nat64, snapshot_id: g3 }), controllers_change: t2.Record({ controllers: t2.Vec(t2.Principal) }), code_uninstall: t2.Null }), y2 = t2.Record({ timestamp_nanos: t2.Nat64, canister_version: t2.Nat64, origin: x3, details: C3 }), i2 = t2.Record({ controllers: t2.Vec(t2.Principal), module_hash: t2.Opt(t2.Vec(t2.Nat8)), recent_changes: t2.Vec(y2), total_num_changes: t2.Nat64 }), k2 = t2.Record({ name: t2.Text, canister_id: s2 }), E3 = t2.Record({ value: t2.Vec(t2.Nat8) }), l3 = t2.Record({ canister_id: s2 }), B3 = t2.Record({ value: t2.Text, name: t2.Text }), w3 = t2.Variant({ controllers: t2.Null, public: t2.Null, allowed_viewers: t2.Vec(t2.Principal) }), q2 = t2.Record({ freezing_threshold: t2.Nat, wasm_memory_threshold: t2.Nat, environment_variables: t2.Vec(B3), controllers: t2.Vec(t2.Principal), reserved_cycles_limit: t2.Nat, log_visibility: w3, wasm_memory_limit: t2.Nat, memory_allocation: t2.Nat, compute_allocation: t2.Nat }), P2 = t2.Record({ memory_metrics: t2.Record({ wasm_binary_size: t2.Nat, wasm_chunk_store_size: t2.Nat, canister_history_size: t2.Nat, stable_memory_size: t2.Nat, snapshots_size: t2.Nat, wasm_memory_size: t2.Nat, global_memory_size: t2.Nat, custom_sections_size: t2.Nat }), status: t2.Variant({ stopped: t2.Null, stopping: t2.Null, running: t2.Null }), memory_size: t2.Nat, ready_for_migration: t2.Bool, version: t2.Nat64, cycles: t2.Nat, settings: q2, query_stats: t2.Record({ response_payload_bytes_total: t2.Nat, num_instructions_total: t2.Nat, num_calls_total: t2.Nat, request_payload_bytes_total: t2.Nat }), idle_cycles_burned_per_day: t2.Nat, module_hash: t2.Opt(t2.Vec(t2.Nat8)), reserved_cycles: t2.Nat }), T2 = t2.Record({ canister_id: s2 }), F2 = t2.Record({ freezing_threshold: t2.Opt(t2.Nat), wasm_memory_threshold: t2.Opt(t2.Nat), environment_variables: t2.Opt(t2.Vec(B3)), controllers: t2.Opt(t2.Vec(t2.Principal)), reserved_cycles_limit: t2.Opt(t2.Nat), log_visibility: t2.Opt(w3), wasm_memory_limit: t2.Opt(t2.Nat), memory_allocation: t2.Opt(t2.Nat), compute_allocation: t2.Opt(t2.Nat) }), H2 = t2.Record({ settings: t2.Opt(F2), sender_canister_version: t2.Opt(t2.Nat64) }), Q2 = t2.Record({ canister_id: s2 }), A3 = t2.Record({ canister_id: s2 }), J2 = t2.Record({ canister_id: s2, snapshot_id: g3 }), j2 = t2.Record({ canister_id: s2 }), S2 = t2.Variant({ secp256k1: t2.Null }), D2 = t2.Record({ key_id: t2.Record({ name: t2.Text, curve: S2 }), canister_id: t2.Opt(s2), derivation_path: t2.Vec(t2.Vec(t2.Nat8)) }), X2 = t2.Record({ public_key: t2.Vec(t2.Nat8), chain_code: t2.Vec(t2.Nat8) }), M2 = t2.Record({ canister_id: s2 }), K2 = t2.Record({ idx: t2.Nat64, timestamp_nanos: t2.Nat64, content: t2.Vec(t2.Nat8) }), W2 = t2.Record({ canister_log_records: t2.Vec(K2) }), z2 = t2.Record({ value: t2.Text, name: t2.Text }), Y2 = t2.Record({ status: t2.Nat, body: t2.Vec(t2.Nat8), headers: t2.Vec(z2) }), Z2 = t2.Record({ url: t2.Text, method: t2.Variant({ get: t2.Null, head: t2.Null, post: t2.Null }), max_response_bytes: t2.Opt(t2.Nat64), body: t2.Opt(t2.Vec(t2.Nat8)), transform: t2.Opt(t2.Record({ function: t2.Func([t2.Record({ context: t2.Vec(t2.Nat8), response: Y2 })], [Y2], []), context: t2.Vec(t2.Nat8) })), headers: t2.Vec(z2), is_replicated: t2.Opt(t2.Bool) }), $2 = t2.Variant({ reinstall: t2.Null, upgrade: t2.Opt(t2.Record({ wasm_memory_persistence: t2.Opt(t2.Variant({ keep: t2.Null, replace: t2.Null })), skip_pre_upgrade: t2.Opt(t2.Bool) })), install: t2.Null }), L2 = t2.Record({ hash: t2.Vec(t2.Nat8) }), et2 = t2.Record({ arg: t2.Vec(t2.Nat8), wasm_module_hash: t2.Vec(t2.Nat8), mode: $2, chunk_hashes_list: t2.Vec(L2), target_canister: s2, store_canister: t2.Opt(s2), sender_canister_version: t2.Opt(t2.Nat64) }), ot2 = t2.Vec(t2.Nat8), I2 = t2.Record({ arg: t2.Vec(t2.Nat8), wasm_module: ot2, mode: $2, canister_id: s2, sender_canister_version: t2.Opt(t2.Nat64) }), ct2 = t2.Record({ canister_id: s2 }), st2 = t2.Record({ id: g3, total_size: t2.Nat64, taken_at_timestamp: t2.Nat64 }), Rt = t2.Vec(st2), ut2 = t2.Record({ canister_id: s2, sender_canister_version: t2.Opt(t2.Nat64), snapshot_id: g3 }), mt = t2.Record({ start_at_timestamp_nanos: t2.Nat64, subnet_id: t2.Principal }), gt = t2.Record({ num_block_failures_total: t2.Nat64, node_id: t2.Principal, num_blocks_proposed_total: t2.Nat64 }), Nt = t2.Vec(t2.Record({ timestamp_nanos: t2.Nat64, node_metrics: t2.Vec(gt) })), tt2 = t2.Record({ settings: t2.Opt(F2), specified_id: t2.Opt(s2), amount: t2.Opt(t2.Nat), sender_canister_version: t2.Opt(t2.Nat64) }), it2 = t2.Record({ canister_id: s2 }), nt2 = t2.Record({ canister_id: s2, amount: t2.Nat }), at = t2.Vec(t2.Nat8), yt2 = t2.Record({ kind: t2.Variant({ wasm_module: t2.Record({ size: t2.Nat64, offset: t2.Nat64 }), wasm_memory: t2.Record({ size: t2.Nat64, offset: t2.Nat64 }), stable_memory: t2.Record({ size: t2.Nat64, offset: t2.Nat64 }), wasm_chunk: t2.Record({ hash: t2.Vec(t2.Nat8) }) }), canister_id: s2, snapshot_id: g3 }), _t = t2.Record({ chunk: t2.Vec(t2.Nat8) }), bt = t2.Record({ canister_id: s2, snapshot_id: g3 }), rt = t2.Record({ globals: t2.Vec(t2.Variant({ f32: t2.Float32, f64: t2.Float64, i32: t2.Int32, i64: t2.Int64, v128: t2.Nat })), canister_version: t2.Nat64, source: t2.Variant({ metadata_upload: t2.Reserved, taken_from_canister: t2.Reserved }), certified_data: t2.Vec(t2.Nat8), global_timer: t2.Opt(t2.Variant({ active: t2.Nat64, inactive: t2.Null })), on_low_wasm_memory_hook_status: t2.Opt(t2.Variant({ condition_not_satisfied: t2.Null, executed: t2.Null, ready: t2.Null })), wasm_module_size: t2.Nat64, stable_memory_size: t2.Nat64, wasm_chunk_store: t2.Vec(t2.Record({ hash: t2.Vec(t2.Nat8) })), taken_at_timestamp: t2.Nat64, wasm_memory_size: t2.Nat64 }), ft2 = t2.Variant({ ed25519: t2.Null, bip340secp256k1: t2.Null }), pt = t2.Record({ key_id: t2.Record({ algorithm: ft2, name: t2.Text }), canister_id: t2.Opt(s2), derivation_path: t2.Vec(t2.Vec(t2.Nat8)) }), ht = t2.Record({ public_key: t2.Vec(t2.Nat8), chain_code: t2.Vec(t2.Nat8) }), dt2 = t2.Record({ key_id: t2.Record({ name: t2.Text, curve: S2 }), derivation_path: t2.Vec(t2.Vec(t2.Nat8)), message_hash: t2.Vec(t2.Nat8) }), St2 = t2.Record({ signature: t2.Vec(t2.Nat8) }), Pt = t2.Variant({ bip341: t2.Record({ merkle_root_hash: t2.Vec(t2.Nat8) }) }), Ct = t2.Record({ aux: t2.Opt(Pt), key_id: t2.Record({ algorithm: ft2, name: t2.Text }), derivation_path: t2.Vec(t2.Vec(t2.Nat8)), message: t2.Vec(t2.Nat8) }), vt = t2.Record({ signature: t2.Vec(t2.Nat8) }), xt = t2.Record({ canister_id: s2 }), wt2 = t2.Record({ canister_id: s2 }), Tt = t2.Record({ canister_id: s2 }), U2 = t2.Vec(L2), G2 = t2.Record({ subnet_id: t2.Principal }), Wt = t2.Record({ replica_version: t2.Text, registry_version: t2.Nat64 }), Kt = t2.Record({ replace_snapshot: t2.Opt(g3), canister_id: s2, uninstall_code: t2.Opt(t2.Bool), sender_canister_version: t2.Opt(t2.Nat64) }), kt = st2, At = t2.Record({ canister_id: s2, sender_canister_version: t2.Opt(t2.Nat64) }), Mt = t2.Record({ canister_id: t2.Principal, settings: F2, sender_canister_version: t2.Opt(t2.Nat64) }), qt = t2.Record({ chunk: t2.Vec(t2.Nat8), kind: t2.Variant({ wasm_module: t2.Record({ offset: t2.Nat64 }), wasm_memory: t2.Record({ offset: t2.Nat64 }), stable_memory: t2.Record({ offset: t2.Nat64 }), wasm_chunk: t2.Null }), canister_id: s2, snapshot_id: g3 }), jt = t2.Record({ globals: t2.Vec(t2.Variant({ f32: t2.Float32, f64: t2.Float64, i32: t2.Int32, i64: t2.Int64, v128: t2.Nat })), replace_snapshot: t2.Opt(g3), certified_data: t2.Vec(t2.Nat8), global_timer: t2.Opt(t2.Variant({ active: t2.Nat64, inactive: t2.Null })), on_low_wasm_memory_hook_status: t2.Opt(t2.Variant({ condition_not_satisfied: t2.Null, executed: t2.Null, ready: t2.Null })), wasm_module_size: t2.Nat64, canister_id: s2, stable_memory_size: t2.Nat64, wasm_memory_size: t2.Nat64 }), Et2 = t2.Record({ snapshot_id: g3 }), Ht = t2.Record({ chunk: t2.Vec(t2.Nat8), canister_id: t2.Principal }), Bt = L2, zt = t2.Variant({ bls12_381_g2: t2.Null }), Qt = t2.Record({ context: t2.Vec(t2.Nat8), key_id: t2.Record({ name: t2.Text, curve: zt }), input: t2.Vec(t2.Nat8), transport_public_key: t2.Vec(t2.Nat8) }), Jt = t2.Record({ encrypted_key: t2.Vec(t2.Nat8) }), Ot = t2.Record({ context: t2.Vec(t2.Nat8), key_id: t2.Record({ name: t2.Text, curve: zt }), canister_id: t2.Opt(s2) }), Xt = t2.Record({ public_key: t2.Vec(t2.Nat8) });
+  return t2.Service({ bitcoin_get_balance: t2.Func([n3], [r2], []), bitcoin_get_block_headers: t2.Func([a3], [N2], []), bitcoin_get_current_fee_percentiles: t2.Func([f2], [v2], []), bitcoin_get_utxos: t2.Func([p2], [V2], []), bitcoin_send_transaction: t2.Func([d2], [], []), canister_info: t2.Func([b2], [i2], []), canister_metadata: t2.Func([k2], [E3], []), canister_status: t2.Func([l3], [P2], []), clear_chunk_store: t2.Func([T2], [], []), create_canister: t2.Func([H2], [Q2], []), delete_canister: t2.Func([A3], [], []), delete_canister_snapshot: t2.Func([J2], [], []), deposit_cycles: t2.Func([j2], [], []), ecdsa_public_key: t2.Func([D2], [X2], []), fetch_canister_logs: t2.Func([M2], [W2], []), http_request: t2.Func([Z2], [Y2], []), install_chunked_code: t2.Func([et2], [], []), install_code: t2.Func([I2], [], []), list_canister_snapshots: t2.Func([ct2], [Rt], []), load_canister_snapshot: t2.Func([ut2], [], []), node_metrics_history: t2.Func([mt], [Nt], []), provisional_create_canister_with_cycles: t2.Func([tt2], [it2], []), provisional_top_up_canister: t2.Func([nt2], [], []), raw_rand: t2.Func([], [at], []), read_canister_snapshot_data: t2.Func([yt2], [_t], []), read_canister_snapshot_metadata: t2.Func([bt], [rt], []), schnorr_public_key: t2.Func([pt], [ht], []), sign_with_ecdsa: t2.Func([dt2], [St2], []), sign_with_schnorr: t2.Func([Ct], [vt], []), start_canister: t2.Func([xt], [], []), stop_canister: t2.Func([wt2], [], []), stored_chunks: t2.Func([Tt], [U2], []), subnet_info: t2.Func([G2], [Wt], []), take_canister_snapshot: t2.Func([Kt], [kt], []), uninstall_code: t2.Func([At], [], []), update_settings: t2.Func([Mt], [], []), upload_canister_snapshot_data: t2.Func([qt], [], []), upload_canister_snapshot_metadata: t2.Func([jt], [Et2], []), upload_chunk: t2.Func([Ht], [Bt], []), vetkd_derive_key: t2.Func([Qt], [Jt], []), vetkd_public_key: t2.Func([Ot], [Xt], []) });
+};
+var zo = ({ IDL: t2 }) => {
+  let e4 = t2.Variant({ mainnet: t2.Null, testnet: t2.Null }), c3 = t2.Text, n3 = t2.Record({ network: e4, address: c3, min_confirmations: t2.Opt(t2.Nat32) }), o3 = t2.Nat64, r2 = o3, _2 = t2.Nat32, a3 = t2.Record({ start_height: _2, end_height: t2.Opt(_2), network: e4 }), R2 = t2.Vec(t2.Nat8), N2 = t2.Record({ tip_height: _2, block_headers: t2.Vec(R2) }), f2 = t2.Record({ network: e4 }), m3 = t2.Nat64, v2 = t2.Vec(m3), p2 = t2.Record({ network: e4, filter: t2.Opt(t2.Variant({ page: t2.Vec(t2.Nat8), min_confirmations: t2.Nat32 })), address: c3 }), u2 = t2.Vec(t2.Nat8), O2 = t2.Record({ txid: t2.Vec(t2.Nat8), vout: t2.Nat32 }), h2 = t2.Record({ height: t2.Nat32, value: o3, outpoint: O2 }), V2 = t2.Record({ next_page: t2.Opt(t2.Vec(t2.Nat8)), tip_height: _2, tip_block_hash: u2, utxos: t2.Vec(h2) }), d2 = t2.Record({ transaction: t2.Vec(t2.Nat8), network: e4 }), s2 = t2.Principal, b2 = t2.Record({ canister_id: s2, num_requested_changes: t2.Opt(t2.Nat64) }), x3 = t2.Variant({ from_user: t2.Record({ user_id: t2.Principal }), from_canister: t2.Record({ canister_version: t2.Opt(t2.Nat64), canister_id: t2.Principal }) }), g3 = t2.Vec(t2.Nat8), C3 = t2.Variant({ creation: t2.Record({ controllers: t2.Vec(t2.Principal), environment_variables_hash: t2.Opt(t2.Vec(t2.Nat8)) }), code_deployment: t2.Record({ mode: t2.Variant({ reinstall: t2.Null, upgrade: t2.Null, install: t2.Null }), module_hash: t2.Vec(t2.Nat8) }), load_snapshot: t2.Record({ canister_version: t2.Nat64, source: t2.Variant({ metadata_upload: t2.Reserved, taken_from_canister: t2.Reserved }), from_canister_id: t2.Opt(t2.Principal), taken_at_timestamp: t2.Nat64, snapshot_id: g3 }), controllers_change: t2.Record({ controllers: t2.Vec(t2.Principal) }), code_uninstall: t2.Null }), y2 = t2.Record({ timestamp_nanos: t2.Nat64, canister_version: t2.Nat64, origin: x3, details: C3 }), i2 = t2.Record({ controllers: t2.Vec(t2.Principal), module_hash: t2.Opt(t2.Vec(t2.Nat8)), recent_changes: t2.Vec(y2), total_num_changes: t2.Nat64 }), k2 = t2.Record({ name: t2.Text, canister_id: s2 }), E3 = t2.Record({ value: t2.Vec(t2.Nat8) }), l3 = t2.Record({ canister_id: s2 }), B3 = t2.Record({ value: t2.Text, name: t2.Text }), w3 = t2.Variant({ controllers: t2.Null, public: t2.Null, allowed_viewers: t2.Vec(t2.Principal) }), q2 = t2.Record({ freezing_threshold: t2.Nat, wasm_memory_threshold: t2.Nat, environment_variables: t2.Vec(B3), controllers: t2.Vec(t2.Principal), reserved_cycles_limit: t2.Nat, log_visibility: w3, wasm_memory_limit: t2.Nat, memory_allocation: t2.Nat, compute_allocation: t2.Nat }), P2 = t2.Record({ memory_metrics: t2.Record({ wasm_binary_size: t2.Nat, wasm_chunk_store_size: t2.Nat, canister_history_size: t2.Nat, stable_memory_size: t2.Nat, snapshots_size: t2.Nat, wasm_memory_size: t2.Nat, global_memory_size: t2.Nat, custom_sections_size: t2.Nat }), status: t2.Variant({ stopped: t2.Null, stopping: t2.Null, running: t2.Null }), memory_size: t2.Nat, ready_for_migration: t2.Bool, version: t2.Nat64, cycles: t2.Nat, settings: q2, query_stats: t2.Record({ response_payload_bytes_total: t2.Nat, num_instructions_total: t2.Nat, num_calls_total: t2.Nat, request_payload_bytes_total: t2.Nat }), idle_cycles_burned_per_day: t2.Nat, module_hash: t2.Opt(t2.Vec(t2.Nat8)), reserved_cycles: t2.Nat }), T2 = t2.Record({ canister_id: s2 }), F2 = t2.Record({ freezing_threshold: t2.Opt(t2.Nat), wasm_memory_threshold: t2.Opt(t2.Nat), environment_variables: t2.Opt(t2.Vec(B3)), controllers: t2.Opt(t2.Vec(t2.Principal)), reserved_cycles_limit: t2.Opt(t2.Nat), log_visibility: t2.Opt(w3), wasm_memory_limit: t2.Opt(t2.Nat), memory_allocation: t2.Opt(t2.Nat), compute_allocation: t2.Opt(t2.Nat) }), H2 = t2.Record({ settings: t2.Opt(F2), sender_canister_version: t2.Opt(t2.Nat64) }), Q2 = t2.Record({ canister_id: s2 }), A3 = t2.Record({ canister_id: s2 }), J2 = t2.Record({ canister_id: s2, snapshot_id: g3 }), j2 = t2.Record({ canister_id: s2 }), S2 = t2.Variant({ secp256k1: t2.Null }), D2 = t2.Record({ key_id: t2.Record({ name: t2.Text, curve: S2 }), canister_id: t2.Opt(s2), derivation_path: t2.Vec(t2.Vec(t2.Nat8)) }), X2 = t2.Record({ public_key: t2.Vec(t2.Nat8), chain_code: t2.Vec(t2.Nat8) }), M2 = t2.Record({ canister_id: s2 }), K2 = t2.Record({ idx: t2.Nat64, timestamp_nanos: t2.Nat64, content: t2.Vec(t2.Nat8) }), W2 = t2.Record({ canister_log_records: t2.Vec(K2) }), z2 = t2.Record({ value: t2.Text, name: t2.Text }), Y2 = t2.Record({ status: t2.Nat, body: t2.Vec(t2.Nat8), headers: t2.Vec(z2) }), Z2 = t2.Record({ url: t2.Text, method: t2.Variant({ get: t2.Null, head: t2.Null, post: t2.Null }), max_response_bytes: t2.Opt(t2.Nat64), body: t2.Opt(t2.Vec(t2.Nat8)), transform: t2.Opt(t2.Record({ function: t2.Func([t2.Record({ context: t2.Vec(t2.Nat8), response: Y2 })], [Y2], ["query"]), context: t2.Vec(t2.Nat8) })), headers: t2.Vec(z2), is_replicated: t2.Opt(t2.Bool) }), $2 = t2.Variant({ reinstall: t2.Null, upgrade: t2.Opt(t2.Record({ wasm_memory_persistence: t2.Opt(t2.Variant({ keep: t2.Null, replace: t2.Null })), skip_pre_upgrade: t2.Opt(t2.Bool) })), install: t2.Null }), L2 = t2.Record({ hash: t2.Vec(t2.Nat8) }), et2 = t2.Record({ arg: t2.Vec(t2.Nat8), wasm_module_hash: t2.Vec(t2.Nat8), mode: $2, chunk_hashes_list: t2.Vec(L2), target_canister: s2, store_canister: t2.Opt(s2), sender_canister_version: t2.Opt(t2.Nat64) }), ot2 = t2.Vec(t2.Nat8), I2 = t2.Record({ arg: t2.Vec(t2.Nat8), wasm_module: ot2, mode: $2, canister_id: s2, sender_canister_version: t2.Opt(t2.Nat64) }), ct2 = t2.Record({ canister_id: s2 }), st2 = t2.Record({ id: g3, total_size: t2.Nat64, taken_at_timestamp: t2.Nat64 }), Rt = t2.Vec(st2), ut2 = t2.Record({ canister_id: s2, sender_canister_version: t2.Opt(t2.Nat64), snapshot_id: g3 }), mt = t2.Record({ start_at_timestamp_nanos: t2.Nat64, subnet_id: t2.Principal }), gt = t2.Record({ num_block_failures_total: t2.Nat64, node_id: t2.Principal, num_blocks_proposed_total: t2.Nat64 }), Nt = t2.Vec(t2.Record({ timestamp_nanos: t2.Nat64, node_metrics: t2.Vec(gt) })), tt2 = t2.Record({ settings: t2.Opt(F2), specified_id: t2.Opt(s2), amount: t2.Opt(t2.Nat), sender_canister_version: t2.Opt(t2.Nat64) }), it2 = t2.Record({ canister_id: s2 }), nt2 = t2.Record({ canister_id: s2, amount: t2.Nat }), at = t2.Vec(t2.Nat8), yt2 = t2.Record({ kind: t2.Variant({ wasm_module: t2.Record({ size: t2.Nat64, offset: t2.Nat64 }), wasm_memory: t2.Record({ size: t2.Nat64, offset: t2.Nat64 }), stable_memory: t2.Record({ size: t2.Nat64, offset: t2.Nat64 }), wasm_chunk: t2.Record({ hash: t2.Vec(t2.Nat8) }) }), canister_id: s2, snapshot_id: g3 }), _t = t2.Record({ chunk: t2.Vec(t2.Nat8) }), bt = t2.Record({ canister_id: s2, snapshot_id: g3 }), rt = t2.Record({ globals: t2.Vec(t2.Variant({ f32: t2.Float32, f64: t2.Float64, i32: t2.Int32, i64: t2.Int64, v128: t2.Nat })), canister_version: t2.Nat64, source: t2.Variant({ metadata_upload: t2.Reserved, taken_from_canister: t2.Reserved }), certified_data: t2.Vec(t2.Nat8), global_timer: t2.Opt(t2.Variant({ active: t2.Nat64, inactive: t2.Null })), on_low_wasm_memory_hook_status: t2.Opt(t2.Variant({ condition_not_satisfied: t2.Null, executed: t2.Null, ready: t2.Null })), wasm_module_size: t2.Nat64, stable_memory_size: t2.Nat64, wasm_chunk_store: t2.Vec(t2.Record({ hash: t2.Vec(t2.Nat8) })), taken_at_timestamp: t2.Nat64, wasm_memory_size: t2.Nat64 }), ft2 = t2.Variant({ ed25519: t2.Null, bip340secp256k1: t2.Null }), pt = t2.Record({ key_id: t2.Record({ algorithm: ft2, name: t2.Text }), canister_id: t2.Opt(s2), derivation_path: t2.Vec(t2.Vec(t2.Nat8)) }), ht = t2.Record({ public_key: t2.Vec(t2.Nat8), chain_code: t2.Vec(t2.Nat8) }), dt2 = t2.Record({ key_id: t2.Record({ name: t2.Text, curve: S2 }), derivation_path: t2.Vec(t2.Vec(t2.Nat8)), message_hash: t2.Vec(t2.Nat8) }), St2 = t2.Record({ signature: t2.Vec(t2.Nat8) }), Pt = t2.Variant({ bip341: t2.Record({ merkle_root_hash: t2.Vec(t2.Nat8) }) }), Ct = t2.Record({ aux: t2.Opt(Pt), key_id: t2.Record({ algorithm: ft2, name: t2.Text }), derivation_path: t2.Vec(t2.Vec(t2.Nat8)), message: t2.Vec(t2.Nat8) }), vt = t2.Record({ signature: t2.Vec(t2.Nat8) }), xt = t2.Record({ canister_id: s2 }), wt2 = t2.Record({ canister_id: s2 }), Tt = t2.Record({ canister_id: s2 }), U2 = t2.Vec(L2), G2 = t2.Record({ subnet_id: t2.Principal }), Wt = t2.Record({ replica_version: t2.Text, registry_version: t2.Nat64 }), Kt = t2.Record({ replace_snapshot: t2.Opt(g3), canister_id: s2, uninstall_code: t2.Opt(t2.Bool), sender_canister_version: t2.Opt(t2.Nat64) }), kt = st2, At = t2.Record({ canister_id: s2, sender_canister_version: t2.Opt(t2.Nat64) }), Mt = t2.Record({ canister_id: t2.Principal, settings: F2, sender_canister_version: t2.Opt(t2.Nat64) }), qt = t2.Record({ chunk: t2.Vec(t2.Nat8), kind: t2.Variant({ wasm_module: t2.Record({ offset: t2.Nat64 }), wasm_memory: t2.Record({ offset: t2.Nat64 }), stable_memory: t2.Record({ offset: t2.Nat64 }), wasm_chunk: t2.Null }), canister_id: s2, snapshot_id: g3 }), jt = t2.Record({ globals: t2.Vec(t2.Variant({ f32: t2.Float32, f64: t2.Float64, i32: t2.Int32, i64: t2.Int64, v128: t2.Nat })), replace_snapshot: t2.Opt(g3), certified_data: t2.Vec(t2.Nat8), global_timer: t2.Opt(t2.Variant({ active: t2.Nat64, inactive: t2.Null })), on_low_wasm_memory_hook_status: t2.Opt(t2.Variant({ condition_not_satisfied: t2.Null, executed: t2.Null, ready: t2.Null })), wasm_module_size: t2.Nat64, canister_id: s2, stable_memory_size: t2.Nat64, wasm_memory_size: t2.Nat64 }), Et2 = t2.Record({ snapshot_id: g3 }), Ht = t2.Record({ chunk: t2.Vec(t2.Nat8), canister_id: t2.Principal }), Bt = L2, zt = t2.Variant({ bls12_381_g2: t2.Null }), Qt = t2.Record({ context: t2.Vec(t2.Nat8), key_id: t2.Record({ name: t2.Text, curve: zt }), input: t2.Vec(t2.Nat8), transport_public_key: t2.Vec(t2.Nat8) }), Jt = t2.Record({ encrypted_key: t2.Vec(t2.Nat8) }), Ot = t2.Record({ context: t2.Vec(t2.Nat8), key_id: t2.Record({ name: t2.Text, curve: zt }), canister_id: t2.Opt(s2) }), Xt = t2.Record({ public_key: t2.Vec(t2.Nat8) });
+  return t2.Service({ bitcoin_get_balance: t2.Func([n3], [r2], []), bitcoin_get_block_headers: t2.Func([a3], [N2], []), bitcoin_get_current_fee_percentiles: t2.Func([f2], [v2], []), bitcoin_get_utxos: t2.Func([p2], [V2], []), bitcoin_send_transaction: t2.Func([d2], [], []), canister_info: t2.Func([b2], [i2], []), canister_metadata: t2.Func([k2], [E3], []), canister_status: t2.Func([l3], [P2], ["query"]), clear_chunk_store: t2.Func([T2], [], []), create_canister: t2.Func([H2], [Q2], []), delete_canister: t2.Func([A3], [], []), delete_canister_snapshot: t2.Func([J2], [], []), deposit_cycles: t2.Func([j2], [], []), ecdsa_public_key: t2.Func([D2], [X2], []), fetch_canister_logs: t2.Func([M2], [W2], ["query"]), http_request: t2.Func([Z2], [Y2], []), install_chunked_code: t2.Func([et2], [], []), install_code: t2.Func([I2], [], []), list_canister_snapshots: t2.Func([ct2], [Rt], []), load_canister_snapshot: t2.Func([ut2], [], []), node_metrics_history: t2.Func([mt], [Nt], []), provisional_create_canister_with_cycles: t2.Func([tt2], [it2], []), provisional_top_up_canister: t2.Func([nt2], [], []), raw_rand: t2.Func([], [at], []), read_canister_snapshot_data: t2.Func([yt2], [_t], []), read_canister_snapshot_metadata: t2.Func([bt], [rt], []), schnorr_public_key: t2.Func([pt], [ht], []), sign_with_ecdsa: t2.Func([dt2], [St2], []), sign_with_schnorr: t2.Func([Ct], [vt], []), start_canister: t2.Func([xt], [], []), stop_canister: t2.Func([wt2], [], []), stored_chunks: t2.Func([Tt], [U2], []), subnet_info: t2.Func([G2], [Wt], []), take_canister_snapshot: t2.Func([Kt], [kt], []), uninstall_code: t2.Func([At], [], []), update_settings: t2.Func([Mt], [], []), upload_canister_snapshot_data: t2.Func([qt], [], []), upload_canister_snapshot_metadata: t2.Func([jt], [Et2], []), upload_chunk: t2.Func([Ht], [Bt], []), vetkd_derive_key: t2.Func([Qt], [Jt], []), vetkd_public_key: t2.Func([Ot], [Xt], []) });
+};
+var jo = ({ IDL: t2 }) => {
+  let e4 = t2.Vec(t2.Nat8), c3 = t2.Record({ owner: t2.Principal, subaccount: t2.Opt(e4) }), n3 = t2.Record({ icrc2: t2.Bool }), o3 = t2.Record({ icrc1_minting_account: t2.Opt(c3), feature_flags: t2.Opt(n3) }), r2 = t2.Record({ e8s: t2.Nat64 }), _2 = t2.Text, a3 = t2.Record({ secs: t2.Nat64, nanos: t2.Nat32 }), R2 = t2.Record({ num_blocks_to_archive: t2.Nat64, max_transactions_per_response: t2.Opt(t2.Nat64), trigger_threshold: t2.Nat64, more_controller_ids: t2.Opt(t2.Vec(t2.Principal)), max_message_size_bytes: t2.Opt(t2.Nat64), cycles_for_archive_creation: t2.Opt(t2.Nat64), node_max_memory_size_bytes: t2.Opt(t2.Nat64), controller_id: t2.Principal }), N2 = t2.Record({ send_whitelist: t2.Vec(t2.Principal), token_symbol: t2.Opt(t2.Text), transfer_fee: t2.Opt(r2), minting_account: _2, transaction_window: t2.Opt(a3), max_message_size_bytes: t2.Opt(t2.Nat64), icrc1_minting_account: t2.Opt(c3), archive_options: t2.Opt(R2), initial_values: t2.Vec(t2.Tuple(_2, r2)), token_name: t2.Opt(t2.Text), feature_flags: t2.Opt(n3) });
+  t2.Variant({ Upgrade: t2.Opt(o3), Init: N2 });
+  let m3 = t2.Vec(t2.Nat8), v2 = t2.Record({ account: m3 }), p2 = t2.Record({ account: _2 }), u2 = t2.Record({ canister_id: t2.Principal }), O2 = t2.Record({ archives: t2.Vec(u2) }), h2 = t2.Record({ prev_spender_id: t2.Opt(_2), from_account_id: _2, take: t2.Opt(t2.Nat64) }), V2 = t2.Vec(t2.Record({ from_account_id: _2, to_spender_id: _2, allowance: r2, expires_at: t2.Opt(t2.Nat64) })), d2 = t2.Nat, s2 = t2.Variant({ Int: t2.Int, Nat: t2.Nat, Blob: t2.Vec(t2.Nat8), Text: t2.Text }), b2 = t2.Nat64, x3 = t2.Record({ to: c3, fee: t2.Opt(d2), memo: t2.Opt(t2.Vec(t2.Nat8)), from_subaccount: t2.Opt(e4), created_at_time: t2.Opt(b2), amount: d2 }), g3 = t2.Nat, C3 = t2.Variant({ GenericError: t2.Record({ message: t2.Text, error_code: t2.Nat }), TemporarilyUnavailable: t2.Null, BadBurn: t2.Record({ min_burn_amount: d2 }), Duplicate: t2.Record({ duplicate_of: g3 }), BadFee: t2.Record({ expected_fee: d2 }), CreatedInFuture: t2.Record({ ledger_time: t2.Nat64 }), TooOld: t2.Null, InsufficientFunds: t2.Record({ balance: d2 }) }), y2 = t2.Variant({ Ok: g3, Err: C3 }), i2 = t2.Record({ utc_offset_minutes: t2.Opt(t2.Int16), language: t2.Text }), k2 = t2.Record({ metadata: i2, device_spec: t2.Opt(t2.Variant({ GenericDisplay: t2.Null, FieldsDisplay: t2.Null })) }), E3 = t2.Record({ arg: t2.Vec(t2.Nat8), method: t2.Text, user_preferences: k2 }), l3 = t2.Variant({ Text: t2.Record({ content: t2.Text }), TokenAmount: t2.Record({ decimals: t2.Nat8, amount: t2.Nat64, symbol: t2.Text }), TimestampSeconds: t2.Record({ amount: t2.Nat64 }), DurationSeconds: t2.Record({ amount: t2.Nat64 }) }), B3 = t2.Record({ fields: t2.Vec(t2.Tuple(t2.Text, l3)), intent: t2.Text }), w3 = t2.Variant({ FieldsDisplayMessage: B3, GenericDisplayMessage: t2.Text }), q2 = t2.Record({ metadata: i2, consent_message: w3 }), P2 = t2.Record({ description: t2.Text }), T2 = t2.Variant({ GenericError: t2.Record({ description: t2.Text, error_code: t2.Nat }), InsufficientPayment: P2, UnsupportedCanisterCall: P2, ConsentMessageUnavailable: P2 }), F2 = t2.Variant({ Ok: q2, Err: T2 }), H2 = t2.Record({ account: c3, spender: c3 }), Q2 = t2.Record({ allowance: d2, expires_at: t2.Opt(b2) }), A3 = t2.Record({ fee: t2.Opt(d2), memo: t2.Opt(t2.Vec(t2.Nat8)), from_subaccount: t2.Opt(e4), created_at_time: t2.Opt(b2), amount: d2, expected_allowance: t2.Opt(d2), expires_at: t2.Opt(b2), spender: c3 }), J2 = t2.Variant({ GenericError: t2.Record({ message: t2.Text, error_code: t2.Nat }), TemporarilyUnavailable: t2.Null, Duplicate: t2.Record({ duplicate_of: g3 }), BadFee: t2.Record({ expected_fee: d2 }), AllowanceChanged: t2.Record({ current_allowance: d2 }), CreatedInFuture: t2.Record({ ledger_time: t2.Nat64 }), TooOld: t2.Null, Expired: t2.Record({ ledger_time: t2.Nat64 }), InsufficientFunds: t2.Record({ balance: d2 }) }), j2 = t2.Variant({ Ok: g3, Err: J2 }), S2 = t2.Record({ to: c3, fee: t2.Opt(d2), spender_subaccount: t2.Opt(e4), from: c3, memo: t2.Opt(t2.Vec(t2.Nat8)), created_at_time: t2.Opt(b2), amount: d2 }), D2 = t2.Variant({ GenericError: t2.Record({ message: t2.Text, error_code: t2.Nat }), TemporarilyUnavailable: t2.Null, InsufficientAllowance: t2.Record({ allowance: d2 }), BadBurn: t2.Record({ min_burn_amount: d2 }), Duplicate: t2.Record({ duplicate_of: g3 }), BadFee: t2.Record({ expected_fee: d2 }), CreatedInFuture: t2.Record({ ledger_time: b2 }), TooOld: t2.Null, InsufficientFunds: t2.Record({ balance: d2 }) }), X2 = t2.Variant({ Ok: g3, Err: D2 }), M2 = t2.Nat64, K2 = t2.Record({ start: M2, length: t2.Nat64 }), W2 = t2.Nat64, z2 = t2.Record({ timestamp_nanos: t2.Nat64 }), Y2 = t2.Variant({ Approve: t2.Record({ fee: r2, from: m3, allowance_e8s: t2.Int, allowance: r2, expected_allowance: t2.Opt(r2), expires_at: t2.Opt(z2), spender: m3 }), Burn: t2.Record({ from: m3, amount: r2, spender: t2.Opt(m3) }), Mint: t2.Record({ to: m3, amount: r2 }), Transfer: t2.Record({ to: m3, fee: r2, from: m3, amount: r2, spender: t2.Opt(t2.Vec(t2.Nat8)) }) }), Z2 = t2.Record({ memo: W2, icrc1_memo: t2.Opt(t2.Vec(t2.Nat8)), operation: t2.Opt(Y2), created_at_time: z2 }), $2 = t2.Record({ transaction: Z2, timestamp: z2, parent_hash: t2.Opt(t2.Vec(t2.Nat8)) }), L2 = t2.Record({ blocks: t2.Vec($2) }), et2 = t2.Variant({ BadFirstBlockIndex: t2.Record({ requested_index: M2, first_valid_index: M2 }), Other: t2.Record({ error_message: t2.Text, error_code: t2.Nat64 }) }), ot2 = t2.Variant({ Ok: L2, Err: et2 }), I2 = t2.Func([K2], [ot2], []), ct2 = t2.Record({ callback: I2, start: M2, length: t2.Nat64 }), st2 = t2.Record({ certificate: t2.Opt(t2.Vec(t2.Nat8)), blocks: t2.Vec($2), chain_length: t2.Nat64, first_block_index: M2, archived_blocks: t2.Vec(ct2) }), Rt = t2.Record({ callback: t2.Func([K2], [t2.Variant({ Ok: t2.Vec(t2.Vec(t2.Nat8)), Err: et2 })], []), start: t2.Nat64, length: t2.Nat64 }), ut2 = t2.Record({ certificate: t2.Opt(t2.Vec(t2.Nat8)), blocks: t2.Vec(t2.Vec(t2.Nat8)), chain_length: t2.Nat64, first_block_index: t2.Nat64, archived_blocks: t2.Vec(Rt) }), mt = t2.Record({ fee: t2.Opt(d2), from_subaccount: t2.Opt(e4), spender: m3 }), gt = t2.Record({ to: _2, fee: r2, memo: W2, from_subaccount: t2.Opt(e4), created_at_time: t2.Opt(z2), amount: r2 }), Nt = t2.Record({ certification: t2.Opt(t2.Vec(t2.Nat8)), tip_index: M2 }), tt2 = t2.Record({ to: m3, fee: r2, memo: W2, from_subaccount: t2.Opt(e4), created_at_time: t2.Opt(z2), amount: r2 }), it2 = t2.Variant({ TxTooOld: t2.Record({ allowed_window_nanos: t2.Nat64 }), BadFee: t2.Record({ expected_fee: r2 }), TxDuplicate: t2.Record({ duplicate_of: M2 }), TxCreatedInFuture: t2.Null, InsufficientFunds: t2.Record({ balance: r2 }) }), nt2 = t2.Variant({ Ok: M2, Err: it2 }), at = t2.Record({}), yt2 = t2.Record({ transfer_fee: r2 });
+  return t2.Service({ account_balance: t2.Func([v2], [r2], []), account_balance_dfx: t2.Func([p2], [r2], []), account_identifier: t2.Func([c3], [m3], []), archives: t2.Func([], [O2], []), decimals: t2.Func([], [t2.Record({ decimals: t2.Nat32 })], []), get_allowances: t2.Func([h2], [V2], []), icrc10_supported_standards: t2.Func([], [t2.Vec(t2.Record({ url: t2.Text, name: t2.Text }))], []), icrc1_balance_of: t2.Func([c3], [d2], []), icrc1_decimals: t2.Func([], [t2.Nat8], []), icrc1_fee: t2.Func([], [d2], []), icrc1_metadata: t2.Func([], [t2.Vec(t2.Tuple(t2.Text, s2))], []), icrc1_minting_account: t2.Func([], [t2.Opt(c3)], []), icrc1_name: t2.Func([], [t2.Text], []), icrc1_supported_standards: t2.Func([], [t2.Vec(t2.Record({ url: t2.Text, name: t2.Text }))], []), icrc1_symbol: t2.Func([], [t2.Text], []), icrc1_total_supply: t2.Func([], [d2], []), icrc1_transfer: t2.Func([x3], [y2], []), icrc21_canister_call_consent_message: t2.Func([E3], [F2], []), icrc2_allowance: t2.Func([H2], [Q2], []), icrc2_approve: t2.Func([A3], [j2], []), icrc2_transfer_from: t2.Func([S2], [X2], []), is_ledger_ready: t2.Func([], [t2.Bool], ["query"]), name: t2.Func([], [t2.Record({ name: t2.Text })], []), query_blocks: t2.Func([K2], [st2], []), query_encoded_blocks: t2.Func([K2], [ut2], []), remove_approval: t2.Func([mt], [j2], []), send_dfx: t2.Func([gt], [M2], []), symbol: t2.Func([], [t2.Record({ symbol: t2.Text })], []), tip_of_chain: t2.Func([], [Nt], []), transfer: t2.Func([tt2], [nt2], []), transfer_fee: t2.Func([at], [yt2], []) });
+};
+var Ho = ({ IDL: t2 }) => {
+  let e4 = t2.Vec(t2.Nat8), c3 = t2.Record({ owner: t2.Principal, subaccount: t2.Opt(e4) }), n3 = t2.Record({ icrc2: t2.Bool }), o3 = t2.Record({ icrc1_minting_account: t2.Opt(c3), feature_flags: t2.Opt(n3) }), r2 = t2.Record({ e8s: t2.Nat64 }), _2 = t2.Text, a3 = t2.Record({ secs: t2.Nat64, nanos: t2.Nat32 }), R2 = t2.Record({ num_blocks_to_archive: t2.Nat64, max_transactions_per_response: t2.Opt(t2.Nat64), trigger_threshold: t2.Nat64, more_controller_ids: t2.Opt(t2.Vec(t2.Principal)), max_message_size_bytes: t2.Opt(t2.Nat64), cycles_for_archive_creation: t2.Opt(t2.Nat64), node_max_memory_size_bytes: t2.Opt(t2.Nat64), controller_id: t2.Principal }), N2 = t2.Record({ send_whitelist: t2.Vec(t2.Principal), token_symbol: t2.Opt(t2.Text), transfer_fee: t2.Opt(r2), minting_account: _2, transaction_window: t2.Opt(a3), max_message_size_bytes: t2.Opt(t2.Nat64), icrc1_minting_account: t2.Opt(c3), archive_options: t2.Opt(R2), initial_values: t2.Vec(t2.Tuple(_2, r2)), token_name: t2.Opt(t2.Text), feature_flags: t2.Opt(n3) });
+  t2.Variant({ Upgrade: t2.Opt(o3), Init: N2 });
+  let m3 = t2.Vec(t2.Nat8), v2 = t2.Record({ account: m3 }), p2 = t2.Record({ account: _2 }), u2 = t2.Record({ canister_id: t2.Principal }), O2 = t2.Record({ archives: t2.Vec(u2) }), h2 = t2.Record({ prev_spender_id: t2.Opt(_2), from_account_id: _2, take: t2.Opt(t2.Nat64) }), V2 = t2.Vec(t2.Record({ from_account_id: _2, to_spender_id: _2, allowance: r2, expires_at: t2.Opt(t2.Nat64) })), d2 = t2.Nat, s2 = t2.Variant({ Int: t2.Int, Nat: t2.Nat, Blob: t2.Vec(t2.Nat8), Text: t2.Text }), b2 = t2.Nat64, x3 = t2.Record({ to: c3, fee: t2.Opt(d2), memo: t2.Opt(t2.Vec(t2.Nat8)), from_subaccount: t2.Opt(e4), created_at_time: t2.Opt(b2), amount: d2 }), g3 = t2.Nat, C3 = t2.Variant({ GenericError: t2.Record({ message: t2.Text, error_code: t2.Nat }), TemporarilyUnavailable: t2.Null, BadBurn: t2.Record({ min_burn_amount: d2 }), Duplicate: t2.Record({ duplicate_of: g3 }), BadFee: t2.Record({ expected_fee: d2 }), CreatedInFuture: t2.Record({ ledger_time: t2.Nat64 }), TooOld: t2.Null, InsufficientFunds: t2.Record({ balance: d2 }) }), y2 = t2.Variant({ Ok: g3, Err: C3 }), i2 = t2.Record({ utc_offset_minutes: t2.Opt(t2.Int16), language: t2.Text }), k2 = t2.Record({ metadata: i2, device_spec: t2.Opt(t2.Variant({ GenericDisplay: t2.Null, FieldsDisplay: t2.Null })) }), E3 = t2.Record({ arg: t2.Vec(t2.Nat8), method: t2.Text, user_preferences: k2 }), l3 = t2.Variant({ Text: t2.Record({ content: t2.Text }), TokenAmount: t2.Record({ decimals: t2.Nat8, amount: t2.Nat64, symbol: t2.Text }), TimestampSeconds: t2.Record({ amount: t2.Nat64 }), DurationSeconds: t2.Record({ amount: t2.Nat64 }) }), B3 = t2.Record({ fields: t2.Vec(t2.Tuple(t2.Text, l3)), intent: t2.Text }), w3 = t2.Variant({ FieldsDisplayMessage: B3, GenericDisplayMessage: t2.Text }), q2 = t2.Record({ metadata: i2, consent_message: w3 }), P2 = t2.Record({ description: t2.Text }), T2 = t2.Variant({ GenericError: t2.Record({ description: t2.Text, error_code: t2.Nat }), InsufficientPayment: P2, UnsupportedCanisterCall: P2, ConsentMessageUnavailable: P2 }), F2 = t2.Variant({ Ok: q2, Err: T2 }), H2 = t2.Record({ account: c3, spender: c3 }), Q2 = t2.Record({ allowance: d2, expires_at: t2.Opt(b2) }), A3 = t2.Record({ fee: t2.Opt(d2), memo: t2.Opt(t2.Vec(t2.Nat8)), from_subaccount: t2.Opt(e4), created_at_time: t2.Opt(b2), amount: d2, expected_allowance: t2.Opt(d2), expires_at: t2.Opt(b2), spender: c3 }), J2 = t2.Variant({ GenericError: t2.Record({ message: t2.Text, error_code: t2.Nat }), TemporarilyUnavailable: t2.Null, Duplicate: t2.Record({ duplicate_of: g3 }), BadFee: t2.Record({ expected_fee: d2 }), AllowanceChanged: t2.Record({ current_allowance: d2 }), CreatedInFuture: t2.Record({ ledger_time: t2.Nat64 }), TooOld: t2.Null, Expired: t2.Record({ ledger_time: t2.Nat64 }), InsufficientFunds: t2.Record({ balance: d2 }) }), j2 = t2.Variant({ Ok: g3, Err: J2 }), S2 = t2.Record({ to: c3, fee: t2.Opt(d2), spender_subaccount: t2.Opt(e4), from: c3, memo: t2.Opt(t2.Vec(t2.Nat8)), created_at_time: t2.Opt(b2), amount: d2 }), D2 = t2.Variant({ GenericError: t2.Record({ message: t2.Text, error_code: t2.Nat }), TemporarilyUnavailable: t2.Null, InsufficientAllowance: t2.Record({ allowance: d2 }), BadBurn: t2.Record({ min_burn_amount: d2 }), Duplicate: t2.Record({ duplicate_of: g3 }), BadFee: t2.Record({ expected_fee: d2 }), CreatedInFuture: t2.Record({ ledger_time: b2 }), TooOld: t2.Null, InsufficientFunds: t2.Record({ balance: d2 }) }), X2 = t2.Variant({ Ok: g3, Err: D2 }), M2 = t2.Nat64, K2 = t2.Record({ start: M2, length: t2.Nat64 }), W2 = t2.Nat64, z2 = t2.Record({ timestamp_nanos: t2.Nat64 }), Y2 = t2.Variant({ Approve: t2.Record({ fee: r2, from: m3, allowance_e8s: t2.Int, allowance: r2, expected_allowance: t2.Opt(r2), expires_at: t2.Opt(z2), spender: m3 }), Burn: t2.Record({ from: m3, amount: r2, spender: t2.Opt(m3) }), Mint: t2.Record({ to: m3, amount: r2 }), Transfer: t2.Record({ to: m3, fee: r2, from: m3, amount: r2, spender: t2.Opt(t2.Vec(t2.Nat8)) }) }), Z2 = t2.Record({ memo: W2, icrc1_memo: t2.Opt(t2.Vec(t2.Nat8)), operation: t2.Opt(Y2), created_at_time: z2 }), $2 = t2.Record({ transaction: Z2, timestamp: z2, parent_hash: t2.Opt(t2.Vec(t2.Nat8)) }), L2 = t2.Record({ blocks: t2.Vec($2) }), et2 = t2.Variant({ BadFirstBlockIndex: t2.Record({ requested_index: M2, first_valid_index: M2 }), Other: t2.Record({ error_message: t2.Text, error_code: t2.Nat64 }) }), ot2 = t2.Variant({ Ok: L2, Err: et2 }), I2 = t2.Func([K2], [ot2], ["query"]), ct2 = t2.Record({ callback: I2, start: M2, length: t2.Nat64 }), st2 = t2.Record({ certificate: t2.Opt(t2.Vec(t2.Nat8)), blocks: t2.Vec($2), chain_length: t2.Nat64, first_block_index: M2, archived_blocks: t2.Vec(ct2) }), Rt = t2.Record({ callback: t2.Func([K2], [t2.Variant({ Ok: t2.Vec(t2.Vec(t2.Nat8)), Err: et2 })], ["query"]), start: t2.Nat64, length: t2.Nat64 }), ut2 = t2.Record({ certificate: t2.Opt(t2.Vec(t2.Nat8)), blocks: t2.Vec(t2.Vec(t2.Nat8)), chain_length: t2.Nat64, first_block_index: t2.Nat64, archived_blocks: t2.Vec(Rt) }), mt = t2.Record({ fee: t2.Opt(d2), from_subaccount: t2.Opt(e4), spender: m3 }), gt = t2.Record({ to: _2, fee: r2, memo: W2, from_subaccount: t2.Opt(e4), created_at_time: t2.Opt(z2), amount: r2 }), Nt = t2.Record({ certification: t2.Opt(t2.Vec(t2.Nat8)), tip_index: M2 }), tt2 = t2.Record({ to: m3, fee: r2, memo: W2, from_subaccount: t2.Opt(e4), created_at_time: t2.Opt(z2), amount: r2 }), it2 = t2.Variant({ TxTooOld: t2.Record({ allowed_window_nanos: t2.Nat64 }), BadFee: t2.Record({ expected_fee: r2 }), TxDuplicate: t2.Record({ duplicate_of: M2 }), TxCreatedInFuture: t2.Null, InsufficientFunds: t2.Record({ balance: r2 }) }), nt2 = t2.Variant({ Ok: M2, Err: it2 }), at = t2.Record({}), yt2 = t2.Record({ transfer_fee: r2 });
+  return t2.Service({ account_balance: t2.Func([v2], [r2], ["query"]), account_balance_dfx: t2.Func([p2], [r2], ["query"]), account_identifier: t2.Func([c3], [m3], ["query"]), archives: t2.Func([], [O2], ["query"]), decimals: t2.Func([], [t2.Record({ decimals: t2.Nat32 })], ["query"]), get_allowances: t2.Func([h2], [V2], ["query"]), icrc10_supported_standards: t2.Func([], [t2.Vec(t2.Record({ url: t2.Text, name: t2.Text }))], ["query"]), icrc1_balance_of: t2.Func([c3], [d2], ["query"]), icrc1_decimals: t2.Func([], [t2.Nat8], ["query"]), icrc1_fee: t2.Func([], [d2], ["query"]), icrc1_metadata: t2.Func([], [t2.Vec(t2.Tuple(t2.Text, s2))], ["query"]), icrc1_minting_account: t2.Func([], [t2.Opt(c3)], ["query"]), icrc1_name: t2.Func([], [t2.Text], ["query"]), icrc1_supported_standards: t2.Func([], [t2.Vec(t2.Record({ url: t2.Text, name: t2.Text }))], ["query"]), icrc1_symbol: t2.Func([], [t2.Text], ["query"]), icrc1_total_supply: t2.Func([], [d2], ["query"]), icrc1_transfer: t2.Func([x3], [y2], []), icrc21_canister_call_consent_message: t2.Func([E3], [F2], []), icrc2_allowance: t2.Func([H2], [Q2], ["query"]), icrc2_approve: t2.Func([A3], [j2], []), icrc2_transfer_from: t2.Func([S2], [X2], []), is_ledger_ready: t2.Func([], [t2.Bool], ["query"]), name: t2.Func([], [t2.Record({ name: t2.Text })], ["query"]), query_blocks: t2.Func([K2], [st2], ["query"]), query_encoded_blocks: t2.Func([K2], [ut2], ["query"]), remove_approval: t2.Func([mt], [j2], []), send_dfx: t2.Func([gt], [M2], []), symbol: t2.Func([], [t2.Record({ symbol: t2.Text })], ["query"]), tip_of_chain: t2.Func([], [Nt], ["query"]), transfer: t2.Func([tt2], [nt2], []), transfer_fee: t2.Func([at], [yt2], ["query"]) });
+};
+var U$1 = ((n3) => (n3[n3.FractionalMoreThan8Decimals = 0] = "FractionalMoreThan8Decimals", n3[n3.InvalidFormat = 1] = "InvalidFormat", n3[n3.FractionalTooManyDecimals = 2] = "FractionalTooManyDecimals", n3))(U$1 || {});
 BigInt(1e8);
 var E$1 = class E {
-  constructor(t3, r2, n2) {
-    this.id = t3;
+  constructor(t2, r2, n3) {
+    this.id = t2;
     this.service = r2;
-    this.certifiedService = n2;
+    this.certifiedService = n3;
   }
   get canisterId() {
     return this.id;
   }
-  caller = ({ certified: t3 = true }) => t3 ? this.certifiedService : this.service;
+  caller = ({ certified: t2 = true }) => t2 ? this.certifiedService : this.service;
 };
-var u$2 = (e5) => e5 == null, s$1 = (e5) => !u$2(e5);
-var O$2 = () => HttpAgent.createSync({ host: "https://icp-api.io", identity: new AnonymousIdentity() });
-var lt = ({ options: { canisterId: e5, serviceOverride: t3, certifiedServiceOverride: r2, agent: n2, callTransform: o3, queryTransform: i3 }, idlFactory: c2, certifiedIdlFactory: a2 }) => {
-  let x3 = n2 ?? O$2(), m2 = t3 ?? Actor.createActor(c2, { agent: x3, canisterId: e5, callTransform: o3, queryTransform: i3 }), d2 = r2 ?? Actor.createActor(a2, { agent: x3, canisterId: e5, callTransform: o3, queryTransform: i3 });
-  return { service: m2, certifiedService: d2, agent: x3, canisterId: e5 };
+var u$1 = (e4) => e4 == null, s$1 = (e4) => !u$1(e4);
+var P$2 = () => HttpAgent.createSync({ host: "https://icp-api.io", identity: new AnonymousIdentity() });
+var lt = ({ options: { canisterId: e4, serviceOverride: t2, certifiedServiceOverride: r2, agent: n3, callTransform: o3, queryTransform: i2 }, idlFactory: c3, certifiedIdlFactory: a3 }) => {
+  let x3 = n3 ?? P$2(), m3 = t2 ?? Actor.createActor(c3, { agent: x3, canisterId: e4, callTransform: o3, queryTransform: i2 }), d2 = r2 ?? Actor.createActor(a3, { agent: x3, canisterId: e4, callTransform: o3, queryTransform: i2 });
+  return { service: m3, certifiedService: d2, agent: x3, canisterId: e4 };
 };
-var A$2 = class A extends Error {
-}, f$1 = (e5, t3) => {
-  if (e5 == null) throw new A$2(t3);
-}, yt = (e5, t3) => {
-  throw new Error(t3);
+var A$1 = class A extends Error {
+}, f = (e4, t2) => {
+  if (e4 == null) throw new A$1(t2);
+}, yt = (e4, t2) => {
+  throw new Error(t2);
 };
-var St = (e5) => new Uint8Array(e5), wt = (e5) => Array.from(e5).map((t3) => t3.charCodeAt(0)), Et$1 = (e5) => {
-  let t3 = e5.match(/.{1,2}/g);
-  return f$1(t3, "Invalid hex string."), Uint8Array.from(t3.map((r2) => parseInt(r2, 16)));
-}, R$1 = (e5) => (e5 instanceof Uint8Array || (e5 = Uint8Array.from(e5)), e5.reduce((t3, r2) => t3 + r2.toString(16).padStart(2, "0"), ""));
-var g$1 = "abcdefghijklmnopqrstuvwxyz234567", b$2 = /* @__PURE__ */ Object.create(null);
-for (let e5 = 0; e5 < g$1.length; e5++) b$2[g$1[e5]] = e5;
-b$2[0] = b$2.o;
-b$2[1] = b$2.i;
-var $ = new Uint32Array([0, 1996959894, 3993919788, 2567524794, 124634137, 1886057615, 3915621685, 2657392035, 249268274, 2044508324, 3772115230, 2547177864, 162941995, 2125561021, 3887607047, 2428444049, 498536548, 1789927666, 4089016648, 2227061214, 450548861, 1843258603, 4107580753, 2211677639, 325883990, 1684777152, 4251122042, 2321926636, 335633487, 1661365465, 4195302755, 2366115317, 997073096, 1281953886, 3579855332, 2724688242, 1006888145, 1258607687, 3524101629, 2768942443, 901097722, 1119000684, 3686517206, 2898065728, 853044451, 1172266101, 3705015759, 2882616665, 651767980, 1373503546, 3369554304, 3218104598, 565507253, 1454621731, 3485111705, 3099436303, 671266974, 1594198024, 3322730930, 2970347812, 795835527, 1483230225, 3244367275, 3060149565, 1994146192, 31158534, 2563907772, 4023717930, 1907459465, 112637215, 2680153253, 3904427059, 2013776290, 251722036, 2517215374, 3775830040, 2137656763, 141376813, 2439277719, 3865271297, 1802195444, 476864866, 2238001368, 4066508878, 1812370925, 453092731, 2181625025, 4111451223, 1706088902, 314042704, 2344532202, 4240017532, 1658658271, 366619977, 2362670323, 4224994405, 1303535960, 984961486, 2747007092, 3569037538, 1256170817, 1037604311, 2765210733, 3554079995, 1131014506, 879679996, 2909243462, 3663771856, 1141124467, 855842277, 2852801631, 3708648649, 1342533948, 654459306, 3188396048, 3373015174, 1466479909, 544179635, 3110523913, 3462522015, 1591671054, 702138776, 2966460450, 3352799412, 1504918807, 783551873, 3082640443, 3233442989, 3988292384, 2596254646, 62317068, 1957810842, 3939845945, 2647816111, 81470997, 1943803523, 3814918930, 2489596804, 225274430, 2053790376, 3826175755, 2466906013, 167816743, 2097651377, 4027552580, 2265490386, 503444072, 1762050814, 4150417245, 2154129355, 426522225, 1852507879, 4275313526, 2312317920, 282753626, 1742555852, 4189708143, 2394877945, 397917763, 1622183637, 3604390888, 2714866558, 953729732, 1340076626, 3518719985, 2797360999, 1068828381, 1219638859, 3624741850, 2936675148, 906185462, 1090812512, 3747672003, 2825379669, 829329135, 1181335161, 3412177804, 3160834842, 628085408, 1382605366, 3423369109, 3138078467, 570562233, 1426400815, 3317316542, 2998733608, 733239954, 1555261956, 3268935591, 3050360625, 752459403, 1541320221, 2607071920, 3965973030, 1969922972, 40735498, 2617837225, 3943577151, 1913087877, 83908371, 2512341634, 3803740692, 2075208622, 213261112, 2463272603, 3855990285, 2094854071, 198958881, 2262029012, 4057260610, 1759359992, 534414190, 2176718541, 4139329115, 1873836001, 414664567, 2282248934, 4279200368, 1711684554, 285281116, 2405801727, 4167216745, 1634467795, 376229701, 2685067896, 3608007406, 1308918612, 956543938, 2808555105, 3495958263, 1231636301, 1047427035, 2932959818, 3654703836, 1088359270, 936918e3, 2847714899, 3736837829, 1202900863, 817233897, 3183342108, 3401237130, 1404277552, 615818150, 3134207493, 3453421203, 1423857449, 601450431, 3009837614, 3294710456, 1567103746, 711928724, 3020668471, 3272380065, 1510334235, 755167117]), J = (e5) => {
-  let t3 = -1;
-  for (let r2 = 0; r2 < e5.length; r2++) {
-    let o3 = (e5[r2] ^ t3) & 255;
-    t3 = $[o3] ^ t3 >>> 8;
+var St = (e4) => new Uint8Array(e4), wt = (e4) => Array.from(e4).map((t2) => t2.charCodeAt(0)), Et = (e4) => {
+  let t2 = e4.match(/.{1,2}/g);
+  return f(t2, "Invalid hex string."), Uint8Array.from(t2.map((r2) => parseInt(r2, 16)));
+}, R = (e4) => (e4 instanceof Uint8Array || (e4 = Uint8Array.from(e4)), e4.reduce((t2, r2) => t2 + r2.toString(16).padStart(2, "0"), ""));
+var g$2 = "abcdefghijklmnopqrstuvwxyz234567", b$3 = /* @__PURE__ */ Object.create(null);
+for (let e4 = 0; e4 < g$2.length; e4++) b$3[g$2[e4]] = e4;
+b$3[0] = b$3.o;
+b$3[1] = b$3.i;
+var $$1 = new Uint32Array([0, 1996959894, 3993919788, 2567524794, 124634137, 1886057615, 3915621685, 2657392035, 249268274, 2044508324, 3772115230, 2547177864, 162941995, 2125561021, 3887607047, 2428444049, 498536548, 1789927666, 4089016648, 2227061214, 450548861, 1843258603, 4107580753, 2211677639, 325883990, 1684777152, 4251122042, 2321926636, 335633487, 1661365465, 4195302755, 2366115317, 997073096, 1281953886, 3579855332, 2724688242, 1006888145, 1258607687, 3524101629, 2768942443, 901097722, 1119000684, 3686517206, 2898065728, 853044451, 1172266101, 3705015759, 2882616665, 651767980, 1373503546, 3369554304, 3218104598, 565507253, 1454621731, 3485111705, 3099436303, 671266974, 1594198024, 3322730930, 2970347812, 795835527, 1483230225, 3244367275, 3060149565, 1994146192, 31158534, 2563907772, 4023717930, 1907459465, 112637215, 2680153253, 3904427059, 2013776290, 251722036, 2517215374, 3775830040, 2137656763, 141376813, 2439277719, 3865271297, 1802195444, 476864866, 2238001368, 4066508878, 1812370925, 453092731, 2181625025, 4111451223, 1706088902, 314042704, 2344532202, 4240017532, 1658658271, 366619977, 2362670323, 4224994405, 1303535960, 984961486, 2747007092, 3569037538, 1256170817, 1037604311, 2765210733, 3554079995, 1131014506, 879679996, 2909243462, 3663771856, 1141124467, 855842277, 2852801631, 3708648649, 1342533948, 654459306, 3188396048, 3373015174, 1466479909, 544179635, 3110523913, 3462522015, 1591671054, 702138776, 2966460450, 3352799412, 1504918807, 783551873, 3082640443, 3233442989, 3988292384, 2596254646, 62317068, 1957810842, 3939845945, 2647816111, 81470997, 1943803523, 3814918930, 2489596804, 225274430, 2053790376, 3826175755, 2466906013, 167816743, 2097651377, 4027552580, 2265490386, 503444072, 1762050814, 4150417245, 2154129355, 426522225, 1852507879, 4275313526, 2312317920, 282753626, 1742555852, 4189708143, 2394877945, 397917763, 1622183637, 3604390888, 2714866558, 953729732, 1340076626, 3518719985, 2797360999, 1068828381, 1219638859, 3624741850, 2936675148, 906185462, 1090812512, 3747672003, 2825379669, 829329135, 1181335161, 3412177804, 3160834842, 628085408, 1382605366, 3423369109, 3138078467, 570562233, 1426400815, 3317316542, 2998733608, 733239954, 1555261956, 3268935591, 3050360625, 752459403, 1541320221, 2607071920, 3965973030, 1969922972, 40735498, 2617837225, 3943577151, 1913087877, 83908371, 2512341634, 3803740692, 2075208622, 213261112, 2463272603, 3855990285, 2094854071, 198958881, 2262029012, 4057260610, 1759359992, 534414190, 2176718541, 4139329115, 1873836001, 414664567, 2282248934, 4279200368, 1711684554, 285281116, 2405801727, 4167216745, 1634467795, 376229701, 2685067896, 3608007406, 1308918612, 956543938, 2808555105, 3495958263, 1231636301, 1047427035, 2932959818, 3654703836, 1088359270, 936918e3, 2847714899, 3736837829, 1202900863, 817233897, 3183342108, 3401237130, 1404277552, 615818150, 3134207493, 3453421203, 1423857449, 601450431, 3009837614, 3294710456, 1567103746, 711928724, 3020668471, 3272380065, 1510334235, 755167117]), J$1 = (e4) => {
+  let t2 = -1;
+  for (let r2 = 0; r2 < e4.length; r2++) {
+    let o3 = (e4[r2] ^ t2) & 255;
+    t2 = $$1[o3] ^ t2 >>> 8;
   }
-  return (t3 ^ -1) >>> 0;
-}, Lt = (e5) => {
-  let t3 = new ArrayBuffer(4);
-  return new DataView(t3).setUint32(0, J(e5), false), new Uint8Array(t3);
+  return (t2 ^ -1) >>> 0;
+}, Lt = (e4) => {
+  let t2 = new ArrayBuffer(4);
+  return new DataView(t2).setUint32(0, J$1(e4), false), new Uint8Array(t2);
 };
-var T$2 = "__bigint__", N$2 = "__principal__", I = "__uint8array__", D$1 = (e5, t3) => typeof t3 == "bigint" ? { [T$2]: `${t3}` } : s$1(t3) && Principal$1.isPrincipal(t3) ? { [N$2]: Principal$1.from(t3).toText() } : s$1(t3) && t3 instanceof Uint8Array ? { [I]: Array.from(t3) } : t3;
-var ne = (e5) => s$1(e5) ? [e5] : [], v$2 = (e5) => e5?.[0];
-var u$1 = ((t3) => (t3[t3.Controllers = 0] = "Controllers", t3[t3.Public = 1] = "Public", t3))(u$1 || {}), i$1 = class i extends Error {
-}, P = ({ controllers: r2, freezingThreshold: a2, memoryAllocation: t3, computeAllocation: s2, reservedCyclesLimit: o3, logVisibility: n2, wasmMemoryLimit: l3, wasmMemoryThreshold: c2 } = {}) => {
-  let m2 = () => {
-    switch (n2) {
+var T$2 = "__bigint__", N$2 = "__principal__", I$2 = "__uint8array__", D$3 = (e4, t2) => typeof t2 == "bigint" ? { [T$2]: `${t2}` } : s$1(t2) && Principal$1.isPrincipal(t2) ? { [N$2]: Principal$1.from(t2).toText() } : s$1(t2) && t2 instanceof Uint8Array ? { [I$2]: Array.from(t2) } : t2;
+var ne$1 = (e4) => s$1(e4) ? [e4] : [], v$1 = (e4) => e4?.[0];
+var K$1 = ((e4) => (e4[e4.Controllers = 0] = "Controllers", e4[e4.Public = 1] = "Public", e4))(K$1 || {}), g$1 = class g extends Error {
+}, h = ({ controllers: n22, freezingThreshold: t2, memoryAllocation: e4, computeAllocation: a3, reservedCyclesLimit: r2, logVisibility: s2, wasmMemoryLimit: d2, wasmMemoryThreshold: m3, environmentVariables: f2 } = {}) => {
+  let C3 = () => {
+    switch (s2) {
       case 0:
         return { controllers: null };
       case 1:
         return { public: null };
       default:
-        throw new i$1();
+        throw new g$1();
     }
   };
-  return { controllers: ne(r2?.map((d2) => Principal$1.fromText(d2))), freezing_threshold: ne(a2), memory_allocation: ne(t3), compute_allocation: ne(s2), reserved_cycles_limit: ne(o3), log_visibility: u$2(n2) ? [] : [m2()], wasm_memory_limit: ne(l3), wasm_memory_threshold: ne(c2) };
+  return { controllers: ne$1(n22?.map((S2) => Principal$1.fromText(S2))), freezing_threshold: ne$1(t2), memory_allocation: ne$1(e4), compute_allocation: ne$1(a3), reserved_cycles_limit: ne$1(r2), log_visibility: u$1(s2) ? [] : [C3()], wasm_memory_limit: ne$1(d2), wasm_memory_threshold: ne$1(m3), environment_variables: ne$1(f2) };
 };
-var Et = ({ IDL: t22 }) => {
-  let e5 = t22.Variant({ mainnet: t22.Null, testnet: t22.Null }), n2 = t22.Text, c2 = t22.Record({ network: e5, address: n2, min_confirmations: t22.Opt(t22.Nat32) }), r2 = t22.Nat64, i3 = r2, o3 = t22.Nat32, u2 = t22.Record({ start_height: o3, end_height: t22.Opt(o3), network: e5 }), F2 = t22.Vec(t22.Nat8), O2 = t22.Record({ tip_height: o3, block_headers: t22.Vec(F2) }), P2 = t22.Record({ network: e5 }), x3 = t22.Nat64, w3 = t22.Vec(x3), C2 = t22.Record({ network: e5, filter: t22.Opt(t22.Variant({ page: t22.Vec(t22.Nat8), min_confirmations: t22.Nat32 })), address: n2 }), T2 = t22.Vec(t22.Nat8), S2 = t22.Record({ txid: t22.Vec(t22.Nat8), vout: t22.Nat32 }), z2 = t22.Record({ height: t22.Nat32, value: r2, outpoint: S2 }), q2 = t22.Record({ next_page: t22.Opt(t22.Vec(t22.Nat8)), tip_height: o3, tip_block_hash: T2, utxos: t22.Vec(z2) }), U2 = t22.Record({ transaction: t22.Vec(t22.Nat8), network: e5 }), s2 = t22.Principal, A4 = t22.Record({ canister_id: s2, num_requested_changes: t22.Opt(t22.Nat64) }), W2 = t22.Variant({ from_user: t22.Record({ user_id: t22.Principal }), from_canister: t22.Record({ canister_version: t22.Opt(t22.Nat64), canister_id: t22.Principal }) }), _2 = t22.Vec(t22.Nat8), B2 = t22.Variant({ creation: t22.Record({ controllers: t22.Vec(t22.Principal) }), code_deployment: t22.Record({ mode: t22.Variant({ reinstall: t22.Null, upgrade: t22.Null, install: t22.Null }), module_hash: t22.Vec(t22.Nat8) }), load_snapshot: t22.Record({ canister_version: t22.Nat64, taken_at_timestamp: t22.Nat64, snapshot_id: _2 }), controllers_change: t22.Record({ controllers: t22.Vec(t22.Principal) }), code_uninstall: t22.Null }), E3 = t22.Record({ timestamp_nanos: t22.Nat64, canister_version: t22.Nat64, origin: W2, details: B2 }), M2 = t22.Record({ controllers: t22.Vec(t22.Principal), module_hash: t22.Opt(t22.Vec(t22.Nat8)), recent_changes: t22.Vec(E3), total_num_changes: t22.Nat64 }), Q2 = t22.Record({ canister_id: s2 }), h2 = t22.Variant({ controllers: t22.Null, public: t22.Null, allowed_viewers: t22.Vec(t22.Principal) }), j2 = t22.Record({ freezing_threshold: t22.Nat, wasm_memory_threshold: t22.Nat, controllers: t22.Vec(t22.Principal), reserved_cycles_limit: t22.Nat, log_visibility: h2, wasm_memory_limit: t22.Nat, memory_allocation: t22.Nat, compute_allocation: t22.Nat }), H2 = t22.Record({ memory_metrics: t22.Record({ wasm_binary_size: t22.Nat, wasm_chunk_store_size: t22.Nat, canister_history_size: t22.Nat, stable_memory_size: t22.Nat, snapshots_size: t22.Nat, wasm_memory_size: t22.Nat, global_memory_size: t22.Nat, custom_sections_size: t22.Nat }), status: t22.Variant({ stopped: t22.Null, stopping: t22.Null, running: t22.Null }), memory_size: t22.Nat, cycles: t22.Nat, settings: j2, query_stats: t22.Record({ response_payload_bytes_total: t22.Nat, num_instructions_total: t22.Nat, num_calls_total: t22.Nat, request_payload_bytes_total: t22.Nat }), idle_cycles_burned_per_day: t22.Nat, module_hash: t22.Opt(t22.Vec(t22.Nat8)), reserved_cycles: t22.Nat }), G2 = t22.Record({ canister_id: s2 }), d2 = t22.Record({ freezing_threshold: t22.Opt(t22.Nat), wasm_memory_threshold: t22.Opt(t22.Nat), controllers: t22.Opt(t22.Vec(t22.Principal)), reserved_cycles_limit: t22.Opt(t22.Nat), log_visibility: t22.Opt(h2), wasm_memory_limit: t22.Opt(t22.Nat), memory_allocation: t22.Opt(t22.Nat), compute_allocation: t22.Opt(t22.Nat) }), J2 = t22.Record({ settings: t22.Opt(d2), sender_canister_version: t22.Opt(t22.Nat64) }), K2 = t22.Record({ canister_id: s2 }), X2 = t22.Record({ canister_id: s2 }), Y2 = t22.Record({ canister_id: s2, snapshot_id: _2 }), Z2 = t22.Record({ canister_id: s2 }), m2 = t22.Variant({ secp256k1: t22.Null }), $2 = t22.Record({ key_id: t22.Record({ name: t22.Text, curve: m2 }), canister_id: t22.Opt(s2), derivation_path: t22.Vec(t22.Vec(t22.Nat8)) }), I2 = t22.Record({ public_key: t22.Vec(t22.Nat8), chain_code: t22.Vec(t22.Nat8) }), L2 = t22.Record({ canister_id: s2 }), D2 = t22.Record({ idx: t22.Nat64, timestamp_nanos: t22.Nat64, content: t22.Vec(t22.Nat8) }), tt2 = t22.Record({ canister_log_records: t22.Vec(D2) }), g2 = t22.Record({ value: t22.Text, name: t22.Text }), l3 = t22.Record({ status: t22.Nat, body: t22.Vec(t22.Nat8), headers: t22.Vec(g2) }), et2 = t22.Record({ url: t22.Text, method: t22.Variant({ get: t22.Null, head: t22.Null, post: t22.Null }), max_response_bytes: t22.Opt(t22.Nat64), body: t22.Opt(t22.Vec(t22.Nat8)), transform: t22.Opt(t22.Record({ function: t22.Func([t22.Record({ context: t22.Vec(t22.Nat8), response: l3 })], [l3], []), context: t22.Vec(t22.Nat8) })), headers: t22.Vec(g2) }), N2 = t22.Variant({ reinstall: t22.Null, upgrade: t22.Opt(t22.Record({ wasm_memory_persistence: t22.Opt(t22.Variant({ keep: t22.Null, replace: t22.Null })), skip_pre_upgrade: t22.Opt(t22.Bool) })), install: t22.Null }), p2 = t22.Record({ hash: t22.Vec(t22.Nat8) }), st2 = t22.Record({ arg: t22.Vec(t22.Nat8), wasm_module_hash: t22.Vec(t22.Nat8), mode: N2, chunk_hashes_list: t22.Vec(p2), target_canister: s2, store_canister: t22.Opt(s2), sender_canister_version: t22.Opt(t22.Nat64) }), nt2 = t22.Vec(t22.Nat8), ct2 = t22.Record({ arg: t22.Vec(t22.Nat8), wasm_module: nt2, mode: N2, canister_id: s2, sender_canister_version: t22.Opt(t22.Nat64) }), rt = t22.Record({ canister_id: s2 }), y2 = t22.Record({ id: _2, total_size: t22.Nat64, taken_at_timestamp: t22.Nat64 }), at = t22.Vec(y2), it2 = t22.Record({ canister_id: s2, sender_canister_version: t22.Opt(t22.Nat64), snapshot_id: _2 }), ot2 = t22.Record({ start_at_timestamp_nanos: t22.Nat64, subnet_id: t22.Principal }), _t = t22.Record({ num_block_failures_total: t22.Nat64, node_id: t22.Principal, num_blocks_proposed_total: t22.Nat64 }), dt2 = t22.Vec(t22.Record({ timestamp_nanos: t22.Nat64, node_metrics: t22.Vec(_t) })), lt2 = t22.Record({ settings: t22.Opt(d2), specified_id: t22.Opt(s2), amount: t22.Opt(t22.Nat), sender_canister_version: t22.Opt(t22.Nat64) }), pt = t22.Record({ canister_id: s2 }), ut2 = t22.Record({ canister_id: s2, amount: t22.Nat }), ht = t22.Vec(t22.Nat8), k2 = t22.Variant({ ed25519: t22.Null, bip340secp256k1: t22.Null }), mt = t22.Record({ key_id: t22.Record({ algorithm: k2, name: t22.Text }), canister_id: t22.Opt(s2), derivation_path: t22.Vec(t22.Vec(t22.Nat8)) }), gt = t22.Record({ public_key: t22.Vec(t22.Nat8), chain_code: t22.Vec(t22.Nat8) }), Nt = t22.Record({ key_id: t22.Record({ name: t22.Text, curve: m2 }), derivation_path: t22.Vec(t22.Vec(t22.Nat8)), message_hash: t22.Vec(t22.Nat8) }), yt2 = t22.Record({ signature: t22.Vec(t22.Nat8) }), kt = t22.Variant({ bip341: t22.Record({ merkle_root_hash: t22.Vec(t22.Nat8) }) }), Rt = t22.Record({ aux: t22.Opt(kt), key_id: t22.Record({ algorithm: k2, name: t22.Text }), derivation_path: t22.Vec(t22.Vec(t22.Nat8)), message: t22.Vec(t22.Nat8) }), Vt = t22.Record({ signature: t22.Vec(t22.Nat8) }), vt = t22.Record({ canister_id: s2 }), bt = t22.Record({ canister_id: s2 }), ft2 = t22.Record({ canister_id: s2 }), Ft = t22.Vec(p2), Ot = t22.Record({ subnet_id: t22.Principal }), Pt = t22.Record({ replica_version: t22.Text, registry_version: t22.Nat64 }), xt = t22.Record({ replace_snapshot: t22.Opt(_2), canister_id: s2 }), wt2 = y2, Ct = t22.Record({ canister_id: s2, sender_canister_version: t22.Opt(t22.Nat64) }), Tt = t22.Record({ canister_id: t22.Principal, settings: d2, sender_canister_version: t22.Opt(t22.Nat64) }), St2 = t22.Record({ chunk: t22.Vec(t22.Nat8), canister_id: t22.Principal }), zt = p2, R2 = t22.Variant({ bls12_381_g2: t22.Null }), qt = t22.Record({ context: t22.Vec(t22.Nat8), key_id: t22.Record({ name: t22.Text, curve: R2 }), input: t22.Vec(t22.Nat8), transport_public_key: t22.Vec(t22.Nat8) }), Ut = t22.Record({ encrypted_key: t22.Vec(t22.Nat8) }), At = t22.Record({ context: t22.Vec(t22.Nat8), key_id: t22.Record({ name: t22.Text, curve: R2 }), canister_id: t22.Opt(s2) }), Wt = t22.Record({ public_key: t22.Vec(t22.Nat8) });
-  return t22.Service({ bitcoin_get_balance: t22.Func([c2], [i3], []), bitcoin_get_block_headers: t22.Func([u2], [O2], []), bitcoin_get_current_fee_percentiles: t22.Func([P2], [w3], []), bitcoin_get_utxos: t22.Func([C2], [q2], []), bitcoin_send_transaction: t22.Func([U2], [], []), canister_info: t22.Func([A4], [M2], []), canister_status: t22.Func([Q2], [H2], []), clear_chunk_store: t22.Func([G2], [], []), create_canister: t22.Func([J2], [K2], []), delete_canister: t22.Func([X2], [], []), delete_canister_snapshot: t22.Func([Y2], [], []), deposit_cycles: t22.Func([Z2], [], []), ecdsa_public_key: t22.Func([$2], [I2], []), fetch_canister_logs: t22.Func([L2], [tt2], []), http_request: t22.Func([et2], [l3], []), install_chunked_code: t22.Func([st2], [], []), install_code: t22.Func([ct2], [], []), list_canister_snapshots: t22.Func([rt], [at], []), load_canister_snapshot: t22.Func([it2], [], []), node_metrics_history: t22.Func([ot2], [dt2], []), provisional_create_canister_with_cycles: t22.Func([lt2], [pt], []), provisional_top_up_canister: t22.Func([ut2], [], []), raw_rand: t22.Func([], [ht], []), schnorr_public_key: t22.Func([mt], [gt], []), sign_with_ecdsa: t22.Func([Nt], [yt2], []), sign_with_schnorr: t22.Func([Rt], [Vt], []), start_canister: t22.Func([vt], [], []), stop_canister: t22.Func([bt], [], []), stored_chunks: t22.Func([ft2], [Ft], []), subnet_info: t22.Func([Ot], [Pt], []), take_canister_snapshot: t22.Func([xt], [wt2], []), uninstall_code: t22.Func([Ct], [], []), update_settings: t22.Func([Tt], [], []), upload_chunk: t22.Func([St2], [zt], []), vetkd_derive_key: t22.Func([qt], [Ut], []), vetkd_public_key: t22.Func([At], [Wt], []) });
+var V$1 = (n22) => Et(n22), y$3 = (n22) => typeof n22 == "string" ? V$1(n22) : n22;
+var p$2 = ({ canisterId: n22, snapshotId: t2 }) => ({ canister_id: n22, snapshot_id: y$3(t2) }), P$1 = ({ canisterId: n22, snapshotId: t2 }) => ({ canister_id: n22, replace_snapshot: ne$1(s$1(t2) ? y$3(t2) : void 0) }), b$2 = (n22) => {
+  if ("wasmModule" in n22) return { wasm_module: n22.wasmModule };
+  if ("wasmMemory" in n22) return { wasm_memory: n22.wasmMemory };
+  if ("stableMemory" in n22) return { stable_memory: n22.stableMemory };
+  if ("wasmChunk" in n22) return { wasm_chunk: n22.wasmChunk };
+  yt(n22, "Unsupported snapshot metadata kind");
+}, k$2 = ({ globals: n22, certifiedData: t2, globalTimer: e4, onLowWasmMemoryHookStatus: a3, wasmModuleSize: r2, stableMemorySize: s2, wasmMemorySize: d2 }) => {
+  let m3 = () => u$1(a3) ? ne$1() : "conditionNotSatisfied" in a3 ? ne$1({ condition_not_satisfied: a3.conditionNotSatisfied }) : ne$1(a3);
+  return { globals: n22, certified_data: t2, global_timer: ne$1(e4), on_low_wasm_memory_hook_status: m3(), wasm_module_size: r2, stable_memory_size: s2, wasm_memory_size: d2 };
+}, D$2 = (n22) => {
+  if ("wasmModule" in n22) return { wasm_module: n22.wasmModule };
+  if ("wasmMemory" in n22) return { wasm_memory: n22.wasmMemory };
+  if ("stableMemory" in n22) return { stable_memory: n22.stableMemory };
+  if ("wasmChunk" in n22) return { wasm_chunk: null };
+  yt(n22, "Unsupported snapshot data kind");
 };
-var Mt = ({ IDL: t22 }) => {
-  let e5 = t22.Variant({ mainnet: t22.Null, testnet: t22.Null }), n2 = t22.Text, c2 = t22.Record({ network: e5, address: n2, min_confirmations: t22.Opt(t22.Nat32) }), r2 = t22.Nat64, i3 = r2, o3 = t22.Nat32, u2 = t22.Record({ start_height: o3, end_height: t22.Opt(o3), network: e5 }), F2 = t22.Vec(t22.Nat8), O2 = t22.Record({ tip_height: o3, block_headers: t22.Vec(F2) }), P2 = t22.Record({ network: e5 }), x3 = t22.Nat64, w3 = t22.Vec(x3), C2 = t22.Record({ network: e5, filter: t22.Opt(t22.Variant({ page: t22.Vec(t22.Nat8), min_confirmations: t22.Nat32 })), address: n2 }), T2 = t22.Vec(t22.Nat8), S2 = t22.Record({ txid: t22.Vec(t22.Nat8), vout: t22.Nat32 }), z2 = t22.Record({ height: t22.Nat32, value: r2, outpoint: S2 }), q2 = t22.Record({ next_page: t22.Opt(t22.Vec(t22.Nat8)), tip_height: o3, tip_block_hash: T2, utxos: t22.Vec(z2) }), U2 = t22.Record({ transaction: t22.Vec(t22.Nat8), network: e5 }), s2 = t22.Principal, A4 = t22.Record({ canister_id: s2, num_requested_changes: t22.Opt(t22.Nat64) }), W2 = t22.Variant({ from_user: t22.Record({ user_id: t22.Principal }), from_canister: t22.Record({ canister_version: t22.Opt(t22.Nat64), canister_id: t22.Principal }) }), _2 = t22.Vec(t22.Nat8), B2 = t22.Variant({ creation: t22.Record({ controllers: t22.Vec(t22.Principal) }), code_deployment: t22.Record({ mode: t22.Variant({ reinstall: t22.Null, upgrade: t22.Null, install: t22.Null }), module_hash: t22.Vec(t22.Nat8) }), load_snapshot: t22.Record({ canister_version: t22.Nat64, taken_at_timestamp: t22.Nat64, snapshot_id: _2 }), controllers_change: t22.Record({ controllers: t22.Vec(t22.Principal) }), code_uninstall: t22.Null }), E3 = t22.Record({ timestamp_nanos: t22.Nat64, canister_version: t22.Nat64, origin: W2, details: B2 }), M2 = t22.Record({ controllers: t22.Vec(t22.Principal), module_hash: t22.Opt(t22.Vec(t22.Nat8)), recent_changes: t22.Vec(E3), total_num_changes: t22.Nat64 }), Q2 = t22.Record({ canister_id: s2 }), h2 = t22.Variant({ controllers: t22.Null, public: t22.Null, allowed_viewers: t22.Vec(t22.Principal) }), j2 = t22.Record({ freezing_threshold: t22.Nat, wasm_memory_threshold: t22.Nat, controllers: t22.Vec(t22.Principal), reserved_cycles_limit: t22.Nat, log_visibility: h2, wasm_memory_limit: t22.Nat, memory_allocation: t22.Nat, compute_allocation: t22.Nat }), H2 = t22.Record({ memory_metrics: t22.Record({ wasm_binary_size: t22.Nat, wasm_chunk_store_size: t22.Nat, canister_history_size: t22.Nat, stable_memory_size: t22.Nat, snapshots_size: t22.Nat, wasm_memory_size: t22.Nat, global_memory_size: t22.Nat, custom_sections_size: t22.Nat }), status: t22.Variant({ stopped: t22.Null, stopping: t22.Null, running: t22.Null }), memory_size: t22.Nat, cycles: t22.Nat, settings: j2, query_stats: t22.Record({ response_payload_bytes_total: t22.Nat, num_instructions_total: t22.Nat, num_calls_total: t22.Nat, request_payload_bytes_total: t22.Nat }), idle_cycles_burned_per_day: t22.Nat, module_hash: t22.Opt(t22.Vec(t22.Nat8)), reserved_cycles: t22.Nat }), G2 = t22.Record({ canister_id: s2 }), d2 = t22.Record({ freezing_threshold: t22.Opt(t22.Nat), wasm_memory_threshold: t22.Opt(t22.Nat), controllers: t22.Opt(t22.Vec(t22.Principal)), reserved_cycles_limit: t22.Opt(t22.Nat), log_visibility: t22.Opt(h2), wasm_memory_limit: t22.Opt(t22.Nat), memory_allocation: t22.Opt(t22.Nat), compute_allocation: t22.Opt(t22.Nat) }), J2 = t22.Record({ settings: t22.Opt(d2), sender_canister_version: t22.Opt(t22.Nat64) }), K2 = t22.Record({ canister_id: s2 }), X2 = t22.Record({ canister_id: s2 }), Y2 = t22.Record({ canister_id: s2, snapshot_id: _2 }), Z2 = t22.Record({ canister_id: s2 }), m2 = t22.Variant({ secp256k1: t22.Null }), $2 = t22.Record({ key_id: t22.Record({ name: t22.Text, curve: m2 }), canister_id: t22.Opt(s2), derivation_path: t22.Vec(t22.Vec(t22.Nat8)) }), I2 = t22.Record({ public_key: t22.Vec(t22.Nat8), chain_code: t22.Vec(t22.Nat8) }), L2 = t22.Record({ canister_id: s2 }), D2 = t22.Record({ idx: t22.Nat64, timestamp_nanos: t22.Nat64, content: t22.Vec(t22.Nat8) }), tt2 = t22.Record({ canister_log_records: t22.Vec(D2) }), g2 = t22.Record({ value: t22.Text, name: t22.Text }), l3 = t22.Record({ status: t22.Nat, body: t22.Vec(t22.Nat8), headers: t22.Vec(g2) }), et2 = t22.Record({ url: t22.Text, method: t22.Variant({ get: t22.Null, head: t22.Null, post: t22.Null }), max_response_bytes: t22.Opt(t22.Nat64), body: t22.Opt(t22.Vec(t22.Nat8)), transform: t22.Opt(t22.Record({ function: t22.Func([t22.Record({ context: t22.Vec(t22.Nat8), response: l3 })], [l3], ["query"]), context: t22.Vec(t22.Nat8) })), headers: t22.Vec(g2) }), N2 = t22.Variant({ reinstall: t22.Null, upgrade: t22.Opt(t22.Record({ wasm_memory_persistence: t22.Opt(t22.Variant({ keep: t22.Null, replace: t22.Null })), skip_pre_upgrade: t22.Opt(t22.Bool) })), install: t22.Null }), p2 = t22.Record({ hash: t22.Vec(t22.Nat8) }), st2 = t22.Record({ arg: t22.Vec(t22.Nat8), wasm_module_hash: t22.Vec(t22.Nat8), mode: N2, chunk_hashes_list: t22.Vec(p2), target_canister: s2, store_canister: t22.Opt(s2), sender_canister_version: t22.Opt(t22.Nat64) }), nt2 = t22.Vec(t22.Nat8), ct2 = t22.Record({ arg: t22.Vec(t22.Nat8), wasm_module: nt2, mode: N2, canister_id: s2, sender_canister_version: t22.Opt(t22.Nat64) }), rt = t22.Record({ canister_id: s2 }), y2 = t22.Record({ id: _2, total_size: t22.Nat64, taken_at_timestamp: t22.Nat64 }), at = t22.Vec(y2), it2 = t22.Record({ canister_id: s2, sender_canister_version: t22.Opt(t22.Nat64), snapshot_id: _2 }), ot2 = t22.Record({ start_at_timestamp_nanos: t22.Nat64, subnet_id: t22.Principal }), _t = t22.Record({ num_block_failures_total: t22.Nat64, node_id: t22.Principal, num_blocks_proposed_total: t22.Nat64 }), dt2 = t22.Vec(t22.Record({ timestamp_nanos: t22.Nat64, node_metrics: t22.Vec(_t) })), lt2 = t22.Record({ settings: t22.Opt(d2), specified_id: t22.Opt(s2), amount: t22.Opt(t22.Nat), sender_canister_version: t22.Opt(t22.Nat64) }), pt = t22.Record({ canister_id: s2 }), ut2 = t22.Record({ canister_id: s2, amount: t22.Nat }), ht = t22.Vec(t22.Nat8), k2 = t22.Variant({ ed25519: t22.Null, bip340secp256k1: t22.Null }), mt = t22.Record({ key_id: t22.Record({ algorithm: k2, name: t22.Text }), canister_id: t22.Opt(s2), derivation_path: t22.Vec(t22.Vec(t22.Nat8)) }), gt = t22.Record({ public_key: t22.Vec(t22.Nat8), chain_code: t22.Vec(t22.Nat8) }), Nt = t22.Record({ key_id: t22.Record({ name: t22.Text, curve: m2 }), derivation_path: t22.Vec(t22.Vec(t22.Nat8)), message_hash: t22.Vec(t22.Nat8) }), yt2 = t22.Record({ signature: t22.Vec(t22.Nat8) }), kt = t22.Variant({ bip341: t22.Record({ merkle_root_hash: t22.Vec(t22.Nat8) }) }), Rt = t22.Record({ aux: t22.Opt(kt), key_id: t22.Record({ algorithm: k2, name: t22.Text }), derivation_path: t22.Vec(t22.Vec(t22.Nat8)), message: t22.Vec(t22.Nat8) }), Vt = t22.Record({ signature: t22.Vec(t22.Nat8) }), vt = t22.Record({ canister_id: s2 }), bt = t22.Record({ canister_id: s2 }), ft2 = t22.Record({ canister_id: s2 }), Ft = t22.Vec(p2), Ot = t22.Record({ subnet_id: t22.Principal }), Pt = t22.Record({ replica_version: t22.Text, registry_version: t22.Nat64 }), xt = t22.Record({ replace_snapshot: t22.Opt(_2), canister_id: s2 }), wt2 = y2, Ct = t22.Record({ canister_id: s2, sender_canister_version: t22.Opt(t22.Nat64) }), Tt = t22.Record({ canister_id: t22.Principal, settings: d2, sender_canister_version: t22.Opt(t22.Nat64) }), St2 = t22.Record({ chunk: t22.Vec(t22.Nat8), canister_id: t22.Principal }), zt = p2, R2 = t22.Variant({ bls12_381_g2: t22.Null }), qt = t22.Record({ context: t22.Vec(t22.Nat8), key_id: t22.Record({ name: t22.Text, curve: R2 }), input: t22.Vec(t22.Nat8), transport_public_key: t22.Vec(t22.Nat8) }), Ut = t22.Record({ encrypted_key: t22.Vec(t22.Nat8) }), At = t22.Record({ context: t22.Vec(t22.Nat8), key_id: t22.Record({ name: t22.Text, curve: R2 }), canister_id: t22.Opt(s2) }), Wt = t22.Record({ public_key: t22.Vec(t22.Nat8) });
-  return t22.Service({ bitcoin_get_balance: t22.Func([c2], [i3], []), bitcoin_get_block_headers: t22.Func([u2], [O2], []), bitcoin_get_current_fee_percentiles: t22.Func([P2], [w3], []), bitcoin_get_utxos: t22.Func([C2], [q2], []), bitcoin_send_transaction: t22.Func([U2], [], []), canister_info: t22.Func([A4], [M2], []), canister_status: t22.Func([Q2], [H2], []), clear_chunk_store: t22.Func([G2], [], []), create_canister: t22.Func([J2], [K2], []), delete_canister: t22.Func([X2], [], []), delete_canister_snapshot: t22.Func([Y2], [], []), deposit_cycles: t22.Func([Z2], [], []), ecdsa_public_key: t22.Func([$2], [I2], []), fetch_canister_logs: t22.Func([L2], [tt2], ["query"]), http_request: t22.Func([et2], [l3], []), install_chunked_code: t22.Func([st2], [], []), install_code: t22.Func([ct2], [], []), list_canister_snapshots: t22.Func([rt], [at], []), load_canister_snapshot: t22.Func([it2], [], []), node_metrics_history: t22.Func([ot2], [dt2], []), provisional_create_canister_with_cycles: t22.Func([lt2], [pt], []), provisional_top_up_canister: t22.Func([ut2], [], []), raw_rand: t22.Func([], [ht], []), schnorr_public_key: t22.Func([mt], [gt], []), sign_with_ecdsa: t22.Func([Nt], [yt2], []), sign_with_schnorr: t22.Func([Rt], [Vt], []), start_canister: t22.Func([vt], [], []), stop_canister: t22.Func([bt], [], []), stored_chunks: t22.Func([ft2], [Ft], []), subnet_info: t22.Func([Ot], [Pt], []), take_canister_snapshot: t22.Func([xt], [wt2], []), uninstall_code: t22.Func([Ct], [], []), update_settings: t22.Func([Tt], [], []), upload_chunk: t22.Func([St2], [zt], []), vetkd_derive_key: t22.Func([qt], [Ut], []), vetkd_public_key: t22.Func([At], [Wt], []) });
+var T$1 = ({ globals: n22, canister_version: t2, source: e4, certified_data: a3, global_timer: r2, on_low_wasm_memory_hook_status: s2, wasm_module_size: d2, stable_memory_size: m3, wasm_chunk_store: f2, taken_at_timestamp: C3, wasm_memory_size: S2 }) => {
+  let A3 = () => {
+    if ("metadata_upload" in e4) return { metadataUpload: e4.metadata_upload };
+    if ("taken_from_canister" in e4) return { takenFromCanister: e4.taken_from_canister };
+    yt(e4, "Unsupported snapshot metadata source");
+  }, z2 = () => {
+    let o3 = v$1(s2);
+    if (!u$1(o3)) {
+      if ("condition_not_satisfied" in o3) return { conditionNotSatisfied: o3.condition_not_satisfied };
+      if ("executed" in o3) return { executed: o3.executed };
+      if ("ready" in o3) return { ready: o3.ready };
+      yt(o3, "Unsupported snapshot metadata on_low_wasm_memory_hook_status");
+    }
+  };
+  return { globals: n22, canisterVersion: t2, source: A3(), certifiedData: a3, globalTimer: v$1(r2), onLowWasmMemoryHookStatus: z2(), wasmModuleSize: d2, stableMemorySize: m3, wasmChunkStore: f2, takenAtTimestamp: C3, wasmMemorySize: S2 };
 };
-var Gt = (t22) => Et$1(t22), b$1 = (t22) => typeof t22 == "string" ? Gt(t22) : t22;
-var Bt = (t22, e5, n2) => {
-  let [c2] = e5;
-  if (s$1(c2) && typeof c2 == "object") {
-    if (t22 === "install_chunked_code" && s$1(c2.target_canister)) return { effectiveCanisterId: Principal$1.from(c2.target_canister) };
-    if (t22 === "provisional_create_canister_with_cycles" && s$1(c2.specified_id)) {
-      let r2 = v$2(c2.specified_id);
+var M$1 = (n22, t2, e4) => {
+  let [a3] = t2;
+  if (s$1(a3) && typeof a3 == "object") {
+    if (n22 === "install_chunked_code" && s$1(a3.target_canister)) return { effectiveCanisterId: Principal$1.from(a3.target_canister) };
+    if (n22 === "provisional_create_canister_with_cycles" && s$1(a3.specified_id)) {
+      let r2 = v$1(a3.specified_id);
       if (s$1(r2)) return { effectiveCanisterId: Principal$1.from(r2) };
     }
-    if (s$1(c2.canister_id)) return { effectiveCanisterId: Principal$1.from(c2.canister_id) };
+    if (s$1(a3.canister_id)) return { effectiveCanisterId: Principal$1.from(a3.canister_id) };
   }
   return { effectiveCanisterId: Principal$1.fromHex("") };
 };
-var Qt = class t {
-  constructor(e5) {
-    this.service = e5;
-    this.service = e5;
+var v = class n {
+  constructor(t2, e4) {
+    this.service = t2;
+    this.certifiedService = e4;
   }
-  static create(e5) {
-    let { service: n2 } = lt({ options: { ...e5, canisterId: Principal$1.fromHex(""), callTransform: Bt, queryTransform: Bt }, idlFactory: Mt, certifiedIdlFactory: Et });
-    return new t(n2);
+  caller = ({ certified: t2 = true }) => t2 ? this.certifiedService : this.service;
+  static create(t2) {
+    let { service: e4, certifiedService: a3 } = lt({ options: { ...t2, canisterId: Principal$1.fromHex(""), callTransform: M$1, queryTransform: M$1 }, idlFactory: zo, certifiedIdlFactory: Uo });
+    return new n(e4, a3);
   }
-  createCanister = async ({ settings: e5, senderCanisterVersion: n2 } = {}) => {
-    let { create_canister: c2 } = this.service, { canister_id: r2 } = await c2({ settings: ne(P(e5)), sender_canister_version: ne(n2) });
+  createCanister = async ({ settings: t2, senderCanisterVersion: e4 } = {}) => {
+    let { create_canister: a3 } = this.certifiedService, { canister_id: r2 } = await a3({ settings: ne$1(h(t2)), sender_canister_version: ne$1(e4) });
     return r2;
   };
-  updateSettings = ({ canisterId: e5, senderCanisterVersion: n2, settings: c2 }) => {
-    let { update_settings: r2 } = this.service;
-    return r2({ canister_id: e5, sender_canister_version: ne(n2), settings: P(c2) });
+  updateSettings = ({ canisterId: t2, senderCanisterVersion: e4, settings: a3 }) => {
+    let { update_settings: r2 } = this.certifiedService;
+    return r2({ canister_id: t2, sender_canister_version: ne$1(e4), settings: h(a3) });
   };
-  installCode = ({ canisterId: e5, wasmModule: n2, senderCanisterVersion: c2, ...r2 }) => {
-    let { install_code: i3 } = this.service;
-    return i3({ ...r2, canister_id: e5, wasm_module: n2, sender_canister_version: ne(c2) });
+  installCode = ({ canisterId: t2, wasmModule: e4, senderCanisterVersion: a3, ...r2 }) => {
+    let { install_code: s2 } = this.certifiedService;
+    return s2({ ...r2, canister_id: t2, wasm_module: e4, sender_canister_version: ne$1(a3) });
   };
-  uploadChunk = ({ canisterId: e5, ...n2 }) => {
-    let { upload_chunk: c2 } = this.service;
-    return c2({ canister_id: e5, ...n2 });
+  uploadChunk = ({ canisterId: t2, ...e4 }) => {
+    let { upload_chunk: a3 } = this.certifiedService;
+    return a3({ canister_id: t2, ...e4 });
   };
-  clearChunkStore = async ({ canisterId: e5 }) => {
-    let { clear_chunk_store: n2 } = this.service;
-    await n2({ canister_id: e5 });
+  clearChunkStore = async ({ canisterId: t2 }) => {
+    let { clear_chunk_store: e4 } = this.certifiedService;
+    await e4({ canister_id: t2 });
   };
-  storedChunks = ({ canisterId: e5 }) => {
-    let { stored_chunks: n2 } = this.service;
-    return n2({ canister_id: e5 });
+  storedChunks = ({ canisterId: t2 }) => {
+    let { stored_chunks: e4 } = this.certifiedService;
+    return e4({ canister_id: t2 });
   };
-  installChunkedCode = async ({ senderCanisterVersion: e5, chunkHashesList: n2, targetCanisterId: c2, storeCanisterId: r2, wasmModuleHash: i3, ...o3 }) => {
-    let { install_chunked_code: u2 } = this.service;
-    await u2({ ...o3, target_canister: c2, store_canister: ne(r2), sender_canister_version: ne(e5), chunk_hashes_list: n2, wasm_module_hash: typeof i3 == "string" ? Et$1(i3) : i3 });
+  installChunkedCode = async ({ senderCanisterVersion: t2, chunkHashesList: e4, targetCanisterId: a3, storeCanisterId: r2, wasmModuleHash: s2, ...d2 }) => {
+    let { install_chunked_code: m3 } = this.certifiedService;
+    await m3({ ...d2, target_canister: a3, store_canister: ne$1(r2), sender_canister_version: ne$1(t2), chunk_hashes_list: e4, wasm_module_hash: typeof s2 == "string" ? Et(s2) : s2 });
   };
-  uninstallCode = ({ canisterId: e5, senderCanisterVersion: n2 }) => {
-    let { uninstall_code: c2 } = this.service;
-    return c2({ canister_id: e5, sender_canister_version: ne(n2) });
+  uninstallCode = ({ canisterId: t2, senderCanisterVersion: e4 }) => {
+    let { uninstall_code: a3 } = this.certifiedService;
+    return a3({ canister_id: t2, sender_canister_version: ne$1(e4) });
   };
-  startCanister = (e5) => {
-    let { start_canister: n2 } = this.service;
-    return n2({ canister_id: e5 });
+  startCanister = (t2) => {
+    let { start_canister: e4 } = this.certifiedService;
+    return e4({ canister_id: t2 });
   };
-  stopCanister = (e5) => {
-    let { stop_canister: n2 } = this.service;
-    return n2({ canister_id: e5 });
+  stopCanister = (t2) => {
+    let { stop_canister: e4 } = this.certifiedService;
+    return e4({ canister_id: t2 });
   };
-  canisterStatus = (e5) => {
-    let { canister_status: n2 } = this.service;
-    return n2({ canister_id: e5 });
+  canisterStatus = ({ canisterId: t2, certified: e4 }) => {
+    let { canister_status: a3 } = this.caller({ certified: e4 });
+    return a3({ canister_id: t2 });
   };
-  deleteCanister = (e5) => {
-    let { delete_canister: n2 } = this.service;
-    return n2({ canister_id: e5 });
+  deleteCanister = (t2) => {
+    let { delete_canister: e4 } = this.certifiedService;
+    return e4({ canister_id: t2 });
   };
-  provisionalCreateCanisterWithCycles = async ({ settings: e5, amount: n2, canisterId: c2 } = {}) => {
-    let { provisional_create_canister_with_cycles: r2 } = this.service, { canister_id: i3 } = await r2({ settings: ne(P(e5)), amount: ne(n2), specified_id: ne(c2), sender_canister_version: [] });
-    return i3;
+  provisionalCreateCanisterWithCycles = async ({ settings: t2, amount: e4, canisterId: a3 } = {}) => {
+    let { provisional_create_canister_with_cycles: r2 } = this.certifiedService, { canister_id: s2 } = await r2({ settings: ne$1(h(t2)), amount: ne$1(e4), specified_id: ne$1(a3), sender_canister_version: [] });
+    return s2;
   };
-  fetchCanisterLogs = (e5) => {
-    let { fetch_canister_logs: n2 } = this.service;
-    return n2({ canister_id: e5 });
+  fetchCanisterLogs = (t2) => {
+    let { fetch_canister_logs: e4 } = this.caller({ certified: false });
+    return e4({ canister_id: t2 });
   };
-  takeCanisterSnapshot = ({ canisterId: e5, snapshotId: n2 }) => {
-    let { take_canister_snapshot: c2 } = this.service;
-    return c2({ canister_id: e5, replace_snapshot: ne(s$1(n2) ? b$1(n2) : void 0) });
+  takeCanisterSnapshot = ({ senderCanisterVersion: t2, uninstallCode: e4, ...a3 }) => {
+    let { take_canister_snapshot: r2 } = this.certifiedService;
+    return r2({ ...P$1(a3), sender_canister_version: ne$1(t2), uninstall_code: ne$1(e4) });
   };
-  listCanisterSnapshots = ({ canisterId: e5 }) => {
-    let { list_canister_snapshots: n2 } = this.service;
-    return n2({ canister_id: e5 });
+  listCanisterSnapshots = ({ canisterId: t2 }) => {
+    let { list_canister_snapshots: e4 } = this.certifiedService;
+    return e4({ canister_id: t2 });
   };
-  loadCanisterSnapshot = async ({ canisterId: e5, snapshotId: n2, senderCanisterVersion: c2 }) => {
-    let { load_canister_snapshot: r2 } = this.service;
-    await r2({ canister_id: e5, snapshot_id: b$1(n2), sender_canister_version: ne(c2) });
+  loadCanisterSnapshot = async ({ senderCanisterVersion: t2, ...e4 }) => {
+    let { load_canister_snapshot: a3 } = this.certifiedService;
+    await a3({ ...p$2(e4), sender_canister_version: ne$1(t2) });
   };
-  deleteCanisterSnapshot = async ({ canisterId: e5, snapshotId: n2 }) => {
-    let { delete_canister_snapshot: c2 } = this.service;
-    await c2({ canister_id: e5, snapshot_id: b$1(n2) });
+  deleteCanisterSnapshot = async (t2) => {
+    let { delete_canister_snapshot: e4 } = this.certifiedService;
+    await e4(p$2(t2));
+  };
+  readCanisterSnapshotMetadata = async (t2) => {
+    let { read_canister_snapshot_metadata: e4 } = this.certifiedService, a3 = await e4(p$2(t2));
+    return T$1(a3);
+  };
+  readCanisterSnapshotData = ({ kind: t2, ...e4 }) => {
+    let { read_canister_snapshot_data: a3 } = this.certifiedService;
+    return a3({ ...p$2(e4), kind: b$2(t2) });
+  };
+  uploadCanisterSnapshotMetadata = ({ metadata: t2, ...e4 }) => {
+    let { upload_canister_snapshot_metadata: a3 } = this.certifiedService;
+    return a3({ ...k$2(t2), ...P$1(e4) });
+  };
+  uploadCanisterSnapshotData = async ({ kind: t2, chunk: e4, ...a3 }) => {
+    let { upload_canister_snapshot_data: r2 } = this.certifiedService;
+    await r2({ ...p$2(a3), chunk: e4, kind: D$2(t2) });
   };
 };
-const y = 1000000000000n, w$2 = ({ IDL: t3 }) => {
-  const e5 = t3.Record({
-    url: t3.Text,
-    method: t3.Text,
-    body: t3.Vec(t3.Nat8),
-    headers: t3.Vec(t3.Tuple(t3.Text, t3.Text))
-  }), a2 = t3.Record({
-    body: t3.Vec(t3.Nat8),
-    headers: t3.Vec(t3.Tuple(t3.Text, t3.Text)),
-    status_code: t3.Nat16
-  }), r2 = t3.Variant({
-    Add: t3.Text,
-    Remove: t3.Text
-  }), n2 = t3.Variant({
-    Ok: t3.Null,
-    Err: t3.Text
-  }), u2 = t3.Variant({
-    Get: t3.Null,
-    Set: t3.Principal
-  }), h2 = t3.Variant({
-    Ok: t3.Principal,
-    Err: t3.Text
-  }), p2 = t3.Variant({
-    Hourly: t3.Null,
-    Weekly: t3.Null,
-    Daily: t3.Null,
-    Monthly: t3.Null
-  }), c2 = t3.Variant({
-    _1T: t3.Null,
-    _2T: t3.Null,
-    _5T: t3.Null,
-    _10T: t3.Null,
-    _50T: t3.Null,
-    _0_5T: t3.Null,
-    _100T: t3.Null,
-    _0_25T: t3.Null
-  }), s2 = t3.Record({
+const y$2 = 1000000000000n, w$2 = ({ IDL: t2 }) => {
+  const e4 = t2.Record({
+    url: t2.Text,
+    method: t2.Text,
+    body: t2.Vec(t2.Nat8),
+    headers: t2.Vec(t2.Tuple(t2.Text, t2.Text))
+  }), a3 = t2.Record({
+    body: t2.Vec(t2.Nat8),
+    headers: t2.Vec(t2.Tuple(t2.Text, t2.Text)),
+    status_code: t2.Nat16
+  }), r2 = t2.Variant({
+    Add: t2.Text,
+    Remove: t2.Text
+  }), n3 = t2.Variant({
+    Ok: t2.Null,
+    Err: t2.Text
+  }), u2 = t2.Variant({
+    Get: t2.Null,
+    Set: t2.Principal
+  }), h2 = t2.Variant({
+    Ok: t2.Principal,
+    Err: t2.Text
+  }), p2 = t2.Variant({
+    Hourly: t2.Null,
+    Weekly: t2.Null,
+    Daily: t2.Null,
+    Monthly: t2.Null
+  }), o3 = t2.Variant({
+    _1T: t2.Null,
+    _2T: t2.Null,
+    _5T: t2.Null,
+    _10T: t2.Null,
+    _50T: t2.Null,
+    _0_5T: t2.Null,
+    _100T: t2.Null,
+    _0_25T: t2.Null
+  }), s2 = t2.Record({
     interval: p2,
-    cycles_amount: c2,
-    cycles_threshold: c2
-  }), d2 = t3.Variant({
+    cycles_amount: o3,
+    cycles_threshold: o3
+  }), d2 = t2.Variant({
     Add: s2,
-    Get: t3.Null,
-    Clear: t3.Null
-  }), m2 = t3.Variant({
-    Ok: t3.Opt(s2),
-    Err: t3.Text
-  }), g2 = t3.Record({
-    memo: t3.Opt(t3.Text),
-    name: t3.Text,
-    version: t3.Nat16
+    Get: t2.Null,
+    Clear: t2.Null
+  }), m3 = t2.Variant({
+    Ok: t2.Opt(s2),
+    Err: t2.Text
+  }), g3 = t2.Record({
+    memo: t2.Opt(t2.Text),
+    name: t2.Text,
+    version: t2.Nat16
   });
-  return t3.Service({
-    http_request: t3.Func([e5], [a2], ["query"]),
-    manage_alternative_origins: t3.Func(
+  return t2.Service({
+    http_request: t2.Func([e4], [a3], ["query"]),
+    manage_alternative_origins: t2.Func(
       [r2],
-      [n2],
+      [n3],
       []
     ),
-    manage_ii_principal: t3.Func(
+    manage_ii_principal: t2.Func(
       [u2],
       [h2],
       []
     ),
-    manage_top_up_rule: t3.Func(
+    manage_top_up_rule: t2.Func(
       [d2],
-      [m2],
+      [m3],
       []
     ),
-    wasm_status: t3.Func([], [g2], ["query"])
+    wasm_status: t2.Func([], [g3], ["query"])
   });
 };
-function N$1(t3) {
-  if (t3.canisterId === "")
+function N$1(t2) {
+  if (t2.canisterId === "")
     throw new Error("canisterId is required");
   return Actor.createActor(w$2, {
-    agent: t3.agent,
-    canisterId: t3.canisterId
+    agent: t2.agent,
+    canisterId: t2.canisterId
   });
 }
-let o$1 = class o {
+let c$1 = class c {
   actor;
-  constructor(e5) {
-    this.actor = e5;
+  constructor(e4) {
+    this.actor = e4;
   }
   /**
    * Create a new MyDashboardBackend instance
    */
-  static create(e5) {
-    const a2 = N$1(e5);
-    return new o(a2);
+  static create(e4) {
+    const a3 = N$1(e4);
+    return new c(a3);
   }
   /**
    * Handle HTTP requests to the Canister Dapp
    */
-  async httpRequest(e5) {
-    return await this.actor.http_request(e5);
+  async httpRequest(e4) {
+    return await this.actor.http_request(e4);
   }
   /**
    * Update alternative origins for the Canister Dapp
    */
-  async manageAlternativeOrigins(e5) {
-    return await this.actor.manage_alternative_origins(e5);
+  async manageAlternativeOrigins(e4) {
+    return await this.actor.manage_alternative_origins(e4);
   }
   /**
    * Update or get the Internet Identity principal of the Canister Dapp
    */
-  async manageIIPrincipal(e5) {
-    return await this.actor.manage_ii_principal(e5);
+  async manageIIPrincipal(e4) {
+    return await this.actor.manage_ii_principal(e4);
   }
   /**
    * Get the WASM status of the Canister Dapp
@@ -12234,32 +12660,34 @@ let o$1 = class o {
   /**
    * Manage the Top-Up Rule for the Canister Dapp
    */
-  async manageTopUpRule(e5) {
-    return await this.actor.manage_top_up_rule(e5);
+  async manageTopUpRule(e4) {
+    return await this.actor.manage_top_up_rule(e4);
   }
 };
-let l$1 = class l {
-  constructor(e5, a2) {
-    this.agent = e5, this.canisterId = a2, this.icManagement = Qt.create({ agent: this.agent });
+let l$2 = class l {
+  constructor(e4, a3) {
+    this.agent = e4, this.canisterId = a3, this.icManagement = v.create({ agent: this.agent });
   }
   icManagement;
   /**
    * Create a new MyCanisterDashboard instance
    */
-  static create(e5, a2) {
-    return new l(e5, a2);
+  static create(e4, a3) {
+    return new l(e4, a3);
   }
   /**
    * Check cycles balance for the canister running My Canister Dashboard.
    */
-  async checkCyclesBalance(e5) {
+  async checkCyclesBalance(e4) {
     try {
-      const a2 = e5?.threshold ?? y, n2 = (await this.icManagement.canisterStatus(this.canisterId)).cycles;
-      return n2 < a2 ? {
-        error: `Low cycles warning: ${n2.toString()} cycles remaining (threshold: ${a2.toString()})`
-      } : { ok: n2 };
-    } catch (a2) {
-      return { error: String(a2) };
+      const a3 = e4?.threshold ?? y$2, n3 = (await this.icManagement.canisterStatus({
+        canisterId: this.canisterId
+      })).cycles;
+      return n3 < a3 ? {
+        error: `Low cycles warning: ${n3.toString()} cycles remaining (threshold: ${a3.toString()})`
+      } : { ok: n3 };
+    } catch (a3) {
+      return { error: String(a3) };
     }
   }
   /**
@@ -12268,7 +12696,7 @@ let l$1 = class l {
    */
   async isAuthenticated() {
     try {
-      return "Ok" in await o$1.create({
+      return "Ok" in await c$1.create({
         agent: this.agent,
         canisterId: this.canisterId
       }).manageIIPrincipal({ Get: null });
@@ -12277,24 +12705,24 @@ let l$1 = class l {
     }
   }
 };
-function M$1() {
-  const t3 = window.location.hostname, e5 = window.location.protocol, a2 = /^([a-z0-9-]+)\.localhost$/.exec(t3);
-  if (a2?.[1] != null) {
-    if (e5 !== "http:")
+function M() {
+  const t2 = window.location.hostname, e4 = window.location.protocol, a3 = /^([a-z0-9-]+)\.localhost$/.exec(t2);
+  if (a3?.[1] != null) {
+    if (e4 !== "http:")
       throw new Error(
-        `Invalid protocol for localhost: ${e5}. Only http: is allowed for localhost.`
+        `Invalid protocol for localhost: ${e4}. Only http: is allowed for localhost.`
       );
-    return Principal$1.fromText(a2[1]);
+    return Principal$1.fromText(a3[1]);
   }
-  const r2 = /^([a-z0-9-]+)\.icp0\.io$/.exec(t3);
+  const r2 = /^([a-z0-9-]+)\.icp0\.io$/.exec(t2);
   if (r2?.[1] != null) {
-    if (e5 !== "https:")
+    if (e4 !== "https:")
       throw new Error(
-        `Invalid protocol for production: ${e5}. Only https: is allowed for icp0.io.`
+        `Invalid protocol for production: ${e4}. Only https: is allowed for icp0.io.`
       );
     return Principal$1.fromText(r2[1]);
   }
-  throw new Error(`Could not infer canister ID from hostname: ${t3}`);
+  throw new Error(`Could not infer canister ID from hostname: ${t2}`);
 }
 const MAX_TIME_TO_LIVE = BigInt(15) * BigInt(60) * BigInt(1e9);
 const CMC_CANISTER_ID = "rkp4c-7iaaa-aaaaa-aaaca-cai";
@@ -12347,7 +12775,7 @@ function isDevMode() {
 }
 function inferCanisterId() {
   try {
-    return M$1();
+    return M();
   } catch {
     {
       return Principal$1.fromText("22ajg-aqaaa-aaaap-adukq-cai");
@@ -12581,7 +13009,7 @@ class AuthManager {
       }
       const agent = await createHttpAgent();
       const canister = canisterId();
-      const dashboard = l$1.create(agent, canister);
+      const dashboard = l$2.create(agent, canister);
       return await dashboard.isAuthenticated();
     } catch (error) {
       console.warn("Failed to check II principal authorization:", error);
@@ -12647,7 +13075,7 @@ class AuthManager {
 class ManagementApi {
   async managmentApi() {
     const agent = await createHttpAgent();
-    return Qt.create({
+    return v.create({
       agent
     });
   }
@@ -12655,7 +13083,9 @@ class ManagementApi {
     try {
       const icManagement = await this.managmentApi();
       const canisterIdPrincipal = canisterId();
-      return await icManagement.canisterStatus(canisterIdPrincipal);
+      return await icManagement.canisterStatus({
+        canisterId: canisterIdPrincipal
+      });
     } catch (error) {
       reportError(NETWORK_ERROR_MESSAGE, error);
       throw error;
@@ -12762,8 +13192,8 @@ class StatusManager {
         cyclesFormatted,
         moduleHashHex
       );
-    } catch (e5) {
-      reportError(NETWORK_ERROR_MESSAGE, e5);
+    } catch (e4) {
+      reportError(NETWORK_ERROR_MESSAGE, e4);
     }
     return instance;
   }
@@ -12783,168 +13213,169 @@ class StatusManager {
         cyclesFormatted,
         moduleHashHex
       );
-    } catch (e5) {
-      reportError(NETWORK_ERROR_MESSAGE, e5);
+    } catch (e4) {
+      reportError(NETWORK_ERROR_MESSAGE, e4);
     }
   }
   formatStatusData(status) {
     const statusText = "running" in status.status ? "Running" : "stopped" in status.status ? "Stopped" : "stopping" in status.status ? "Stopping" : "Unknown";
     const memorySizeFormatted = formatMemorySize(status.memory_size);
     const cyclesFormatted = formatCycles(status.cycles);
-    const moduleHashHex = status.module_hash.length > 0 ? R$1(status.module_hash[0]) : "N/A";
+    const moduleHashHex = status.module_hash.length > 0 ? R(status.module_hash[0]) : "N/A";
     return { statusText, memorySizeFormatted, cyclesFormatted, moduleHashHex };
   }
 }
-function W(e5) {
-  return e5 instanceof Uint8Array || ArrayBuffer.isView(e5) && e5.constructor.name === "Uint8Array";
+function G(e4) {
+  return e4 instanceof Uint8Array || ArrayBuffer.isView(e4) && e4.constructor.name === "Uint8Array";
 }
-function w$1(e5, ...t3) {
-  if (!W(e5)) throw new Error("Uint8Array expected");
-  if (t3.length > 0 && !t3.includes(e5.length)) throw new Error("Uint8Array expected of length " + t3 + ", got length=" + e5.length);
+function w$1(e4, ...t2) {
+  if (!G(e4)) throw new Error("Uint8Array expected");
+  if (t2.length > 0 && !t2.includes(e4.length)) throw new Error("Uint8Array expected of length " + t2 + ", got length=" + e4.length);
 }
-function U(e5, t3 = true) {
-  if (e5.destroyed) throw new Error("Hash instance has been destroyed");
-  if (t3 && e5.finished) throw new Error("Hash#digest() has already been called");
+function E2(e4, t2 = true) {
+  if (e4.destroyed) throw new Error("Hash instance has been destroyed");
+  if (t2 && e4.finished) throw new Error("Hash#digest() has already been called");
 }
-function D(e5, t3) {
-  w$1(e5);
-  let r2 = t3.outputLen;
-  if (e5.length < r2) throw new Error("digestInto() expects output buffer of length at least " + r2);
+function D$1(e4, t2) {
+  w$1(e4);
+  let n3 = t2.outputLen;
+  if (e4.length < n3) throw new Error("digestInto() expects output buffer of length at least " + n3);
 }
-function g(...e5) {
-  for (let t3 = 0; t3 < e5.length; t3++) e5[t3].fill(0);
+function y$1(...e4) {
+  for (let t2 = 0; t2 < e4.length; t2++) e4[t2].fill(0);
 }
-function m$1(e5) {
-  return new DataView(e5.buffer, e5.byteOffset, e5.byteLength);
+function H(e4) {
+  return new DataView(e4.buffer, e4.byteOffset, e4.byteLength);
 }
-function x2(e5, t3) {
-  return e5 << 32 - t3 | e5 >>> t3;
+function a$2(e4, t2) {
+  return e4 << 32 - t2 | e4 >>> t2;
 }
-function N(e5) {
-  if (typeof e5 != "string") throw new Error("string expected");
-  return new Uint8Array(new TextEncoder().encode(e5));
+function V(e4) {
+  if (typeof e4 != "string") throw new Error("string expected");
+  return new Uint8Array(new TextEncoder().encode(e4));
 }
-function E2(e5) {
-  return typeof e5 == "string" && (e5 = N(e5)), w$1(e5), e5;
+function U(e4) {
+  return typeof e4 == "string" && (e4 = V(e4)), w$1(e4), e4;
 }
-var A$1 = class A2 {
+var A2 = class {
 };
-function F$1(e5) {
-  let t3 = (n2) => e5().update(E2(n2)).digest(), r2 = e5();
-  return t3.outputLen = r2.outputLen, t3.blockLen = r2.blockLen, t3.create = () => e5(), t3;
+function S$1(e4) {
+  let t2 = (s2) => e4().update(U(s2)).digest(), n3 = e4();
+  return t2.outputLen = n3.outputLen, t2.blockLen = n3.blockLen, t2.create = () => e4(), t2;
 }
-function M(e5, t3, r2, n2) {
-  if (typeof e5.setBigUint64 == "function") return e5.setBigUint64(t3, r2, n2);
-  let s2 = BigInt(32), o3 = BigInt(4294967295), i3 = Number(r2 >> s2 & o3), c2 = Number(r2 & o3), h2 = n2 ? 4 : 0, a2 = n2 ? 0 : 4;
-  e5.setUint32(t3 + h2, i3, n2), e5.setUint32(t3 + a2, c2, n2);
+function T(e4, t2, n3, s2) {
+  if (typeof e4.setBigUint64 == "function") return e4.setBigUint64(t2, n3, s2);
+  let o3 = BigInt(32), f2 = BigInt(4294967295), r2 = Number(n3 >> o3 & f2), i2 = Number(n3 & f2), h2 = s2 ? 4 : 0, x3 = s2 ? 0 : 4;
+  e4.setUint32(t2 + h2, r2, s2), e4.setUint32(t2 + x3, i2, s2);
 }
-function T$1(e5, t3, r2) {
-  return e5 & t3 ^ ~e5 & r2;
+function F(e4, t2, n3) {
+  return e4 & t2 ^ ~e4 & n3;
 }
-function G(e5, t3, r2) {
-  return e5 & t3 ^ e5 & r2 ^ t3 & r2;
+function I$1(e4, t2, n3) {
+  return e4 & t2 ^ e4 & n3 ^ t2 & n3;
 }
-var H = class extends A$1 {
-  constructor(t3, r2, n2, s2) {
-    super(), this.finished = false, this.length = 0, this.pos = 0, this.destroyed = false, this.blockLen = t3, this.outputLen = r2, this.padOffset = n2, this.isLE = s2, this.buffer = new Uint8Array(t3), this.view = m$1(this.buffer);
+var B$1 = class B extends A2 {
+  constructor(t2, n3, s2, o3) {
+    super(), this.finished = false, this.length = 0, this.pos = 0, this.destroyed = false, this.blockLen = t2, this.outputLen = n3, this.padOffset = s2, this.isLE = o3, this.buffer = new Uint8Array(t2), this.view = H(this.buffer);
   }
-  update(t3) {
-    U(this), t3 = E2(t3), w$1(t3);
-    let { view: r2, buffer: n2, blockLen: s2 } = this, o3 = t3.length;
-    for (let i3 = 0; i3 < o3; ) {
-      let c2 = Math.min(s2 - this.pos, o3 - i3);
-      if (c2 === s2) {
-        let h2 = m$1(t3);
-        for (; s2 <= o3 - i3; i3 += s2) this.process(h2, i3);
+  update(t2) {
+    E2(this), t2 = U(t2), w$1(t2);
+    let { view: n3, buffer: s2, blockLen: o3 } = this, f2 = t2.length;
+    for (let r2 = 0; r2 < f2; ) {
+      let i2 = Math.min(o3 - this.pos, f2 - r2);
+      if (i2 === o3) {
+        let h2 = H(t2);
+        for (; o3 <= f2 - r2; r2 += o3) this.process(h2, r2);
         continue;
       }
-      n2.set(t3.subarray(i3, i3 + c2), this.pos), this.pos += c2, i3 += c2, this.pos === s2 && (this.process(r2, 0), this.pos = 0);
+      s2.set(t2.subarray(r2, r2 + i2), this.pos), this.pos += i2, r2 += i2, this.pos === o3 && (this.process(n3, 0), this.pos = 0);
     }
-    return this.length += t3.length, this.roundClean(), this;
+    return this.length += t2.length, this.roundClean(), this;
   }
-  digestInto(t3) {
-    U(this), D(t3, this), this.finished = true;
-    let { buffer: r2, view: n2, blockLen: s2, isLE: o3 } = this, { pos: i3 } = this;
-    r2[i3++] = 128, g(this.buffer.subarray(i3)), this.padOffset > s2 - i3 && (this.process(n2, 0), i3 = 0);
-    for (let f2 = i3; f2 < s2; f2++) r2[f2] = 0;
-    M(n2, s2 - 8, BigInt(this.length * 8), o3), this.process(n2, 0);
-    let c2 = m$1(t3), h2 = this.outputLen;
+  digestInto(t2) {
+    E2(this), D$1(t2, this), this.finished = true;
+    let { buffer: n3, view: s2, blockLen: o3, isLE: f2 } = this, { pos: r2 } = this;
+    n3[r2++] = 128, y$1(this.buffer.subarray(r2)), this.padOffset > o3 - r2 && (this.process(s2, 0), r2 = 0);
+    for (let c3 = r2; c3 < o3; c3++) n3[c3] = 0;
+    T(s2, o3 - 8, BigInt(this.length * 8), f2), this.process(s2, 0);
+    let i2 = H(t2), h2 = this.outputLen;
     if (h2 % 4) throw new Error("_sha2: outputLen should be aligned to 32bit");
-    let a2 = h2 / 4, d2 = this.get();
-    if (a2 > d2.length) throw new Error("_sha2: outputLen bigger than state");
-    for (let f2 = 0; f2 < a2; f2++) c2.setUint32(4 * f2, d2[f2], o3);
+    let x3 = h2 / 4, u2 = this.get();
+    if (x3 > u2.length) throw new Error("_sha2: outputLen bigger than state");
+    for (let c3 = 0; c3 < x3; c3++) i2.setUint32(4 * c3, u2[c3], f2);
   }
   digest() {
-    let { buffer: t3, outputLen: r2 } = this;
-    this.digestInto(t3);
-    let n2 = t3.slice(0, r2);
-    return this.destroy(), n2;
+    let { buffer: t2, outputLen: n3 } = this;
+    this.digestInto(t2);
+    let s2 = t2.slice(0, n3);
+    return this.destroy(), s2;
   }
-  _cloneInto(t3) {
-    t3 || (t3 = new this.constructor()), t3.set(...this.get());
-    let { blockLen: r2, buffer: n2, length: s2, finished: o3, destroyed: i3, pos: c2 } = this;
-    return t3.destroyed = i3, t3.finished = o3, t3.length = s2, t3.pos = c2, s2 % r2 && t3.buffer.set(n2), t3;
+  _cloneInto(t2) {
+    t2 || (t2 = new this.constructor()), t2.set(...this.get());
+    let { blockLen: n3, buffer: s2, length: o3, finished: f2, destroyed: r2, pos: i2 } = this;
+    return t2.destroyed = r2, t2.finished = f2, t2.length = o3, t2.pos = i2, o3 % n3 && t2.buffer.set(s2), t2;
   }
   clone() {
     return this._cloneInto();
   }
-}, u = Uint32Array.from([1779033703, 3144134277, 1013904242, 2773480762, 1359893119, 2600822924, 528734635, 1541459225]), b = Uint32Array.from([3238371032, 914150663, 812702999, 4144912697, 4290775857, 1750603025, 1694076839, 3204075428]);
-var j = Uint32Array.from([1116352408, 1899447441, 3049323471, 3921009573, 961987163, 1508970993, 2453635748, 2870763221, 3624381080, 310598401, 607225278, 1426881987, 1925078388, 2162078206, 2614888103, 3248222580, 3835390401, 4022224774, 264347078, 604807628, 770255983, 1249150122, 1555081692, 1996064986, 2554220882, 2821834349, 2952996808, 3210313671, 3336571891, 3584528711, 113926993, 338241895, 666307205, 773529912, 1294757372, 1396182291, 1695183700, 1986661051, 2177026350, 2456956037, 2730485921, 2820302411, 3259730800, 3345764771, 3516065817, 3600352804, 4094571909, 275423344, 430227734, 506948616, 659060556, 883997877, 958139571, 1322822218, 1537002063, 1747873779, 1955562222, 2024104815, 2227730452, 2361852424, 2428436474, 2756734187, 3204031479, 3329325298]), l2 = new Uint32Array(64), L = class extends H {
-  constructor(t3 = 32) {
-    super(64, t3, 8, false), this.A = u[0] | 0, this.B = u[1] | 0, this.C = u[2] | 0, this.D = u[3] | 0, this.E = u[4] | 0, this.F = u[5] | 0, this.G = u[6] | 0, this.H = u[7] | 0;
+}, d$1 = Uint32Array.from([1779033703, 3144134277, 1013904242, 2773480762, 1359893119, 2600822924, 528734635, 1541459225]), b$1 = Uint32Array.from([3238371032, 914150663, 812702999, 4144912697, 4290775857, 1750603025, 1694076839, 3204075428]);
+var k$1 = Uint32Array.from([1116352408, 1899447441, 3049323471, 3921009573, 961987163, 1508970993, 2453635748, 2870763221, 3624381080, 310598401, 607225278, 1426881987, 1925078388, 2162078206, 2614888103, 3248222580, 3835390401, 4022224774, 264347078, 604807628, 770255983, 1249150122, 1555081692, 1996064986, 2554220882, 2821834349, 2952996808, 3210313671, 3336571891, 3584528711, 113926993, 338241895, 666307205, 773529912, 1294757372, 1396182291, 1695183700, 1986661051, 2177026350, 2456956037, 2730485921, 2820302411, 3259730800, 3345764771, 3516065817, 3600352804, 4094571909, 275423344, 430227734, 506948616, 659060556, 883997877, 958139571, 1322822218, 1537002063, 1747873779, 1955562222, 2024104815, 2227730452, 2361852424, 2428436474, 2756734187, 3204031479, 3329325298]), l$1 = new Uint32Array(64), m$1 = class m extends B$1 {
+  constructor(t2 = 32) {
+    super(64, t2, 8, false), this.A = d$1[0] | 0, this.B = d$1[1] | 0, this.C = d$1[2] | 0, this.D = d$1[3] | 0, this.E = d$1[4] | 0, this.F = d$1[5] | 0, this.G = d$1[6] | 0, this.H = d$1[7] | 0;
   }
   get() {
-    let { A: t3, B: r2, C: n2, D: s2, E: o3, F: i3, G: c2, H: h2 } = this;
-    return [t3, r2, n2, s2, o3, i3, c2, h2];
+    let { A: t2, B: n3, C: s2, D: o3, E: f2, F: r2, G: i2, H: h2 } = this;
+    return [t2, n3, s2, o3, f2, r2, i2, h2];
   }
-  set(t3, r2, n2, s2, o3, i3, c2, h2) {
-    this.A = t3 | 0, this.B = r2 | 0, this.C = n2 | 0, this.D = s2 | 0, this.E = o3 | 0, this.F = i3 | 0, this.G = c2 | 0, this.H = h2 | 0;
+  set(t2, n3, s2, o3, f2, r2, i2, h2) {
+    this.A = t2 | 0, this.B = n3 | 0, this.C = s2 | 0, this.D = o3 | 0, this.E = f2 | 0, this.F = r2 | 0, this.G = i2 | 0, this.H = h2 | 0;
   }
-  process(t3, r2) {
-    for (let f2 = 0; f2 < 16; f2++, r2 += 4) l2[f2] = t3.getUint32(r2, false);
-    for (let f2 = 16; f2 < 64; f2++) {
-      let y2 = l2[f2 - 15], p2 = l2[f2 - 2], _2 = x2(y2, 7) ^ x2(y2, 18) ^ y2 >>> 3, B2 = x2(p2, 17) ^ x2(p2, 19) ^ p2 >>> 10;
-      l2[f2] = B2 + l2[f2 - 7] + _2 + l2[f2 - 16] | 0;
+  process(t2, n3) {
+    for (let c3 = 0; c3 < 16; c3++, n3 += 4) l$1[c3] = t2.getUint32(n3, false);
+    for (let c3 = 16; c3 < 64; c3++) {
+      let g3 = l$1[c3 - 15], p2 = l$1[c3 - 2], _2 = a$2(g3, 7) ^ a$2(g3, 18) ^ g3 >>> 3, L2 = a$2(p2, 17) ^ a$2(p2, 19) ^ p2 >>> 10;
+      l$1[c3] = L2 + l$1[c3 - 7] + _2 + l$1[c3 - 16] | 0;
     }
-    let { A: n2, B: s2, C: o3, D: i3, E: c2, F: h2, G: a2, H: d2 } = this;
-    for (let f2 = 0; f2 < 64; f2++) {
-      let y2 = x2(c2, 6) ^ x2(c2, 11) ^ x2(c2, 25), p2 = d2 + y2 + T$1(c2, h2, a2) + j[f2] + l2[f2] | 0, B2 = (x2(n2, 2) ^ x2(n2, 13) ^ x2(n2, 22)) + G(n2, s2, o3) | 0;
-      d2 = a2, a2 = h2, h2 = c2, c2 = i3 + p2 | 0, i3 = o3, o3 = s2, s2 = n2, n2 = p2 + B2 | 0;
+    let { A: s2, B: o3, C: f2, D: r2, E: i2, F: h2, G: x3, H: u2 } = this;
+    for (let c3 = 0; c3 < 64; c3++) {
+      let g3 = a$2(i2, 6) ^ a$2(i2, 11) ^ a$2(i2, 25), p2 = u2 + g3 + F(i2, h2, x3) + k$1[c3] + l$1[c3] | 0, L2 = (a$2(s2, 2) ^ a$2(s2, 13) ^ a$2(s2, 22)) + I$1(s2, o3, f2) | 0;
+      u2 = x3, x3 = h2, h2 = i2, i2 = r2 + p2 | 0, r2 = f2, f2 = o3, o3 = s2, s2 = p2 + L2 | 0;
     }
-    n2 = n2 + this.A | 0, s2 = s2 + this.B | 0, o3 = o3 + this.C | 0, i3 = i3 + this.D | 0, c2 = c2 + this.E | 0, h2 = h2 + this.F | 0, a2 = a2 + this.G | 0, d2 = d2 + this.H | 0, this.set(n2, s2, o3, i3, c2, h2, a2, d2);
+    s2 = s2 + this.A | 0, o3 = o3 + this.B | 0, f2 = f2 + this.C | 0, r2 = r2 + this.D | 0, i2 = i2 + this.E | 0, h2 = h2 + this.F | 0, x3 = x3 + this.G | 0, u2 = u2 + this.H | 0, this.set(s2, o3, f2, r2, i2, h2, x3, u2);
   }
   roundClean() {
-    g(l2);
+    y$1(l$1);
   }
   destroy() {
-    this.set(0, 0, 0, 0, 0, 0, 0, 0), g(this.buffer);
+    this.set(0, 0, 0, 0, 0, 0, 0, 0), y$1(this.buffer);
   }
-}, S = class extends L {
+}, C$1 = class C extends m$1 {
   constructor() {
-    super(28), this.A = b[0] | 0, this.B = b[1] | 0, this.C = b[2] | 0, this.D = b[3] | 0, this.E = b[4] | 0, this.F = b[5] | 0, this.G = b[6] | 0, this.H = b[7] | 0;
+    super(28), this.A = b$1[0] | 0, this.B = b$1[1] | 0, this.C = b$1[2] | 0, this.D = b$1[3] | 0, this.E = b$1[4] | 0, this.F = b$1[5] | 0, this.G = b$1[6] | 0, this.H = b$1[7] | 0;
   }
 };
-var V = F$1(() => new S());
-var O$1 = class e {
-  constructor(t3) {
-    this.bytes = t3;
+S$1(() => new m$1());
+var X$1 = S$1(() => new C$1());
+var p$1 = class e {
+  constructor(n3) {
+    this.bytes = n3;
   }
-  static fromHex(t3) {
-    let r2 = Et$1(t3);
-    if (r2.length !== 32) throw new Error(`Invalid AccountIdentifier: expected 32 bytes, got ${r2.length}.`);
-    let n2 = R$1(r2.slice(0, 4)), s2 = r2.slice(4), o3 = R$1(Lt(s2));
-    if (n2 !== o3) throw Error(`Checksum mismatch. Expected ${o3}, but got ${n2}.`);
-    return new e(r2);
+  static fromHex(n3) {
+    let t2 = Et(n3);
+    if (t2.length !== 32) throw new Error(`Invalid AccountIdentifier: expected 32 bytes, got ${t2.length}.`);
+    let r2 = R(t2.slice(0, 4)), i2 = t2.slice(4), c3 = R(Lt(i2));
+    if (r2 !== c3) throw Error(`Checksum mismatch. Expected ${c3}, but got ${r2}.`);
+    return new e(t2);
   }
-  static fromPrincipal({ principal: t3, subAccount: r2 = C.fromID(0) }) {
-    let n2 = wt(`
-account-id`), s2 = V.create();
-    s2.update(St([...n2, ...t3.toUint8Array(), ...r2.toUint8Array()]));
-    let o3 = s2.digest(), i3 = Lt(o3), c2 = new Uint8Array([...i3, ...o3]);
-    return new e(c2);
+  static fromPrincipal({ principal: n3, subAccount: t2 = I.fromID(0) }) {
+    let r2 = wt(`
+account-id`), i2 = X$1.create();
+    i2.update(St([...r2, ...n3.toUint8Array(), ...t2.toUint8Array()]));
+    let c3 = i2.digest(), h2 = Lt(c3), T2 = new Uint8Array([...h2, ...c3]);
+    return new e(T2);
   }
   toHex() {
-    return R$1(this.bytes);
+    return R(this.bytes);
   }
   toUint8Array() {
     return this.bytes;
@@ -12955,156 +13386,139 @@ account-id`), s2 = V.create();
   toAccountIdentifierHash() {
     return { hash: this.toUint8Array() };
   }
-}, C = class e2 {
-  constructor(t3) {
-    this.bytes = t3;
+}, I = class e2 {
+  constructor(n3) {
+    this.bytes = n3;
   }
-  static fromBytes(t3) {
-    if (t3.length !== 32) throw new Error("Subaccount length must be 32-bytes");
-    return new e2(t3);
+  static fromBytes(n3) {
+    if (n3.length !== 32) throw new Error("Subaccount length must be 32-bytes");
+    return new e2(n3);
   }
-  static fromPrincipal(t3) {
-    let r2 = new Uint8Array(32).fill(0), n2 = t3.toUint8Array();
-    r2[0] = n2.length;
-    for (let s2 = 0; s2 < n2.length; s2++) r2[1 + s2] = n2[s2];
-    return new e2(r2);
+  static fromPrincipal(n3) {
+    let t2 = new Uint8Array(32).fill(0), r2 = n3.toUint8Array();
+    t2[0] = r2.length;
+    for (let i2 = 0; i2 < r2.length; i2++) t2[1 + i2] = r2[i2];
+    return new e2(t2);
   }
-  static fromID(t3) {
-    if (t3 < 0) throw new Error("Number cannot be negative");
-    if (t3 > Number.MAX_SAFE_INTEGER) throw new Error("Number is too large to fit in 32 bytes.");
-    let r2 = new DataView(new ArrayBuffer(32));
-    if (typeof r2.setBigUint64 == "function") r2.setBigUint64(24, BigInt(t3));
+  static fromID(n3) {
+    if (n3 < 0) throw new Error("Number cannot be negative");
+    if (n3 > Number.MAX_SAFE_INTEGER) throw new Error("Number is too large to fit in 32 bytes.");
+    let t2 = new DataView(new ArrayBuffer(32));
+    if (typeof t2.setBigUint64 == "function") t2.setBigUint64(24, BigInt(n3));
     else {
-      let s2 = BigInt(1) << BigInt(32);
-      r2.setUint32(24, Number(BigInt(t3) >> BigInt(32))), r2.setUint32(28, Number(BigInt(t3) % s2));
+      let i2 = BigInt(1) << BigInt(32);
+      t2.setUint32(24, Number(BigInt(n3) >> BigInt(32))), t2.setUint32(28, Number(BigInt(n3) % i2));
     }
-    let n2 = new Uint8Array(r2.buffer);
-    return new e2(n2);
+    let r2 = new Uint8Array(t2.buffer);
+    return new e2(r2);
   }
   toUint8Array() {
     return this.bytes;
   }
 };
-/*! Bundled license information:
-
-@noble/hashes/esm/utils.js:
-  (*! noble-hashes - MIT License (c) 2022 Paul Miller (paulmillr.com) *)
-*/
-var r = Principal$1.fromText("ryjl3-tyaaa-aaaaa-aaaba-cai");
-Principal$1.fromText("qhbym-qaaaa-aaaaa-aaafq-cai");
-var f = (t3) => t3 instanceof O$1 ? t3 : O$1.fromHex(t3);
-var Pe = ({ IDL: e5 }) => {
-  let c2 = e5.Vec(e5.Nat8), t3 = e5.Record({ owner: e5.Principal, subaccount: e5.Opt(c2) }), o3 = e5.Record({ icrc2: e5.Bool }), d2 = e5.Record({ icrc1_minting_account: e5.Opt(t3), feature_flags: e5.Opt(o3) }), r2 = e5.Record({ e8s: e5.Nat64 }), s2 = e5.Text, N2 = e5.Record({ secs: e5.Nat64, nanos: e5.Nat32 }), C2 = e5.Record({ num_blocks_to_archive: e5.Nat64, max_transactions_per_response: e5.Opt(e5.Nat64), trigger_threshold: e5.Nat64, more_controller_ids: e5.Opt(e5.Vec(e5.Principal)), max_message_size_bytes: e5.Opt(e5.Nat64), cycles_for_archive_creation: e5.Opt(e5.Nat64), node_max_memory_size_bytes: e5.Opt(e5.Nat64), controller_id: e5.Principal }), P2 = e5.Record({ send_whitelist: e5.Vec(e5.Principal), token_symbol: e5.Opt(e5.Text), transfer_fee: e5.Opt(r2), minting_account: s2, transaction_window: e5.Opt(N2), max_message_size_bytes: e5.Opt(e5.Nat64), icrc1_minting_account: e5.Opt(t3), archive_options: e5.Opt(C2), initial_values: e5.Vec(e5.Tuple(s2, r2)), token_name: e5.Opt(e5.Text), feature_flags: e5.Opt(o3) });
-  e5.Variant({ Upgrade: e5.Opt(d2), Init: P2 });
-  let a2 = e5.Vec(e5.Nat8), E3 = e5.Record({ account: a2 }), S2 = e5.Record({ account: s2 }), U2 = e5.Record({ canister_id: e5.Principal }), M2 = e5.Record({ archives: e5.Vec(U2) }), G2 = e5.Record({ prev_spender_id: e5.Opt(s2), from_account_id: s2, take: e5.Opt(e5.Nat64) }), Q2 = e5.Vec(e5.Record({ from_account_id: s2, to_spender_id: s2, allowance: r2, expires_at: e5.Opt(e5.Nat64) })), n2 = e5.Nat, z2 = e5.Variant({ Int: e5.Int, Nat: e5.Nat, Blob: e5.Vec(e5.Nat8), Text: e5.Text }), u2 = e5.Nat64, H2 = e5.Record({ to: t3, fee: e5.Opt(n2), memo: e5.Opt(e5.Vec(e5.Nat8)), from_subaccount: e5.Opt(c2), created_at_time: e5.Opt(u2), amount: n2 }), l3 = e5.Nat, J2 = e5.Variant({ GenericError: e5.Record({ message: e5.Text, error_code: e5.Nat }), TemporarilyUnavailable: e5.Null, BadBurn: e5.Record({ min_burn_amount: n2 }), Duplicate: e5.Record({ duplicate_of: l3 }), BadFee: e5.Record({ expected_fee: n2 }), CreatedInFuture: e5.Record({ ledger_time: e5.Nat64 }), TooOld: e5.Null, InsufficientFunds: e5.Record({ balance: n2 }) }), $2 = e5.Variant({ Ok: l3, Err: J2 }), y2 = e5.Record({ utc_offset_minutes: e5.Opt(e5.Int16), language: e5.Text }), K2 = e5.Record({ metadata: y2, device_spec: e5.Opt(e5.Variant({ GenericDisplay: e5.Null, FieldsDisplay: e5.Null })) }), Y2 = e5.Record({ arg: e5.Vec(e5.Nat8), method: e5.Text, user_preferences: K2 }), j2 = e5.Variant({ Text: e5.Record({ content: e5.Text }), TokenAmount: e5.Record({ decimals: e5.Nat8, amount: e5.Nat64, symbol: e5.Text }), TimestampSeconds: e5.Record({ amount: e5.Nat64 }), DurationSeconds: e5.Record({ amount: e5.Nat64 }) }), W2 = e5.Record({ fields: e5.Vec(e5.Tuple(e5.Text, j2)), intent: e5.Text }), X2 = e5.Variant({ FieldsDisplayMessage: W2, GenericDisplayMessage: e5.Text }), Z2 = e5.Record({ metadata: y2, consent_message: X2 }), g2 = e5.Record({ description: e5.Text }), I2 = e5.Variant({ GenericError: e5.Record({ description: e5.Text, error_code: e5.Nat }), InsufficientPayment: g2, UnsupportedCanisterCall: g2, ConsentMessageUnavailable: g2 }), D2 = e5.Variant({ Ok: Z2, Err: I2 }), L2 = e5.Record({ account: t3, spender: t3 }), ee = e5.Record({ allowance: n2, expires_at: e5.Opt(u2) }), te = e5.Record({ fee: e5.Opt(n2), memo: e5.Opt(e5.Vec(e5.Nat8)), from_subaccount: e5.Opt(c2), created_at_time: e5.Opt(u2), amount: n2, expected_allowance: e5.Opt(n2), expires_at: e5.Opt(u2), spender: t3 }), ce = e5.Variant({ GenericError: e5.Record({ message: e5.Text, error_code: e5.Nat }), TemporarilyUnavailable: e5.Null, Duplicate: e5.Record({ duplicate_of: l3 }), BadFee: e5.Record({ expected_fee: n2 }), AllowanceChanged: e5.Record({ current_allowance: n2 }), CreatedInFuture: e5.Record({ ledger_time: e5.Nat64 }), TooOld: e5.Null, Expired: e5.Record({ ledger_time: e5.Nat64 }), InsufficientFunds: e5.Record({ balance: n2 }) }), F2 = e5.Variant({ Ok: l3, Err: ce }), re = e5.Record({ to: t3, fee: e5.Opt(n2), spender_subaccount: e5.Opt(c2), from: t3, memo: e5.Opt(e5.Vec(e5.Nat8)), created_at_time: e5.Opt(u2), amount: n2 }), ne2 = e5.Variant({ GenericError: e5.Record({ message: e5.Text, error_code: e5.Nat }), TemporarilyUnavailable: e5.Null, InsufficientAllowance: e5.Record({ allowance: n2 }), BadBurn: e5.Record({ min_burn_amount: n2 }), Duplicate: e5.Record({ duplicate_of: l3 }), BadFee: e5.Record({ expected_fee: n2 }), CreatedInFuture: e5.Record({ ledger_time: u2 }), TooOld: e5.Null, InsufficientFunds: e5.Record({ balance: n2 }) }), oe = e5.Variant({ Ok: l3, Err: ne2 }), i3 = e5.Nat64, f2 = e5.Record({ start: i3, length: e5.Nat64 }), x3 = e5.Nat64, _2 = e5.Record({ timestamp_nanos: e5.Nat64 }), ae = e5.Variant({ Approve: e5.Record({ fee: r2, from: a2, allowance_e8s: e5.Int, allowance: r2, expected_allowance: e5.Opt(r2), expires_at: e5.Opt(_2), spender: a2 }), Burn: e5.Record({ from: a2, amount: r2, spender: e5.Opt(a2) }), Mint: e5.Record({ to: a2, amount: r2 }), Transfer: e5.Record({ to: a2, fee: r2, from: a2, amount: r2, spender: e5.Opt(e5.Vec(e5.Nat8)) }) }), se = e5.Record({ memo: x3, icrc1_memo: e5.Opt(e5.Vec(e5.Nat8)), operation: e5.Opt(ae), created_at_time: _2 }), b2 = e5.Record({ transaction: se, timestamp: _2, parent_hash: e5.Opt(e5.Vec(e5.Nat8)) }), ie = e5.Record({ blocks: e5.Vec(b2) }), V2 = e5.Variant({ BadFirstBlockIndex: e5.Record({ requested_index: i3, first_valid_index: i3 }), Other: e5.Record({ error_message: e5.Text, error_code: e5.Nat64 }) }), de = e5.Variant({ Ok: ie, Err: V2 }), ue = e5.Func([f2], [de], []), le = e5.Record({ callback: ue, start: i3, length: e5.Nat64 }), pe = e5.Record({ certificate: e5.Opt(e5.Vec(e5.Nat8)), blocks: e5.Vec(b2), chain_length: e5.Nat64, first_block_index: i3, archived_blocks: e5.Vec(le) }), _e = e5.Record({ callback: e5.Func([f2], [e5.Variant({ Ok: e5.Vec(e5.Vec(e5.Nat8)), Err: V2 })], []), start: e5.Nat64, length: e5.Nat64 }), me = e5.Record({ certificate: e5.Opt(e5.Vec(e5.Nat8)), blocks: e5.Vec(e5.Vec(e5.Nat8)), chain_length: e5.Nat64, first_block_index: e5.Nat64, archived_blocks: e5.Vec(_e) }), fe = e5.Record({ fee: e5.Opt(n2), from_subaccount: e5.Opt(c2), spender: a2 }), Re = e5.Record({ to: s2, fee: r2, memo: x3, from_subaccount: e5.Opt(c2), created_at_time: e5.Opt(_2), amount: r2 }), ge = e5.Record({ certification: e5.Opt(e5.Vec(e5.Nat8)), tip_index: i3 }), xe = e5.Record({ to: a2, fee: r2, memo: x3, from_subaccount: e5.Opt(c2), created_at_time: e5.Opt(_2), amount: r2 }), Oe = e5.Variant({ TxTooOld: e5.Record({ allowed_window_nanos: e5.Nat64 }), BadFee: e5.Record({ expected_fee: r2 }), TxDuplicate: e5.Record({ duplicate_of: i3 }), TxCreatedInFuture: e5.Null, InsufficientFunds: e5.Record({ balance: r2 }) }), Te = e5.Variant({ Ok: i3, Err: Oe }), Ne = e5.Record({}), ye = e5.Record({ transfer_fee: r2 });
-  return e5.Service({ account_balance: e5.Func([E3], [r2], []), account_balance_dfx: e5.Func([S2], [r2], []), account_identifier: e5.Func([t3], [a2], []), archives: e5.Func([], [M2], []), decimals: e5.Func([], [e5.Record({ decimals: e5.Nat32 })], []), get_allowances: e5.Func([G2], [Q2], []), icrc10_supported_standards: e5.Func([], [e5.Vec(e5.Record({ url: e5.Text, name: e5.Text }))], []), icrc1_balance_of: e5.Func([t3], [n2], []), icrc1_decimals: e5.Func([], [e5.Nat8], []), icrc1_fee: e5.Func([], [n2], []), icrc1_metadata: e5.Func([], [e5.Vec(e5.Tuple(e5.Text, z2))], []), icrc1_minting_account: e5.Func([], [e5.Opt(t3)], []), icrc1_name: e5.Func([], [e5.Text], []), icrc1_supported_standards: e5.Func([], [e5.Vec(e5.Record({ url: e5.Text, name: e5.Text }))], []), icrc1_symbol: e5.Func([], [e5.Text], []), icrc1_total_supply: e5.Func([], [n2], []), icrc1_transfer: e5.Func([H2], [$2], []), icrc21_canister_call_consent_message: e5.Func([Y2], [D2], []), icrc2_allowance: e5.Func([L2], [ee], []), icrc2_approve: e5.Func([te], [F2], []), icrc2_transfer_from: e5.Func([re], [oe], []), is_ledger_ready: e5.Func([], [e5.Bool], ["query"]), name: e5.Func([], [e5.Record({ name: e5.Text })], []), query_blocks: e5.Func([f2], [pe], []), query_encoded_blocks: e5.Func([f2], [me], []), remove_approval: e5.Func([fe], [F2], []), send_dfx: e5.Func([Re], [i3], []), symbol: e5.Func([], [e5.Record({ symbol: e5.Text })], []), tip_of_chain: e5.Func([], [ge], []), transfer: e5.Func([xe], [Te], []), transfer_fee: e5.Func([Ne], [ye], []) });
-};
-var Ee = ({ IDL: e5 }) => {
-  let c2 = e5.Vec(e5.Nat8), t3 = e5.Record({ owner: e5.Principal, subaccount: e5.Opt(c2) }), o3 = e5.Record({ icrc2: e5.Bool }), d2 = e5.Record({ icrc1_minting_account: e5.Opt(t3), feature_flags: e5.Opt(o3) }), r2 = e5.Record({ e8s: e5.Nat64 }), s2 = e5.Text, N2 = e5.Record({ secs: e5.Nat64, nanos: e5.Nat32 }), C2 = e5.Record({ num_blocks_to_archive: e5.Nat64, max_transactions_per_response: e5.Opt(e5.Nat64), trigger_threshold: e5.Nat64, more_controller_ids: e5.Opt(e5.Vec(e5.Principal)), max_message_size_bytes: e5.Opt(e5.Nat64), cycles_for_archive_creation: e5.Opt(e5.Nat64), node_max_memory_size_bytes: e5.Opt(e5.Nat64), controller_id: e5.Principal }), P2 = e5.Record({ send_whitelist: e5.Vec(e5.Principal), token_symbol: e5.Opt(e5.Text), transfer_fee: e5.Opt(r2), minting_account: s2, transaction_window: e5.Opt(N2), max_message_size_bytes: e5.Opt(e5.Nat64), icrc1_minting_account: e5.Opt(t3), archive_options: e5.Opt(C2), initial_values: e5.Vec(e5.Tuple(s2, r2)), token_name: e5.Opt(e5.Text), feature_flags: e5.Opt(o3) });
-  e5.Variant({ Upgrade: e5.Opt(d2), Init: P2 });
-  let a2 = e5.Vec(e5.Nat8), E3 = e5.Record({ account: a2 }), S2 = e5.Record({ account: s2 }), U2 = e5.Record({ canister_id: e5.Principal }), M2 = e5.Record({ archives: e5.Vec(U2) }), G2 = e5.Record({ prev_spender_id: e5.Opt(s2), from_account_id: s2, take: e5.Opt(e5.Nat64) }), Q2 = e5.Vec(e5.Record({ from_account_id: s2, to_spender_id: s2, allowance: r2, expires_at: e5.Opt(e5.Nat64) })), n2 = e5.Nat, z2 = e5.Variant({ Int: e5.Int, Nat: e5.Nat, Blob: e5.Vec(e5.Nat8), Text: e5.Text }), u2 = e5.Nat64, H2 = e5.Record({ to: t3, fee: e5.Opt(n2), memo: e5.Opt(e5.Vec(e5.Nat8)), from_subaccount: e5.Opt(c2), created_at_time: e5.Opt(u2), amount: n2 }), l3 = e5.Nat, J2 = e5.Variant({ GenericError: e5.Record({ message: e5.Text, error_code: e5.Nat }), TemporarilyUnavailable: e5.Null, BadBurn: e5.Record({ min_burn_amount: n2 }), Duplicate: e5.Record({ duplicate_of: l3 }), BadFee: e5.Record({ expected_fee: n2 }), CreatedInFuture: e5.Record({ ledger_time: e5.Nat64 }), TooOld: e5.Null, InsufficientFunds: e5.Record({ balance: n2 }) }), $2 = e5.Variant({ Ok: l3, Err: J2 }), y2 = e5.Record({ utc_offset_minutes: e5.Opt(e5.Int16), language: e5.Text }), K2 = e5.Record({ metadata: y2, device_spec: e5.Opt(e5.Variant({ GenericDisplay: e5.Null, FieldsDisplay: e5.Null })) }), Y2 = e5.Record({ arg: e5.Vec(e5.Nat8), method: e5.Text, user_preferences: K2 }), j2 = e5.Variant({ Text: e5.Record({ content: e5.Text }), TokenAmount: e5.Record({ decimals: e5.Nat8, amount: e5.Nat64, symbol: e5.Text }), TimestampSeconds: e5.Record({ amount: e5.Nat64 }), DurationSeconds: e5.Record({ amount: e5.Nat64 }) }), W2 = e5.Record({ fields: e5.Vec(e5.Tuple(e5.Text, j2)), intent: e5.Text }), X2 = e5.Variant({ FieldsDisplayMessage: W2, GenericDisplayMessage: e5.Text }), Z2 = e5.Record({ metadata: y2, consent_message: X2 }), g2 = e5.Record({ description: e5.Text }), I2 = e5.Variant({ GenericError: e5.Record({ description: e5.Text, error_code: e5.Nat }), InsufficientPayment: g2, UnsupportedCanisterCall: g2, ConsentMessageUnavailable: g2 }), D2 = e5.Variant({ Ok: Z2, Err: I2 }), L2 = e5.Record({ account: t3, spender: t3 }), ee = e5.Record({ allowance: n2, expires_at: e5.Opt(u2) }), te = e5.Record({ fee: e5.Opt(n2), memo: e5.Opt(e5.Vec(e5.Nat8)), from_subaccount: e5.Opt(c2), created_at_time: e5.Opt(u2), amount: n2, expected_allowance: e5.Opt(n2), expires_at: e5.Opt(u2), spender: t3 }), ce = e5.Variant({ GenericError: e5.Record({ message: e5.Text, error_code: e5.Nat }), TemporarilyUnavailable: e5.Null, Duplicate: e5.Record({ duplicate_of: l3 }), BadFee: e5.Record({ expected_fee: n2 }), AllowanceChanged: e5.Record({ current_allowance: n2 }), CreatedInFuture: e5.Record({ ledger_time: e5.Nat64 }), TooOld: e5.Null, Expired: e5.Record({ ledger_time: e5.Nat64 }), InsufficientFunds: e5.Record({ balance: n2 }) }), F2 = e5.Variant({ Ok: l3, Err: ce }), re = e5.Record({ to: t3, fee: e5.Opt(n2), spender_subaccount: e5.Opt(c2), from: t3, memo: e5.Opt(e5.Vec(e5.Nat8)), created_at_time: e5.Opt(u2), amount: n2 }), ne2 = e5.Variant({ GenericError: e5.Record({ message: e5.Text, error_code: e5.Nat }), TemporarilyUnavailable: e5.Null, InsufficientAllowance: e5.Record({ allowance: n2 }), BadBurn: e5.Record({ min_burn_amount: n2 }), Duplicate: e5.Record({ duplicate_of: l3 }), BadFee: e5.Record({ expected_fee: n2 }), CreatedInFuture: e5.Record({ ledger_time: u2 }), TooOld: e5.Null, InsufficientFunds: e5.Record({ balance: n2 }) }), oe = e5.Variant({ Ok: l3, Err: ne2 }), i3 = e5.Nat64, f2 = e5.Record({ start: i3, length: e5.Nat64 }), x3 = e5.Nat64, _2 = e5.Record({ timestamp_nanos: e5.Nat64 }), ae = e5.Variant({ Approve: e5.Record({ fee: r2, from: a2, allowance_e8s: e5.Int, allowance: r2, expected_allowance: e5.Opt(r2), expires_at: e5.Opt(_2), spender: a2 }), Burn: e5.Record({ from: a2, amount: r2, spender: e5.Opt(a2) }), Mint: e5.Record({ to: a2, amount: r2 }), Transfer: e5.Record({ to: a2, fee: r2, from: a2, amount: r2, spender: e5.Opt(e5.Vec(e5.Nat8)) }) }), se = e5.Record({ memo: x3, icrc1_memo: e5.Opt(e5.Vec(e5.Nat8)), operation: e5.Opt(ae), created_at_time: _2 }), b2 = e5.Record({ transaction: se, timestamp: _2, parent_hash: e5.Opt(e5.Vec(e5.Nat8)) }), ie = e5.Record({ blocks: e5.Vec(b2) }), V2 = e5.Variant({ BadFirstBlockIndex: e5.Record({ requested_index: i3, first_valid_index: i3 }), Other: e5.Record({ error_message: e5.Text, error_code: e5.Nat64 }) }), de = e5.Variant({ Ok: ie, Err: V2 }), ue = e5.Func([f2], [de], ["query"]), le = e5.Record({ callback: ue, start: i3, length: e5.Nat64 }), pe = e5.Record({ certificate: e5.Opt(e5.Vec(e5.Nat8)), blocks: e5.Vec(b2), chain_length: e5.Nat64, first_block_index: i3, archived_blocks: e5.Vec(le) }), _e = e5.Record({ callback: e5.Func([f2], [e5.Variant({ Ok: e5.Vec(e5.Vec(e5.Nat8)), Err: V2 })], ["query"]), start: e5.Nat64, length: e5.Nat64 }), me = e5.Record({ certificate: e5.Opt(e5.Vec(e5.Nat8)), blocks: e5.Vec(e5.Vec(e5.Nat8)), chain_length: e5.Nat64, first_block_index: e5.Nat64, archived_blocks: e5.Vec(_e) }), fe = e5.Record({ fee: e5.Opt(n2), from_subaccount: e5.Opt(c2), spender: a2 }), Re = e5.Record({ to: s2, fee: r2, memo: x3, from_subaccount: e5.Opt(c2), created_at_time: e5.Opt(_2), amount: r2 }), ge = e5.Record({ certification: e5.Opt(e5.Vec(e5.Nat8)), tip_index: i3 }), xe = e5.Record({ to: a2, fee: r2, memo: x3, from_subaccount: e5.Opt(c2), created_at_time: e5.Opt(_2), amount: r2 }), Oe = e5.Variant({ TxTooOld: e5.Record({ allowed_window_nanos: e5.Nat64 }), BadFee: e5.Record({ expected_fee: r2 }), TxDuplicate: e5.Record({ duplicate_of: i3 }), TxCreatedInFuture: e5.Null, InsufficientFunds: e5.Record({ balance: r2 }) }), Te = e5.Variant({ Ok: i3, Err: Oe }), Ne = e5.Record({}), ye = e5.Record({ transfer_fee: r2 });
-  return e5.Service({ account_balance: e5.Func([E3], [r2], ["query"]), account_balance_dfx: e5.Func([S2], [r2], ["query"]), account_identifier: e5.Func([t3], [a2], ["query"]), archives: e5.Func([], [M2], ["query"]), decimals: e5.Func([], [e5.Record({ decimals: e5.Nat32 })], ["query"]), get_allowances: e5.Func([G2], [Q2], ["query"]), icrc10_supported_standards: e5.Func([], [e5.Vec(e5.Record({ url: e5.Text, name: e5.Text }))], ["query"]), icrc1_balance_of: e5.Func([t3], [n2], ["query"]), icrc1_decimals: e5.Func([], [e5.Nat8], ["query"]), icrc1_fee: e5.Func([], [n2], ["query"]), icrc1_metadata: e5.Func([], [e5.Vec(e5.Tuple(e5.Text, z2))], ["query"]), icrc1_minting_account: e5.Func([], [e5.Opt(t3)], ["query"]), icrc1_name: e5.Func([], [e5.Text], ["query"]), icrc1_supported_standards: e5.Func([], [e5.Vec(e5.Record({ url: e5.Text, name: e5.Text }))], ["query"]), icrc1_symbol: e5.Func([], [e5.Text], ["query"]), icrc1_total_supply: e5.Func([], [n2], ["query"]), icrc1_transfer: e5.Func([H2], [$2], []), icrc21_canister_call_consent_message: e5.Func([Y2], [D2], []), icrc2_allowance: e5.Func([L2], [ee], ["query"]), icrc2_approve: e5.Func([te], [F2], []), icrc2_transfer_from: e5.Func([re], [oe], []), is_ledger_ready: e5.Func([], [e5.Bool], ["query"]), name: e5.Func([], [e5.Record({ name: e5.Text })], ["query"]), query_blocks: e5.Func([f2], [pe], ["query"]), query_encoded_blocks: e5.Func([f2], [me], ["query"]), remove_approval: e5.Func([fe], [F2], []), send_dfx: e5.Func([Re], [i3], []), symbol: e5.Func([], [e5.Record({ symbol: e5.Text })], ["query"]), tip_of_chain: e5.Func([], [ge], ["query"]), transfer: e5.Func([xe], [Te], []), transfer_fee: e5.Func([Ne], [ye], ["query"]) });
-};
 BigInt(1095062083);
 BigInt(1347768404);
-var h$1 = BigInt(1e4);
+var y = BigInt(1e4);
 BigInt(1e8);
-var Se = (e5) => ({ e8s: e5 }), Ue = ({ to: e5, amount: c2, memo: t3, fee: o3, fromSubAccount: d2, createdAt: r2 }) => ({ to: e5.toUint8Array(), fee: Se(o3 ?? h$1), amount: Se(c2), memo: t3 ?? BigInt(0), created_at_time: r2 !== void 0 ? [{ timestamp_nanos: r2 }] : [], from_subaccount: d2 === void 0 ? [] : [St(d2)] }), Me = ({ fromSubAccount: e5, to: c2, amount: t3, fee: o3, icrc1Memo: d2, createdAt: r2 }) => ({ to: c2, fee: ne(o3 ?? h$1), amount: t3, memo: ne(d2), created_at_time: ne(r2), from_subaccount: ne(e5) }), Ge = ({ fee: e5, createdAt: c2, icrc1Memo: t3, fromSubAccount: o3, expected_allowance: d2, expires_at: r2, amount: s2, ...N2 }) => ({ ...N2, fee: ne(e5 ?? h$1), memo: ne(t3), from_subaccount: ne(o3), created_at_time: ne(c2), amount: s2, expected_allowance: ne(d2), expires_at: ne(r2) }), Qe = ({ userPreferences: { metadata: { utcOffsetMinutes: e5, language: c2 }, deriveSpec: t3 }, ...o3 }) => ({ ...o3, user_preferences: { metadata: { language: c2, utc_offset_minutes: ne(e5) }, device_spec: u$2(t3) ? ne() : ne("GenericDisplay" in t3 ? { GenericDisplay: null } : { FieldsDisplay: null }) } });
-var O = class extends Error {
-}, R = class extends O {
-}, m = class extends O {
-}, T = class extends O {
-}, A3 = class extends R {
-  constructor(t3) {
+var $ = (e4) => ({ e8s: e4 }), J = ({ to: e4, amount: n3, memo: t2, fee: r2, fromSubAccount: i2, createdAt: c3 }) => ({ to: e4.toUint8Array(), fee: $(r2 ?? y), amount: $(n3), memo: t2 ?? BigInt(0), created_at_time: c3 !== void 0 ? [{ timestamp_nanos: c3 }] : [], from_subaccount: i2 === void 0 ? [] : [St(i2)] }), Q = ({ fromSubAccount: e4, to: n3, amount: t2, fee: r2, icrc1Memo: i2, createdAt: c3 }) => ({ to: n3, fee: ne$1(r2 ?? y), amount: t2, memo: ne$1(i2), created_at_time: ne$1(c3), from_subaccount: ne$1(e4) }), X = ({ fee: e4, createdAt: n3, icrc1Memo: t2, fromSubAccount: r2, expected_allowance: i2, expires_at: c3, amount: h2, ...T2 }) => ({ ...T2, fee: ne$1(e4 ?? y), memo: ne$1(t2), from_subaccount: ne$1(r2), created_at_time: ne$1(n3), amount: h2, expected_allowance: ne$1(i2), expires_at: ne$1(c3) }), j = ({ userPreferences: { metadata: { utcOffsetMinutes: e4, language: n3 }, deriveSpec: t2 }, ...r2 }) => ({ ...r2, user_preferences: { metadata: { language: n3, utc_offset_minutes: ne$1(e4) }, device_spec: u$1(t2) ? ne$1() : ne$1("GenericDisplay" in t2 ? { GenericDisplay: null } : { FieldsDisplay: null }) } });
+var u = class extends Error {
+}, a$1 = class a extends u {
+}, o$1 = class o extends u {
+}, d = class extends u {
+}, l2 = class extends a$1 {
+  constructor(t2) {
     super();
-    this.balance = t3;
+    this.balance = t2;
   }
-}, w2 = class extends R {
-  constructor(t3) {
+}, x2 = class extends a$1 {
+  constructor(t2) {
     super();
-    this.allowed_window_secs = t3;
+    this.allowed_window_secs = t2;
   }
-}, v$1 = class v extends R {
-}, B = class extends R {
-  constructor(t3) {
+}, g2 = class extends a$1 {
+}, b = class extends a$1 {
+  constructor(t2) {
     super();
-    this.duplicateOf = t3;
+    this.duplicateOf = t2;
   }
-}, k = class extends O {
-  constructor(t3) {
+}, m2 = class extends u {
+  constructor(t2) {
     super();
-    this.expectedFee = t3;
+    this.expectedFee = t2;
   }
-}, q = class extends m {
-  constructor(t3, o3) {
+}, _ = class extends o$1 {
+  constructor(t2, r2) {
     super();
-    this.message = t3;
-    this.error_code = o3;
+    this.message = t2;
+    this.error_code = r2;
   }
-}, Fe = class extends m {
-}, be = class extends m {
-  constructor(t3) {
+}, w2 = class extends o$1 {
+}, N = class extends o$1 {
+  constructor(t2) {
     super();
-    this.duplicateOf = t3;
+    this.duplicateOf = t2;
   }
-}, Ve = class extends m {
-  constructor(t3) {
+}, C2 = class extends o$1 {
+  constructor(t2) {
     super();
-    this.currentAllowance = t3;
+    this.currentAllowance = t2;
   }
-}, Ae = class extends m {
-}, ke = class extends m {
-}, he = class extends m {
-  constructor(t3) {
+}, D = class extends o$1 {
+}, B2 = class extends o$1 {
+}, S = class extends o$1 {
+  constructor(t2) {
     super();
-    this.ledgerTime = t3;
+    this.ledgerTime = t2;
   }
-}, we = class extends T {
-}, ve = class extends T {
-}, Be = class extends T {
-}, Je = (e5) => "TxDuplicate" in e5 ? new B(e5.TxDuplicate.duplicate_of) : "InsufficientFunds" in e5 ? new A3(e5.InsufficientFunds.balance.e8s) : "TxCreatedInFuture" in e5 ? new v$1() : "TxTooOld" in e5 ? new w2(Number(e5.TxTooOld.allowed_window_nanos)) : "BadFee" in e5 ? new k(e5.BadFee.expected_fee.e8s) : new R(`Unknown error type ${JSON.stringify(e5)}`), $e = (e5) => "Duplicate" in e5 ? new B(e5.Duplicate.duplicate_of) : "InsufficientFunds" in e5 ? new A3(e5.InsufficientFunds.balance) : "CreatedInFuture" in e5 ? new v$1() : "TooOld" in e5 ? new w2() : "BadFee" in e5 ? new k(e5.BadFee.expected_fee) : new R(`Unknown error type ${JSON.stringify(e5)}`), Ke = (e5) => "GenericError" in e5 ? new q(e5.GenericError.message, e5.GenericError.error_code) : "TemporarilyUnavailable" in e5 ? new Fe() : "Duplicate" in e5 ? new be(e5.Duplicate.duplicate_of) : "BadFee" in e5 ? new k(e5.BadFee.expected_fee) : "AllowanceChanged" in e5 ? new Ve(e5.AllowanceChanged.current_allowance) : "CreatedInFuture" in e5 ? new Ae() : "TooOld" in e5 ? new ke() : "Expired" in e5 ? new he(e5.Expired.ledger_time) : "InsufficientFunds" in e5 ? new A3(e5.InsufficientFunds.balance) : new m(`Unknown error type ${JSON.stringify(e5)}`), Ye = (e5) => "GenericError" in e5 ? new q(e5.GenericError.description, e5.GenericError.error_code) : "InsufficientPayment" in e5 ? new we(e5.InsufficientPayment.description) : "UnsupportedCanisterCall" in e5 ? new ve(e5.UnsupportedCanisterCall.description) : "ConsentMessageUnavailable" in e5 ? new Be(e5.ConsentMessageUnavailable.description) : new T(`Unknown error type ${JSON.stringify(e5)}`);
-var je = class e3 extends E$1 {
-  static create(c2 = {}) {
-    let t3 = c2.canisterId ?? r, { service: o3, certifiedService: d2 } = lt({ options: { ...c2, canisterId: t3 }, idlFactory: Ee, certifiedIdlFactory: Pe });
-    return new e3(t3, o3, d2);
+}, k = class extends d {
+}, q = class extends d {
+}, P = class extends d {
+}, K = (e4) => "TxDuplicate" in e4 ? new b(e4.TxDuplicate.duplicate_of) : "InsufficientFunds" in e4 ? new l2(e4.InsufficientFunds.balance.e8s) : "TxCreatedInFuture" in e4 ? new g2() : "TxTooOld" in e4 ? new x2(Number(e4.TxTooOld.allowed_window_nanos)) : "BadFee" in e4 ? new m2(e4.BadFee.expected_fee.e8s) : new a$1(`Unknown error type ${JSON.stringify(e4)}`), W = (e4) => "Duplicate" in e4 ? new b(e4.Duplicate.duplicate_of) : "InsufficientFunds" in e4 ? new l2(e4.InsufficientFunds.balance) : "CreatedInFuture" in e4 ? new g2() : "TooOld" in e4 ? new x2() : "BadFee" in e4 ? new m2(e4.BadFee.expected_fee) : new a$1(`Unknown error type ${JSON.stringify(e4)}`), Y = (e4) => "GenericError" in e4 ? new _(e4.GenericError.message, e4.GenericError.error_code) : "TemporarilyUnavailable" in e4 ? new w2() : "Duplicate" in e4 ? new N(e4.Duplicate.duplicate_of) : "BadFee" in e4 ? new m2(e4.BadFee.expected_fee) : "AllowanceChanged" in e4 ? new C2(e4.AllowanceChanged.current_allowance) : "CreatedInFuture" in e4 ? new D() : "TooOld" in e4 ? new B2() : "Expired" in e4 ? new S(e4.Expired.ledger_time) : "InsufficientFunds" in e4 ? new l2(e4.InsufficientFunds.balance) : new o$1(`Unknown error type ${JSON.stringify(e4)}`), z = (e4) => "GenericError" in e4 ? new _(e4.GenericError.description, e4.GenericError.error_code) : "InsufficientPayment" in e4 ? new k(e4.InsufficientPayment.description) : "UnsupportedCanisterCall" in e4 ? new q(e4.UnsupportedCanisterCall.description) : "ConsentMessageUnavailable" in e4 ? new P(e4.ConsentMessageUnavailable.description) : new d(`Unknown error type ${JSON.stringify(e4)}`);
+var ee = Principal$1.fromText("ryjl3-tyaaa-aaaaa-aaaba-cai");
+Principal$1.fromText("qhbym-qaaaa-aaaaa-aaafq-cai");
+var ne = (e4) => e4 instanceof p$1 ? e4 : p$1.fromHex(e4);
+var O = class e3 extends E$1 {
+  static create(n3 = {}) {
+    let t2 = n3.canisterId ?? ee, { service: r2, certifiedService: i2 } = lt({ options: { ...n3, canisterId: t2 }, idlFactory: Ho, certifiedIdlFactory: jo });
+    return new e3(t2, r2, i2);
   }
-  accountBalance = async ({ accountIdentifier: c2, certified: t3 = true }) => {
-    let o3 = f(c2);
-    return (await (t3 ? this.certifiedService : this.service).account_balance({ account: o3.toUint8Array() })).e8s;
+  accountBalance = async ({ accountIdentifier: n3, certified: t2 = true }) => {
+    let r2 = ne(n3);
+    return (await (t2 ? this.certifiedService : this.service).account_balance({ account: r2.toUint8Array() })).e8s;
   };
-  metadata = (c2) => {
-    let { icrc1_metadata: t3 } = this.caller(c2);
-    return t3();
+  metadata = (n3) => {
+    let { icrc1_metadata: t2 } = this.caller(n3);
+    return t2();
   };
-  transactionFee = async (c2 = { certified: false }) => {
-    let { transfer_fee: t3 } = this.caller(c2), { transfer_fee: { e8s: o3 } } = await t3({});
-    return o3;
+  transactionFee = async (n3 = { certified: false }) => {
+    let { transfer_fee: t2 } = this.caller(n3), { transfer_fee: { e8s: r2 } } = await t2({});
+    return r2;
   };
-  transfer = async (c2) => {
-    let t3 = Ue(c2), o3 = await this.certifiedService.transfer(t3);
-    if ("Err" in o3) throw Je(o3.Err);
-    return o3.Ok;
+  transfer = async (n3) => {
+    let t2 = J(n3), r2 = await this.certifiedService.transfer(t2);
+    if ("Err" in r2) throw K(r2.Err);
+    return r2.Ok;
   };
-  icrc1Transfer = async (c2) => {
-    let t3 = Me(c2), o3 = await this.certifiedService.icrc1_transfer(t3);
-    if ("Err" in o3) throw $e(o3.Err);
-    return o3.Ok;
+  icrc1Transfer = async (n3) => {
+    let t2 = Q(n3), r2 = await this.certifiedService.icrc1_transfer(t2);
+    if ("Err" in r2) throw W(r2.Err);
+    return r2.Ok;
   };
-  icrc2Approve = async (c2) => {
-    let { icrc2_approve: t3 } = this.caller({ certified: true }), o3 = await t3(Ge(c2));
-    if ("Err" in o3) throw Ke(o3.Err);
-    return o3.Ok;
+  icrc2Approve = async (n3) => {
+    let { icrc2_approve: t2 } = this.caller({ certified: true }), r2 = await t2(X(n3));
+    if ("Err" in r2) throw Y(r2.Err);
+    return r2.Ok;
   };
-  icrc21ConsentMessage = async (c2) => {
-    let { icrc21_canister_call_consent_message: t3 } = this.caller({ certified: true }), o3 = await t3(Qe(c2));
-    if ("Err" in o3) throw Ye(o3.Err);
-    return o3.Ok;
+  icrc21ConsentMessage = async (n3) => {
+    let { icrc21_canister_call_consent_message: t2 } = this.caller({ certified: true }), r2 = await t2(j(n3));
+    if ("Err" in r2) throw z(r2.Err);
+    return r2.Ok;
   };
 };
 class LedgerApi {
   async ledgerApi() {
     const agent = await createHttpAgent();
-    return je.create({
+    return O.create({
       agent
     });
   }
@@ -13112,7 +13526,7 @@ class LedgerApi {
     try {
       const agent = await createHttpAgent();
       const principal = await agent.getPrincipal();
-      const accountIdentifier = O$1.fromPrincipal({
+      const accountIdentifier = p$1.fromPrincipal({
         principal
       });
       const ledger = await this.ledgerApi();
@@ -13127,7 +13541,7 @@ class LedgerApi {
   async canisterBalance() {
     try {
       const canister = canisterId();
-      const accountIdentifier = O$1.fromPrincipal({
+      const accountIdentifier = p$1.fromPrincipal({
         principal: canister
       });
       const ledger = await this.ledgerApi();
@@ -13157,63 +13571,51 @@ class LedgerApi {
     }
   }
 }
-var e4 = class extends Error {
-}, n = class extends Error {
+var i = class extends Error {
 }, s = class extends Error {
 }, o2 = class extends Error {
-}, i2 = class extends Error {
-}, p = ({ Err: t3 }) => {
-  if ("Refunded" in t3) throw new e4(t3.Refunded.reason);
-  if ("InvalidTransaction" in t3) throw new n(t3.InvalidTransaction);
-  if ("Processing" in t3) throw new o2();
-  if ("TransactionTooOld" in t3) throw new i2();
-  if ("Other" in t3) throw new s(`Error in CMC with code ${t3.Other.error_code}: ${t3.Other.error_message}`);
-  yt(t3, `Unsupported error type ${JSON.stringify(t3, D$1)}`);
+}, n2 = class extends Error {
+}, c2 = class extends Error {
+}, p = ({ Err: t2 }) => {
+  if ("Refunded" in t2) throw new i(t2.Refunded.reason);
+  if ("InvalidTransaction" in t2) throw new s(t2.InvalidTransaction);
+  if ("Processing" in t2) throw new n2();
+  if ("TransactionTooOld" in t2) throw new c2();
+  if ("Other" in t2) throw new o2(`Error in CMC with code ${t2.Other.error_code}: ${t2.Other.error_message}`);
+  yt(t2, `Unsupported error type ${JSON.stringify(t2, D$3)}`);
 };
-var h = ({ IDL: t3 }) => {
-  let n2 = t3.Variant({ Set: t3.Principal, Unset: t3.Null }), e5 = t3.Text;
-  t3.Record({ exchange_rate_canister: t3.Opt(n2), cycles_ledger_canister_id: t3.Opt(t3.Principal), last_purged_notification: t3.Opt(t3.Nat64), governance_canister_id: t3.Opt(t3.Principal), minting_account_id: t3.Opt(e5), ledger_canister_id: t3.Opt(t3.Principal) });
-  let c2 = t3.Record({ subnet_type: t3.Opt(t3.Text) }), a2 = t3.Variant({ Filter: c2, Subnet: t3.Record({ subnet: t3.Principal }) }), p2 = t3.Variant({ controllers: t3.Null, public: t3.Null }), o3 = t3.Record({ freezing_threshold: t3.Opt(t3.Nat), wasm_memory_threshold: t3.Opt(t3.Nat), controllers: t3.Opt(t3.Vec(t3.Principal)), reserved_cycles_limit: t3.Opt(t3.Nat), log_visibility: t3.Opt(p2), wasm_memory_limit: t3.Opt(t3.Nat), memory_allocation: t3.Opt(t3.Nat), compute_allocation: t3.Opt(t3.Nat) }), l3 = t3.Record({ subnet_selection: t3.Opt(a2), settings: t3.Opt(o3), subnet_type: t3.Opt(t3.Text) }), _2 = t3.Variant({ Refunded: t3.Record({ create_error: t3.Text, refund_amount: t3.Nat }) }), d2 = t3.Variant({ Ok: t3.Principal, Err: _2 }), u2 = t3.Record({ xdr_permyriad_per_icp: t3.Nat64, timestamp_seconds: t3.Nat64 }), y2 = t3.Record({ certificate: t3.Vec(t3.Nat8), data: u2, hash_tree: t3.Vec(t3.Nat8) }), O2 = t3.Record({ data: t3.Vec(t3.Tuple(t3.Principal, t3.Vec(t3.Principal))) }), C2 = t3.Record({ data: t3.Vec(t3.Tuple(t3.Text, t3.Vec(t3.Principal))) }), r2 = t3.Nat64, g2 = t3.Record({ controller: t3.Principal, block_index: r2, subnet_selection: t3.Opt(a2), settings: t3.Opt(o3), subnet_type: t3.Opt(t3.Text) }), i3 = t3.Variant({ Refunded: t3.Record({ block_index: t3.Opt(r2), reason: t3.Text }), InvalidTransaction: t3.Text, Other: t3.Record({ error_message: t3.Text, error_code: t3.Nat64 }), Processing: t3.Null, TransactionTooOld: r2 }), N2 = t3.Variant({ Ok: t3.Principal, Err: i3 }), m2 = t3.Opt(t3.Vec(t3.Nat8)), b2 = t3.Opt(t3.Vec(t3.Nat8)), f2 = t3.Record({ block_index: r2, deposit_memo: m2, to_subaccount: b2 }), R2 = t3.Record({ balance: t3.Nat, block_index: t3.Nat, minted: t3.Nat }), P2 = t3.Variant({ Ok: R2, Err: i3 }), T2 = t3.Record({ block_index: r2, canister_id: t3.Principal }), x3 = t3.Nat, S2 = t3.Variant({ Ok: x3, Err: i3 });
-  return t3.Service({ create_canister: t3.Func([l3], [d2], []), get_build_metadata: t3.Func([], [t3.Text], []), get_default_subnets: t3.Func([], [t3.Vec(t3.Principal)], []), get_icp_xdr_conversion_rate: t3.Func([], [y2], []), get_principals_authorized_to_create_canisters_to_subnets: t3.Func([], [O2], []), get_subnet_types_to_subnets: t3.Func([], [C2], []), notify_create_canister: t3.Func([g2], [N2], []), notify_mint_cycles: t3.Func([f2], [P2], []), notify_top_up: t3.Func([T2], [S2], []) });
-};
-var v2 = ({ IDL: t3 }) => {
-  let n2 = t3.Variant({ Set: t3.Principal, Unset: t3.Null }), e5 = t3.Text;
-  t3.Record({ exchange_rate_canister: t3.Opt(n2), cycles_ledger_canister_id: t3.Opt(t3.Principal), last_purged_notification: t3.Opt(t3.Nat64), governance_canister_id: t3.Opt(t3.Principal), minting_account_id: t3.Opt(e5), ledger_canister_id: t3.Opt(t3.Principal) });
-  let c2 = t3.Record({ subnet_type: t3.Opt(t3.Text) }), a2 = t3.Variant({ Filter: c2, Subnet: t3.Record({ subnet: t3.Principal }) }), p2 = t3.Variant({ controllers: t3.Null, public: t3.Null }), o3 = t3.Record({ freezing_threshold: t3.Opt(t3.Nat), wasm_memory_threshold: t3.Opt(t3.Nat), controllers: t3.Opt(t3.Vec(t3.Principal)), reserved_cycles_limit: t3.Opt(t3.Nat), log_visibility: t3.Opt(p2), wasm_memory_limit: t3.Opt(t3.Nat), memory_allocation: t3.Opt(t3.Nat), compute_allocation: t3.Opt(t3.Nat) }), l3 = t3.Record({ subnet_selection: t3.Opt(a2), settings: t3.Opt(o3), subnet_type: t3.Opt(t3.Text) }), _2 = t3.Variant({ Refunded: t3.Record({ create_error: t3.Text, refund_amount: t3.Nat }) }), d2 = t3.Variant({ Ok: t3.Principal, Err: _2 }), u2 = t3.Record({ xdr_permyriad_per_icp: t3.Nat64, timestamp_seconds: t3.Nat64 }), y2 = t3.Record({ certificate: t3.Vec(t3.Nat8), data: u2, hash_tree: t3.Vec(t3.Nat8) }), O2 = t3.Record({ data: t3.Vec(t3.Tuple(t3.Principal, t3.Vec(t3.Principal))) }), C2 = t3.Record({ data: t3.Vec(t3.Tuple(t3.Text, t3.Vec(t3.Principal))) }), r2 = t3.Nat64, g2 = t3.Record({ controller: t3.Principal, block_index: r2, subnet_selection: t3.Opt(a2), settings: t3.Opt(o3), subnet_type: t3.Opt(t3.Text) }), i3 = t3.Variant({ Refunded: t3.Record({ block_index: t3.Opt(r2), reason: t3.Text }), InvalidTransaction: t3.Text, Other: t3.Record({ error_message: t3.Text, error_code: t3.Nat64 }), Processing: t3.Null, TransactionTooOld: r2 }), N2 = t3.Variant({ Ok: t3.Principal, Err: i3 }), m2 = t3.Opt(t3.Vec(t3.Nat8)), b2 = t3.Opt(t3.Vec(t3.Nat8)), f2 = t3.Record({ block_index: r2, deposit_memo: m2, to_subaccount: b2 }), R2 = t3.Record({ balance: t3.Nat, block_index: t3.Nat, minted: t3.Nat }), P2 = t3.Variant({ Ok: R2, Err: i3 }), T2 = t3.Record({ block_index: r2, canister_id: t3.Principal }), x3 = t3.Nat, S2 = t3.Variant({ Ok: x3, Err: i3 });
-  return t3.Service({ create_canister: t3.Func([l3], [d2], []), get_build_metadata: t3.Func([], [t3.Text], ["query"]), get_default_subnets: t3.Func([], [t3.Vec(t3.Principal)], ["query"]), get_icp_xdr_conversion_rate: t3.Func([], [y2], ["query"]), get_principals_authorized_to_create_canisters_to_subnets: t3.Func([], [O2], ["query"]), get_subnet_types_to_subnets: t3.Func([], [C2], ["query"]), notify_create_canister: t3.Func([g2], [N2], []), notify_mint_cycles: t3.Func([f2], [P2], []), notify_top_up: t3.Func([T2], [S2], []) });
-};
-var F = class t2 extends E$1 {
-  static create(n2) {
-    let { service: e5, certifiedService: s2, canisterId: c2 } = lt({ options: n2, idlFactory: v2, certifiedIdlFactory: h });
-    return new t2(c2, e5, s2);
+var a2 = class t extends E$1 {
+  static create(r2) {
+    let { service: e4, certifiedService: f2, canisterId: d2 } = lt({ options: r2, idlFactory: Eo, certifiedIdlFactory: qo });
+    return new t(d2, e4, f2);
   }
-  getIcpToCyclesConversionRate = async ({ certified: n2 } = {}) => {
-    let { data: e5 } = await this.caller({ certified: n2 }).get_icp_xdr_conversion_rate();
-    return e5.xdr_permyriad_per_icp;
+  getIcpToCyclesConversionRate = async ({ certified: r2 } = {}) => {
+    let { data: e4 } = await this.caller({ certified: r2 }).get_icp_xdr_conversion_rate();
+    return e4.xdr_permyriad_per_icp;
   };
-  notifyCreateCanister = async (n2) => {
-    let e5 = await this.service.notify_create_canister(n2);
-    if ("Err" in e5 && p(e5), "Ok" in e5) return e5.Ok;
-    throw new Error(`Unsupported response type in notifyCreateCanister ${JSON.stringify(e5)}`);
+  notifyCreateCanister = async (r2) => {
+    let e4 = await this.service.notify_create_canister(r2);
+    if ("Err" in e4 && p(e4), "Ok" in e4) return e4.Ok;
+    throw new Error(`Unsupported response type in notifyCreateCanister ${JSON.stringify(e4)}`);
   };
-  notifyTopUp = async (n2) => {
-    let e5 = await this.service.notify_top_up(n2);
-    if ("Err" in e5 && p(e5), "Ok" in e5) return e5.Ok;
-    throw new Error(`Unsupported response type in notifyTopUp ${JSON.stringify(e5)}`);
+  notifyTopUp = async (r2) => {
+    let e4 = await this.service.notify_top_up(r2);
+    if ("Err" in e4 && p(e4), "Ok" in e4) return e4.Ok;
+    throw new Error(`Unsupported response type in notifyTopUp ${JSON.stringify(e4)}`);
   };
-  getDefaultSubnets = ({ certified: n2 } = {}) => {
-    let { get_default_subnets: e5 } = this.caller({ certified: n2 });
-    return e5();
+  getDefaultSubnets = ({ certified: r2 } = {}) => {
+    let { get_default_subnets: e4 } = this.caller({ certified: r2 });
+    return e4();
   };
-  getSubnetTypesToSubnets = ({ certified: n2 } = {}) => {
-    let { get_subnet_types_to_subnets: e5 } = this.caller({ certified: n2 });
-    return e5();
+  getSubnetTypesToSubnets = ({ certified: r2 } = {}) => {
+    let { get_subnet_types_to_subnets: e4 } = this.caller({ certified: r2 });
+    return e4();
   };
 };
 class CMCApi {
   async cmcApi() {
     const agent = await createHttpAgent();
-    return F.create({
+    return a2.create({
       agent,
       canisterId: Principal$1.fromText(CMC_CANISTER_ID)
     });
@@ -13261,8 +13663,8 @@ class TopupManager {
     showLoading();
     try {
       await this.fetchAndRenderBalance();
-    } catch (e5) {
-      reportError(NETWORK_ERROR_MESSAGE, e5);
+    } catch (e4) {
+      reportError(NETWORK_ERROR_MESSAGE, e4);
     } finally {
       hideLoading();
     }
@@ -13284,8 +13686,8 @@ class TopupManager {
       const canisterIdString = canisterIdPrincipal.toString();
       await cmcApi.notifyTopUp(canisterIdString, blockHeight);
       await this.updateBalanceAndStatus();
-    } catch (e5) {
-      reportError(NETWORK_ERROR_MESSAGE, e5);
+    } catch (e4) {
+      reportError(NETWORK_ERROR_MESSAGE, e4);
     } finally {
       hideLoading();
     }
@@ -13358,7 +13760,7 @@ class ControllersManager {
     }
     const newController = Principal$1.fromText(principalText);
     const updatedControllers = [...this.controllersList, newController];
-    const controllerStrings = updatedControllers.map((c2) => c2.toString());
+    const controllerStrings = updatedControllers.map((c3) => c3.toString());
     const hasDuplicates = controllerStrings.length !== new Set(controllerStrings).size;
     if (hasDuplicates) {
       showError(DUPLICATE_CONTROLLER_MESSAGE);
@@ -13378,8 +13780,8 @@ class ControllersManager {
       this.controllersList = updatedControllers;
       clearInput("controller-input");
       this.renderControllersContent();
-    } catch (e5) {
-      reportError(NETWORK_ERROR_MESSAGE, e5);
+    } catch (e4) {
+      reportError(NETWORK_ERROR_MESSAGE, e4);
     } finally {
       hideLoading();
     }
@@ -13417,8 +13819,8 @@ class ControllersManager {
       this.controllersList = updatedControllers;
       clearInput("controller-input");
       this.renderControllersContent();
-    } catch (e5) {
-      reportError(NETWORK_ERROR_MESSAGE, e5);
+    } catch (e4) {
+      reportError(NETWORK_ERROR_MESSAGE, e4);
     } finally {
       hideLoading();
     }
@@ -13538,8 +13940,8 @@ class AlternativeOriginsManager {
         reportError("Unknown error adding alternative origin");
         reportError(UNKNOWN_ADD_ALT_ORIGIN_MESSAGE);
       }
-    } catch (e5) {
-      reportError(FAILED_ADD_ALT_ORIGIN_MESSAGE_PREFIX, e5);
+    } catch (e4) {
+      reportError(FAILED_ADD_ALT_ORIGIN_MESSAGE_PREFIX, e4);
     } finally {
       hideLoading();
     }
@@ -13563,8 +13965,8 @@ class AlternativeOriginsManager {
         reportError("Unknown error removing alternative origin");
         reportError(UNKNOWN_REMOVE_ALT_ORIGIN_MESSAGE);
       }
-    } catch (e5) {
-      reportError(FAILED_REMOVE_ALT_ORIGIN_MESSAGE_PREFIX, e5);
+    } catch (e4) {
+      reportError(FAILED_REMOVE_ALT_ORIGIN_MESSAGE_PREFIX, e4);
     } finally {
       hideLoading();
     }
@@ -13607,13 +14009,13 @@ class CanisterLogsManager {
         return `<li class="data-display">[${ts}] (#${idx})<br>${message}</li>`;
       }).join("");
       logsList.innerHTML = items;
-    } catch (e5) {
-      reportError(NETWORK_ERROR_MESSAGE, e5);
+    } catch (e4) {
+      reportError(NETWORK_ERROR_MESSAGE, e4);
     }
   }
 }
-function pad2(n2) {
-  return n2.toString().padStart(2, "0");
+function pad2(n3) {
+  return n3.toString().padStart(2, "0");
 }
 function formatSimpleDateTime(d2) {
   const yyyy = d2.getFullYear();
@@ -13654,8 +14056,8 @@ class TopUpRuleManager {
   async fetchAndRender() {
     try {
       this.render(await this.api.manageTopUpRule({ Get: null }));
-    } catch (e5) {
-      reportError(NETWORK_ERROR_MESSAGE, e5);
+    } catch (e4) {
+      reportError(NETWORK_ERROR_MESSAGE, e4);
     }
   }
   render(result) {
@@ -13683,8 +14085,8 @@ class TopUpRuleManager {
       });
       if ("Err" in res) return showError(res.Err);
       await this.fetchAndRender();
-    } catch (e5) {
-      reportError(TOP_UP_ERROR_PREFIX + " " + NETWORK_ERROR_MESSAGE, e5);
+    } catch (e4) {
+      reportError(TOP_UP_ERROR_PREFIX + " " + NETWORK_ERROR_MESSAGE, e4);
     } finally {
       hideLoading();
     }
@@ -13696,8 +14098,8 @@ class TopUpRuleManager {
       if ("Err" in res)
         return showError(TOP_UP_RULE_ERROR_PREFIX + " " + res.Err);
       await this.fetchAndRender();
-    } catch (e5) {
-      reportError(TOP_UP_ERROR_PREFIX + " " + NETWORK_ERROR_MESSAGE, e5);
+    } catch (e4) {
+      reportError(TOP_UP_ERROR_PREFIX + " " + NETWORK_ERROR_MESSAGE, e4);
     } finally {
       hideLoading();
     }

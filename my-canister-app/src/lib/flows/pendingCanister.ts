@@ -1,5 +1,5 @@
-import type { Principal } from '@dfinity/principal';
-import { Principal as PrincipalClass } from '@dfinity/principal';
+import type { Principal } from '@icp-sdk/core/principal';
+import { Principal as PrincipalClass } from '@icp-sdk/core/principal';
 
 const STORAGE_KEY = 'pending_canister_creation';
 

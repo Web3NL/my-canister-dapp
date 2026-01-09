@@ -1,19 +1,22 @@
-import { LedgerCanister, AccountIdentifier } from '@dfinity/ledger-icp';
+import {
+  IcpLedgerCanister,
+  AccountIdentifier,
+} from '@icp-sdk/canisters/ledger/icp';
 import { createHttpAgent } from '$lib/utils/agent';
 import { CREATE_CANISTER_MEMO, TRANSACTION_FEE } from '$lib/constants';
 import { authStore } from '$lib/stores/auth';
 import { cmcCreateCanisterAccount } from '$lib/utils/account';
 
 export class LedgerApi {
-  private ledger: LedgerCanister;
+  private ledger: IcpLedgerCanister;
 
-  private constructor(ledger: LedgerCanister) {
+  private constructor(ledger: IcpLedgerCanister) {
     this.ledger = ledger;
   }
 
   static async create(): Promise<LedgerApi> {
     const agent = await createHttpAgent();
-    const ledger = LedgerCanister.create({
+    const ledger = IcpLedgerCanister.create({
       agent,
     });
     return new LedgerApi(ledger);

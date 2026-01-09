@@ -4,7 +4,7 @@ import { formatIcpBalance, principalToSubaccount } from '../helpers';
 import { ICP_TX_FEE, TPUP_MEMO, CMC_CANISTER_ID } from '../constants';
 import { canisterId } from '../utils';
 import { StatusManager } from './status';
-import { Principal } from '@dfinity/principal';
+import { Principal } from '@icp-sdk/core/principal';
 import {
   INSUFFICIENT_BALANCE_MESSAGE,
   NETWORK_ERROR_MESSAGE,

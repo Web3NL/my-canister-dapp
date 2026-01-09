@@ -1,12 +1,15 @@
-import { LedgerCanister, AccountIdentifier } from '@dfinity/ledger-icp';
-import type { Principal } from '@dfinity/principal';
+import {
+  IcpLedgerCanister,
+  AccountIdentifier,
+} from '@icp-sdk/canisters/ledger/icp';
+import type { Principal } from '@icp-sdk/core/principal';
 import { createHttpAgent, canisterId } from '../utils';
 import { reportError, NETWORK_ERROR_MESSAGE } from '../error';
 
 export class LedgerApi {
-  private async ledgerApi(): Promise<LedgerCanister> {
+  private async ledgerApi(): Promise<IcpLedgerCanister> {
     const agent = await createHttpAgent();
-    return LedgerCanister.create({
+    return IcpLedgerCanister.create({
       agent,
     });
   }

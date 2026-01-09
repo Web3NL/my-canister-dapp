@@ -1,4 +1,4 @@
-import { Actor, type ActorSubclass } from '@dfinity/agent';
+import { Actor, type ActorSubclass } from '@icp-sdk/core/agent';
 import { createHttpAgent } from '$lib/utils/agent';
 import { idlFactory } from '$declarations/icp-index/icp-index.did.js';
 import type {
@@ -7,7 +7,7 @@ import type {
   Account,
 } from '$declarations/icp-index/icp-index.did.d.ts';
 import { INDEX_CANISTER_ID } from '$lib/constants';
-import type { Principal } from '@dfinity/principal';
+import type { Principal } from '@icp-sdk/core/principal';
 
 export class LedgerIndex {
   private indexCanister: ActorSubclass<_SERVICE>;

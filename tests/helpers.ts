@@ -1,7 +1,7 @@
 import { exec } from 'child_process';
 import { promisify } from 'util';
-import { AccountIdentifier } from '@dfinity/ledger-icp';
-import type { Principal } from '@dfinity/principal';
+import { AccountIdentifier } from '@icp-sdk/canisters/ledger/icp';
+import type { Principal } from '@icp-sdk/core/principal';
 import fs from 'fs';
 import path from 'path';
 import dotenv from 'dotenv';

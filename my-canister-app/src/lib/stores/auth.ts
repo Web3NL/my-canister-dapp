@@ -1,8 +1,8 @@
-import type { Principal } from '@dfinity/principal';
+import type { Principal } from '@icp-sdk/core/principal';
 import type { Readable } from 'svelte/store';
-import type { Identity } from '@dfinity/agent';
+import type { Identity } from '@icp-sdk/core/agent';
 import { writable } from 'svelte/store';
-import { AuthClient } from '@dfinity/auth-client';
+import { AuthClient } from '@icp-sdk/auth/client';
 import { IDENTITY_PROVIDER, MAX_TIME_TO_LIVE } from '$lib/constants';
 
 interface AuthStore extends Readable<Principal | null | undefined> {

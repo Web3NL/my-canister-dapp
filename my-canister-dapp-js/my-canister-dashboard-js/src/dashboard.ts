@@ -1,6 +1,6 @@
-import type { HttpAgent } from '@dfinity/agent';
-import type { Principal } from '@dfinity/principal';
-import { ICManagementCanister } from '@dfinity/ic-management';
+import type { HttpAgent } from '@icp-sdk/core/agent';
+import type { Principal } from '@icp-sdk/core/principal';
+import { IcManagementCanister } from '@icp-sdk/canisters/ic-management';
 import { MyDashboardBackend } from './actor';
 import { LOW_CYCLES_THRESHOLD } from './constants';
 
@@ -21,15 +21,13 @@ export type CheckCyclesBalanceResult = { ok: bigint } | { error: string };
  * MyCanisterDashboard class for Canister Dapp management
  */
 export class MyCanisterDashboard {
-  private icManagement: ICManagementCanister;
+  private icManagement: IcManagementCanister;
 
   private constructor(
     private agent: HttpAgent,
     private canisterId: Principal
   ) {
-    // Type assertion needed due to @dfinity/principal vs @icp-sdk/core Principal mismatch
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    this.icManagement = ICManagementCanister.create({ agent: this.agent as any });
+    this.icManagement = IcManagementCanister.create({ agent: this.agent });
   }
 
   /**
@@ -48,9 +46,8 @@ export class MyCanisterDashboard {
     try {
       const threshold = options?.threshold ?? LOW_CYCLES_THRESHOLD;
 
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const status = await this.icManagement.canisterStatus({
-        canisterId: this.canisterId as any,
+        canisterId: this.canisterId,
       });
       const cycles = status.cycles;
 

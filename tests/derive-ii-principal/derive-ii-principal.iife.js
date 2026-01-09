@@ -336,7 +336,6 @@ var __privateSet = (obj, member, value, setter) => (__accessCheck(obj, member, "
     return (crc ^ -1) >>> 0;
   }
   const crypto$1 = typeof globalThis === "object" && "crypto" in globalThis ? globalThis.crypto : void 0;
-  /*! noble-hashes - MIT License (c) 2022 Paul Miller (paulmillr.com) */
   function isBytes(a) {
     return a instanceof Uint8Array || ArrayBuffer.isView(a) && a.constructor.name === "Uint8Array";
   }
@@ -1475,6 +1474,7 @@ Call context:
     const result = sha256(concatenated);
     return result;
   }
+  new TextEncoder().encode("\ric-state-root");
   const IC_REQUEST_DOMAIN_SEPARATOR = new TextEncoder().encode("\nic-request");
   new TextEncoder().encode("\vic-response");
   const IC_REQUEST_AUTH_DELEGATION_DOMAIN_SEPARATOR = new TextEncoder().encode("ic-request-auth-delegation");
@@ -1519,7 +1519,6 @@ Call context:
       };
     }
   }
-  /*! noble-curves - MIT License (c) 2022 Paul Miller (paulmillr.com) */
   const _0n$3 = /* @__PURE__ */ BigInt(0);
   const _1n$4 = /* @__PURE__ */ BigInt(1);
   function _abool2(value, title = "") {
@@ -1620,7 +1619,6 @@ Call context:
       return computed;
     };
   }
-  /*! noble-curves - MIT License (c) 2022 Paul Miller (paulmillr.com) */
   const _0n$2 = BigInt(0), _1n$3 = BigInt(1), _2n$2 = /* @__PURE__ */ BigInt(2), _3n = /* @__PURE__ */ BigInt(3);
   const _4n = /* @__PURE__ */ BigInt(4), _5n$1 = /* @__PURE__ */ BigInt(5), _7n = /* @__PURE__ */ BigInt(7);
   const _8n$2 = /* @__PURE__ */ BigInt(8), _9n = /* @__PURE__ */ BigInt(9), _16n = /* @__PURE__ */ BigInt(16);
@@ -1937,7 +1935,6 @@ Call context:
     });
     return Object.freeze(f);
   }
-  /*! noble-curves - MIT License (c) 2022 Paul Miller (paulmillr.com) */
   const _0n$1 = BigInt(0);
   const _1n$2 = BigInt(1);
   function negateCt(condition, item) {
@@ -2199,7 +2196,6 @@ Call context:
     CURVE = Object.freeze(Object.assign({}, CURVE));
     return { CURVE, Fp: Fp2, Fn };
   }
-  /*! noble-curves - MIT License (c) 2022 Paul Miller (paulmillr.com) */
   const _0n = BigInt(0), _1n$1 = BigInt(1), _2n$1 = BigInt(2), _8n$1 = BigInt(8);
   function isEdValidXY(Fp2, CURVE, x, y) {
     const x2 = Fp2.sqr(x);
@@ -2679,7 +2675,6 @@ Call context:
     const EDDSA = eddsa(Point, hash, eddsaOpts);
     return _eddsa_new_output_to_legacy(c, EDDSA);
   }
-  /*! noble-curves - MIT License (c) 2022 Paul Miller (paulmillr.com) */
   const _1n = BigInt(1), _2n = BigInt(2);
   BigInt(3);
   const _5n = BigInt(5), _8n = BigInt(8);
@@ -3462,7 +3457,7 @@ Call context:
      * @param options.scrollDebounce scroll debounce time in ms
      */
     static create(options = {}) {
-      return new this(options);
+      return new IdleManager(options);
     }
     /**
      * @protected
@@ -3474,14 +3469,14 @@ Call context:
       this.idleTimeout = idleTimeout;
       const _resetTimer = this._resetTimer.bind(this);
       window.addEventListener("load", _resetTimer, true);
-      events.forEach(function(name) {
+      events.forEach((name) => {
         document.addEventListener(name, _resetTimer, true);
       });
       const debounce = (func, wait) => {
         let timeout;
         return (...args) => {
           const context = this;
-          const later = function() {
+          const later = () => {
             timeout = void 0;
             func.apply(context, args);
           };
@@ -3508,10 +3503,12 @@ Call context:
       clearTimeout(this.timeoutID);
       window.removeEventListener("load", this._resetTimer, true);
       const _resetTimer = this._resetTimer.bind(this);
-      events.forEach(function(name) {
+      events.forEach((name) => {
         document.removeEventListener(name, _resetTimer, true);
       });
-      this.callbacks.forEach((cb) => cb());
+      this.callbacks.forEach((cb) => {
+        cb();
+      });
     }
     /**
      * Resets the timeouts during cleanup
@@ -3728,9 +3725,9 @@ Call context:
   const AUTH_DB_NAME = "auth-client-db";
   const OBJECT_STORE_NAME = "ic-keyval";
   const _openDbStore = async (dbName = AUTH_DB_NAME, storeName = OBJECT_STORE_NAME, version) => {
-    if (isBrowser && localStorage?.getItem(KEY_STORAGE_DELEGATION)) {
-      localStorage.removeItem(KEY_STORAGE_DELEGATION);
-      localStorage.removeItem(KEY_STORAGE_KEY);
+    if (globalThis.localStorage?.getItem(KEY_STORAGE_DELEGATION)) {
+      globalThis.localStorage.removeItem(KEY_STORAGE_DELEGATION);
+      globalThis.localStorage.removeItem(KEY_STORAGE_KEY);
     }
     return await openDB(dbName, version, {
       upgrade: (database) => {
@@ -3751,8 +3748,11 @@ Call context:
     return await db.delete(storeName, key);
   }
   class IdbKeyVal {
-    _db;
-    _storeName;
+    // Do not use - instead prefer create
+    constructor(_db, _storeName) {
+      this._db = _db;
+      this._storeName = _storeName;
+    }
     /**
      * @param {DBCreateOptions} options - DBCreateOptions
      * @param {DBCreateOptions['dbName']} options.dbName name for the indexeddb database
@@ -3762,14 +3762,13 @@ Call context:
      * @param {DBCreateOptions['version']} options.version version of the database. Increment to safely upgrade
      */
     static async create(options) {
-      const { dbName = AUTH_DB_NAME, storeName = OBJECT_STORE_NAME, version = DB_VERSION } = options ?? {};
+      const {
+        dbName = AUTH_DB_NAME,
+        storeName = OBJECT_STORE_NAME,
+        version = DB_VERSION
+      } = options ?? {};
       const db = await _openDbStore(dbName, storeName, version);
       return new IdbKeyVal(db, storeName);
-    }
-    // Do not use - instead prefer create
-    constructor(_db, _storeName) {
-      this._db = _db;
-      this._storeName = _storeName;
     }
     /**
      * Basic setter
@@ -3804,10 +3803,7 @@ Call context:
   const KEY_STORAGE_DELEGATION = "delegation";
   const KEY_VECTOR = "iv";
   const DB_VERSION = 1;
-  const isBrowser = typeof window !== "undefined";
   class LocalStorage {
-    prefix;
-    _localStorage;
     constructor(prefix = "ic-", _localStorage) {
       this.prefix = prefix;
       this._localStorage = _localStorage;
@@ -3827,7 +3823,7 @@ Call context:
       if (this._localStorage) {
         return this._localStorage;
       }
-      const ls = typeof window === "undefined" ? typeof global === "undefined" ? typeof self === "undefined" ? void 0 : self.localStorage : global.localStorage : window.localStorage;
+      const ls = globalThis.localStorage;
       if (!ls) {
         throw new Error("Could not find local storage.");
       }
@@ -3887,14 +3883,17 @@ Call context:
   const INTERRUPT_CHECK_INTERVAL = 500;
   const ERROR_USER_INTERRUPT = "UserInterrupt";
   class AuthClient {
-    _identity;
-    _key;
-    _chain;
-    _storage;
-    idleManager;
-    _createOptions;
-    _idpWindow;
-    _eventHandler;
+    constructor(_identity, _key, _chain, _storage, idleManager, _createOptions, _idpWindow, _eventHandler) {
+      this._identity = _identity;
+      this._key = _key;
+      this._chain = _chain;
+      this._storage = _storage;
+      this.idleManager = idleManager;
+      this._createOptions = _createOptions;
+      this._idpWindow = _idpWindow;
+      this._eventHandler = _eventHandler;
+      this._registerDefaultIdleCallback();
+    }
     /**
      * Create an AuthClient to manage authentication and identity
      * @param {AuthClientCreateOptions} options - Options for creating an {@link AuthClient}
@@ -3922,7 +3921,7 @@ Call context:
         key = options.identity;
       } else {
         let maybeIdentityStorage = await storage.get(KEY_STORAGE_KEY);
-        if (!maybeIdentityStorage && isBrowser) {
+        if (!maybeIdentityStorage) {
           try {
             const fallbackLocalStorage = new LocalStorage();
             const localChain = await fallbackLocalStorage.get(KEY_STORAGE_DELEGATION);
@@ -3936,7 +3935,7 @@ Call context:
               await fallbackLocalStorage.remove(KEY_STORAGE_KEY);
             }
           } catch (error) {
-            console.error("error while attempting to recover localstorage: " + error);
+            console.error(`error while attempting to recover localstorage: ${error}`);
           }
         }
         if (maybeIdentityStorage) {
@@ -3960,7 +3959,9 @@ Call context:
         try {
           const chainStorage = await storage.get(KEY_STORAGE_DELEGATION);
           if (typeof chainStorage === "object" && chainStorage !== null) {
-            throw new Error("Delegation chain is incorrectly stored. A delegation chain should be stored as a string.");
+            throw new Error(
+              "Delegation chain is incorrectly stored. A delegation chain should be stored as a string."
+            );
           }
           if (options.identity) {
             identity = options.identity;
@@ -3992,27 +3993,17 @@ Call context:
       if (!key) {
         if (keyType === ED25519_KEY_LABEL) {
           key = Ed25519KeyIdentity.generate();
-          await storage.set(KEY_STORAGE_KEY, JSON.stringify(key.toJSON()));
         } else {
           if (options.storage && keyType === ECDSA_KEY_LABEL) {
-            console.warn(`You are using a custom storage provider that may not support CryptoKey storage. If you are using a custom storage provider that does not support CryptoKey storage, you should use '${ED25519_KEY_LABEL}' as the key type, as it can serialize to a string`);
+            console.warn(
+              `You are using a custom storage provider that may not support CryptoKey storage. If you are using a custom storage provider that does not support CryptoKey storage, you should use '${ED25519_KEY_LABEL}' as the key type, as it can serialize to a string`
+            );
           }
           key = await ECDSAKeyIdentity.generate();
-          await storage.set(KEY_STORAGE_KEY, key.getKeyPair());
         }
+        await persistKey(storage, key);
       }
-      return new this(identity, key, chain, storage, idleManager, options);
-    }
-    constructor(_identity, _key, _chain, _storage, idleManager, _createOptions, _idpWindow, _eventHandler) {
-      this._identity = _identity;
-      this._key = _key;
-      this._chain = _chain;
-      this._storage = _storage;
-      this.idleManager = idleManager;
-      this._createOptions = _createOptions;
-      this._idpWindow = _idpWindow;
-      this._eventHandler = _eventHandler;
-      this._registerDefaultIdleCallback();
+      return new AuthClient(identity, key, chain, storage, idleManager, options);
     }
     _registerDefaultIdleCallback() {
       const idleOptions = this._createOptions?.idleOptions;
@@ -4026,11 +4017,18 @@ Call context:
     async _handleSuccess(message, onSuccess) {
       const delegations = message.delegations.map((signedDelegation) => {
         return {
-          delegation: new Delegation(signedDelegation.delegation.pubkey, signedDelegation.delegation.expiration, signedDelegation.delegation.targets),
+          delegation: new Delegation(
+            signedDelegation.delegation.pubkey,
+            signedDelegation.delegation.expiration,
+            signedDelegation.delegation.targets
+          ),
           signature: signedDelegation.signature
         };
       });
-      const delegationChain = DelegationChain.fromDelegations(delegations, message.userPublicKey);
+      const delegationChain = DelegationChain.fromDelegations(
+        delegations,
+        message.userPublicKey
+      );
       const key = this._key;
       if (!key) {
         return;
@@ -4052,6 +4050,7 @@ Call context:
       if (this._chain) {
         await this._storage.set(KEY_STORAGE_DELEGATION, JSON.stringify(this._chain.toJSON()));
       }
+      await persistKey(this._storage, this._key);
       onSuccess?.(message);
     }
     getIdentity() {
@@ -4088,7 +4087,9 @@ Call context:
     async login(options) {
       const loginOptions = mergeLoginOptions(this._createOptions?.loginOptions, options);
       const maxTimeToLive = loginOptions?.maxTimeToLive ?? DEFAULT_MAX_TIME_TO_LIVE;
-      const identityProviderUrl = new URL(loginOptions?.identityProvider?.toString() || IDENTITY_PROVIDER_DEFAULT);
+      const identityProviderUrl = new URL(
+        loginOptions?.identityProvider?.toString() || IDENTITY_PROVIDER_DEFAULT
+      );
       identityProviderUrl.hash = IDENTITY_PROVIDER_ENDPOINT;
       this._idpWindow?.close();
       this._removeEventListener();
@@ -4097,7 +4098,11 @@ Call context:
         ...loginOptions
       });
       window.addEventListener("message", this._eventHandler);
-      this._idpWindow = window.open(identityProviderUrl.toString(), "idpWindow", loginOptions?.windowOpenerFeatures) ?? void 0;
+      this._idpWindow = window.open(
+        identityProviderUrl.toString(),
+        "idpWindow",
+        loginOptions?.windowOpenerFeatures
+      ) ?? void 0;
       const checkInterruption = () => {
         if (this._idpWindow) {
           if (this._idpWindow.closed) {
@@ -4185,6 +4190,19 @@ Call context:
       ...otherLoginOptions,
       customValues
     };
+  }
+  function toStoredKey(key) {
+    if (key instanceof ECDSAKeyIdentity) {
+      return key.getKeyPair();
+    }
+    if (key instanceof Ed25519KeyIdentity) {
+      return JSON.stringify(key.toJSON());
+    }
+    throw new Error("Unsupported key type");
+  }
+  async function persistKey(storage, key) {
+    const serialized = toStoredKey(key);
+    await storage.set(KEY_STORAGE_KEY, serialized);
   }
   async function performAuth(identityProvider, derivationOrigin) {
     return new Promise((resolve, reject) => {

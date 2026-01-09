@@ -5,7 +5,7 @@
   import type { ProgressStep } from '@dfinity/gix-components';
   import { LedgerApi } from '$lib/api/ledgerIcp';
   import { formatIcpBalance } from '$lib/utils/format';
-  import { Principal } from '@dfinity/principal';
+  import { Principal } from '@icp-sdk/core/principal';
   import {
     createNewCanister,
     installAndTakeControl,

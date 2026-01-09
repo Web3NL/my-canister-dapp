@@ -6,7 +6,7 @@ import {
   transferToPrincipal,
   saveTestData,
 } from '../helpers.js';
-import { Principal } from '@dfinity/principal';
+import { Principal } from '@icp-sdk/core/principal';
 
 // Load global dfx environment variables
 loadDfxEnv();

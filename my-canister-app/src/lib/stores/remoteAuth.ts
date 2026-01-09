@@ -1,4 +1,4 @@
-import type { Principal } from '@dfinity/principal';
+import type { Principal } from '@icp-sdk/core/principal';
 import type { Readable } from 'svelte/store';
 import { writable } from 'svelte/store';
 import {
@@ -7,8 +7,7 @@ import {
 } from '$lib/remoteAuthentication/remoteAuthClient';
 
 interface RemoteAuthStore
-  extends Readable<Principal | null | undefined>,
-    RemoteAuthClient {}
+  extends Readable<Principal | null | undefined>, RemoteAuthClient {}
 
 async function createRemoteAuthStore(): Promise<RemoteAuthStore> {
   const { subscribe, set } = writable<Principal | null | undefined>(undefined);

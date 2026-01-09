@@ -1,4 +1,4 @@
-import type { ActorSubclass, HttpAgent } from '@dfinity/agent';
+import type { ActorSubclass, HttpAgent } from '@icp-sdk/core/agent';
 import {
   createMyCanisterActor,
   type MyDashboardService as CanisterApiService,
