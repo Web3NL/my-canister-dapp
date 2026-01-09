@@ -1,6 +1,5 @@
 #!/bin/bash
-
-set -e
+set -euo pipefail
 
 # Check if version bump type was provided
 if [ -z "$1" ]; then

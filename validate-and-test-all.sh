@@ -1,6 +1,8 @@
 #!/bin/bash
+set -euo pipefail
 
-set -e
+# Source shared constants
+source "$(dirname "$0")/scripts/constants.sh"
 
 # Minimal total runtime reporting (MM:SS)
 SCRIPT_START_TIME=$(date +%s)
@@ -36,8 +38,8 @@ fi
 if [ "$SKIP_DFX_BOOTSTRAP_FLAG" != "true" ]; then
     echo "Starting DFX bootstrap"
 
-    dfxvm install 0.30.1
-    dfxvm default 0.30.1
+    dfxvm install "$DFX_VERSION"
+    dfxvm default "$DFX_VERSION"
 
     ./scripts/setup-dfx-identity.sh
 

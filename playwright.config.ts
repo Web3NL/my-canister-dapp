@@ -38,10 +38,12 @@ export default defineConfig({
     },
     {
       name: 'create-ii-account',
+      testDir: './test-fixtures/ii-account',
       testMatch: /.*create-ii-account.*\.spec\.ts/,
     },
     {
       name: 'derive-ii-principal',
+      testDir: './test-fixtures/ii-principal-derivation',
       testMatch: /.*derive-ii-principal.*\.spec\.ts/,
     },
   ],

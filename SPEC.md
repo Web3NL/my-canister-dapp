@@ -341,8 +341,110 @@ LOCAL_HOST = "http://localhost:8080"
 
 ---
 
+## 9. Development & Testing Infrastructure
+
+This project combines several unconventional technologies in unusual ways, requiring a specialized build and test pipeline. This section documents the pipeline for developers and AI systems.
+
+### 9.1 Why This Pipeline Exists
+
+The User-Owned Canister pattern requires solving several problems that don't exist in typical web development:
+
+1. **Principal Derivation**: Internet Identity derives different principals for different domains. Testing requires obtaining principals at multiple origins.
+2. **Certified Assets**: HTTP responses must be cryptographically certified by the canister.
+3. **Local Infrastructure**: Development requires mock versions of ICP Ledger, Cycles Minting Canister, and Internet Identity.
+4. **Dual Environment Testing**: The same frontend must work both in Vite dev server and deployed as canister assets.
+
+### 9.2 Pipeline Overview
+
+```
+validate-and-test-all.sh
+├── scripts/check.sh                    # Lint, format, typecheck (Rust + JS)
+├── DFX Bootstrap
+│   ├── dfx-env/deploy-all.sh           # Deploy fake-cmc, ledger, index, II
+│   └── scripts/setup-dfx-identity.sh   # Create deterministic test identity
+├── scripts/setup-dashboard-dev-env.sh  # II principal derivation (see 9.3)
+│   ├── Create my-hello-world canister
+│   ├── Run create-ii-account fixture
+│   ├── Run derive-ii-principal fixture (x2 origins)
+│   └── Set canister controllers
+├── scripts/generate-registry-dev.sh    # Transform GitHub URLs → local paths
+├── dfx deploy my-canister-app
+├── scripts/run-test.sh                 # Unit tests (npm + cargo)
+└── scripts/run-test-e2e.sh             # E2E tests (Playwright)
+```
+
+### 9.3 Internet Identity Test Fixtures
+
+Located in `test-fixtures/` (not `tests/`), these are **infrastructure utilities**, not tests:
+
+| Fixture | Purpose | Output |
+|---------|---------|--------|
+| `ii-account/create-ii-account.spec.ts` | Creates II account via Playwright automation | `test-output/ii-anchor.txt` |
+| `ii-principal-derivation/derive-ii-principal.spec.ts` | Derives principal at a specified origin | `test-output/derived-ii-principal-*.txt` |
+| `ii-principal-derivation/derive-ii-principal-prod.spec.ts` | Manual derivation for production II | Interactive |
+
+**Why these exist**: E2E tests need to authenticate as a user. Internet Identity derives principals per-origin, so we must:
+1. Create an II account once
+2. Derive principals at each test origin (Vite dev server, dfx canister)
+3. Set those principals as canister controllers before running E2E tests
+
+The `derive-ii-principal.ts` source is bundled into an IIFE (`derive-ii-principal.iife.js`) that can be injected into any page to perform II authentication.
+
+### 9.4 Local Infrastructure
+
+`dfx-env/deploy-all.sh` deploys mock system canisters with hardcoded IDs:
+
+| Canister | ID | Purpose |
+|----------|-----|---------|
+| icp-ledger | `ryjl3-tyaaa-aaaaa-aaaba-cai` | Token transfers, balance queries |
+| icp-index | `qhbym-qaaaa-aaaaa-aaafq-cai` | Transaction indexing |
+| fake-cmc | `rkp4c-7iaaa-aaaaa-aaaca-cai` | Mock Cycles Minting Canister |
+| internet-identity | `rdmx6-jaaaa-aaaaa-aaadq-cai` | Authentication |
+
+**fake-cmc**: A custom Rust canister that simulates `notify_create_canister` without requiring real cycles. Essential for testing the canister creation flow.
+
+### 9.5 Test Categories
+
+**E2E Tests** (in `tests/`):
+
+| Directory | Tests |
+|-----------|-------|
+| `canister-dashboard-frontend/` | Dashboard UI: topup, controllers, alternative-origins, topup-rule |
+| `my-canister-app/` | Full installer flow: fund → create → install → transfer |
+| `my-hello-world-frontend/` | Example dapp functionality |
+
+**Unit Tests** (via `scripts/run-test.sh`):
+- npm workspace tests (vitest)
+- Rust tests with PocketIC (`cargo test -p canister-dapp-test`)
+
+### 9.6 Dual Environment Testing
+
+E2E tests run in two configurations:
+
+1. **Vite Dev Server** (`localhost:5173`): Dashboard served by Vite with hot reload
+2. **DFX Canister** (`<id>.localhost:8080`): Dashboard served as certified canister assets
+
+This ensures the dashboard works in both development and production. Playwright projects in `playwright.config.ts` handle the routing.
+
+### 9.7 Registry Configuration
+
+The wasm registry (`registry.json`) contains GitHub URLs for production:
+```json
+"url": "https://raw.githubusercontent.com/Web3NL/my-canister-dapp/<hash>/wasm/my-hello-world.wasm"
+```
+
+`scripts/generate-registry-dev.sh` transforms these to local paths for development:
+```json
+"url": "wasm/my-hello-world.wasm"
+```
+
+Output: `registry-dev.json` used by the local my-canister-app instance.
+
+---
+
 ## Document History
 
 | Version | Date | Changes |
 |---------|------|---------|
+| 1.1 | 2026-01-09 | Added Section 9: Development & Testing Infrastructure |
 | 1.0 | 2026-01-08 | Initial specification |

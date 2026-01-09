@@ -1,6 +1,5 @@
 #!/bin/bash
-
-set -e
+set -euo pipefail
 
 echo "🔍 Running prerelease validation checks..."
 
