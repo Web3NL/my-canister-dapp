@@ -23,7 +23,9 @@ class AuthManager {
   private isAuthenticated = false;
 
   async init(): Promise<boolean> {
-    this.authClient = await AuthClient.create();
+    this.authClient = await AuthClient.create({
+      idleOptions: { disableIdle: true },
+    });
 
     if (await this.authClient.isAuthenticated()) {
       await this.updateAuthState();

@@ -18,7 +18,9 @@ async function createAuthStore(): Promise<AuthStore> {
   let authClient: AuthClient | null = null;
 
   const init = async () => {
-    authClient = await AuthClient.create();
+    authClient = await AuthClient.create({
+      idleOptions: { disableIdle: true },
+    });
     const isAuthenticated = await authClient.isAuthenticated();
     if (isAuthenticated) {
       const identity = authClient.getIdentity();
@@ -33,7 +35,9 @@ async function createAuthStore(): Promise<AuthStore> {
   return {
     subscribe,
     login: async () => {
-      authClient ??= await AuthClient.create();
+      authClient ??= await AuthClient.create({
+        idleOptions: { disableIdle: true },
+      });
 
       await authClient.login({
         identityProvider: IDENTITY_PROVIDER,
@@ -51,7 +55,9 @@ async function createAuthStore(): Promise<AuthStore> {
       }
     },
     getIdentity: async () => {
-      authClient ??= await AuthClient.create();
+      authClient ??= await AuthClient.create({
+        idleOptions: { disableIdle: true },
+      });
       const isAuthenticated = await authClient.isAuthenticated();
       if (!isAuthenticated) {
         await authClient.logout();
@@ -61,7 +67,9 @@ async function createAuthStore(): Promise<AuthStore> {
       return authClient.getIdentity();
     },
     getPrincipal: async () => {
-      authClient ??= await AuthClient.create();
+      authClient ??= await AuthClient.create({
+        idleOptions: { disableIdle: true },
+      });
       const isAuthenticated = await authClient.isAuthenticated();
       if (!isAuthenticated) {
         await authClient.logout();

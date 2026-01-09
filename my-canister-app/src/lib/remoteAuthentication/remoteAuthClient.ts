@@ -32,6 +32,7 @@ export class RemoteAuthClientImpl implements RemoteAuthClient {
     return await AuthClient.create({
       storage: this.storage,
       keyType: 'Ed25519',
+      idleOptions: { disableIdle: true },
     });
   }
 

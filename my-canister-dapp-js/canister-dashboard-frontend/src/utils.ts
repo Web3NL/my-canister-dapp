@@ -28,7 +28,9 @@ export function canisterId(): Principal {
 
 export async function createHttpAgent(): Promise<HttpAgent> {
   try {
-    const authClient = await AuthClient.create();
+    const authClient = await AuthClient.create({
+      idleOptions: { disableIdle: true },
+    });
     const config = getConfig();
 
     const identity = authClient.getIdentity();

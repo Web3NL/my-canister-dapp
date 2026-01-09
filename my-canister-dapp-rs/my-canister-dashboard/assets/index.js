@@ -12953,7 +12953,9 @@ function canisterId() {
 }
 async function createHttpAgent() {
   try {
-    const authClient = await AuthClient.create();
+    const authClient = await AuthClient.create({
+      idleOptions: { disableIdle: true }
+    });
     const config = getConfig();
     const identity = authClient.getIdentity();
     const agent = await HttpAgent.create({
@@ -12993,12 +12995,16 @@ class AuthManager {
   }
   static async create() {
     const instance = new AuthManager();
-    instance.authClient = await AuthClient.create();
+    instance.authClient = await AuthClient.create({
+      idleOptions: { disableIdle: true }
+    });
     return instance;
   }
   async ensureAuthClient() {
     if (!this.authClient) {
-      this.authClient = await AuthClient.create();
+      this.authClient = await AuthClient.create({
+        idleOptions: { disableIdle: true }
+      });
     }
     return this.authClient;
   }

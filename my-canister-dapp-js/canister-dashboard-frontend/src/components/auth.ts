@@ -19,13 +19,17 @@ export class AuthManager {
 
   static async create(): Promise<AuthManager> {
     const instance = new AuthManager();
-    instance.authClient = await AuthClient.create();
+    instance.authClient = await AuthClient.create({
+      idleOptions: { disableIdle: true },
+    });
     return instance;
   }
 
   private async ensureAuthClient(): Promise<AuthClient> {
     if (!this.authClient) {
-      this.authClient = await AuthClient.create();
+      this.authClient = await AuthClient.create({
+        idleOptions: { disableIdle: true },
+      });
     }
     return this.authClient;
   }

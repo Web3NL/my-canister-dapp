@@ -36,8 +36,8 @@ fi
 if [ "$SKIP_DFX_BOOTSTRAP_FLAG" != "true" ]; then
     echo "Starting DFX bootstrap"
 
-    dfxvm install 0.28.0
-    dfxvm default 0.28.0
+    dfxvm install 0.30.1
+    dfxvm default 0.30.1
 
     ./scripts/setup-dfx-identity.sh
 
