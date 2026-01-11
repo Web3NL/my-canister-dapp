@@ -116,9 +116,6 @@ class Dashboard {
   }
 
   private setState(newState: DashboardState): void {
-    console.log(
-      `Dashboard state transition: ${this.currentState} -> ${newState}`
-    );
     this.currentState = newState;
   }
 
