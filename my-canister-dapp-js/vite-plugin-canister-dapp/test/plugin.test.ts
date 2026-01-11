@@ -25,7 +25,7 @@ describe('canisterDappEnvironmentConfig', () => {
       expect(viteConfig.define?.__CANISTER_DAPP_DEV_CONFIG__).toBe(
         JSON.stringify({
           host: 'http://localhost:8080',
-          identityProvider: 'http://rdmx6-jaaaa-aaaaa-aaadq-cai.localhost:8080',
+          identityProvider: 'http://uxrrr-q7777-77774-qaaaq-cai.localhost:8080',
         })
       );
       expect(viteConfig.define?.__CANISTER_DAPP_PROD_CONFIG__).toBe(

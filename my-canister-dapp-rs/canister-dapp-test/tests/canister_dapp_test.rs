@@ -2,7 +2,7 @@ use candid::Principal;
 use canister_dapp_test::{AssetHashes, validate_frontend_assets, *};
 use ic_cdk::management_canister::CanisterSettings;
 use ic_http_certification::{HttpRequest, HttpResponse};
-use ic_ledger_types::{AccountIdentifier, Subaccount};
+use ic_ledger_types::{AccountIdentifier, Memo, Subaccount, Tokens, TransferArgs};
 use my_canister_dashboard::CyclesAmount;
 use my_canister_dashboard::{
     ALTERNATIVE_ORIGINS_PATH, CANISTER_DASHBOARD_CSS_PATH, CANISTER_DASHBOARD_HTML_PATH,
@@ -10,22 +10,25 @@ use my_canister_dashboard::{
     ManageIIPrincipalArg, ManageIIPrincipalResult, WasmStatus,
 };
 use my_canister_dashboard::{ManageTopUpRuleArg, ManageTopUpRuleResult, TopUpInterval, TopUpRule};
+use pocket_ic::common::rest::{IcpFeatures, IcpFeaturesConfig};
 use pocket_ic::{query_candid, update_candid_as};
 use std::fs;
 
 #[test]
 fn canister_dapp_test() {
-    // Use a PocketIC instance with an NNS subnet to allow installing canisters with
-    // mainnet-reserved IDs (ledger/CMC) used by the code under test.
-    let pic = pocket_ic::PocketIcBuilder::new().with_nns_subnet().build();
+    // Use a PocketIC instance with built-in system canisters:
+    // - cycles_minting: CMC at rkp4c-7iaaa-aaaaa-aaaca-cai
+    // - icp_token: ICP Ledger at ryjl3-tyaaa-aaaaa-aaaba-cai + Index
+    //              Anonymous principal gets 1,000,000,000 ICP
+    let pic = pocket_ic::PocketIcBuilder::new()
+        .with_icp_features(IcpFeatures {
+            cycles_minting: Some(IcpFeaturesConfig::DefaultConfig),
+            icp_token: Some(IcpFeaturesConfig::DefaultConfig),
+            ..Default::default()
+        })
+        .build();
 
-    // Prepare helper and constants to install Ledger/CMC later (after we know our canister ID)
     let ledger_id = Principal::from_text(ICP_LEDGER_CANISTER_ID_TEXT).unwrap();
-    let cmc_id = Principal::from_text(FAKE_CMC_CANISTER_ID_TEXT).unwrap();
-    // For this experiment, we'll pass the gzipped bytes directly to install_canister
-    fn read_bytes(path: &str) -> Vec<u8> {
-        fs::read(path).unwrap_or_else(|e| panic!("Failed to read {path}: {e}"))
-    }
 
     // Setup principals
     let user = ii_principal_at_installer_app();
@@ -61,112 +64,33 @@ fn canister_dapp_test() {
     pic.install_canister(canister_id, wasm_bytes, vec![], Some(user));
     println!("Wasm installed: \n {wasm_path} \n");
 
-    // Now install ICP Ledger and Fake CMC so top-up can actually mint cycles.
-    // Compute the canister's default ledger account identifier to pre-fund it.
+    // Transfer ICP from anonymous principal (has 1B ICP) to the canister's account
+    // so it can pay for ledger transfers during top-up flow.
     let canister_ai = AccountIdentifier::new(&canister_id, &Subaccount([0; 32]));
-    let canister_ai_text = format!("{canister_ai}");
-
-    // Ledger wasm and init payload (similar to dfx-env/deploy-all.sh)
-    let manifest_dir = env!("CARGO_MANIFEST_DIR");
-    let ledger_wasm_path = std::path::Path::new(manifest_dir).join(LEDGER_WASM_GZ_RELATIVE);
-    let ledger_wasm = read_bytes(ledger_wasm_path.to_str().unwrap());
-
-    // Fabricated principals for minter and an initial funded account (not strictly needed)
-    let minter = Principal::from_slice(&[201; 29]);
-    let minter_ai = AccountIdentifier::new(&minter, &Subaccount([0; 32]));
-    let minter_text = format!("{minter_ai}");
-
-    #[derive(candid::CandidType, serde::Deserialize)]
-    struct TokensArg {
-        e8s: u64,
-    }
-    #[derive(candid::CandidType, serde::Deserialize)]
-    struct DurationArg {
-        secs: u64,
-        nanos: u32,
-    }
-    #[derive(candid::CandidType, serde::Deserialize)]
-    struct ArchiveOptionsArg {
-        trigger_threshold: u64,
-        num_blocks_to_archive: u64,
-        node_max_memory_size_bytes: Option<u64>,
-        max_message_size_bytes: Option<u64>,
-        controller_id: Principal,
-        more_controller_ids: Option<Vec<Principal>>,
-        cycles_for_archive_creation: Option<u64>,
-        max_transactions_per_response: Option<u64>,
-    }
-    #[derive(candid::CandidType, serde::Deserialize)]
-    struct IcrcAccount {
-        owner: Principal,
-        subaccount: Option<Vec<u8>>,
-    }
-    #[derive(candid::CandidType, serde::Deserialize)]
-    struct InitArgs {
-        minting_account: String,
-        icrc1_minting_account: Option<IcrcAccount>,
-        initial_values: Vec<(String, TokensArg)>,
-        max_message_size_bytes: Option<u64>,
-        transaction_window: Option<DurationArg>,
-        archive_options: Option<ArchiveOptionsArg>,
-        send_whitelist: Vec<Principal>,
-        transfer_fee: Option<TokensArg>,
-        token_symbol: Option<String>,
-        token_name: Option<String>,
-        feature_flags: Option<candid::Empty>,
-        maximum_number_of_accounts: Option<u64>,
-        accounts_overflow_trim_quantity: Option<u64>,
-    }
-    #[derive(candid::CandidType, serde::Deserialize)]
-    enum LedgerCanisterPayload {
-        Init(Box<InitArgs>),
-        Upgrade(Option<candid::Empty>),
-    }
-
-    let init_args = InitArgs {
-        minting_account: minter_text.clone(),
-        icrc1_minting_account: None,
-        // Pre-fund the dashboard canister's default account so it can pay transfer+fee.
-        initial_values: vec![(
-            canister_ai_text.clone(),
-            TokensArg {
-                e8s: LEDGER_PREFUND_E8S,
-            }, // pre-fund for headroom
-        )],
-        max_message_size_bytes: None,
-        transaction_window: None,
-        archive_options: None,
-        send_whitelist: vec![],
-        transfer_fee: Some(TokensArg {
-            e8s: LEDGER_INIT_TRANSFER_FEE_E8S,
-        }),
-        token_symbol: Some("LICP".to_string()),
-        token_name: Some("Local ICP".to_string()),
-        feature_flags: None,
-        maximum_number_of_accounts: None,
-        accounts_overflow_trim_quantity: None,
+    let transfer_args = TransferArgs {
+        memo: Memo(0),
+        amount: Tokens::from_e8s(LEDGER_PREFUND_E8S),
+        fee: Tokens::from_e8s(LEDGER_INIT_TRANSFER_FEE_E8S),
+        from_subaccount: None,
+        to: canister_ai,
+        created_at_time: None,
     };
-    let payload = LedgerCanisterPayload::Init(Box::new(init_args));
 
-    // Create and install with fixed IDs and a known controller
-    pic.create_canister_with_id(Some(user), None, ledger_id)
-        .unwrap();
-    pic.add_cycles(ledger_id, SYSTEM_CANISTER_BOOT_CYCLES);
-    pic.install_canister(
-        ledger_id,
-        ledger_wasm,
-        candid::encode_one(payload).unwrap(),
-        Some(user),
-    );
+    let transfer_result: Result<(Result<u64, ic_ledger_types::TransferError>,), _> =
+        update_candid_as(
+            &pic,
+            ledger_id,
+            Principal::anonymous(),
+            "transfer",
+            (transfer_args,),
+        );
+    let block_height = transfer_result
+        .expect("Transfer call failed")
+        .0
+        .expect("Transfer failed");
+    println!("Transferred {LEDGER_PREFUND_E8S} e8s to canister account (block {block_height})\n");
 
-    // Fake CMC wasm
-    let cmc_wasm_path = std::path::Path::new(manifest_dir).join(FAKE_CMC_WASM_RELATIVE);
-    let cmc_wasm = fs::read(&cmc_wasm_path)
-        .unwrap_or_else(|e| panic!("Missing fake-cmc.wasm at {}: {e}", cmc_wasm_path.display()));
-    pic.create_canister_with_id(Some(user), None, cmc_id)
-        .unwrap();
-    pic.add_cycles(cmc_id, SYSTEM_CANISTER_BOOT_CYCLES);
-    pic.install_canister(cmc_id, cmc_wasm, vec![], Some(user));
+    // System canisters (CMC, Ledger) are now deployed by PocketIC's IcpFeatures
 
     // Assert ManageIIPrincipalResult::Err when Get II Principal before Set
     let get_result = update_candid_as::<(ManageIIPrincipalArg,), (ManageIIPrincipalResult,)>(
