@@ -194,3 +194,35 @@ export function getSelectValue(id: string): string {
   const select = getElement<HTMLSelectElement>(id);
   return select.value;
 }
+
+// Create a copyable list item with copy button
+export function createCopyableListItem(text: string): HTMLLIElement {
+  const li = document.createElement('li');
+  li.className = 'copyable';
+
+  const textDiv = document.createElement('div');
+  textDiv.className = 'data-display';
+  textDiv.textContent = text;
+
+  const copyBtn = document.createElement('button');
+  copyBtn.type = 'button';
+  copyBtn.className = 'copy-btn';
+  copyBtn.setAttribute('aria-label', 'Copy to clipboard');
+  copyBtn.dataset.copyText = text;
+
+  // Copy icon
+  copyBtn.innerHTML = `
+    <svg class="copy-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <rect width="14" height="14" x="8" y="8" rx="2" ry="2"/>
+      <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>
+    </svg>
+    <svg class="check-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="20 6 9 17 4 12"/>
+    </svg>
+  `;
+
+  li.appendChild(textDiv);
+  li.appendChild(copyBtn);
+
+  return li;
+}

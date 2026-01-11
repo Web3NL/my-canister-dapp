@@ -18,7 +18,9 @@ import {
   showError,
   getInputValue,
   clearInput,
+  createCopyableListItem,
 } from '../dom';
+import { attachCopyHandler } from '../copy';
 
 export class ControllersManager {
   private canisterId: Principal;
@@ -46,9 +48,9 @@ export class ControllersManager {
     const controllersList = getElement('controllers-list');
     controllersList.textContent = '';
     for (const controller of this.controllersList) {
-      const li = document.createElement('li');
-      li.className = 'data-display';
-      li.textContent = controller.toString();
+      const li = createCopyableListItem(controller.toString());
+      const copyBtn = li.querySelector('.copy-btn') as HTMLButtonElement;
+      if (copyBtn) attachCopyHandler(copyBtn);
       controllersList.appendChild(li);
     }
   }

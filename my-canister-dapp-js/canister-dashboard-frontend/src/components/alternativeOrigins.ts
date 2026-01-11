@@ -17,7 +17,9 @@ import {
   showError,
   getInputValue,
   clearInput,
+  createCopyableListItem,
 } from '../dom';
+import { attachCopyHandler } from '../copy';
 
 const IC_UPDATE_CALL_DELAY = 3000;
 
@@ -48,9 +50,9 @@ export class AlternativeOriginsManager {
     const list = getElement('alternative-origins-list');
     list.textContent = '';
     for (const origin of origins) {
-      const li = document.createElement('li');
-      li.className = 'data-display';
-      li.textContent = origin;
+      const li = createCopyableListItem(origin);
+      const copyBtn = li.querySelector('.copy-btn') as HTMLButtonElement;
+      if (copyBtn) attachCopyHandler(copyBtn);
       list.appendChild(li);
     }
   }
