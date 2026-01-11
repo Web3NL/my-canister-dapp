@@ -423,7 +423,7 @@ The User-Owned Canister pattern requires solving several problems that don't exi
 validate-and-test-all.sh
 ├── scripts/check.sh                    # Lint, format, typecheck (Rust + JS)
 ├── DFX Bootstrap
-│   ├── dfx-env/deploy-all.sh           # Deploy ledger, index, II (CMC via --system-canisters)
+│   ├── dfx-env/deploy-all.sh           # Deploy custom II (CMC, Ledger, Index via --system-canisters)
 │   └── scripts/setup-dfx-identity.sh   # Create deterministic test identity
 ├── scripts/setup-dashboard-dev-env.sh  # II principal derivation (see 9.3)
 │   ├── Create my-hello-world canister
