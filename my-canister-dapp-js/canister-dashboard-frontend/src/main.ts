@@ -21,6 +21,7 @@ import {
 } from './dom';
 import { TopUpRuleManager } from './components/top-up-rule';
 import { initializeTheme } from './theme';
+import { initializeCopyButtons } from './copy';
 import type { Principal } from '@icp-sdk/core/principal';
 
 enum DashboardState {
@@ -221,5 +222,6 @@ class Dashboard {
 
 document.addEventListener('DOMContentLoaded', () => {
   initializeTheme();
+  initializeCopyButtons();
   new Dashboard();
 });
