@@ -283,9 +283,36 @@ IC-CertificateExpression: <expression>
 
 | Crate | Purpose | Key Exports |
 |-------|---------|-------------|
-| `my-canister-dashboard` | Dashboard UI + management logic | `setup_dashboard_assets()`, `manage_ii_principal()`, `manage_alternative_origins()`, `manage_top_up_rule()`, guards |
+| `my-canister-dashboard` | Dashboard UI + management logic | See details below |
 | `my-canister-frontend` | Certified asset serving | `asset_router_configs()` |
 | `canister-dapp-test` | PocketIC test utilities | Test principals, constants, wasm helpers |
+
+#### my-canister-dashboard Crate Details
+
+**Setup:**
+- `setup_dashboard_assets(router, alternative_origins)` - Initialize dashboard in AssetRouter during `#[init]`
+
+**Management Functions:**
+- `manage_ii_principal(arg)` - Get/Set Internet Identity principal
+- `manage_alternative_origins(router, arg)` - Add/Remove alternative origins for II
+- `manage_top_up_rule(arg)` - Get/Add/Clear automatic cycles top-up rules
+
+**Guard Functions:**
+- `only_canister_controllers_guard()` - Restrict endpoint to canister controllers
+- `only_ii_principal_guard()` - Restrict endpoint to configured II principal
+
+**Asset Paths (constants):**
+- `CANISTER_DASHBOARD_HTML_PATH` = `/canister-dashboard`
+- `CANISTER_DASHBOARD_JS_PATH` = `/canister-dashboard/index.js`
+- `CANISTER_DASHBOARD_CSS_PATH` = `/canister-dashboard/style.css`
+- `ALTERNATIVE_ORIGINS_PATH` = `/.well-known/ii-alternative-origins`
+
+**Dashboard UI Features:**
+- Light/dark theme toggle with system preference detection
+- Copy buttons on all address fields (principals, accounts, hashes)
+- Responsive design for mobile and desktop
+
+**Important:** Thread-local state (II principal, alternative origins, top-up rules) is NOT persisted to stable memory. Canisters must implement their own persistence if configuration should survive upgrades.
 
 ### 6.2 JavaScript Packages
 
@@ -480,6 +507,7 @@ Output: `registry-dev.json` used by the local my-canister-app instance.
 
 | Version | Date | Changes |
 |---------|------|---------|
+| 1.3 | 2026-01-11 | Expanded Section 6.1: my-canister-dashboard crate details, UI features, state persistence note |
 | 1.2 | 2026-01-11 | Expanded Section 6.2: vite-plugin-canister-dapp documentation |
 | 1.1 | 2026-01-09 | Added Section 9: Development & Testing Infrastructure |
 | 1.0 | 2026-01-08 | Initial specification |
