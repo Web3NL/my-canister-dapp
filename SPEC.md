@@ -283,8 +283,8 @@ IC-CertificateExpression: <expression>
 
 | Crate | Purpose | Key Exports |
 |-------|---------|-------------|
-| `my-canister-dashboard` | Dashboard UI + management logic | See details below |
-| `my-canister-frontend` | Certified asset serving | `asset_router_configs()` |
+| `my-canister-dashboard` | Dashboard UI and management utilities for user-owned canisters | See details below |
+| `my-canister-frontend` | Certified frontend asset serving for IC canisters | See details below |
 | `canister-dapp-test` | PocketIC test utilities | Test principals, constants, wasm helpers |
 
 #### my-canister-dashboard Crate Details
@@ -313,6 +313,21 @@ IC-CertificateExpression: <expression>
 - Responsive design for mobile and desktop
 
 **Important:** Thread-local state (II principal, alternative origins, top-up rules) is NOT persisted to stable memory. Canisters must implement their own persistence if configuration should survive upgrades.
+
+#### my-canister-frontend Crate Details
+
+**Setup:**
+- `setup_frontend(assets_dir)` - Initialize and certify frontend assets during `#[init]`
+
+**HTTP Serving:**
+- `http_request(request)` - Serve certified assets via HTTP query endpoint
+
+**Asset Router Access:**
+- `asset_router::with_asset_router(f)` - Read-only access to internal router
+- `asset_router::with_asset_router_mut(f)` - Mutable access for adding assets (e.g., dashboard)
+- `asset_router::asset_router_configs(dir)` - Low-level asset processing for custom routers
+
+**Note:** This crate is independent of `my-canister-dashboard`. They can be used together (frontend provides router, dashboard adds assets) or separately.
 
 ### 6.2 JavaScript Packages
 
@@ -514,6 +529,7 @@ Output: `registry-dev.json` used by the local my-canister-app instance.
 
 | Version | Date | Changes |
 |---------|------|---------|
+| 1.4 | 2026-01-11 | Added Section 6.1: my-canister-frontend crate details, clarified crate independence |
 | 1.3 | 2026-01-11 | Expanded Section 6.1: my-canister-dashboard crate details, UI features, state persistence note |
 | 1.2 | 2026-01-11 | Expanded Section 6.2: vite-plugin-canister-dapp documentation |
 | 1.1 | 2026-01-09 | Added Section 9: Development & Testing Infrastructure |
