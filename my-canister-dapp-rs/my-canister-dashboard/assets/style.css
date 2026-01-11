@@ -129,9 +129,33 @@ body {
   height: 20px;
 }
 
+/* Theme icon visibility - controlled by data-theme */
+#theme-icon-sun,
+#theme-icon-moon {
+  display: none;
+}
+
+/* Show sun in dark mode (to switch to light) */
+[data-theme='dark'] #theme-icon-sun {
+  display: block;
+}
+
+/* Show moon in light mode (to switch to dark) */
+:root:not([data-theme='dark']) #theme-icon-moon {
+  display: block;
+}
+
 /* Utility classes */
 .hidden {
   display: none !important;
+}
+
+.mt-12 {
+  margin-top: 12px;
+}
+
+.mt-16 {
+  margin-top: 16px;
 }
 
 /* Error section styles */

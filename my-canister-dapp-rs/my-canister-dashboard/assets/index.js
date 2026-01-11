@@ -14175,15 +14175,6 @@ function getCurrentTheme() {
 }
 function applyTheme(theme) {
   document.documentElement.dataset.theme = theme;
-  updateToggleIcon(theme);
-}
-function updateToggleIcon(theme) {
-  const sunIcon = document.getElementById("theme-icon-sun");
-  const moonIcon = document.getElementById("theme-icon-moon");
-  if (sunIcon && moonIcon) {
-    sunIcon.style.display = theme === "dark" ? "block" : "none";
-    moonIcon.style.display = theme === "light" ? "block" : "none";
-  }
 }
 function toggleTheme() {
   const current = getCurrentTheme();

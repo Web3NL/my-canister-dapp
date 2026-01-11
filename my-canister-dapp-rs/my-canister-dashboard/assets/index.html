@@ -4,17 +4,6 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>My Canister Dashboard</title>
-    <script>
-      // Prevent flash of wrong theme by setting it before page renders
-      (function () {
-        const stored = localStorage.getItem('canister-dashboard-theme');
-        const systemDark = window.matchMedia(
-          '(prefers-color-scheme: dark)'
-        ).matches;
-        const theme = stored || (systemDark ? 'dark' : 'light');
-        document.documentElement.dataset.theme = theme;
-      })();
-    </script>
     <script type="module" crossorigin src="/canister-dashboard/index.js"></script>
     <link rel="stylesheet" crossorigin href="/canister-dashboard/style.css">
   </head>
@@ -37,7 +26,7 @@
           class="theme-toggle"
           aria-label="Toggle theme"
         >
-          <!-- Sun icon (shown in dark mode) -->
+          <!-- Sun icon (shown in dark mode via CSS) -->
           <svg
             id="theme-icon-sun"
             xmlns="http://www.w3.org/2000/svg"
@@ -49,7 +38,6 @@
             stroke-width="2"
             stroke-linecap="round"
             stroke-linejoin="round"
-            style="display: none"
           >
             <circle cx="12" cy="12" r="4" />
             <path d="M12 2v2" />
@@ -61,7 +49,7 @@
             <path d="m6.34 17.66-1.41 1.41" />
             <path d="m19.07 4.93-1.41 1.41" />
           </svg>
-          <!-- Moon icon (shown in light mode) -->
+          <!-- Moon icon (shown in light mode via CSS) -->
           <svg
             id="theme-icon-moon"
             xmlns="http://www.w3.org/2000/svg"
@@ -73,7 +61,6 @@
             stroke-width="2"
             stroke-linecap="round"
             stroke-linejoin="round"
-            style="display: none"
           >
             <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" />
           </svg>
@@ -102,7 +89,7 @@
               <strong>ICRC1 Account:</strong>
             </p>
             <div id="icrc1-account" class="data-display">Loading...</div>
-            <div class="button-group" style="margin-top: 12px">
+            <div class="button-group mt-12">
               <button
                 id="refresh-balance-btn"
                 class="btn"
@@ -128,7 +115,7 @@
               </p>
               <span id="canister-id" class="data-display">Loading...</span>
             </div>
-            <div class="form-group" style="margin-top: 16px">
+            <div class="form-group mt-16">
               <div>
                 <label for="top-up-rule-interval">Interval:</label>
                 <select id="top-up-rule-interval">
@@ -176,7 +163,7 @@
                 </button>
               </div>
             </div>
-            <div style="margin-top: 16px">
+            <div class="mt-16">
               <strong>Current Rule:</strong>
               <div id="top-up-rule-display">Loading...</div>
             </div>
@@ -279,7 +266,7 @@
                   Refresh
                 </button>
               </div>
-              <ul id="logs-list" style="margin-top: 12px">
+              <ul id="logs-list" class="mt-12">
                 <li class="data-display">Loading...</li>
               </ul>
             </div>
