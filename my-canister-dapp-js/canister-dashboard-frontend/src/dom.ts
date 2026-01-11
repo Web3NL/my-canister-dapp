@@ -74,10 +74,9 @@ export function setLoggedInState(
   principalText: string,
   onLogout: () => void | Promise<void>
 ): void {
-  const authBtn = getElement('auth-btn');
+  const logoutBtn = getElement('logout-btn');
 
-  authBtn.textContent = 'Logout';
-  authBtn.onclick = async (): Promise<void> => {
+  logoutBtn.onclick = async (): Promise<void> => {
     try {
       await onLogout();
     } catch {
@@ -85,8 +84,9 @@ export function setLoggedInState(
     }
   };
 
-  toggleVisibility('ii-principal', true);
-  toggleVisibility('ii-principal-label', true);
+  // Show logged-in state, hide login button
+  toggleVisibility('auth-logged-out', false);
+  toggleVisibility('auth-logged-in', true);
   setText('ii-principal', principalText);
   toggleVisibility('authenticated-content', true);
 }
@@ -94,11 +94,11 @@ export function setLoggedInState(
 export function setLoggedOutState(onLogin: () => void | Promise<void>): void {
   const authBtn = getElement('auth-btn');
 
-  authBtn.textContent = 'Login';
   authBtn.onclick = async (): Promise<void> => await onLogin();
 
-  toggleVisibility('ii-principal', false);
-  toggleVisibility('ii-principal-label', false);
+  // Show login button, hide logged-in state
+  toggleVisibility('auth-logged-out', true);
+  toggleVisibility('auth-logged-in', false);
   setText('ii-principal', '');
   toggleVisibility('authenticated-content', false);
   toggleVisibility('loading-overlay', false);
