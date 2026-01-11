@@ -37,11 +37,12 @@ test('manage alternative HTTP origins', async ({ page }, testInfo) => {
 
     await expect(async () => {
       const listItems = await page
-        .locator('#alternative-origins-list li')
+        .locator('#alternative-origins-list li .data-display')
         .allTextContents();
-      expect(listItems).toContain(origin);
+      const trimmedItems = listItems.map(t => t.trim());
+      expect(trimmedItems).toContain(origin);
       console.log(
-        `Origin ${origin} successfully added to the list. Current list: ${listItems.join(', ')}`
+        `Origin ${origin} successfully added to the list. Current list: ${trimmedItems.join(', ')}`
       );
     }).toPass({ timeout: 5000 });
 
@@ -57,10 +58,11 @@ test('manage alternative HTTP origins', async ({ page }, testInfo) => {
 
     await expect(async () => {
       const listItems = await page
-        .locator('#alternative-origins-list li')
+        .locator('#alternative-origins-list li .data-display')
         .allTextContents();
-      console.log(`Current origins list: ${listItems.join(', ')}`);
-      expect(listItems).not.toContain(origin);
+      const trimmedItems = listItems.map(t => t.trim());
+      console.log(`Current origins list: ${trimmedItems.join(', ')}`);
+      expect(trimmedItems).not.toContain(origin);
       console.log(`Origin ${origin} successfully removed from the list`);
     }).toPass({ timeout: 5000 });
 

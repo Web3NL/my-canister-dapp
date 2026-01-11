@@ -74,10 +74,9 @@ export function setLoggedInState(
   principalText: string,
   onLogout: () => void | Promise<void>
 ): void {
-  const authBtn = getElement('auth-btn');
+  const logoutBtn = getElement('logout-btn');
 
-  authBtn.textContent = 'Logout';
-  authBtn.onclick = async (): Promise<void> => {
+  logoutBtn.onclick = async (): Promise<void> => {
     try {
       await onLogout();
     } catch {
@@ -85,8 +84,9 @@ export function setLoggedInState(
     }
   };
 
-  toggleVisibility('ii-principal', true);
-  toggleVisibility('ii-principal-label', true);
+  // Show logged-in state, hide login button
+  toggleVisibility('auth-logged-out', false);
+  toggleVisibility('auth-logged-in', true);
   setText('ii-principal', principalText);
   toggleVisibility('authenticated-content', true);
 }
@@ -94,11 +94,11 @@ export function setLoggedInState(
 export function setLoggedOutState(onLogin: () => void | Promise<void>): void {
   const authBtn = getElement('auth-btn');
 
-  authBtn.textContent = 'Login';
   authBtn.onclick = async (): Promise<void> => await onLogin();
 
-  toggleVisibility('ii-principal', false);
-  toggleVisibility('ii-principal-label', false);
+  // Show login button, hide logged-in state
+  toggleVisibility('auth-logged-out', true);
+  toggleVisibility('auth-logged-in', false);
   setText('ii-principal', '');
   toggleVisibility('authenticated-content', false);
   toggleVisibility('loading-overlay', false);
@@ -193,4 +193,36 @@ export function updateTopUpRuleDisplay(formattedRule: string | null): void {
 export function getSelectValue(id: string): string {
   const select = getElement<HTMLSelectElement>(id);
   return select.value;
+}
+
+// Create a copyable list item with copy button
+export function createCopyableListItem(text: string): HTMLLIElement {
+  const li = document.createElement('li');
+  li.className = 'copyable';
+
+  const textDiv = document.createElement('div');
+  textDiv.className = 'data-display';
+  textDiv.textContent = text;
+
+  const copyBtn = document.createElement('button');
+  copyBtn.type = 'button';
+  copyBtn.className = 'copy-btn';
+  copyBtn.setAttribute('aria-label', 'Copy to clipboard');
+  copyBtn.dataset.copyText = text;
+
+  // Copy icon
+  copyBtn.innerHTML = `
+    <svg class="copy-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <rect width="14" height="14" x="8" y="8" rx="2" ry="2"/>
+      <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>
+    </svg>
+    <svg class="check-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="20 6 9 17 4 12"/>
+    </svg>
+  `;
+
+  li.appendChild(textDiv);
+  li.appendChild(copyBtn);
+
+  return li;
 }

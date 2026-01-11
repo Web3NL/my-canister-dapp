@@ -12738,8 +12738,6 @@ const TPUP_MEMO = new Uint8Array([
   0,
   0
 ]);
-var define_CANISTER_DAPP_DEV_CONFIG_default = { host: "http://localhost:8080", identityProvider: "http://rdmx6-jaaaa-aaaaa-aaadq-cai.localhost:8080" };
-var define_CANISTER_DAPP_PROD_CONFIG_default = { host: "https://icp-api.io", identityProvider: "https://identity.internetcomputer.org" };
 const DEFAULT_DEV_CONFIG = {
   host: "http://localhost:8080",
   identityProvider: "http://rdmx6-jaaaa-aaaaa-aaadq-cai.localhost:8080"
@@ -12748,6 +12746,8 @@ const DEFAULT_PROD_CONFIG = {
   host: "https://icp-api.io",
   identityProvider: "https://identity.internetcomputer.org"
 };
+var define_CANISTER_DAPP_DEV_CONFIG_default = { host: "http://localhost:8080", identityProvider: "http://rdmx6-jaaaa-aaaaa-aaadq-cai.localhost:8080" };
+var define_CANISTER_DAPP_PROD_CONFIG_default = { host: "https://icp-api.io", identityProvider: "https://identity.internetcomputer.org" };
 let configCache = null;
 let devModeCache = null;
 function detectDevModeFromOrigin() {
@@ -12826,26 +12826,24 @@ function addEventListener(id, event, handler) {
   }
 }
 function setLoggedInState(principalText, onLogout) {
-  const authBtn = getElement("auth-btn");
-  authBtn.textContent = "Logout";
-  authBtn.onclick = async () => {
+  const logoutBtn = getElement("logout-btn");
+  logoutBtn.onclick = async () => {
     try {
       await onLogout();
     } catch {
       showError(LOGOUT_FAILED_MESSAGE);
     }
   };
-  toggleVisibility("ii-principal", true);
-  toggleVisibility("ii-principal-label", true);
+  toggleVisibility("auth-logged-out", false);
+  toggleVisibility("auth-logged-in", true);
   setText("ii-principal", principalText);
   toggleVisibility("authenticated-content", true);
 }
 function setLoggedOutState(onLogin) {
   const authBtn = getElement("auth-btn");
-  authBtn.textContent = "Login";
   authBtn.onclick = async () => await onLogin();
-  toggleVisibility("ii-principal", false);
-  toggleVisibility("ii-principal-label", false);
+  toggleVisibility("auth-logged-out", true);
+  toggleVisibility("auth-logged-in", false);
   setText("ii-principal", "");
   toggleVisibility("authenticated-content", false);
   toggleVisibility("loading-overlay", false);
@@ -12909,6 +12907,30 @@ function updateTopUpRuleDisplay(formattedRule) {
 function getSelectValue(id) {
   const select = getElement(id);
   return select.value;
+}
+function createCopyableListItem(text) {
+  const li = document.createElement("li");
+  li.className = "copyable";
+  const textDiv = document.createElement("div");
+  textDiv.className = "data-display";
+  textDiv.textContent = text;
+  const copyBtn = document.createElement("button");
+  copyBtn.type = "button";
+  copyBtn.className = "copy-btn";
+  copyBtn.setAttribute("aria-label", "Copy to clipboard");
+  copyBtn.dataset.copyText = text;
+  copyBtn.innerHTML = `
+    <svg class="copy-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <rect width="14" height="14" x="8" y="8" rx="2" ry="2"/>
+      <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>
+    </svg>
+    <svg class="check-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="20 6 9 17 4 12"/>
+    </svg>
+  `;
+  li.appendChild(textDiv);
+  li.appendChild(copyBtn);
+  return li;
 }
 const NETWORK_ERROR_MESSAGE = "Network error occurred. Please try again.";
 const GENERIC_ERROR_MESSAGE = "Something went wrong. Please try again.";
@@ -13723,6 +13745,38 @@ class TopupManager {
     return blockHeight;
   }
 }
+function initializeCopyButtons() {
+  document.querySelectorAll(".copy-btn").forEach((btn) => {
+    btn.addEventListener("click", handleCopyClick);
+  });
+}
+async function handleCopyClick(event) {
+  const button = event.currentTarget;
+  const targetId = button.dataset.copyTarget;
+  const directText = button.dataset.copyText;
+  let textToCopy = directText ?? "";
+  if (!textToCopy && targetId) {
+    const targetElement = document.getElementById(targetId);
+    if (!targetElement) return;
+    textToCopy = targetElement.textContent?.trim() ?? "";
+  }
+  if (!textToCopy || textToCopy === "Loading...") return;
+  try {
+    await navigator.clipboard.writeText(textToCopy);
+    showCopiedFeedback(button);
+  } catch (err) {
+    console.error("Failed to copy to clipboard:", err);
+  }
+}
+function showCopiedFeedback(button) {
+  button.classList.add("copied");
+  setTimeout(() => {
+    button.classList.remove("copied");
+  }, 1500);
+}
+function attachCopyHandler(button) {
+  button.addEventListener("click", handleCopyClick);
+}
 class ControllersManager {
   canisterId;
   iiPrincipal;
@@ -13743,12 +13797,11 @@ class ControllersManager {
     const controllersList = getElement("controllers-list");
     controllersList.textContent = "";
     for (const controller of this.controllersList) {
-      const li = document.createElement("li");
-      li.className = "data-display";
-      li.textContent = controller.toString();
+      const li = createCopyableListItem(controller.toString());
+      const copyBtn = li.querySelector(".copy-btn");
+      if (copyBtn) attachCopyHandler(copyBtn);
       controllersList.appendChild(li);
     }
-    this.attachEventListeners();
   }
   attachEventListeners() {
     addEventListener("controller-add", "click", () => this.handleAdd());
@@ -13894,9 +13947,9 @@ class AlternativeOriginsManager {
     const list = getElement("alternative-origins-list");
     list.textContent = "";
     for (const origin of origins) {
-      const li = document.createElement("li");
-      li.className = "data-display";
-      li.textContent = origin;
+      const li = createCopyableListItem(origin);
+      const copyBtn = li.querySelector(".copy-btn");
+      if (copyBtn) attachCopyHandler(copyBtn);
       list.appendChild(li);
     }
   }
@@ -14160,6 +14213,42 @@ function buildInterval(key) {
   }
   return interval;
 }
+const THEME_STORAGE_KEY = "canister-dashboard-theme";
+function getSystemTheme() {
+  return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+}
+function getStoredTheme() {
+  const stored = localStorage.getItem(THEME_STORAGE_KEY);
+  if (stored === "light" || stored === "dark") {
+    return stored;
+  }
+  return null;
+}
+function getCurrentTheme() {
+  return getStoredTheme() ?? getSystemTheme();
+}
+function applyTheme(theme) {
+  document.documentElement.dataset.theme = theme;
+}
+function toggleTheme() {
+  const current = getCurrentTheme();
+  const newTheme = current === "dark" ? "light" : "dark";
+  localStorage.setItem(THEME_STORAGE_KEY, newTheme);
+  applyTheme(newTheme);
+}
+function initializeTheme() {
+  const theme = getCurrentTheme();
+  applyTheme(theme);
+  const toggleBtn = document.getElementById("theme-toggle");
+  if (toggleBtn) {
+    toggleBtn.addEventListener("click", toggleTheme);
+  }
+  window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", (e4) => {
+    if (!getStoredTheme()) {
+      applyTheme(e4.matches ? "dark" : "light");
+    }
+  });
+}
 class Dashboard {
   authManager = null;
   currentState = "initializing";
@@ -14237,9 +14326,6 @@ class Dashboard {
     setLoggedOutState(() => this.handleLogin());
   }
   setState(newState) {
-    console.log(
-      `Dashboard state transition: ${this.currentState} -> ${newState}`
-    );
     this.currentState = newState;
   }
   async initializeManagers(canisterIdPrincipal, iiPrincipal) {
@@ -14326,5 +14412,7 @@ class Dashboard {
   }
 }
 document.addEventListener("DOMContentLoaded", () => {
+  initializeTheme();
+  initializeCopyButtons();
   new Dashboard();
 });

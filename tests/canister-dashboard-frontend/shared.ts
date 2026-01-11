@@ -23,8 +23,10 @@ export const waitForListUpdate = async (
         await expect(listLocator.locator('li', { hasText: expectedItem })).toBeVisible({ timeout: 10000 });
     } else {
         await expect(async () => {
-            const listItems = await listLocator.locator('li').allTextContents();
-            expect(listItems).not.toContain(expectedItem);
+            // Query only the .data-display elements within list items to avoid picking up copy button SVG whitespace
+            const listItems = await listLocator.locator('li .data-display').allTextContents();
+            const trimmedItems = listItems.map(item => item.trim());
+            expect(trimmedItems).not.toContain(expectedItem);
         }).toPass({ timeout: 10000, intervals: [500, 1000, 2000] });
     }
 };
