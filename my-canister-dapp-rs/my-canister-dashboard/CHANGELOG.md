@@ -22,6 +22,11 @@
 
 - CSP compliance: removed all inline scripts and styles
 
+### Docs
+
+- Expanded README with features list, management functions, guards, and asset paths
+- Added rustdoc for top-up rule types (TopUpRule, TopUpInterval, CyclesAmount, ManageTopUpRuleArg)
+
 
 ## [0.10.7] - 2025-09-07
 
