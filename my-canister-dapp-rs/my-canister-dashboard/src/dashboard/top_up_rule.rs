@@ -16,40 +16,64 @@ const ICRC1_FEE_E8S: u64 = 10_000;
 // TPUP memo required by CMC for top-up transfers
 const TPUP_MEMO: [u8; 8] = [0x54, 0x50, 0x55, 0x50, 0x00, 0x00, 0x00, 0x00];
 
+/// Arguments for managing automatic top-up rules.
 #[derive(CandidType, Serialize, Deserialize, Clone, Debug, PartialEq, Eq)]
 pub enum ManageTopUpRuleArg {
+    /// Get the current top-up rule, if any.
     Get,
+    /// Add a new top-up rule, replacing any existing rule.
     Add(TopUpRule),
+    /// Clear the current top-up rule and stop the timer.
     Clear,
 }
 
+/// Result of managing top-up rules.
 #[derive(CandidType, Serialize, Deserialize, Clone, Debug, PartialEq, Eq)]
 pub enum ManageTopUpRuleResult {
+    /// Operation succeeded, returns the current rule (if any).
     Ok(Option<TopUpRule>),
+    /// Operation failed with an error message.
     Err(String),
 }
 
+/// Interval at which to check cycles balance and potentially top up.
 #[derive(CandidType, Serialize, Deserialize, Clone, Debug, PartialEq, Eq)]
 pub enum TopUpInterval {
+    /// Check every hour.
     Hourly,
+    /// Check every day.
     Daily,
+    /// Check every week.
     Weekly,
+    /// Check every 30 days.
     Monthly,
 }
 
+/// Predefined cycles amounts for thresholds and top-up amounts.
+///
+/// Values are in trillion cycles (T = 10^12 cycles).
 #[derive(CandidType, Serialize, Deserialize, Clone, Debug, PartialEq, Eq)]
 pub enum CyclesAmount {
+    /// 0.25 trillion cycles (250 billion).
     _0_25T,
+    /// 0.5 trillion cycles (500 billion).
     _0_5T,
+    /// 1 trillion cycles.
     _1T,
+    /// 2 trillion cycles.
     _2T,
+    /// 5 trillion cycles.
     _5T,
+    /// 10 trillion cycles.
     _10T,
+    /// 50 trillion cycles.
     _50T,
+    /// 100 trillion cycles.
     _100T,
 }
 
 impl CyclesAmount {
+    /// Convert to raw cycles count.
     pub fn as_cycles(&self) -> u64 {
         match self {
             CyclesAmount::_0_25T => 250_000_000_000,
@@ -64,10 +88,18 @@ impl CyclesAmount {
     }
 }
 
+/// Configuration for automatic cycles top-up.
+///
+/// When a rule is active, the canister will periodically check its cycles balance.
+/// If the balance falls below `cycles_threshold`, it will transfer ICP from the
+/// canister's default account to the CMC to mint `cycles_amount` cycles.
 #[derive(CandidType, Serialize, Deserialize, Clone, Debug, PartialEq, Eq)]
 pub struct TopUpRule {
+    /// How often to check the cycles balance.
     pub interval: TopUpInterval,
+    /// Top up when cycles fall below this threshold.
     pub cycles_threshold: CyclesAmount,
+    /// Amount of cycles to mint when topping up.
     pub cycles_amount: CyclesAmount,
 }
 
@@ -78,6 +110,43 @@ thread_local! {
     static TOP_UP_LAST_BLOCK_INDEX: RefCell<Option<u64>> = const { RefCell::new(None) };
 }
 
+/// Manages automatic cycles top-up rules.
+///
+/// Allows getting, adding, or clearing a top-up rule. When a rule is added,
+/// a periodic timer is started that checks the canister's cycles balance.
+/// If the balance falls below the threshold, ICP is transferred to the CMC
+/// to mint cycles.
+///
+/// # Arguments
+///
+/// * `arg` - The operation to perform (Get, Add, or Clear)
+///
+/// # Returns
+///
+/// The result of the operation containing the current rule (if any).
+///
+/// # Example
+///
+/// ```rust,ignore
+/// use my_canister_dashboard::{
+///     ManageTopUpRuleArg, ManageTopUpRuleResult, TopUpRule, TopUpInterval, CyclesAmount,
+///     guards::only_ii_principal_guard,
+/// };
+/// use ic_cdk::update;
+///
+/// #[update(guard = "only_ii_principal_guard")]
+/// fn manage_top_up_rule(arg: ManageTopUpRuleArg) -> ManageTopUpRuleResult {
+///     my_canister_dashboard::manage_top_up_rule(arg)
+/// }
+///
+/// // Example: Add a rule to top up 1T cycles when balance falls below 0.5T, checking daily
+/// let rule = TopUpRule {
+///     interval: TopUpInterval::Daily,
+///     cycles_threshold: CyclesAmount::_0_5T,
+///     cycles_amount: CyclesAmount::_1T,
+/// };
+/// manage_top_up_rule(ManageTopUpRuleArg::Add(rule));
+/// ```
 pub fn manage_top_up_rule(arg: ManageTopUpRuleArg) -> ManageTopUpRuleResult {
     match arg {
         ManageTopUpRuleArg::Get => ManageTopUpRuleResult::Ok(current_rule()),
