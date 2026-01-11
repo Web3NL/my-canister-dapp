@@ -223,6 +223,49 @@ body {
   }
 }
 
+/* Card header with title and action */
+.card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.card-header h3 {
+  margin: 0;
+}
+
+/* Small button variant for header actions */
+.btn-sm {
+  padding: 6px 12px;
+  font-size: 13px;
+}
+
+/* Help text styling */
+.help-text {
+  color: var(--color-text-secondary);
+  font-size: 14px;
+  margin: 0 0 16px 0;
+  line-height: 1.5;
+}
+
+/* Info row for label + value pairs */
+.info-row {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.info-label {
+  color: var(--color-text-secondary);
+  font-size: 14px;
+}
+
+.info-value {
+  font-weight: 500;
+}
+
 /* Button styles */
 .btn {
   background-color: var(--color-btn-bg);

@@ -12826,26 +12826,24 @@ function addEventListener(id, event, handler) {
   }
 }
 function setLoggedInState(principalText, onLogout) {
-  const authBtn = getElement("auth-btn");
-  authBtn.textContent = "Logout";
-  authBtn.onclick = async () => {
+  const logoutBtn = getElement("logout-btn");
+  logoutBtn.onclick = async () => {
     try {
       await onLogout();
     } catch {
       showError(LOGOUT_FAILED_MESSAGE);
     }
   };
-  toggleVisibility("ii-principal", true);
-  toggleVisibility("ii-principal-label", true);
+  toggleVisibility("auth-logged-out", false);
+  toggleVisibility("auth-logged-in", true);
   setText("ii-principal", principalText);
   toggleVisibility("authenticated-content", true);
 }
 function setLoggedOutState(onLogin) {
   const authBtn = getElement("auth-btn");
-  authBtn.textContent = "Login";
   authBtn.onclick = async () => await onLogin();
-  toggleVisibility("ii-principal", false);
-  toggleVisibility("ii-principal-label", false);
+  toggleVisibility("auth-logged-out", true);
+  toggleVisibility("auth-logged-in", false);
   setText("ii-principal", "");
   toggleVisibility("authenticated-content", false);
   toggleVisibility("loading-overlay", false);
@@ -14272,9 +14270,6 @@ class Dashboard {
     setLoggedOutState(() => this.handleLogin());
   }
   setState(newState) {
-    console.log(
-      `Dashboard state transition: ${this.currentState} -> ${newState}`
-    );
     this.currentState = newState;
   }
   async initializeManagers(canisterIdPrincipal, iiPrincipal) {
