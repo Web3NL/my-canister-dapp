@@ -155,7 +155,7 @@ transfer : (TransferArgs) -> (TransferResult)
 
 ### 3.4 Internet Identity
 
-**Canister ID**: `rdmx6-jaaaa-aaaaa-aaadq-cai`
+**Canister ID**: `rdmx6-jaaaa-aaaaa-aaadq-cai` (mainnet), `uxrrr-q7777-77774-qaaaq-cai` (local)
 
 **AuthClient.login() Parameters**:
 ```typescript
@@ -381,13 +381,15 @@ TOP_UP_MEMO = 0x5450555000000000 ("TPUP")
 // System Canisters
 CMC_CANISTER_ID = "rkp4c-7iaaa-aaaaa-aaaca-cai"
 LEDGER_CANISTER_ID = "ryjl3-tyaaa-aaaaa-aaaba-cai"
-II_CANISTER_ID = "rdmx6-jaaaa-aaaaa-aaadq-cai"
+II_CANISTER_ID_MAINNET = "rdmx6-jaaaa-aaaaa-aaadq-cai"
+II_CANISTER_ID_LOCAL = "uxrrr-q7777-77774-qaaaq-cai"
 IC_MANAGEMENT_CANISTER_ID = "aaaaa-aa"
 
 // Hosts
 MAINNET_HOST = "https://icp-api.io"
 MAINNET_IDENTITY_PROVIDER = "https://identity.internetcomputer.org"
 LOCAL_HOST = "http://localhost:8080"
+LOCAL_IDENTITY_PROVIDER = "http://uxrrr-q7777-77774-qaaaq-cai.localhost:8080"
 ```
 
 ---
@@ -421,7 +423,7 @@ The User-Owned Canister pattern requires solving several problems that don't exi
 validate-and-test-all.sh
 ├── scripts/check.sh                    # Lint, format, typecheck (Rust + JS)
 ├── DFX Bootstrap
-│   ├── dfx-env/deploy-all.sh           # Deploy fake-cmc, ledger, index, II
+│   ├── dfx-env/deploy-all.sh           # Deploy ledger, index, II (CMC via --system-canisters)
 │   └── scripts/setup-dfx-identity.sh   # Create deterministic test identity
 ├── scripts/setup-dashboard-dev-env.sh  # II principal derivation (see 9.3)
 │   ├── Create my-hello-world canister
@@ -453,16 +455,21 @@ The `derive-ii-principal.ts` source is bundled into an IIFE (`derive-ii-principa
 
 ### 9.4 Local Infrastructure
 
-`dfx-env/deploy-all.sh` deploys mock system canisters with hardcoded IDs:
+`dfx start --system-canisters` (dfx 0.30+) bootstraps system canisters automatically:
 
-| Canister | ID | Purpose |
+| Canister | ID | Source |
 |----------|-----|---------|
-| icp-ledger | `ryjl3-tyaaa-aaaaa-aaaba-cai` | Token transfers, balance queries |
-| icp-index | `qhbym-qaaaa-aaaaa-aaafq-cai` | Transaction indexing |
-| fake-cmc | `rkp4c-7iaaa-aaaaa-aaaca-cai` | Mock Cycles Minting Canister |
-| internet-identity | `rdmx6-jaaaa-aaaaa-aaadq-cai` | Authentication |
+| nns-cycles-minting (CMC) | `rkp4c-7iaaa-aaaaa-aaaca-cai` | Built-in |
+| nns-ledger (ICP Ledger) | `ryjl3-tyaaa-aaaaa-aaaba-cai` | Built-in |
+| nns-index (ICP Index) | `qhbym-qaaaa-aaaaa-aaafq-cai` | Built-in |
+| internet-identity | `uxrrr-q7777-77774-qaaaq-cai` | Custom (dfx-env) |
 
-**fake-cmc**: A custom Rust canister that simulates `notify_create_canister` without requiring real cycles. Essential for testing the canister creation flow.
+**Pre-funding**: The anonymous identity is initialized with 1,000,000,000 ICP.
+Test accounts receive ICP via transfers from anonymous identity (`dfx-env/deploy-all.sh`).
+
+**Note**: CMC, Ledger, and Index use dfx 0.30+ built-in canisters. Internet Identity uses
+a custom deployment because the built-in II has a newer UI incompatible with e2e tests,
+and it cannot be overridden (controlled by NNS root). PocketIC tests use `IcpFeatures`.
 
 ### 9.5 Test Categories
 

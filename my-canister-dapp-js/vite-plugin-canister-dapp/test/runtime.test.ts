@@ -97,7 +97,7 @@ describe('runtime', () => {
 
       expect(result).toEqual({
         host: 'http://localhost:8080',
-        identityProvider: 'http://rdmx6-jaaaa-aaaaa-aaadq-cai.localhost:8080',
+        identityProvider: 'http://uxrrr-q7777-77774-qaaaq-cai.localhost:8080',
       });
     });
 

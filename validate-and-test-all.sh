@@ -47,7 +47,7 @@ if [ "$SKIP_DFX_BOOTSTRAP_FLAG" != "true" ]; then
     cd dfx-env
 
     dfx killall
-    dfx start --clean --background > dfx.log 2>&1
+    dfx start --clean --background --system-canisters > dfx.log 2>&1
 
     ./deploy-all.sh
 
