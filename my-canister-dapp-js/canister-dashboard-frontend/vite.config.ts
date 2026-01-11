@@ -19,7 +19,7 @@ export default defineConfig(() => {
       outDir: path.resolve(__dirname, 'dist'),
       emptyOutDir: true,
       cssCodeSplit: false,
-      minify: false,
+      minify: true,
       rollupOptions: {
         input: path.resolve(__dirname, 'src/index.html'),
         output: {
