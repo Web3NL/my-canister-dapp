@@ -2,14 +2,25 @@
 
 ## [Unreleased]
 
-### Changed
-
-- Use `CanisterDappEnvironmentConfig` for environment config in stead of `CanisterDashboardDevConfig`
-
 ### Added
 
-- Canister dashboard frontend: implemented `canisterStatusStore` and used it in `controllers` and `status` components.
+- Light/dark theme toggle with system preference detection
+- Copy buttons on all address fields (principals, ICRC1 accounts, module hash)
+- Copy buttons on controllers and alternative origins list items
+- Canister dashboard frontend: implemented `canisterStatusStore` and used it in `controllers` and `status` components
+
+### Changed
+
+- Use `CanisterDappEnvironmentConfig` for environment config instead of `CanisterDashboardDevConfig`
+- Widget 1 renamed from "Logged in as" to "Your Identity"
+- Widget 2 renamed from "Top up" to "Manual Top-up"
+- Widget 3 renamed from "Top Up Rule" to "Automatic Top-up"
 - Adjusted `top-up` and `status` to use new `canisterStatusStore.refresh` method
+- Enable minification for dashboard assets
+
+### Fixed
+
+- CSP compliance: removed all inline scripts and styles
 
 
 ## [0.10.7] - 2025-09-07
