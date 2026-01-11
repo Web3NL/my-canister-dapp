@@ -29,8 +29,8 @@ test('add and remove canister controllers', async ({ page }, testInfo) => {
 
   await waitForListUpdate(page, '#controllers-list', TEST_CONTROLLER, true);
 
-  const controllersListAfterAdd = await page.textContent('#controllers-list');
-  expect(controllersListAfterAdd).toContain(TEST_CONTROLLER);
+  const controllersAfterAdd = await page.locator('#controllers-list li .data-display').allTextContents();
+  expect(controllersAfterAdd.map(t => t.trim())).toContain(TEST_CONTROLLER);
   console.log('Controller successfully added to the list');
 
   const inputValueAfterAdd = await page.inputValue('#controller-input');
@@ -42,8 +42,8 @@ test('add and remove canister controllers', async ({ page }, testInfo) => {
 
   await waitForListUpdate(page, '#controllers-list', TEST_CONTROLLER, false);
 
-  const controllersListAfterRemove = await page.textContent('#controllers-list');
-  expect(controllersListAfterRemove).not.toContain(TEST_CONTROLLER);
+  const controllersAfterRemove = await page.locator('#controllers-list li .data-display').allTextContents();
+  expect(controllersAfterRemove.map(t => t.trim())).not.toContain(TEST_CONTROLLER);
   console.log('Controller successfully removed from the list');
 
   const inputValueAfterRemove = await page.inputValue('#controller-input');
