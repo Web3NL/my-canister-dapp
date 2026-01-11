@@ -5,6 +5,8 @@ Build dapps that anyone can install and own—no CLI, no dev tools, just a brows
 [![Build Status](https://github.com/Web3NL/my-canister-dapp/workflows/Release/badge.svg)](https://github.com/Web3NL/my-canister-dapp/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
 
+> **Status**: This project is in active development. See the [FAQ](https://mycanister.app/faq) for more information.
+
 ## The Problem
 
 On the Internet Computer, canisters are deployed using the `dfx` CLI. This works well for developers, but creates a barrier for everyone else.
@@ -92,10 +94,6 @@ Developers can submit their dapps to the registry, or users can install custom w
 | [my-canister-frontend](https://crates.io/crates/my-canister-frontend) | Rust | Certified HTTP asset serving |
 | [@web3nl/my-canister-dashboard](https://www.npmjs.com/package/@web3nl/my-canister-dashboard) | npm | Dashboard interaction utilities |
 | [@web3nl/vite-plugin-canister-dapp](https://www.npmjs.com/package/@web3nl/vite-plugin-canister-dapp) | npm | Vite plugin for environment config |
-
-## Status
-
-This project is in active development. See the [FAQ](https://mycanister.app/faq) for more information.
 
 ## License
 
