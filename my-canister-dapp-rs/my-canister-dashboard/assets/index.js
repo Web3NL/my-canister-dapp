@@ -12908,6 +12908,30 @@ function getSelectValue(id) {
   const select = getElement(id);
   return select.value;
 }
+function createCopyableListItem(text) {
+  const li = document.createElement("li");
+  li.className = "copyable";
+  const textDiv = document.createElement("div");
+  textDiv.className = "data-display";
+  textDiv.textContent = text;
+  const copyBtn = document.createElement("button");
+  copyBtn.type = "button";
+  copyBtn.className = "copy-btn";
+  copyBtn.setAttribute("aria-label", "Copy to clipboard");
+  copyBtn.dataset.copyText = text;
+  copyBtn.innerHTML = `
+    <svg class="copy-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <rect width="14" height="14" x="8" y="8" rx="2" ry="2"/>
+      <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/>
+    </svg>
+    <svg class="check-icon" xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+      <polyline points="20 6 9 17 4 12"/>
+    </svg>
+  `;
+  li.appendChild(textDiv);
+  li.appendChild(copyBtn);
+  return li;
+}
 const NETWORK_ERROR_MESSAGE = "Network error occurred. Please try again.";
 const GENERIC_ERROR_MESSAGE = "Something went wrong. Please try again.";
 const DASHBOARD_INIT_ERROR_MESSAGE = "Failed to initialize dashboard.";
@@ -13721,6 +13745,38 @@ class TopupManager {
     return blockHeight;
   }
 }
+function initializeCopyButtons() {
+  document.querySelectorAll(".copy-btn").forEach((btn) => {
+    btn.addEventListener("click", handleCopyClick);
+  });
+}
+async function handleCopyClick(event) {
+  const button = event.currentTarget;
+  const targetId = button.dataset.copyTarget;
+  const directText = button.dataset.copyText;
+  let textToCopy = directText ?? "";
+  if (!textToCopy && targetId) {
+    const targetElement = document.getElementById(targetId);
+    if (!targetElement) return;
+    textToCopy = targetElement.textContent?.trim() ?? "";
+  }
+  if (!textToCopy || textToCopy === "Loading...") return;
+  try {
+    await navigator.clipboard.writeText(textToCopy);
+    showCopiedFeedback(button);
+  } catch (err) {
+    console.error("Failed to copy to clipboard:", err);
+  }
+}
+function showCopiedFeedback(button) {
+  button.classList.add("copied");
+  setTimeout(() => {
+    button.classList.remove("copied");
+  }, 1500);
+}
+function attachCopyHandler(button) {
+  button.addEventListener("click", handleCopyClick);
+}
 class ControllersManager {
   canisterId;
   iiPrincipal;
@@ -13741,9 +13797,9 @@ class ControllersManager {
     const controllersList = getElement("controllers-list");
     controllersList.textContent = "";
     for (const controller of this.controllersList) {
-      const li = document.createElement("li");
-      li.className = "data-display";
-      li.textContent = controller.toString();
+      const li = createCopyableListItem(controller.toString());
+      const copyBtn = li.querySelector(".copy-btn");
+      if (copyBtn) attachCopyHandler(copyBtn);
       controllersList.appendChild(li);
     }
   }
@@ -13891,9 +13947,9 @@ class AlternativeOriginsManager {
     const list = getElement("alternative-origins-list");
     list.textContent = "";
     for (const origin of origins) {
-      const li = document.createElement("li");
-      li.className = "data-display";
-      li.textContent = origin;
+      const li = createCopyableListItem(origin);
+      const copyBtn = li.querySelector(".copy-btn");
+      if (copyBtn) attachCopyHandler(copyBtn);
       list.appendChild(li);
     }
   }
@@ -14357,5 +14413,6 @@ class Dashboard {
 }
 document.addEventListener("DOMContentLoaded", () => {
   initializeTheme();
+  initializeCopyButtons();
   new Dashboard();
 });
