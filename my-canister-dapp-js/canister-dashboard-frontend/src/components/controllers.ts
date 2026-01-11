@@ -51,8 +51,6 @@ export class ControllersManager {
       li.textContent = controller.toString();
       controllersList.appendChild(li);
     }
-
-    this.attachEventListeners();
   }
 
   private attachEventListeners(): void {
