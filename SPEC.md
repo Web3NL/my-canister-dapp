@@ -292,7 +292,41 @@ IC-CertificateExpression: <expression>
 | Package | Purpose | Key Exports |
 |---------|---------|-------------|
 | `@web3nl/my-canister-dashboard` | Dashboard client utilities | `MyCanisterDashboard`, `MyDashboardBackend`, `inferCanisterIdFromLocation()` |
-| `@web3nl/vite-plugin-canister-dapp` | Build-time environment config | `canisterDappEnvironmentConfig()`, `inferEnvironment()`, `isDevMode()` |
+| `@web3nl/vite-plugin-canister-dapp` | Vite plugin for environment config | See below |
+
+#### @web3nl/vite-plugin-canister-dapp
+
+Enables building a single frontend/WASM that works in all environments (local dfx, Vite dev server, IC mainnet).
+
+**Build-time** (Vite plugin):
+- Injects dev and prod environment configs as global constants
+- Sets up Vite dev server proxies for `/api`, `/canister-dashboard`, `/.well-known/ii-alternative-origins`
+
+**Runtime** (browser):
+- `inferEnvironment()` - Returns `{ host, identityProvider }` based on URL origin detection
+- `isDevMode()` - Returns `true` if origin is http://, localhost, or 127.0.0.1
+- `inferCanisterId()` - Extracts canister ID from URL subdomain or uses `viteDevCanisterId` fallback
+
+**Exports**:
+```typescript
+// Main export
+import { canisterDappEnvironmentConfig } from '@web3nl/vite-plugin-canister-dapp';
+
+// Runtime export (for frontend code)
+import { inferEnvironment, isDevMode, inferCanisterId } from '@web3nl/vite-plugin-canister-dapp/runtime';
+```
+
+**Configuration**:
+```typescript
+canisterDappEnvironmentConfig({
+  viteDevCanisterId: 'canister-id',  // Required for Vite dev server
+  environment: {                      // Optional, sensible defaults provided
+    development: { host: 'http://localhost:8080', identityProvider: '...' },
+    production: { host: 'https://icp-api.io', identityProvider: '...' }
+  },
+  serverProxies: { api: true, canisterDashboard: true, iiAlternativeOrigins: true }
+})
+```
 
 ### 6.3 Services
 
@@ -446,5 +480,6 @@ Output: `registry-dev.json` used by the local my-canister-app instance.
 
 | Version | Date | Changes |
 |---------|------|---------|
+| 1.2 | 2026-01-11 | Expanded Section 6.2: vite-plugin-canister-dapp documentation |
 | 1.1 | 2026-01-09 | Added Section 9: Development & Testing Infrastructure |
 | 1.0 | 2026-01-08 | Initial specification |

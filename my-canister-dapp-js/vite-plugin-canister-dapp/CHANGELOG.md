@@ -1,5 +1,67 @@
 # @web3nl/vite-plugin-canister-dapp
 
+## 1.0.0
+
+### Major Changes
+
+- **BREAKING**: Removed deprecated `canisterDashboardDevConfig()` plugin. Use `canisterDappEnvironmentConfig()` instead.
+- **BREAKING**: Removed deprecated `CanisterDashboardDevConfig` interface. Use `CanisterDappEnvironmentConfig` instead.
+- **BREAKING**: Removed deprecated `CanisterDashboardPluginConfig` interface. Use `CanisterDappEnvironmentPluginConfig` instead.
+- **BREAKING**: Removed VITE\_\* environment variable based configuration. Use plugin options instead:
+  - `viteDevCanisterId` replaces `VITE_CANISTER_ID`
+  - `environment.development` replaces `VITE_DFX_*` and `VITE_II_CANISTER_ID`
+- **BREAKING**: Removed `/canister-dashboard-dev-config.json` endpoint. Configuration is now injected at build time.
+
+### Migration Guide
+
+**Before (v0.x):**
+
+```typescript
+// vite.config.ts
+import { canisterDashboardDevConfig } from '@web3nl/vite-plugin-canister-dapp';
+
+export default defineConfig({
+  plugins: [canisterDashboardDevConfig()],
+});
+```
+
+```env
+# .env.development
+VITE_CANISTER_ID=rrkah-fqaaa-aaaaa-aaaaq-cai
+VITE_II_CANISTER_ID=rdmx6-jaaaa-aaaaa-aaadq-cai
+VITE_DFX_PROTOCOL=http
+VITE_DFX_HOSTNAME=localhost
+VITE_DFX_PORT=8080
+```
+
+**After (v1.0):**
+
+```typescript
+// vite.config.ts
+import { canisterDappEnvironmentConfig } from '@web3nl/vite-plugin-canister-dapp';
+
+export default defineConfig({
+  plugins: [
+    canisterDappEnvironmentConfig({
+      viteDevCanisterId: 'rrkah-fqaaa-aaaaa-aaaaq-cai',
+      // environment config is optional - sensible defaults provided
+    }),
+  ],
+});
+```
+
+```typescript
+// Frontend code
+import {
+  inferEnvironment,
+  isDevMode,
+  inferCanisterId,
+} from '@web3nl/vite-plugin-canister-dapp/runtime';
+
+const config = inferEnvironment();
+const canisterId = inferCanisterId();
+```
+
 ## 0.4.3
 
 ### Patch Changes

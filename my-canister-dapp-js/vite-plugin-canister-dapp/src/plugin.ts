@@ -1,4 +1,9 @@
 import type { Plugin } from 'vite';
+import {
+  DEFAULT_DEV_CONFIG,
+  DEFAULT_PROD_CONFIG,
+  notEmptyString,
+} from './constants.js';
 
 /**
  * Environment configuration interface for Internet Computer Canister Dapp
@@ -42,22 +47,6 @@ export interface CanisterDappEnvironmentPluginConfig {
     iiAlternativeOrigins?: boolean;
   };
 }
-
-/**
- * Default development environment configuration
- */
-const DEFAULT_DEV_CONFIG: CanisterDappEnvironmentConfig = {
-  host: 'http://localhost:8080',
-  identityProvider: 'http://rdmx6-jaaaa-aaaaa-aaadq-cai.localhost:8080',
-};
-
-/**
- * Default production environment configuration
- */
-const DEFAULT_PROD_CONFIG: CanisterDappEnvironmentConfig = {
-  host: 'https://icp-api.io',
-  identityProvider: 'https://identity.internetcomputer.org',
-};
 
 /**
  * Vite plugin that provides Internet Computer Canister Dapp environment configuration
@@ -266,8 +255,4 @@ export function canisterDappEnvironmentConfig(
       };
     },
   };
-}
-
-function notEmptyString(value: unknown): value is string {
-  return typeof value === 'string' && value.length > 0;
 }
