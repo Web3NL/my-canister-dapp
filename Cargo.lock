@@ -1252,7 +1252,6 @@ dependencies = [
  "ic-http-certification",
  "include_dir",
  "mime_guess",
- "my-canister-dashboard",
 ]
 
 [[package]]

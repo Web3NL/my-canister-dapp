@@ -9,7 +9,7 @@ use my_canister_dashboard::{
     ManageAlternativeOriginsArg, ManageAlternativeOriginsResult, ManageIIPrincipalArg,
     ManageIIPrincipalResult, ManageTopUpRuleArg, ManageTopUpRuleResult, WasmStatus,
 };
-use my_canister_frontend::asset_router_configs;
+use my_canister_frontend::asset_router::asset_router_configs;
 use std::borrow::Cow;
 use std::cell::RefCell;
 
