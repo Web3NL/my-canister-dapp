@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.11.0] - 2026-01-11
+
 ### Added
 
 - Light/dark theme toggle with system preference detection
