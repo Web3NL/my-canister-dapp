@@ -4,6 +4,8 @@
 
 ### Major Changes
 
+- [#201](https://github.com/Web3NL/my-canister-dapp/pull/201) [`a16c057`](https://github.com/Web3NL/my-canister-dapp/commit/a16c057) Thanks [@Web3NL](https://github.com/Web3NL)!
+
 - **BREAKING**: Removed deprecated `canisterDashboardDevConfig()` plugin. Use `canisterDappEnvironmentConfig()` instead.
 - **BREAKING**: Removed deprecated `CanisterDashboardDevConfig` interface. Use `CanisterDappEnvironmentConfig` instead.
 - **BREAKING**: Removed deprecated `CanisterDashboardPluginConfig` interface. Use `CanisterDappEnvironmentPluginConfig` instead.
