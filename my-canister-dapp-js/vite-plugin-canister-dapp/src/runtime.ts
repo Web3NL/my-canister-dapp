@@ -1,22 +1,7 @@
 import { Principal } from '@icp-sdk/core/principal';
 import { inferCanisterIdFromLocation } from '@web3nl/my-canister-dashboard';
-import type { CanisterDappEnvironmentConfig } from './plugin';
-
-/**
- * Default development environment configuration
- */
-const DEFAULT_DEV_CONFIG: CanisterDappEnvironmentConfig = {
-  host: 'http://localhost:8080',
-  identityProvider: 'http://rdmx6-jaaaa-aaaaa-aaadq-cai.localhost:8080',
-};
-
-/**
- * Default production environment configuration
- */
-const DEFAULT_PROD_CONFIG: CanisterDappEnvironmentConfig = {
-  host: 'https://icp-api.io',
-  identityProvider: 'https://identity.internetcomputer.org',
-};
+import type { CanisterDappEnvironmentConfig } from './plugin.js';
+import { DEFAULT_DEV_CONFIG, DEFAULT_PROD_CONFIG } from './constants.js';
 
 // Cache for environment configuration
 let configCache: CanisterDappEnvironmentConfig | null = null;
