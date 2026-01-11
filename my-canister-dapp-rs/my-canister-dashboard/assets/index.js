@@ -12738,8 +12738,6 @@ const TPUP_MEMO = new Uint8Array([
   0,
   0
 ]);
-var define_CANISTER_DAPP_DEV_CONFIG_default = { host: "http://localhost:8080", identityProvider: "http://rdmx6-jaaaa-aaaaa-aaadq-cai.localhost:8080" };
-var define_CANISTER_DAPP_PROD_CONFIG_default = { host: "https://icp-api.io", identityProvider: "https://identity.internetcomputer.org" };
 const DEFAULT_DEV_CONFIG = {
   host: "http://localhost:8080",
   identityProvider: "http://rdmx6-jaaaa-aaaaa-aaadq-cai.localhost:8080"
@@ -12748,6 +12746,8 @@ const DEFAULT_PROD_CONFIG = {
   host: "https://icp-api.io",
   identityProvider: "https://identity.internetcomputer.org"
 };
+var define_CANISTER_DAPP_DEV_CONFIG_default = { host: "http://localhost:8080", identityProvider: "http://rdmx6-jaaaa-aaaaa-aaadq-cai.localhost:8080" };
+var define_CANISTER_DAPP_PROD_CONFIG_default = { host: "https://icp-api.io", identityProvider: "https://identity.internetcomputer.org" };
 let configCache = null;
 let devModeCache = null;
 function detectDevModeFromOrigin() {
