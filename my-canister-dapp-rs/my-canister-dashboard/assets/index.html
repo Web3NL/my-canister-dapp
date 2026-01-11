@@ -4,6 +4,17 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>My Canister Dashboard</title>
+    <script>
+      // Prevent flash of wrong theme by setting it before page renders
+      (function () {
+        const stored = localStorage.getItem('canister-dashboard-theme');
+        const systemDark = window.matchMedia(
+          '(prefers-color-scheme: dark)'
+        ).matches;
+        const theme = stored || (systemDark ? 'dark' : 'light');
+        document.documentElement.dataset.theme = theme;
+      })();
+    </script>
     <script type="module" crossorigin src="/canister-dashboard/index.js"></script>
     <link rel="stylesheet" crossorigin href="/canister-dashboard/style.css">
   </head>
@@ -12,11 +23,62 @@
     <div id="error-section" class="hidden"></div>
 
     <div id="loading-overlay" class="hidden">
-      <div>Loading...</div>
+      <div>
+        <div class="spinner"></div>
+        Loading...
+      </div>
     </div>
 
     <div class="container">
-      <h1>Canister Dashboard</h1>
+      <div class="header">
+        <h1>Canister Dashboard</h1>
+        <button
+          id="theme-toggle"
+          class="theme-toggle"
+          aria-label="Toggle theme"
+        >
+          <!-- Sun icon (shown in dark mode) -->
+          <svg
+            id="theme-icon-sun"
+            xmlns="http://www.w3.org/2000/svg"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            style="display: none"
+          >
+            <circle cx="12" cy="12" r="4" />
+            <path d="M12 2v2" />
+            <path d="M12 20v2" />
+            <path d="m4.93 4.93 1.41 1.41" />
+            <path d="m17.66 17.66 1.41 1.41" />
+            <path d="M2 12h2" />
+            <path d="M20 12h2" />
+            <path d="m6.34 17.66-1.41 1.41" />
+            <path d="m19.07 4.93-1.41 1.41" />
+          </svg>
+          <!-- Moon icon (shown in light mode) -->
+          <svg
+            id="theme-icon-moon"
+            xmlns="http://www.w3.org/2000/svg"
+            width="20"
+            height="20"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            style="display: none"
+          >
+            <path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z" />
+          </svg>
+        </button>
+      </div>
 
       <div id="auth-section" class="card">
         <div class="auth-section">
@@ -24,7 +86,7 @@
             Logged in as
           </div>
           <div id="ii-principal" class="data-display hidden"></div>
-          <button id="auth-btn" class="btn"></button>
+          <button id="auth-btn" class="btn btn-primary"></button>
         </div>
       </div>
 
@@ -40,7 +102,7 @@
               <strong>ICRC1 Account:</strong>
             </p>
             <div id="icrc1-account" class="data-display">Loading...</div>
-            <p>
+            <div class="button-group" style="margin-top: 12px">
               <button
                 id="refresh-balance-btn"
                 class="btn"
@@ -48,8 +110,8 @@
               >
                 Refresh
               </button>
-              <button id="top-up-btn" class="btn">Top-up</button>
-            </p>
+              <button id="top-up-btn" class="btn btn-primary">Top-up</button>
+            </div>
           </div>
         </div>
 
@@ -63,10 +125,10 @@
               </p>
               <p>
                 <strong>Canister ICRC1 Account:</strong>
-                <span id="canister-id" class="data-display">Loading...</span>
               </p>
+              <span id="canister-id" class="data-display">Loading...</span>
             </div>
-            <div class="form-group">
+            <div class="form-group" style="margin-top: 16px">
               <div>
                 <label for="top-up-rule-interval">Interval:</label>
                 <select id="top-up-rule-interval">
@@ -114,9 +176,9 @@
                 </button>
               </div>
             </div>
-            <div>
+            <div style="margin-top: 16px">
               <strong>Current Rule:</strong>
-              <span id="top-up-rule-display">Loading...</span>
+              <div id="top-up-rule-display">Loading...</div>
             </div>
           </div>
         </div>
@@ -217,7 +279,7 @@
                   Refresh
                 </button>
               </div>
-              <ul id="logs-list">
+              <ul id="logs-list" style="margin-top: 12px">
                 <li class="data-display">Loading...</li>
               </ul>
             </div>

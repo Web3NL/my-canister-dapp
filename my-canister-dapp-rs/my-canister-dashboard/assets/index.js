@@ -13748,7 +13748,6 @@ class ControllersManager {
       li.textContent = controller.toString();
       controllersList.appendChild(li);
     }
-    this.attachEventListeners();
   }
   attachEventListeners() {
     addEventListener("controller-add", "click", () => this.handleAdd());
@@ -14160,6 +14159,51 @@ function buildInterval(key) {
   }
   return interval;
 }
+const THEME_STORAGE_KEY = "canister-dashboard-theme";
+function getSystemTheme() {
+  return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+}
+function getStoredTheme() {
+  const stored = localStorage.getItem(THEME_STORAGE_KEY);
+  if (stored === "light" || stored === "dark") {
+    return stored;
+  }
+  return null;
+}
+function getCurrentTheme() {
+  return getStoredTheme() ?? getSystemTheme();
+}
+function applyTheme(theme) {
+  document.documentElement.dataset.theme = theme;
+  updateToggleIcon(theme);
+}
+function updateToggleIcon(theme) {
+  const sunIcon = document.getElementById("theme-icon-sun");
+  const moonIcon = document.getElementById("theme-icon-moon");
+  if (sunIcon && moonIcon) {
+    sunIcon.style.display = theme === "dark" ? "block" : "none";
+    moonIcon.style.display = theme === "light" ? "block" : "none";
+  }
+}
+function toggleTheme() {
+  const current = getCurrentTheme();
+  const newTheme = current === "dark" ? "light" : "dark";
+  localStorage.setItem(THEME_STORAGE_KEY, newTheme);
+  applyTheme(newTheme);
+}
+function initializeTheme() {
+  const theme = getCurrentTheme();
+  applyTheme(theme);
+  const toggleBtn = document.getElementById("theme-toggle");
+  if (toggleBtn) {
+    toggleBtn.addEventListener("click", toggleTheme);
+  }
+  window.matchMedia("(prefers-color-scheme: dark)").addEventListener("change", (e4) => {
+    if (!getStoredTheme()) {
+      applyTheme(e4.matches ? "dark" : "light");
+    }
+  });
+}
 class Dashboard {
   authManager = null;
   currentState = "initializing";
@@ -14326,5 +14370,6 @@ class Dashboard {
   }
 }
 document.addEventListener("DOMContentLoaded", () => {
+  initializeTheme();
   new Dashboard();
 });

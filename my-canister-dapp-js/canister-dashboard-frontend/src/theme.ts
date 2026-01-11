@@ -23,20 +23,8 @@ function getCurrentTheme(): Theme {
 }
 
 function applyTheme(theme: Theme): void {
+  // CSS handles icon visibility based on data-theme attribute
   document.documentElement.dataset.theme = theme;
-  updateToggleIcon(theme);
-}
-
-function updateToggleIcon(theme: Theme): void {
-  const sunIcon = document.getElementById('theme-icon-sun');
-  const moonIcon = document.getElementById('theme-icon-moon');
-
-  if (sunIcon && moonIcon) {
-    // Show sun icon in dark mode (to switch to light)
-    // Show moon icon in light mode (to switch to dark)
-    sunIcon.style.display = theme === 'dark' ? 'block' : 'none';
-    moonIcon.style.display = theme === 'light' ? 'block' : 'none';
-  }
 }
 
 function toggleTheme(): void {
@@ -47,7 +35,7 @@ function toggleTheme(): void {
 }
 
 export function initializeTheme(): void {
-  // Apply theme immediately to prevent flash
+  // Apply theme immediately
   const theme = getCurrentTheme();
   applyTheme(theme);
 
