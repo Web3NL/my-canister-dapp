@@ -499,3 +499,89 @@ async fn cmc_notify_top_up(block_index: u64, canister_id: Principal) -> Result<N
         NotifyTopUpResult::Err(e) => Err(e),
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    mod cycles_amount {
+        use super::*;
+
+        #[test]
+        fn as_cycles_0_25t() {
+            assert_eq!(CyclesAmount::_0_25T.as_cycles(), 250_000_000_000);
+        }
+
+        #[test]
+        fn as_cycles_0_5t() {
+            assert_eq!(CyclesAmount::_0_5T.as_cycles(), 500_000_000_000);
+        }
+
+        #[test]
+        fn as_cycles_1t() {
+            assert_eq!(CyclesAmount::_1T.as_cycles(), 1_000_000_000_000);
+        }
+
+        #[test]
+        fn as_cycles_2t() {
+            assert_eq!(CyclesAmount::_2T.as_cycles(), 2_000_000_000_000);
+        }
+
+        #[test]
+        fn as_cycles_5t() {
+            assert_eq!(CyclesAmount::_5T.as_cycles(), 5_000_000_000_000);
+        }
+
+        #[test]
+        fn as_cycles_10t() {
+            assert_eq!(CyclesAmount::_10T.as_cycles(), 10_000_000_000_000);
+        }
+
+        #[test]
+        fn as_cycles_50t() {
+            assert_eq!(CyclesAmount::_50T.as_cycles(), 50_000_000_000_000);
+        }
+
+        #[test]
+        fn as_cycles_100t() {
+            assert_eq!(CyclesAmount::_100T.as_cycles(), 100_000_000_000_000);
+        }
+    }
+
+    mod interval_duration_tests {
+        use super::*;
+        use std::time::Duration;
+
+        #[test]
+        fn hourly_is_3600_seconds() {
+            assert_eq!(
+                interval_duration(&TopUpInterval::Hourly),
+                Duration::from_secs(3600)
+            );
+        }
+
+        #[test]
+        fn daily_is_86400_seconds() {
+            assert_eq!(
+                interval_duration(&TopUpInterval::Daily),
+                Duration::from_secs(86400)
+            );
+        }
+
+        #[test]
+        fn weekly_is_604800_seconds() {
+            assert_eq!(
+                interval_duration(&TopUpInterval::Weekly),
+                Duration::from_secs(604800)
+            );
+        }
+
+        #[test]
+        fn monthly_is_2592000_seconds() {
+            assert_eq!(
+                interval_duration(&TopUpInterval::Monthly),
+                Duration::from_secs(2592000)
+            );
+        }
+    }
+}
