@@ -14,9 +14,9 @@ export interface PendingCanisterStorage {
 }
 
 const defaultStorage: PendingCanisterStorage = {
-  get: (key) => localStorage.getItem(key),
+  get: key => localStorage.getItem(key),
   set: (key, value) => localStorage.setItem(key, value),
-  remove: (key) => localStorage.removeItem(key),
+  remove: key => localStorage.removeItem(key),
 };
 
 let storage = defaultStorage;

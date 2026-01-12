@@ -6,7 +6,9 @@ import type {
 } from '$declarations/icp-index/icp-index.did.d.ts';
 
 // CREATE_CANISTER_MEMO = [0x43, 0x52, 0x45, 0x41, 0x00, 0x00, 0x00, 0x00] = 'CREA' + padding
-const CREATE_CANISTER_MEMO = new Uint8Array([0x43, 0x52, 0x45, 0x41, 0x00, 0x00, 0x00, 0x00]);
+const CREATE_CANISTER_MEMO = new Uint8Array([
+  0x43, 0x52, 0x45, 0x41, 0x00, 0x00, 0x00, 0x00,
+]);
 
 function createMockTransaction(
   icrc1Memo: [] | [Uint8Array | number[]]
@@ -16,7 +18,15 @@ function createMockTransaction(
     transaction: {
       icrc1_memo: icrc1Memo,
       memo: 0n,
-      operation: { Transfer: { to: 'account-to', fee: { e8s: 10000n }, from: 'account-from', amount: { e8s: 100000000n }, spender: [] } },
+      operation: {
+        Transfer: {
+          to: 'account-to',
+          fee: { e8s: 10000n },
+          from: 'account-from',
+          amount: { e8s: 100000000n },
+          spender: [],
+        },
+      },
       created_at_time: [],
       timestamp: [],
     },
@@ -73,7 +83,9 @@ describe('filterCreateCanisterTransactions', () => {
   });
 
   it('excludes transactions with partial memo match', () => {
-    const partialMemo = new Uint8Array([0x43, 0x52, 0x45, 0x41, 0x00, 0x00, 0x00, 0x01]); // Last byte different
+    const partialMemo = new Uint8Array([
+      0x43, 0x52, 0x45, 0x41, 0x00, 0x00, 0x00, 0x01,
+    ]); // Last byte different
     const txWithPartialMatch = createMockTransaction([partialMemo]);
     const result = createOkResult([txWithPartialMatch]);
 
@@ -92,7 +104,9 @@ describe('filterCreateCanisterTransactions', () => {
   it('handles mixed valid/invalid transactions', () => {
     const validTx = createMockTransaction([CREATE_CANISTER_MEMO]);
     const invalidTx1 = createMockTransaction([]); // No memo
-    const invalidTx2 = createMockTransaction([new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8])]); // Wrong memo
+    const invalidTx2 = createMockTransaction([
+      new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8]),
+    ]); // Wrong memo
     const result = createOkResult([invalidTx1, validTx, invalidTx2]);
 
     const filtered = filterCreateCanisterTransactions(result);

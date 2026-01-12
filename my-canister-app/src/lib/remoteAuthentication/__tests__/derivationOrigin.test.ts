@@ -23,11 +23,17 @@ describe('createDerivationOriginFromHost', () => {
 
     it('handles different port numbers', () => {
       expect(
-        createDerivationOriginFromHost(TEST_CANISTER_ID, 'http://localhost:4943')
+        createDerivationOriginFromHost(
+          TEST_CANISTER_ID,
+          'http://localhost:4943'
+        )
       ).toBe(`http://${TEST_CANISTER_ID}.localhost:4943`);
 
       expect(
-        createDerivationOriginFromHost(TEST_CANISTER_ID, 'http://localhost:8000')
+        createDerivationOriginFromHost(
+          TEST_CANISTER_ID,
+          'http://localhost:8000'
+        )
       ).toBe(`http://${TEST_CANISTER_ID}.localhost:8000`);
     });
   });
