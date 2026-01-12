@@ -64,6 +64,7 @@
   "workspaces": [
     "my-canister-dapp-js/my-canister-dashboard-js",
     "my-canister-dapp-js/vite-plugin-canister-dapp",
+    "my-canister-dapp-js/my-canister-installer",
     "my-canister-dapp-js/canister-dashboard-frontend",
     "my-canister-app",
     "examples/my-hello-world/src/my-hello-world-frontend"

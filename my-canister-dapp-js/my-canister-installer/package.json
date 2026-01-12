@@ -1,0 +1,59 @@
+{
+  "name": "@web3nl/my-canister-installer",
+  "description": "Reusable utilities for Internet Computer canister installation logic",
+  "version": "0.1.0",
+  "author": "Web3NL",
+  "dependencies": {},
+  "devDependencies": {
+    "@icp-sdk/core": "^5.0.0"
+  },
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    }
+  },
+  "files": [
+    "dist",
+    "README.md",
+    "LICENSE"
+  ],
+  "homepage": "https://github.com/Web3NL/my-canister-dapp/tree/main/my-canister-dapp-js/my-canister-installer",
+  "keywords": [
+    "canister",
+    "cycles",
+    "dfinity",
+    "ic",
+    "installer",
+    "internet-computer"
+  ],
+  "license": "MIT",
+  "main": "dist/index.js",
+  "module": "dist/index.js",
+  "peerDependencies": {
+    "@icp-sdk/core": "^5.0.0"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Web3NL/my-canister-dapp.git",
+    "directory": "my-canister-dapp-js/my-canister-installer"
+  },
+  "scripts": {
+    "build": "vite build",
+    "format": "prettier --check src test",
+    "format:fix": "prettier --write src test",
+    "lint": "eslint src test",
+    "lint:fix": "eslint src test --fix",
+    "test": "vitest --run",
+    "typecheck": "tsc --noEmit"
+  },
+  "sideEffects": false,
+  "type": "module",
+  "types": "dist/index.d.ts"
+}

@@ -242,6 +242,7 @@ The framework consists of published packages (for dapp developers) and private p
 | `canister-dapp-test` | Rust crate | crates.io | Conformance test suite for User-Owned Dapps |
 | `@web3nl/my-canister-dashboard` | JS package | npm | Frontend code to interact with dashboard backend API |
 | `@web3nl/vite-plugin-canister-dapp` | JS package | npm | Vite plugin for dfx integration + environment detection |
+| `@web3nl/my-canister-installer` | JS package | npm | Utilities for canister installation (cycles calc, recovery) |
 | `canister-dashboard-frontend` | JS package | private | Dashboard UI source (compiled into Rust crate) |
 | `my-canister-app` | JS package | private | Production installer service at mycanister.app |
 | `my-hello-world` | Rust crate | private | Reference implementation canister |
@@ -504,6 +505,7 @@ IC-CertificateExpression: <expression>
 |---------|---------|-------------|
 | `@web3nl/my-canister-dashboard` | Dashboard client utilities | `MyCanisterDashboard`, `MyDashboardBackend`, `inferCanisterIdFromLocation()` |
 | `@web3nl/vite-plugin-canister-dapp` | Vite plugin for environment config | See below |
+| `@web3nl/my-canister-installer` | Installer utilities | See below |
 
 #### @web3nl/vite-plugin-canister-dapp
 
@@ -539,6 +541,27 @@ canisterDappEnvironmentConfig({
 })
 ```
 
+#### @web3nl/my-canister-installer
+
+Reusable utilities for building custom canister installers. Used by `my-canister-app`.
+
+**Exports**:
+
+| Export | Type | Description |
+|--------|------|-------------|
+| `calculateIcpFromCyclesRate()` | Function | Pure ICP-to-cycles conversion using CMC rate |
+| `createDerivationOriginFromHost()` | Function | Derivation origin URL construction |
+| `E8S_PER_TOKEN` | Constant | 100_000_000n (e8s per ICP token) |
+| `PendingCanisterStorage` | Interface | Storage abstraction for recovery state |
+| `setPendingCanister()` | Function | Store pending canister ID for recovery |
+| `getPendingCanister()` | Function | Retrieve pending canister ID |
+| `clearPendingCanister()` | Function | Clear pending state after success |
+| `setStorage()` | Function | Inject custom storage (for testing) |
+| `resetStorage()` | Function | Reset to default localStorage |
+| `PartialCreationError` | Class | Error when canister created but install fails |
+
+**Peer dependency**: `@icp-sdk/core` ^5.0.0
+
 ### 7.3 Private Packages
 
 These packages are not published to npm or crates.io. They are deployment artifacts or internal build dependencies.
@@ -568,20 +591,6 @@ These packages are not published to npm or crates.io. They are deployment artifa
 - My Dapps: View and access canisters the user has created
 
 **Why Private**: This is a deployment target (a running service), not a library. The source is open for reference but not intended for external reuse.
-
-#### canister-dapp-installer (Future)
-
-**Status**: In preparation - core logic being refactored for extraction.
-
-**Purpose**: Reusable npm package for canister installation logic.
-
-**Planned Exports**:
-- `calculateIcpFromCyclesRate()` - Pure ICP-to-cycles conversion
-- `createDerivationOriginFromHost()` - Derivation origin URL construction
-- `PendingCanisterStorage` - Abstraction for recovery state
-- `PartialCreationError` - Error class for partial creation failures
-
-**Why Extract**: Enable third-party installers to reuse the proven canister creation, recovery, and derivation logic without duplicating code.
 
 #### my-hello-world + my-hello-world-frontend
 
@@ -996,6 +1005,7 @@ Goal: Enable third-party developers to build User-Owned Dapps using the publishe
 
 | Version | Date | Changes |
 |---------|------|---------|
+| 2.1 | 2026-01-12 | Added @web3nl/my-canister-installer to Section 7.2 (JavaScript Packages). Package extracted from my-canister-app with full test suite. |
 | 2.0 | 2026-01-11 | Major restructure: Added Section 3 (Architecture Overview with diagrams), Section 7.3 (Private Packages), Section 8 (Reference Implementation), Section 9 (Conformance Testing), Section 12.8 (PocketIC), Section 13 (Future Direction). Renumbered all sections. |
 | 1.4 | 2026-01-11 | Added Section 6.1: my-canister-frontend crate details, clarified crate independence |
 | 1.3 | 2026-01-11 | Expanded Section 6.1: my-canister-dashboard crate details, UI features, state persistence note |
