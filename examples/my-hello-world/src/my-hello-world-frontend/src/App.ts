@@ -1,48 +1,86 @@
-import { html, render } from 'lit-html';
+// Main Application Manager
+// Vanilla TypeScript implementation following canister-dashboard-frontend patterns
+
 import { createActor } from '$declarations/index.js';
-import { createCyclesChecker } from './cyclesChecker';
 import { authManager } from './auth';
+import { createCyclesChecker } from './cyclesChecker';
+import {
+  addEventListener,
+  getInputValue,
+  setText,
+  toggleVisibility,
+  showError,
+  clearAllNotifications,
+  showLoading,
+  hideLoading,
+} from './dom';
+import {
+  NOT_AUTHORIZED_MESSAGE,
+  BACKEND_CALL_FAILED_MESSAGE,
+  CYCLES_CHECK_FAILED_MESSAGE,
+} from './constants';
 import { inferCanisterId } from '@web3nl/vite-plugin-canister-dapp/runtime';
-import { showError, clearAllNotifications } from './errorHandler';
-import logo from './logo2.svg';
 
-interface EventListenerInfo {
-  element: Element;
-  event: string;
-  handler: EventListenerOrEventListenerObject;
-}
-
-export default class App {
+export class AppManager {
   private greeting = '';
-  private isAuthenticated = false;
-  private isAuthorized = false;
-  private principal = '';
-  private eventListeners: EventListenerInfo[] = [];
 
-  constructor() {
-    this.init();
+  private constructor() {
+    // Private constructor enforces use of static create method
   }
 
-  private async init(): Promise<void> {
-    this.isAuthenticated = await authManager.init();
-    this.principal = authManager.getPrincipalText();
+  static async create(): Promise<AppManager> {
+    const instance = new AppManager();
+    await instance.initialize();
+    return instance;
+  }
 
-    if (this.isAuthenticated) {
-      this.isAuthorized = await authManager.checkAuthorization();
-      if (!this.isAuthorized) {
-        showError('You are not authorized to access this application');
+  private async initialize(): Promise<void> {
+    const isAuthenticated = await authManager.init();
+
+    if (isAuthenticated) {
+      const isAuthorized = await authManager.checkAuthorization();
+      if (!isAuthorized) {
+        showError(NOT_AUTHORIZED_MESSAGE);
         await authManager.logout();
-        this.isAuthenticated = false;
-        this.isAuthorized = false;
-        this.principal = '';
+        this.setLoggedOutState();
+        return;
       }
-    }
-
-    this.render();
-
-    if (this.isAuthenticated && this.isAuthorized) {
+      this.setLoggedInState();
       await this.checkCycles();
+    } else {
+      this.setLoggedOutState();
     }
+  }
+
+  private setLoggedInState(): void {
+    const principal = authManager.getPrincipalText();
+
+    // Update UI
+    toggleVisibility('auth-logged-out', false);
+    toggleVisibility('auth-logged-in', true);
+    setText('principal', principal);
+    toggleVisibility('dashboard-section', true);
+    toggleVisibility('greeting-section', true);
+
+    // Setup event listeners
+    addEventListener('logout-btn', 'click', () => this.handleLogout());
+    addEventListener('dashboard-btn', 'click', () =>
+      this.handleOpenDashboard()
+    );
+    addEventListener('greeting-form', 'submit', e => this.handleSubmit(e));
+  }
+
+  private setLoggedOutState(): void {
+    // Update UI
+    toggleVisibility('auth-logged-out', true);
+    toggleVisibility('auth-logged-in', false);
+    setText('principal', '');
+    toggleVisibility('dashboard-section', false);
+    toggleVisibility('greeting-section', false);
+    toggleVisibility('greeting', false);
+
+    // Setup login listener
+    addEventListener('login-btn', 'click', () => this.handleLogin());
   }
 
   private async checkCycles(): Promise<void> {
@@ -53,177 +91,72 @@ export default class App {
         await cyclesChecker.checkAndWarn(agent);
       }
     } catch {
-      showError('Failed to check cycles');
+      showError(CYCLES_CHECK_FAILED_MESSAGE);
     }
   }
 
-  private handleLogin = async (): Promise<void> => {
+  private async handleLogin(): Promise<void> {
+    showLoading();
     try {
-      this.isAuthenticated = await authManager.login();
-      this.principal = authManager.getPrincipalText();
+      const success = await authManager.login();
 
-      if (this.isAuthenticated) {
-        this.isAuthorized = await authManager.checkAuthorization();
-        if (!this.isAuthorized) {
-          showError('You are not authorized to access this application');
+      if (success) {
+        const isAuthorized = await authManager.checkAuthorization();
+        if (!isAuthorized) {
+          showError(NOT_AUTHORIZED_MESSAGE);
           await authManager.logout();
-          this.isAuthenticated = false;
-          this.isAuthorized = false;
-          this.principal = '';
+          this.setLoggedOutState();
+          return;
         }
-      }
-
-      this.render();
-
-      if (this.isAuthenticated && this.isAuthorized) {
+        this.setLoggedInState();
         await this.checkCycles();
       }
-    } catch {
-      showError('Login failed');
+    } finally {
+      hideLoading();
     }
-  };
+  }
 
-  private handleLogout = async (): Promise<void> => {
-    await authManager.logout();
-    this.isAuthenticated = false;
-    this.isAuthorized = false;
-    this.principal = '';
-    this.greeting = '';
-    this.clearAllNotifications();
-    this.render();
-  };
-
-  private handleOpenDashboard = (): void => {
-    // Same link as used in cyclesChecker.ts
-    window.open('/canister-dashboard', '_blank', 'noopener,noreferrer');
-  };
-
-  private handleSubmit = async (e: Event): Promise<void> => {
-    e.preventDefault();
-
-    if (!this.isAuthenticated || !this.isAuthorized) {
-      showError('Please login with Internet Identity first');
-      return;
-    }
-
-    const nameInput = document.getElementById('name') as HTMLInputElement;
-    const name = nameInput.value;
-
+  private async handleLogout(): Promise<void> {
+    showLoading();
     try {
-      // Get canister ID using plugin runtime
+      await authManager.logout();
+      this.greeting = '';
+      clearAllNotifications();
+      this.setLoggedOutState();
+    } finally {
+      hideLoading();
+    }
+  }
+
+  private handleOpenDashboard(): void {
+    window.open('/canister-dashboard', '_blank', 'noopener,noreferrer');
+  }
+
+  private async handleSubmit(e?: Event): Promise<void> {
+    e?.preventDefault();
+
+    const name = getInputValue('name');
+    if (!name) return;
+
+    showLoading();
+    try {
       const canisterId = inferCanisterId();
       const agent = authManager.getAgent();
       if (!agent) {
         throw new Error('No authenticated agent available');
       }
 
-      const my_hello_world_backend = createActor(canisterId, { agent });
+      const backend = createActor(canisterId, { agent });
+      this.greeting = (await backend.greet(name)) as string;
 
-      this.greeting = (await my_hello_world_backend.greet(name)) as string;
-      this.render();
+      // Update greeting display
+      setText('greeting', this.greeting);
+      toggleVisibility('greeting', true);
     } catch (error) {
-      showError('Failed to call backend service. Please try again.');
-
+      showError(BACKEND_CALL_FAILED_MESSAGE);
       console.error('Backend call failed:', error);
-    }
-  };
-
-  private clearAllNotifications(): void {
-    clearAllNotifications();
-  }
-
-  private removeEventListeners(): void {
-    // Remove existing event listeners to prevent memory leaks
-    this.eventListeners.forEach(({ element, event, handler }) => {
-      element.removeEventListener(event, handler);
-    });
-    this.eventListeners = [];
-  }
-
-  private addEventListener(
-    element: Element,
-    event: string,
-    handler: EventListenerOrEventListenerObject
-  ): void {
-    element.addEventListener(event, handler);
-    this.eventListeners.push({ element, event, handler });
-  }
-
-  private render(): void {
-    const body = html`
-      <main>
-        <img src="${logo}" alt="DFINITY logo" />
-        <br />
-
-        ${this.isAuthenticated && this.isAuthorized
-          ? html`
-              <div>
-                <button type="button" class="open-dashboard-btn">
-                  Goto Canister Dashboard
-                </button>
-              </div>
-              <br />
-            `
-          : ''}
-
-        <div class="auth-section">
-          ${this.isAuthenticated
-            ? html`
-                <div class="user-info">
-                  <p><strong>Logged in as:</strong></p>
-                  <p class="principal">${this.principal}</p>
-                  <button class="logout-btn">Logout</button>
-                </div>
-              `
-            : html`
-                <button class="login-btn">Login with Internet Identity</button>
-              `}
-        </div>
-
-        ${this.isAuthenticated && this.isAuthorized
-          ? html`
-              <form action="#">
-                <label for="name">Enter your name: &nbsp;</label>
-                <input id="name" alt="Name" type="text" />
-                <button type="submit">Click Me!</button>
-              </form>
-              <section id="greeting">${this.greeting}</section>
-            `
-          : ''}
-      </main>
-    `;
-
-    const rootElement = document.getElementById('root');
-    if (rootElement) {
-      render(body, rootElement);
-    }
-
-    // Clean up existing event listeners before adding new ones
-    this.removeEventListeners();
-
-    // Add event listeners
-    const form = document.querySelector('form');
-    if (form) {
-      this.addEventListener(form, 'submit', this.handleSubmit);
-    }
-
-    const loginBtn = document.querySelector('.login-btn');
-    if (loginBtn) {
-      this.addEventListener(loginBtn, 'click', this.handleLogin);
-    }
-
-    const logoutBtn = document.querySelector('.logout-btn');
-    if (logoutBtn) {
-      this.addEventListener(logoutBtn, 'click', this.handleLogout);
-    }
-
-    const openDashboardBtn = document.querySelector('.open-dashboard-btn');
-    if (openDashboardBtn) {
-      this.addEventListener(
-        openDashboardBtn,
-        'click',
-        this.handleOpenDashboard
-      );
+    } finally {
+      hideLoading();
     }
   }
 }

@@ -4,11 +4,59 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>IC Hello Starter</title>
+    <title>Hello World - User-Owned Dapp</title>
   </head>
 
   <body>
-    <div id="root"></div>
-    <script type="module" src="/src/main.js"></script>
+    <!-- Theme Toggle -->
+    <button id="theme-toggle" class="theme-toggle" aria-label="Toggle theme">
+      <span id="theme-icon">🌙</span>
+    </button>
+
+    <main>
+      <!-- Logo -->
+      <img id="logo" src="/src/logo2.svg" alt="Internet Computer logo" class="logo" />
+
+      <!-- Dashboard Button (shown when authenticated) -->
+      <div id="dashboard-section" class="hidden">
+        <button id="dashboard-btn" class="dashboard-btn">
+          Go to Canister Dashboard
+        </button>
+      </div>
+
+      <!-- Authentication Section -->
+      <div class="auth-section">
+        <!-- Login Button (shown when logged out) -->
+        <div id="auth-logged-out">
+          <button id="login-btn" class="login-btn">
+            Login with Internet Identity
+          </button>
+        </div>
+
+        <!-- User Info (shown when logged in) -->
+        <div id="auth-logged-in" class="user-info hidden">
+          <p><strong>Logged in as:</strong></p>
+          <p id="principal" class="principal"></p>
+          <button id="logout-btn" class="logout-btn">Logout</button>
+        </div>
+      </div>
+
+      <!-- Greeting Form (shown when authenticated) -->
+      <div id="greeting-section" class="hidden">
+        <form id="greeting-form">
+          <label for="name">Enter your name:</label>
+          <input id="name" type="text" placeholder="Your name" required />
+          <button type="submit">Click Me!</button>
+        </form>
+        <section id="greeting" class="hidden"></section>
+      </div>
+    </main>
+
+    <!-- Loading Overlay -->
+    <div id="loading-overlay" class="loading-overlay hidden">
+      <div class="loading-spinner"></div>
+    </div>
+
+    <script type="module" src="/src/main.ts"></script>
   </body>
 </html>

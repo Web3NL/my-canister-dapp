@@ -1,9 +1,14 @@
+// Cycles Checker
+// Monitors canister cycle balance and displays warnings
+
 import type { HttpAgent } from '@icp-sdk/core/agent';
 import { MyCanisterDashboard } from '@web3nl/my-canister-dashboard';
 import { inferCanisterId } from '@web3nl/vite-plugin-canister-dapp/runtime';
-import { showError, showWarning } from './errorHandler';
-
-const DEFAULT_THRESHOLD = 1_000_000_000_000n; // 1T cycles
+import { showError, showWarning } from './dom';
+import {
+  DEFAULT_CYCLES_THRESHOLD,
+  CYCLES_CHECK_FAILED_MESSAGE,
+} from './constants';
 
 interface CyclesResult {
   ok?: boolean;
@@ -11,7 +16,7 @@ interface CyclesResult {
 }
 
 class CyclesChecker {
-  constructor(private readonly threshold: bigint = DEFAULT_THRESHOLD) {}
+  constructor(private readonly threshold: bigint = DEFAULT_CYCLES_THRESHOLD) {}
 
   async checkCyclesBalance(agent: HttpAgent): Promise<CyclesResult | null> {
     try {
@@ -21,7 +26,7 @@ class CyclesChecker {
 
       return result as CyclesResult;
     } catch {
-      showError('Failed to check cycles balance');
+      showError(CYCLES_CHECK_FAILED_MESSAGE);
       return null;
     }
   }

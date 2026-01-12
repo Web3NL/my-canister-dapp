@@ -1,9 +1,13 @@
+// Authentication Manager
+// Handles Internet Identity authentication and agent creation
+
 import { AuthClient } from '@icp-sdk/auth/client';
 import { HttpAgent } from '@icp-sdk/core/agent';
 import type { Identity } from '@icp-sdk/core/agent';
 import type { Principal } from '@icp-sdk/core/principal';
 import { MyDashboardBackend } from '@web3nl/my-canister-dashboard';
-import { showError } from './errorHandler';
+import { showError } from './dom';
+import { LOGIN_FAILED_MESSAGE, NETWORK_ERROR_MESSAGE } from './constants';
 import {
   inferCanisterId,
   inferEnvironment,
@@ -49,7 +53,7 @@ class AuthManager {
           resolve(this.isAuthenticated);
         },
         onError: (error?: string) => {
-          showError('Login failed. Please try again.');
+          showError(LOGIN_FAILED_MESSAGE);
           reject(error);
         },
       });
@@ -83,7 +87,7 @@ class AuthManager {
         try {
           await this.agent.fetchRootKey();
         } catch {
-          showError('Unable to connect to local network');
+          showError(NETWORK_ERROR_MESSAGE);
         }
       }
     }
@@ -123,11 +127,9 @@ class AuthManager {
       if ('Ok' in result) {
         return true;
       } else {
-        showError(`Authorization check failed: ${result.Err}`);
         return false;
       }
     } catch {
-      showError('Failed to check authorization');
       return false;
     }
   }

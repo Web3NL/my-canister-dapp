@@ -1,94 +1,104 @@
-use ic_asset_certification::AssetRouter;
-use ic_cdk::api::certified_data_set;
-use ic_cdk::api::data_certificate;
+//! My Hello World - Reference Implementation
+//!
+//! This canister demonstrates the User-Owned Dapp pattern using:
+//! - `my_canister_frontend` for certified asset serving
+//! - `my_canister_dashboard` for management UI and endpoints
+//!
+//! See the SPEC.md Section 8 for detailed documentation.
+
 use ic_cdk::{init, query, update};
-use ic_http_certification::{HttpRequest, HttpResponse, StatusCode};
+use ic_http_certification::{HttpRequest, HttpResponse};
 use include_dir::{include_dir, Dir};
 use my_canister_dashboard::{
     guards::{only_canister_controllers_guard, only_ii_principal_guard},
+    setup::setup_dashboard_assets,
     ManageAlternativeOriginsArg, ManageAlternativeOriginsResult, ManageIIPrincipalArg,
     ManageIIPrincipalResult, ManageTopUpRuleArg, ManageTopUpRuleResult, WasmStatus,
 };
-use my_canister_frontend::asset_router::asset_router_configs;
-use std::borrow::Cow;
-use std::cell::RefCell;
+use my_canister_frontend::{asset_router::with_asset_router_mut, setup_frontend};
 
+/// Embedded frontend assets from the build output.
 static FRONTEND_DIR: Dir = include_dir!("$CARGO_MANIFEST_DIR/../my-hello-world-frontend/dist");
 
-thread_local! {
-    static ASSET_ROUTER: RefCell<AssetRouter<'static>> = RefCell::new(
-        AssetRouter::new()
-    );
-}
+/// Alternative origins allowed for Internet Identity derivation.
+/// These domains can authenticate users with principals derived at this canister's domain.
+const ALTERNATIVE_ORIGINS: &[&str] = &[
+    "https://mycanister.app",
+    "http://localhost:5174",
+    "http://c7lwu-3qaaa-aaaam-qbgia-cai.localhost:8080",
+];
+
+// ============================================================================
+// Initialization
+// ============================================================================
 
 #[init]
 fn init() {
-    ASSET_ROUTER.with(|router| {
-        let mut router = router.borrow_mut();
+    // Setup frontend assets with certification
+    setup_frontend(&FRONTEND_DIR).expect("Failed to setup frontend");
 
-        my_canister_dashboard::setup::setup_dashboard_assets(
-            &mut router,
-            Some(vec![
-                "https://mycanister.app".to_string(),
-                "http://localhost:5174".to_string(),
-                "http://c7lwu-3qaaa-aaaam-qbgia-cai.localhost:8080".to_string(),
-            ]),
-        )
-        .expect("Failed to setup dashboard assets");
-
-        let (assets, asset_configs) = asset_router_configs(&FRONTEND_DIR);
-        router
-            .certify_assets(assets, asset_configs)
-            .expect("Failed to certify frontend assets");
-
-        certified_data_set(router.root_hash());
+    // Add dashboard UI and configure alternative origins
+    with_asset_router_mut(|router| {
+        let origins: Vec<String> = ALTERNATIVE_ORIGINS.iter().map(|s| s.to_string()).collect();
+        setup_dashboard_assets(router, Some(origins)).expect("Failed to setup dashboard assets");
     });
 }
 
+// ============================================================================
+// HTTP Asset Serving
+// ============================================================================
+
+/// Serve certified frontend and dashboard assets.
 #[query]
 fn http_request(request: HttpRequest) -> HttpResponse {
-    let data_certificate = data_certificate().unwrap_or_default();
-
-    ASSET_ROUTER.with(|router| {
-        let router = router.borrow();
-        match router.serve_asset(&data_certificate, &request) {
-            Ok(response) => response,
-            Err(_) => HttpResponse::builder()
-                .with_status_code(StatusCode::NOT_FOUND)
-                .with_headers(vec![("Content-Type".to_string(), "text/plain".to_string())])
-                .with_body(Cow::Owned("404 Not Found".as_bytes().to_vec()))
-                .build(),
-        }
-    })
+    my_canister_frontend::http_request(request)
 }
 
+// ============================================================================
+// WASM Metadata
+// ============================================================================
+
+/// Return WASM metadata for the installer and dashboard.
 #[query]
 fn wasm_status() -> WasmStatus {
     WasmStatus {
         name: "My Hello World".to_string(),
-        version: 5,
-        memo: Some("The Internet Computer Hello World Dapp".to_string()),
+        version: 6,
+        memo: Some("Reference implementation for User-Owned Dapps".to_string()),
     }
 }
 
+// ============================================================================
+// Dashboard Management Endpoints
+// ============================================================================
+
+/// Get or set the Internet Identity principal for this canister.
+/// Only callable by canister controllers.
 #[update(guard = "only_canister_controllers_guard")]
 fn manage_ii_principal(arg: ManageIIPrincipalArg) -> ManageIIPrincipalResult {
     my_canister_dashboard::manage_ii_principal(arg)
 }
 
+/// Add or remove alternative origins for II principal derivation.
+/// Only callable by canister controllers.
 #[update(guard = "only_canister_controllers_guard")]
 fn manage_alternative_origins(arg: ManageAlternativeOriginsArg) -> ManageAlternativeOriginsResult {
-    ASSET_ROUTER.with(|router| {
-        let mut router = router.borrow_mut();
-        my_canister_dashboard::manage_alternative_origins(&mut router, arg)
-    })
+    with_asset_router_mut(|router| my_canister_dashboard::manage_alternative_origins(router, arg))
 }
 
+/// Get, add, or clear automatic cycle top-up rules.
+/// Only callable by canister controllers.
 #[update(guard = "only_canister_controllers_guard")]
 fn manage_top_up_rule(arg: ManageTopUpRuleArg) -> ManageTopUpRuleResult {
     my_canister_dashboard::manage_top_up_rule(arg)
 }
 
+// ============================================================================
+// Application Endpoint
+// ============================================================================
+
+/// Greet the user by name.
+/// Only callable by the configured II principal (the canister owner).
 #[query(guard = "only_ii_principal_guard")]
 fn greet(name: String) -> String {
     format!("Hello, {name}!")
