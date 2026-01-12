@@ -10,6 +10,9 @@ npm run test --workspace=@web3nl/vite-plugin-canister-dapp
 echo "Unit testing canister-dashboard-frontend"
 npm run test --workspace=canister-dashboard-frontend
 
+echo "Unit testing my-canister-app"
+npm run test --workspace=my-canister-app
+
 echo "Unit testing my-canister-dashboard (Rust)"
 cargo test -p my-canister-dashboard
 

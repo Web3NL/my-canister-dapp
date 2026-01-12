@@ -569,6 +569,20 @@ These packages are not published to npm or crates.io. They are deployment artifa
 
 **Why Private**: This is a deployment target (a running service), not a library. The source is open for reference but not intended for external reuse.
 
+#### canister-dapp-installer (Future)
+
+**Status**: In preparation - core logic being refactored for extraction.
+
+**Purpose**: Reusable npm package for canister installation logic.
+
+**Planned Exports**:
+- `calculateIcpFromCyclesRate()` - Pure ICP-to-cycles conversion
+- `createDerivationOriginFromHost()` - Derivation origin URL construction
+- `PendingCanisterStorage` - Abstraction for recovery state
+- `PartialCreationError` - Error class for partial creation failures
+
+**Why Extract**: Enable third-party installers to reuse the proven canister creation, recovery, and derivation logic without duplicating code.
+
 #### my-hello-world + my-hello-world-frontend
 
 **Location**: `examples/my-hello-world/`

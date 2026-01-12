@@ -19,6 +19,7 @@
     "lint": "eslint src",
     "lint:fix": "eslint src --fix",
     "sync": "svelte-kit sync",
+    "test": "vitest run",
     "typecheck": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json"
   },
   "type": "module"
