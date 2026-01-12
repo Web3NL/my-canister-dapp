@@ -12,8 +12,8 @@
 
 | Metric | Value |
 |--------|-------|
-| Total Test Files | 16 |
-| Unit Tests | 193 |
+| Total Test Files | 21 |
+| Unit Tests | 234 |
 | E2E Tests | 6 |
 | Skipped/Disabled Tests | 0 |
 | Packages with 0% Unit Coverage | 2 (my-canister-app, my-hello-world-frontend) |
@@ -39,9 +39,14 @@
 | my-canister-dashboard-js/test/dashboard.test.ts | 13 | MyCanisterDashboard class |
 | my-canister-dashboard-js/test/actor.test.ts | 15 | MyDashboardBackend, createMyCanisterActor |
 | my-canister-dashboard-js/test/constants.test.ts | 3 | LOW_CYCLES_THRESHOLD constant |
-| canister-dashboard-frontend/test/utils.test.ts | 38 | Principal/origin validation |
-| canister-dashboard-frontend/test/helpers.test.ts | 21 | Formatting functions |
-| canister-dashboard-frontend/test/top-up-rule.test.ts | 33 | Top-up rule variants |
+| canister-dashboard-frontend/test/utils.test.ts | 22 | Principal/origin validation |
+| canister-dashboard-frontend/test/helpers.test.ts | 24 | Formatting functions |
+| canister-dashboard-frontend/test/top-up-rule.test.ts | 29 | Top-up rule variants |
+| canister-dashboard-frontend/test/constants.test.ts | 12 | Configuration constants |
+| canister-dashboard-frontend/test/api/ledger.test.ts | 6 | LedgerApi class |
+| canister-dashboard-frontend/test/api/cmc.test.ts | 4 | CMCApi class |
+| canister-dashboard-frontend/test/api/management.test.ts | 8 | ManagementApi class |
+| canister-dashboard-frontend/test/api/canister.test.ts | 11 | CanisterApi class |
 
 ### Rust Tests
 
@@ -77,7 +82,7 @@
 | Package | Unit Coverage | E2E Coverage | Overall Rating |
 |---------|---------------|--------------|----------------|
 | @web3nl/vite-plugin-canister-dapp | 95% | N/A | Excellent |
-| canister-dashboard-frontend | 40% | 90% | Medium |
+| canister-dashboard-frontend | 70% | 90% | Good |
 | @web3nl/my-canister-dashboard | 85% | Indirect | Good |
 | my-canister-app | 0% | 70% | Critical Gap |
 | my-hello-world-frontend | 0% | 80% | Low Priority |
@@ -99,7 +104,6 @@
 ### High Priority
 
 - **Rust error handling paths** - `top_up_rule.rs` error scenarios untested
-- **Dashboard API clients** - CanisterApi, LedgerApi classes untested
 
 ### Medium Priority
 
@@ -132,7 +136,6 @@ The `.only` markers in test-fixtures/ are intentional for infrastructure utiliti
 
 1. Rust unit tests for `CyclesAmount::as_cycles()` and `interval_duration()`
 2. Tests for top_up_rule.rs error handling paths
-3. Unit tests for canister-dashboard-frontend API classes
 
 ### Medium (Nice to Have)
 
@@ -177,6 +180,7 @@ npm run test -w @web3nl/vite-plugin-canister-dapp
 - Rust crates use thread-local state which complicates unit testing; integration tests are more practical
 - `my-canister-frontend` unit tests cover MIME type inference (`infer_content_type`), asset config creation, and headers generation
 - `@web3nl/my-canister-dashboard` unit tests use mocked IC SDK dependencies to test class methods, error handling, and actor creation
+- `canister-dashboard-frontend` API tests cover LedgerApi, CMCApi, ManagementApi, and CanisterApi with mocked dependencies
 
 ---
 
@@ -184,6 +188,7 @@ npm run test -w @web3nl/vite-plugin-canister-dapp
 
 | Date | Change |
 |------|--------|
+| 2026-01-12 | Added 41 unit tests for `canister-dashboard-frontend` API classes (LedgerApi, CMCApi, ManagementApi, CanisterApi) and constants |
 | 2026-01-12 | Added 31 unit tests for `@web3nl/my-canister-dashboard` (MyCanisterDashboard, MyDashboardBackend, createMyCanisterActor, constants) |
 | 2026-01-12 | Added 16 unit tests for `my-canister-frontend` crate (MIME detection, asset config, headers) |
 | 2026-01-12 | Initial audit report created |
