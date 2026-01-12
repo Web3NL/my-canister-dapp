@@ -130,3 +130,145 @@ fn build_csp_header() -> String {
         connect_src.join(" ")
     )
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    mod build_csp_header_tests {
+        use super::*;
+
+        #[test]
+        fn contains_default_src_none() {
+            let csp = build_csp_header();
+            assert!(csp.contains("default-src 'none'"));
+        }
+
+        #[test]
+        fn contains_script_src_self() {
+            let csp = build_csp_header();
+            assert!(csp.contains("script-src 'self'"));
+        }
+
+        #[test]
+        fn contains_connect_src_with_icp_api() {
+            let csp = build_csp_header();
+            assert!(csp.contains("connect-src"));
+            assert!(csp.contains("https://icp-api.io"));
+        }
+
+        #[test]
+        fn contains_localhost_websocket() {
+            let csp = build_csp_header();
+            assert!(csp.contains("ws://localhost:*"));
+        }
+
+        #[test]
+        fn frame_ancestors_none() {
+            let csp = build_csp_header();
+            assert!(csp.contains("frame-ancestors 'none'"));
+        }
+    }
+
+    mod create_asset_config_tests {
+        use super::*;
+
+        #[test]
+        fn index_html_returns_ok() {
+            let result = create_asset_config("index.html");
+            assert!(result.is_ok());
+        }
+
+        #[test]
+        fn index_js_returns_ok() {
+            let result = create_asset_config("index.js");
+            assert!(result.is_ok());
+        }
+
+        #[test]
+        fn style_css_returns_ok() {
+            let result = create_asset_config("style.css");
+            assert!(result.is_ok());
+        }
+
+        #[test]
+        fn unknown_path_returns_error() {
+            let result = create_asset_config("unknown.txt");
+            assert!(result.is_err());
+            assert!(result.unwrap_err().contains("Unsupported asset type"));
+        }
+    }
+
+    mod asset_config_tests {
+        use super::*;
+
+        #[test]
+        fn html_config_has_csp_header() {
+            let config = canister_dashboard_html_config();
+            match config {
+                AssetConfig::File { headers, .. } => {
+                    assert!(headers.iter().any(|(k, _)| k == "Content-Security-Policy"));
+                }
+                _ => panic!("Expected AssetConfig::File"),
+            }
+        }
+
+        #[test]
+        fn html_config_has_correct_content_type() {
+            let config = canister_dashboard_html_config();
+            match config {
+                AssetConfig::File { content_type, .. } => {
+                    assert_eq!(content_type, Some("text/html".to_string()));
+                }
+                _ => panic!("Expected AssetConfig::File"),
+            }
+        }
+
+        #[test]
+        fn html_config_aliased_by_dashboard_path() {
+            let config = canister_dashboard_html_config();
+            match config {
+                AssetConfig::File { aliased_by, .. } => {
+                    assert!(aliased_by.contains(&CANISTER_DASHBOARD_HTML_PATH.to_string()));
+                }
+                _ => panic!("Expected AssetConfig::File"),
+            }
+        }
+
+        #[test]
+        fn js_config_has_correct_content_type() {
+            let config = dashboard_js_config();
+            match config {
+                AssetConfig::File { content_type, .. } => {
+                    assert_eq!(content_type, Some("application/javascript".to_string()));
+                }
+                _ => panic!("Expected AssetConfig::File"),
+            }
+        }
+
+        #[test]
+        fn css_config_has_correct_content_type() {
+            let config = dashboard_css_config();
+            match config {
+                AssetConfig::File { content_type, .. } => {
+                    assert_eq!(content_type, Some("text/css".to_string()));
+                }
+                _ => panic!("Expected AssetConfig::File"),
+            }
+        }
+
+        #[test]
+        fn alternative_origins_config_is_json() {
+            let config = alternative_origins_asset_config();
+            match config {
+                AssetConfig::File {
+                    content_type, path, ..
+                } => {
+                    assert_eq!(content_type, Some("application/json".to_string()));
+                    assert_eq!(path, ALTERNATIVE_ORIGINS_PATH);
+                }
+                _ => panic!("Expected AssetConfig::File"),
+            }
+        }
+    }
+}
