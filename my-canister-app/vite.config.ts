@@ -7,6 +7,9 @@ import fs from 'fs';
 export default defineConfig({
   test: {
     include: ['src/**/*.{test,spec}.{js,ts}'],
+    environment: 'jsdom',
+    globals: true,
+    setupFiles: ['./src/lib/__tests__/setup.ts'],
   },
   build: {
     target: 'es2022',

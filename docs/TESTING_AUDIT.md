@@ -9,11 +9,12 @@
 | @web3nl/vite-plugin-canister-dapp | 30 | Vite plugin config & runtime |
 | @web3nl/my-canister-dashboard | 42 | Actor, dashboard, utils |
 | canister-dashboard-frontend | 115 | API classes, helpers, utils |
+| my-canister-app | 43 | Pure functions, balance, pendingCanister |
 | my-canister-dashboard (Rust) | 30 | Pure functions, asset configs |
 | my-canister-frontend (Rust) | 16 | Asset router, MIME types |
 | canister-dapp-test | 1 | PocketIC integration test |
 
-**Total: 234 unit tests**
+**Total: 277 unit tests**
 
 ## E2E Tests (Playwright)
 
@@ -40,6 +41,6 @@ npm run test:e2e
 
 ## Coverage Gaps
 
-- **my-canister-app**: No unit tests (E2E only)
 - **my-hello-world-frontend**: No unit tests (example code)
 - **Rust guards/error paths**: Require PocketIC testing
+- **my-canister-app API classes**: Not yet covered (CmcApi, LedgerApi, etc.)

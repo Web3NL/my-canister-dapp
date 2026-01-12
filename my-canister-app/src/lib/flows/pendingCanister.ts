@@ -3,9 +3,36 @@ import { Principal as PrincipalClass } from '@icp-sdk/core/principal';
 
 const STORAGE_KEY = 'pending_canister_creation';
 
-interface PendingCanister {
-  canisterId: string;
-  createdAt: number;
+/**
+ * Storage interface for pending canister state.
+ * Allows injection of mock storage for testing.
+ */
+export interface PendingCanisterStorage {
+  get(key: string): string | null;
+  set(key: string, value: string): void;
+  remove(key: string): void;
+}
+
+const defaultStorage: PendingCanisterStorage = {
+  get: (key) => localStorage.getItem(key),
+  set: (key, value) => localStorage.setItem(key, value),
+  remove: (key) => localStorage.removeItem(key),
+};
+
+let storage = defaultStorage;
+
+/**
+ * Set custom storage implementation (for testing).
+ */
+export function setStorage(s: PendingCanisterStorage): void {
+  storage = s;
+}
+
+/**
+ * Reset to default localStorage implementation.
+ */
+export function resetStorage(): void {
+  storage = defaultStorage;
 }
 
 /**
@@ -13,32 +40,19 @@ interface PendingCanister {
  * Used to recover from partial creation failures.
  */
 export function setPendingCanister(canisterId: Principal): void {
-  const pending: PendingCanister = {
-    canisterId: canisterId.toText(),
-    createdAt: Date.now(),
-  };
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(pending));
+  storage.set(STORAGE_KEY, canisterId.toText());
 }
 
 /**
  * Retrieves a pending canister if one exists.
- * Returns null if no pending canister or if it's older than 24 hours.
+ * Returns null if no pending canister exists or if the stored value is invalid.
  */
 export function getPendingCanister(): Principal | null {
-  const stored = localStorage.getItem(STORAGE_KEY);
+  const stored = storage.get(STORAGE_KEY);
   if (!stored) return null;
 
   try {
-    const pending: PendingCanister = JSON.parse(stored);
-
-    // Expire pending canisters after 24 hours
-    const maxAge = 24 * 60 * 60 * 1000;
-    if (Date.now() - pending.createdAt > maxAge) {
-      clearPendingCanister();
-      return null;
-    }
-
-    return PrincipalClass.fromText(pending.canisterId);
+    return PrincipalClass.fromText(stored);
   } catch {
     clearPendingCanister();
     return null;
@@ -50,7 +64,7 @@ export function getPendingCanister(): Principal | null {
  * Call this after successful completion or intentional abandonment.
  */
 export function clearPendingCanister(): void {
-  localStorage.removeItem(STORAGE_KEY);
+  storage.remove(STORAGE_KEY);
 }
 
 /**
