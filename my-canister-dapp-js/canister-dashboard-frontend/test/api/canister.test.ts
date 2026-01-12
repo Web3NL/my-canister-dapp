@@ -52,8 +52,8 @@ describe('CanisterApi', () => {
       const api = new CanisterApi();
 
       // Wait for initialization by calling a method
-      mockActor.manage_alternative_origins.mockResolvedValue({ Ok: [] });
-      await api.manageAlternativeOrigins({ List: null });
+      mockActor.manage_alternative_origins.mockResolvedValue({ Ok: null });
+      await api.manageAlternativeOrigins({ Add: 'https://example.com' });
 
       expect(createHttpAgent).toHaveBeenCalled();
       expect(canisterId).toHaveBeenCalled();
@@ -65,26 +65,6 @@ describe('CanisterApi', () => {
   });
 
   describe('manageAlternativeOrigins', () => {
-    it('should list alternative origins', async () => {
-      const mockAgent = createMockAgent();
-      const mockActor = createMockActor();
-      const expectedOrigins = ['https://example.com', 'https://test.com'];
-
-      vi.mocked(createHttpAgent).mockResolvedValue(mockAgent as never);
-      vi.mocked(createMyCanisterActor).mockReturnValue(mockActor as never);
-      mockActor.manage_alternative_origins.mockResolvedValue({
-        Ok: expectedOrigins,
-      });
-
-      const api = new CanisterApi();
-      const result = await api.manageAlternativeOrigins({ List: null });
-
-      expect(result).toEqual({ Ok: expectedOrigins });
-      expect(mockActor.manage_alternative_origins).toHaveBeenCalledWith({
-        List: null,
-      });
-    });
-
     it('should add alternative origin', async () => {
       const mockAgent = createMockAgent();
       const mockActor = createMockActor();
@@ -153,7 +133,7 @@ describe('CanisterApi', () => {
       const api = new CanisterApi();
 
       await expect(
-        api.manageAlternativeOrigins({ List: null })
+        api.manageAlternativeOrigins({ Add: 'https://test.com' })
       ).rejects.toThrow('Network timeout');
       expect(reportError).toHaveBeenCalledWith(NETWORK_ERROR_MESSAGE, error);
     });
@@ -164,13 +144,13 @@ describe('CanisterApi', () => {
       const mockAgent = createMockAgent();
       const mockActor = createMockActor();
       const expectedRule = {
-        Ok: {
-          Enabled: {
-            threshold: { TCycles: 1n },
-            amount: { TCycles: 5n },
-            interval: { Hours: 24n },
+        Ok: [
+          {
+            cycles_threshold: { _1T: null },
+            cycles_amount: { _5T: null },
+            interval: { Daily: null },
           },
-        },
+        ],
       };
 
       vi.mocked(createHttpAgent).mockResolvedValue(mockAgent as never);
@@ -184,59 +164,59 @@ describe('CanisterApi', () => {
       expect(mockActor.manage_top_up_rule).toHaveBeenCalledWith({ Get: null });
     });
 
-    it('should set top-up rule', async () => {
+    it('should add top-up rule', async () => {
       const mockAgent = createMockAgent();
       const mockActor = createMockActor();
       const newRule = {
-        threshold: { TCycles: 2n },
-        amount: { TCycles: 10n },
-        interval: { Minutes: 60n },
+        cycles_threshold: { _2T: null },
+        cycles_amount: { _10T: null },
+        interval: { Hourly: null },
       };
 
       vi.mocked(createHttpAgent).mockResolvedValue(mockAgent as never);
       vi.mocked(createMyCanisterActor).mockReturnValue(mockActor as never);
-      mockActor.manage_top_up_rule.mockResolvedValue({ Ok: null });
+      mockActor.manage_top_up_rule.mockResolvedValue({ Ok: [] });
 
       const api = new CanisterApi();
-      const result = await api.manageTopUpRule({ Set: newRule });
+      const result = await api.manageTopUpRule({ Add: newRule });
 
-      expect(result).toEqual({ Ok: null });
+      expect(result).toEqual({ Ok: [] });
       expect(mockActor.manage_top_up_rule).toHaveBeenCalledWith({
-        Set: newRule,
+        Add: newRule,
       });
     });
 
-    it('should disable top-up rule', async () => {
+    it('should clear top-up rule', async () => {
       const mockAgent = createMockAgent();
       const mockActor = createMockActor();
 
       vi.mocked(createHttpAgent).mockResolvedValue(mockAgent as never);
       vi.mocked(createMyCanisterActor).mockReturnValue(mockActor as never);
-      mockActor.manage_top_up_rule.mockResolvedValue({ Ok: null });
+      mockActor.manage_top_up_rule.mockResolvedValue({ Ok: [] });
 
       const api = new CanisterApi();
-      const result = await api.manageTopUpRule({ Disable: null });
+      const result = await api.manageTopUpRule({ Clear: null });
 
-      expect(result).toEqual({ Ok: null });
+      expect(result).toEqual({ Ok: [] });
       expect(mockActor.manage_top_up_rule).toHaveBeenCalledWith({
-        Disable: null,
+        Clear: null,
       });
     });
 
-    it('should return disabled state', async () => {
+    it('should return empty array when no rule set', async () => {
       const mockAgent = createMockAgent();
       const mockActor = createMockActor();
 
       vi.mocked(createHttpAgent).mockResolvedValue(mockAgent as never);
       vi.mocked(createMyCanisterActor).mockReturnValue(mockActor as never);
       mockActor.manage_top_up_rule.mockResolvedValue({
-        Ok: { Disabled: null },
+        Ok: [],
       });
 
       const api = new CanisterApi();
       const result = await api.manageTopUpRule({ Get: null });
 
-      expect(result).toEqual({ Ok: { Disabled: null } });
+      expect(result).toEqual({ Ok: [] });
     });
 
     it('should report error and rethrow on failure', async () => {

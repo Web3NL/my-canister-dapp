@@ -170,23 +170,6 @@ describe('MyDashboardBackend', () => {
       expect(result).toBe(mockResult);
     });
 
-    it('should call manage_alternative_origins with List argument', async () => {
-      const agent = createMockAgent();
-      const mockActor = createMockActor();
-      const mockResult = { Ok: ['https://example.com'] };
-      mockActor.manage_alternative_origins.mockResolvedValue(mockResult);
-      vi.mocked(Actor.createActor).mockReturnValue(mockActor as never);
-
-      const backend = MyDashboardBackend.create({
-        agent,
-        canisterId: TEST_CANISTER_ID,
-      });
-      const arg = { List: null };
-      const result = await backend.manageAlternativeOrigins(arg);
-
-      expect(mockActor.manage_alternative_origins).toHaveBeenCalledWith(arg);
-      expect(result).toBe(mockResult);
-    });
   });
 
   describe('manageIIPrincipal', () => {
@@ -287,10 +270,10 @@ describe('MyDashboardBackend', () => {
       expect(result).toBe(mockResult);
     });
 
-    it('should call manage_top_up_rule with Set argument', async () => {
+    it('should call manage_top_up_rule with Add argument', async () => {
       const agent = createMockAgent();
       const mockActor = createMockActor();
-      const mockResult = { Ok: null };
+      const mockResult = { Ok: [] };
       mockActor.manage_top_up_rule.mockResolvedValue(mockResult);
       vi.mocked(Actor.createActor).mockReturnValue(mockActor as never);
 
@@ -299,21 +282,21 @@ describe('MyDashboardBackend', () => {
         canisterId: TEST_CANISTER_ID,
       });
       const topUpRule = {
-        threshold: { TCycles: 1n },
-        amount: { TCycles: 5n },
-        interval: { Minutes: 60n },
+        cycles_threshold: { _1T: null },
+        cycles_amount: { _5T: null },
+        interval: { Hourly: null },
       };
-      const arg = { Set: topUpRule };
+      const arg = { Add: topUpRule };
       const result = await backend.manageTopUpRule(arg);
 
       expect(mockActor.manage_top_up_rule).toHaveBeenCalledWith(arg);
       expect(result).toBe(mockResult);
     });
 
-    it('should call manage_top_up_rule with Disable argument', async () => {
+    it('should call manage_top_up_rule with Clear argument', async () => {
       const agent = createMockAgent();
       const mockActor = createMockActor();
-      const mockResult = { Ok: null };
+      const mockResult = { Ok: [] };
       mockActor.manage_top_up_rule.mockResolvedValue(mockResult);
       vi.mocked(Actor.createActor).mockReturnValue(mockActor as never);
 
@@ -321,7 +304,7 @@ describe('MyDashboardBackend', () => {
         agent,
         canisterId: TEST_CANISTER_ID,
       });
-      const arg = { Disable: null };
+      const arg = { Clear: null };
       const result = await backend.manageTopUpRule(arg);
 
       expect(mockActor.manage_top_up_rule).toHaveBeenCalledWith(arg);
