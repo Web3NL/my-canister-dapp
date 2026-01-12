@@ -246,7 +246,7 @@ The framework consists of published packages (for dapp developers) and private p
 | `canister-dashboard-frontend` | JS package | private | Dashboard UI source (compiled into Rust crate) |
 | `my-canister-app` | JS package | private | Production installer service at mycanister.app |
 | `my-hello-world` | Rust crate | private | Reference implementation canister |
-| `my-hello-world-frontend` | JS package | private | Reference implementation frontend |
+| `my-hello-world-frontend` | JS package | private | Vanilla TypeScript reference implementation |
 
 ### 3.6 How Packages Work Together
 
@@ -596,9 +596,16 @@ These packages are not published to npm or crates.io. They are deployment artifa
 
 **Location**: `examples/my-hello-world/`
 
-**Purpose**: Reference implementation demonstrating the complete User-Owned Dapp pattern.
+**Purpose**: Vanilla TypeScript reference implementation demonstrating the complete User-Owned Dapp pattern. Serves as the canonical example for developers building user-owned dapps.
 
-**Why Private**: These are examples, not production libraries. See Section 8 for detailed documentation.
+**Key Features**:
+- Vanilla TypeScript frontend (no UI framework dependencies)
+- DOM abstraction layer matching canister-dashboard-frontend patterns
+- Internet Identity authentication integration
+- Cycles balance checking with dashboard API
+- Light/dark theme support with CSS variables
+
+**Why Private**: These are reference implementations, not production libraries. See Section 8 for detailed documentation.
 
 ### 7.4 Services
 
@@ -610,9 +617,19 @@ These packages are not published to npm or crates.io. They are deployment artifa
 
 ## 8. Reference Implementation: my-hello-world
 
-The `examples/my-hello-world/` directory contains a complete reference implementation demonstrating the User-Owned Dapp pattern.
+The `examples/my-hello-world/` directory contains a complete **vanilla TypeScript** reference implementation demonstrating the User-Owned Dapp pattern. This serves as the canonical example for developers building user-owned dapps on the Internet Computer.
 
-### 8.1 Structure
+### 8.1 Why Vanilla TypeScript
+
+The reference implementation uses vanilla TypeScript without any UI framework dependencies:
+
+- **No framework lock-in**: Developers can understand the core patterns without framework-specific abstractions
+- **Minimal bundle size**: Only essential dependencies (IC SDK, dashboard client)
+- **Easy to understand**: Direct DOM manipulation with clear, readable code
+- **Matches dashboard**: Uses the same patterns as the canister-dashboard-frontend
+- **Framework-agnostic patterns**: The authentication, cycles checking, and API patterns can be adapted to any framework
+
+### 8.2 Structure
 
 ```
 examples/my-hello-world/
@@ -622,19 +639,23 @@ examples/my-hello-world/
 │   │   ├── build.rs                   # Compiles frontend before Rust build
 │   │   ├── src/lib.rs                 # Canister implementation
 │   │   └── my-hello-world.did         # Candid interface definition
-│   ├── my-hello-world-frontend/       # TypeScript frontend
+│   ├── my-hello-world-frontend/       # Vanilla TypeScript frontend
 │   │   ├── package.json
 │   │   ├── vite.config.ts
+│   │   ├── index.html                 # HTML structure with element IDs
 │   │   └── src/
-│   │       ├── main.ts                # Entry point
-│   │       ├── App.ts                 # lit-html based UI
+│   │       ├── main.ts                # Entry point, theme initialization
+│   │       ├── App.ts                 # Main application manager
 │   │       ├── auth.ts                # II authentication manager
-│   │       └── cyclesChecker.ts       # Dashboard API usage example
+│   │       ├── cyclesChecker.ts       # Dashboard API usage example
+│   │       ├── dom.ts                 # DOM abstraction layer
+│   │       ├── constants.ts           # Error messages, configuration
+│   │       └── styles.css             # Plain CSS with CSS variables
 │   └── declarations/                  # Generated Candid bindings
 └── README.md
 ```
 
-### 8.2 Build Process
+### 8.3 Build Process
 
 The `build.rs` script automates frontend compilation:
 
@@ -674,7 +695,66 @@ fn init() {
 }
 ```
 
-### 8.3 Frontend Integration
+### 8.4 Frontend Patterns
+
+The frontend follows vanilla TypeScript patterns matching the canister-dashboard-frontend:
+
+**DOM Abstraction Layer** (`dom.ts`):
+```typescript
+// Type-safe element retrieval with graceful fallback
+export function getElement<T extends HTMLElement>(id: string): T {
+  const element = document.getElementById(id) as T | null;
+  if (!element) {
+    console.error(`Element with id '${id}' not found`);
+    return document.createElement('div') as unknown as T;
+  }
+  return element;
+}
+
+// Event listener registry prevents duplicate listeners
+const listenersRegistry = new WeakMap<HTMLElement, Map<string, EventListener>>();
+
+export function addEventListener(
+  id: string,
+  event: string,
+  handler: (e?: Event) => void | Promise<void>
+): void {
+  const element = getElement(id);
+  // Remove existing listener, wrap with error handling, register new one
+}
+```
+
+**Manager Pattern** (`App.ts`):
+```typescript
+export class AppManager {
+  private constructor() {}  // Private constructor enforces factory method
+
+  static async create(): Promise<AppManager> {
+    const instance = new AppManager();
+    await instance.initialize();
+    return instance;
+  }
+
+  private setLoggedInState(): void {
+    toggleVisibility('auth-logged-out', false);
+    toggleVisibility('auth-logged-in', true);
+    addEventListener('logout-btn', 'click', () => this.handleLogout());
+  }
+}
+```
+
+**Entry Point** (`main.ts`):
+```typescript
+import './styles.css';
+import { AppManager } from './App';
+
+document.addEventListener('DOMContentLoaded', () => {
+  initializeTheme();
+  void AppManager.create();
+});
+```
+
+### 8.5 Dashboard Integration
 
 The frontend uses published packages for dashboard integration:
 
@@ -682,10 +762,10 @@ The frontend uses published packages for dashboard integration:
 // cyclesChecker.ts
 import { MyCanisterDashboard } from '@web3nl/my-canister-dashboard';
 
-const dashboard = new MyCanisterDashboard(canisterId, { agent });
-const status = await dashboard.canisterStatus();
-if (status.cycles < CYCLES_THRESHOLD) {
-    showWarning("Low cycles - visit dashboard to top up");
+const dashboard = MyCanisterDashboard.create(agent, canisterId);
+const result = await dashboard.checkCyclesBalance();
+if (result.error?.includes('Low cycles')) {
+    showWarning('Low cycles - visit dashboard to top up');
 }
 ```
 
@@ -702,7 +782,7 @@ export default defineConfig({
 });
 ```
 
-### 8.4 Backend Implementation
+### 8.6 Backend Implementation
 
 The canister implements all required User-Owned Dapp endpoints:
 
@@ -1005,6 +1085,7 @@ Goal: Enable third-party developers to build User-Owned Dapps using the publishe
 
 | Version | Date | Changes |
 |---------|------|---------|
+| 2.2 | 2026-01-12 | Rewrote my-hello-world-frontend to vanilla TypeScript (removed lit-html). Updated Section 8 with new structure, patterns, and rationale. Updated Sections 3.5 and 7.3 to reflect vanilla TS implementation. |
 | 2.1 | 2026-01-12 | Added @web3nl/my-canister-installer to Section 7.2 (JavaScript Packages). Package extracted from my-canister-app with full test suite. |
 | 2.0 | 2026-01-11 | Major restructure: Added Section 3 (Architecture Overview with diagrams), Section 7.3 (Private Packages), Section 8 (Reference Implementation), Section 9 (Conformance Testing), Section 12.8 (PocketIC), Section 13 (Future Direction). Renumbered all sections. |
 | 1.4 | 2026-01-11 | Added Section 6.1: my-canister-frontend crate details, clarified crate independence |
