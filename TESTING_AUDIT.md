@@ -12,8 +12,8 @@
 
 | Metric | Value |
 |--------|-------|
-| Total Test Files | 13 |
-| Unit Tests | 162 |
+| Total Test Files | 16 |
+| Unit Tests | 193 |
 | E2E Tests | 6 |
 | Skipped/Disabled Tests | 0 |
 | Packages with 0% Unit Coverage | 2 (my-canister-app, my-hello-world-frontend) |
@@ -36,6 +36,9 @@
 | vite-plugin-canister-dapp/test/plugin.test.ts | 27 | Vite plugin configuration |
 | vite-plugin-canister-dapp/test/runtime.test.ts | 12 | Runtime environment detection |
 | my-canister-dashboard-js/test/utils.test.ts | 12 | Canister ID inference |
+| my-canister-dashboard-js/test/dashboard.test.ts | 13 | MyCanisterDashboard class |
+| my-canister-dashboard-js/test/actor.test.ts | 15 | MyDashboardBackend, createMyCanisterActor |
+| my-canister-dashboard-js/test/constants.test.ts | 3 | LOW_CYCLES_THRESHOLD constant |
 | canister-dashboard-frontend/test/utils.test.ts | 38 | Principal/origin validation |
 | canister-dashboard-frontend/test/helpers.test.ts | 21 | Formatting functions |
 | canister-dashboard-frontend/test/top-up-rule.test.ts | 33 | Top-up rule variants |
@@ -75,7 +78,7 @@
 |---------|---------------|--------------|----------------|
 | @web3nl/vite-plugin-canister-dapp | 95% | N/A | Excellent |
 | canister-dashboard-frontend | 40% | 90% | Medium |
-| @web3nl/my-canister-dashboard | 15% | Indirect | Poor |
+| @web3nl/my-canister-dashboard | 85% | Indirect | Good |
 | my-canister-app | 0% | 70% | Critical Gap |
 | my-hello-world-frontend | 0% | 80% | Low Priority |
 | my-canister-dashboard (Rust) | 5% | Via integration | Medium |
@@ -92,11 +95,6 @@
   - Utility functions: `formatIcpBalance`, `hasSufficientBalanceForCanisterCreation`, `calculateIcpNeededForCanisterCreation`
   - Auth store and remote authentication
   - All API clients (CMC, IcManagement, Ledger)
-
-- **@web3nl/my-canister-dashboard** - Published npm package
-  - `MyCanisterDashboard` class (checkCyclesBalance, isAuthenticated)
-  - `MyDashboardBackend` class (all methods)
-  - `createMyCanisterActor` function
 
 ### High Priority
 
@@ -127,9 +125,8 @@ The `.only` markers in test-fixtures/ are intentional for infrastructure utiliti
 
 ### Critical (Must Add)
 
-1. Unit tests for `@web3nl/my-canister-dashboard` classes with mocked agents
-2. Unit tests for `my-canister-app/src/lib/utils/*.ts` utility functions
-3. Unit tests for `createMyCanisterActor()` error handling
+1. Unit tests for `my-canister-app/src/lib/utils/*.ts` utility functions
+2. Unit tests for `my-canister-app/src/lib/auth.ts` auth store
 
 ### High (Should Add)
 
@@ -179,6 +176,7 @@ npm run test -w @web3nl/vite-plugin-canister-dapp
 - Test fixtures are infrastructure utilities, not part of the test suite
 - Rust crates use thread-local state which complicates unit testing; integration tests are more practical
 - `my-canister-frontend` unit tests cover MIME type inference (`infer_content_type`), asset config creation, and headers generation
+- `@web3nl/my-canister-dashboard` unit tests use mocked IC SDK dependencies to test class methods, error handling, and actor creation
 
 ---
 
@@ -186,6 +184,7 @@ npm run test -w @web3nl/vite-plugin-canister-dapp
 
 | Date | Change |
 |------|--------|
+| 2026-01-12 | Added 31 unit tests for `@web3nl/my-canister-dashboard` (MyCanisterDashboard, MyDashboardBackend, createMyCanisterActor, constants) |
 | 2026-01-12 | Added 16 unit tests for `my-canister-frontend` crate (MIME detection, asset config, headers) |
 | 2026-01-12 | Initial audit report created |
 
