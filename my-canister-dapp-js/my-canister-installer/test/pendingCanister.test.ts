@@ -8,7 +8,7 @@ import {
   setStorage,
   resetStorage,
   type PendingCanisterStorage,
-} from '../pendingCanister';
+} from '../src/pendingCanister';
 
 const TEST_CANISTER_ID = 'rrkah-fqaaa-aaaaa-aaaaq-cai';
 
