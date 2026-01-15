@@ -616,7 +616,8 @@ pre {
   border-radius: 4px;
   font-size: 12px;
   font-weight: 600;
-  text-transform: lowercase;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
   font-family:
     ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
 }
@@ -691,7 +692,37 @@ pre {
   display: block;
 }
 
-/* Key-value pairs container */
+/* Key-value table layout */
+.log-kv-table {
+  margin-top: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  padding-left: 4px;
+  border-left: 2px solid var(--color-card-border);
+  margin-left: 4px;
+}
+
+.log-kv-row {
+  display: flex;
+  gap: 16px;
+  font-size: 12px;
+  padding: 2px 0 2px 8px;
+}
+
+.log-kv-key {
+  min-width: 80px;
+  color: var(--color-text-muted);
+  font-weight: 500;
+}
+
+.log-kv-value {
+  color: var(--color-text);
+  font-family:
+    ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, monospace;
+}
+
+/* Legacy inline key-value pairs (for backward compatibility) */
 .log-kv-pairs {
   margin-top: 6px;
   display: flex;
@@ -705,15 +736,6 @@ pre {
   padding: 2px 6px;
   border-radius: 4px;
   font-size: 11px;
-}
-
-.log-kv-key {
-  color: var(--color-text-secondary);
-}
-
-.log-kv-value {
-  color: var(--color-text);
-  font-weight: 500;
 }
 
 /* Left border accent by level */

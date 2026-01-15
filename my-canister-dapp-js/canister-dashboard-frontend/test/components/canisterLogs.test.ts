@@ -4,6 +4,12 @@ import {
   inferLogLevel,
   formatRelativeTime,
   escapeHtml,
+  formatCycles,
+  formatE8s,
+  formatDuration,
+  formatKeyName,
+  prettifyMessage,
+  formatValue,
 } from '../../src/components/canisterLogs';
 
 describe('canisterLogs', () => {
@@ -229,7 +235,7 @@ describe('canisterLogs', () => {
     });
 
     it('should escape single quotes', () => {
-      expect(escapeHtml("test'value")).toBe("test&#39;value");
+      expect(escapeHtml("test'value")).toBe('test&#39;value');
     });
 
     it('should escape ampersands', () => {
@@ -248,6 +254,171 @@ describe('canisterLogs', () => {
       expect(escapeHtml('<div class="test" data-val=\'x\'>a & b</div>')).toBe(
         '&lt;div class=&quot;test&quot; data-val=&#39;x&#39;&gt;a &amp; b&lt;/div&gt;'
       );
+    });
+  });
+
+  describe('formatCycles', () => {
+    it('should format cycles to T with 2 decimal places', () => {
+      expect(formatCycles('500000000000')).toBe('0.50 T');
+      expect(formatCycles('1000000000000')).toBe('1.00 T');
+      expect(formatCycles('250000000000')).toBe('0.25 T');
+    });
+
+    it('should handle large cycle values', () => {
+      expect(formatCycles('10000000000000')).toBe('10.00 T');
+      expect(formatCycles('5500000000000')).toBe('5.50 T');
+    });
+
+    it('should handle small cycle values', () => {
+      expect(formatCycles('100000000000')).toBe('0.10 T');
+      expect(formatCycles('10000000000')).toBe('0.01 T');
+    });
+
+    it('should handle zero', () => {
+      expect(formatCycles('0')).toBe('0.00 T');
+    });
+
+    it('should handle real-world cycle values', () => {
+      expect(formatCycles('350720226345')).toBe('0.35 T');
+    });
+  });
+
+  describe('formatE8s', () => {
+    it('should format e8s to ICP with 4 decimal places', () => {
+      expect(formatE8s('100000000')).toBe('1.0000 ICP');
+      expect(formatE8s('50000000')).toBe('0.5000 ICP');
+    });
+
+    it('should handle small e8s values', () => {
+      expect(formatE8s('10000')).toBe('0.0001 ICP');
+      expect(formatE8s('1000')).toBe('0.0000 ICP');
+    });
+
+    it('should handle large e8s values', () => {
+      expect(formatE8s('1000000000000')).toBe('10000.0000 ICP');
+    });
+
+    it('should handle zero', () => {
+      expect(formatE8s('0')).toBe('0.0000 ICP');
+    });
+  });
+
+  describe('formatDuration', () => {
+    it('should format seconds', () => {
+      expect(formatDuration('1')).toBe('1 second');
+      expect(formatDuration('30')).toBe('30 seconds');
+      expect(formatDuration('59')).toBe('59 seconds');
+    });
+
+    it('should format minutes', () => {
+      expect(formatDuration('60')).toBe('1 minute');
+      expect(formatDuration('120')).toBe('2 minutes');
+      expect(formatDuration('300')).toBe('5 minutes');
+    });
+
+    it('should format hours', () => {
+      expect(formatDuration('3600')).toBe('1 hour');
+      expect(formatDuration('7200')).toBe('2 hours');
+      expect(formatDuration('10800')).toBe('3 hours');
+    });
+
+    it('should format days', () => {
+      expect(formatDuration('86400')).toBe('1 day');
+      expect(formatDuration('172800')).toBe('2 days');
+      expect(formatDuration('604800')).toBe('7 days');
+    });
+  });
+
+  describe('formatKeyName', () => {
+    it('should convert snake_case to Title Case', () => {
+      expect(formatKeyName('block_index')).toBe('Block Index');
+      expect(formatKeyName('cycles_per_icp')).toBe('Cycles Per Icp');
+    });
+
+    it('should capitalize single words', () => {
+      expect(formatKeyName('amount')).toBe('Amount');
+      expect(formatKeyName('threshold')).toBe('Threshold');
+    });
+
+    it('should handle already capitalized words', () => {
+      expect(formatKeyName('Amount')).toBe('Amount');
+    });
+  });
+
+  describe('prettifyMessage', () => {
+    it('should map known messages to pretty versions', () => {
+      expect(prettifyMessage('rule set', 'top-up').text).toBe('Rule Set');
+      expect(prettifyMessage('rule cleared', 'top-up').text).toBe(
+        'Rule Cleared'
+      );
+      expect(prettifyMessage('tick', 'top-up').text).toBe('Tick');
+    });
+
+    it('should map success messages with correct level', () => {
+      const result = prettifyMessage('rule set', 'top-up');
+      expect(result.text).toBe('Rule Set');
+      expect(result.level).toBe('success');
+    });
+
+    it('should map warning messages with correct level', () => {
+      const result = prettifyMessage(
+        'cycles above threshold; skipping',
+        'top-up'
+      );
+      expect(result.text).toBe('Cycles Above Threshold (Skipped)');
+      expect(result.level).toBe('warning');
+    });
+
+    it('should handle timer set messages', () => {
+      const result = prettifyMessage('timer set every 3600s', 'top-up');
+      expect(result.text).toBe('Timer Started');
+      expect(result.level).toBe('success');
+    });
+
+    it('should handle mint in-flight messages', () => {
+      const result = prettifyMessage(
+        'Mint in-flight; skipping this tick',
+        'log'
+      );
+      expect(result.text).toBe('Mint In-Flight (Skipped)');
+      expect(result.level).toBe('warning');
+    });
+
+    it('should capitalize unknown messages as fallback', () => {
+      const result = prettifyMessage('some unknown message', 'test');
+      expect(result.text).toBe('Some Unknown Message');
+    });
+  });
+
+  describe('formatValue', () => {
+    it('should format cycle values', () => {
+      expect(formatValue('amount', '500000000000')).toBe('0.50 T');
+      expect(formatValue('threshold', '250000000000')).toBe('0.25 T');
+      expect(formatValue('current', '350720226345')).toBe('0.35 T');
+      expect(formatValue('cycles', '1000000000000')).toBe('1.00 T');
+    });
+
+    it('should format e8s values', () => {
+      expect(formatValue('icp_e8s', '100000000')).toBe('1.0000 ICP');
+      expect(formatValue('fee', '10000')).toBe('0.0001 ICP');
+    });
+
+    it('should format duration values', () => {
+      expect(formatValue('every', '3600s')).toBe('1 hour');
+      expect(formatValue('every', '86400s')).toBe('1 day');
+    });
+
+    it('should format block index', () => {
+      expect(formatValue('block_index', '12345')).toBe('#12345');
+    });
+
+    it('should pass through interval values unchanged', () => {
+      expect(formatValue('interval', 'Hourly')).toBe('Hourly');
+      expect(formatValue('interval', 'Daily')).toBe('Daily');
+    });
+
+    it('should pass through unknown keys unchanged', () => {
+      expect(formatValue('unknown_key', 'some_value')).toBe('some_value');
     });
   });
 });

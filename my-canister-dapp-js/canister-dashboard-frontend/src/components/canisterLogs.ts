@@ -26,6 +26,61 @@ interface ParsedLogEntry {
   index: string;
 }
 
+// --- Value Formatters ---
+
+/**
+ * Format raw cycles value to T (trillions) with 2 decimal places.
+ * 1 T = 1,000,000,000,000 (10^12)
+ */
+export function formatCycles(value: string): string {
+  const num = BigInt(value);
+  const trillion = 1_000_000_000_000n;
+  const whole = num / trillion;
+  const remainder = num % trillion;
+  const decimal = (remainder * 100n) / trillion;
+  return `${whole}.${decimal.toString().padStart(2, '0')} T`;
+}
+
+/**
+ * Format e8s to ICP with 4 decimal places.
+ * 1 ICP = 100,000,000 e8s (10^8)
+ */
+export function formatE8s(value: string): string {
+  const num = BigInt(value);
+  const e8s = 100_000_000n;
+  const whole = num / e8s;
+  const remainder = num % e8s;
+  const decimal = remainder.toString().padStart(8, '0').slice(0, 4);
+  return `${whole}.${decimal} ICP`;
+}
+
+/**
+ * Format seconds to human-readable duration.
+ */
+export function formatDuration(seconds: string): string {
+  const s = parseInt(seconds, 10);
+  if (s >= 86400) {
+    const days = Math.floor(s / 86400);
+    return days === 1 ? '1 day' : `${days} days`;
+  }
+  if (s >= 3600) {
+    const hours = Math.floor(s / 3600);
+    return hours === 1 ? '1 hour' : `${hours} hours`;
+  }
+  if (s >= 60) {
+    const minutes = Math.floor(s / 60);
+    return minutes === 1 ? '1 minute' : `${minutes} minutes`;
+  }
+  return s === 1 ? '1 second' : `${s} seconds`;
+}
+
+/**
+ * Pretty print a key name (snake_case → Title Case).
+ */
+export function formatKeyName(key: string): string {
+  return key.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+}
+
 // --- Exported parsing functions (for testing) ---
 
 /**
@@ -147,6 +202,153 @@ export function formatRelativeTime(date: Date): string {
   return 'over a month ago';
 }
 
+// --- Message Pretty Printing ---
+
+interface PrettyMessage {
+  text: string;
+  level: LogLevel;
+}
+
+const MESSAGE_MAP: Record<string, PrettyMessage> = {
+  'rule set': { text: 'Rule Set', level: 'success' },
+  'rule cleared': { text: 'Rule Cleared', level: 'success' },
+  'timer cleared': { text: 'Timer Stopped', level: 'success' },
+  tick: { text: 'Tick', level: 'info' },
+  'active rule': { text: 'Active Rule', level: 'info' },
+  'cycles above threshold; skipping': {
+    text: 'Cycles Above Threshold (Skipped)',
+    level: 'warning',
+  },
+  'below threshold': { text: 'Below Threshold', level: 'info' },
+  'starting transfer + notify flow': {
+    text: 'Starting Top-Up Flow',
+    level: 'info',
+  },
+  'flow completed': { text: 'Top-Up Completed', level: 'success' },
+  'no rule set; skipping': { text: 'No Rule Set (Skipped)', level: 'warning' },
+  'notify succeeded': { text: 'Notify Succeeded', level: 'success' },
+  'notify previous block succeeded': {
+    text: 'Previous Block Succeeded',
+    level: 'success',
+  },
+  'notify still processing': {
+    text: 'Notify Still Processing',
+    level: 'warning',
+  },
+  'notify processing; will retry later': {
+    text: 'Notify Processing (Will Retry)',
+    level: 'warning',
+  },
+  'notify failed non-retriable; proceeding to new transfer': {
+    text: 'Previous Notify Failed',
+    level: 'warning',
+  },
+  'transfer ok': { text: 'Transfer Successful', level: 'success' },
+};
+
+/**
+ * Convert raw message to pretty display text and determine log level.
+ */
+export function prettifyMessage(
+  rawMessage: string,
+  category: string
+): PrettyMessage {
+  const lowerMessage = rawMessage.toLowerCase();
+
+  // Check exact matches first
+  const exactMatch = MESSAGE_MAP[lowerMessage];
+  if (exactMatch) return exactMatch;
+
+  // Check prefix matches
+  for (const [pattern, pretty] of Object.entries(MESSAGE_MAP)) {
+    if (lowerMessage.startsWith(pattern)) {
+      return pretty;
+    }
+  }
+
+  // Special pattern matches
+  if (lowerMessage.startsWith('timer set every')) {
+    return { text: 'Timer Started', level: 'success' };
+  }
+  if (lowerMessage.startsWith('convert cycles')) {
+    return { text: 'Converting Cycles to ICP', level: 'info' };
+  }
+  if (lowerMessage.startsWith('xrc cycles_per_icp')) {
+    return { text: 'Exchange Rate', level: 'info' };
+  }
+  if (lowerMessage.startsWith('notifying previous')) {
+    return { text: 'Retrying Previous Block', level: 'info' };
+  }
+  if (lowerMessage.startsWith('notifying block')) {
+    return { text: 'Notifying CMC', level: 'info' };
+  }
+  if (
+    lowerMessage.startsWith('transfer ') &&
+    lowerMessage.includes('e8s to cmc')
+  ) {
+    return { text: 'ICP Transfer to CMC', level: 'info' };
+  }
+  if (lowerMessage.includes('failed to compute')) {
+    return { text: 'Failed to Compute ICP', level: 'error' };
+  }
+  if (lowerMessage.includes('mint in-flight')) {
+    return { text: 'Mint In-Flight (Skipped)', level: 'warning' };
+  }
+  if (lowerMessage.includes('cmc mint error')) {
+    return { text: 'CMC Mint Error', level: 'error' };
+  }
+
+  // Fallback: capitalize first letter of each word
+  const text = rawMessage.replace(/\b\w/g, c => c.toUpperCase());
+  return { text, level: inferLogLevel(category, rawMessage) };
+}
+
+// --- Value Formatting ---
+
+// Keys that represent cycle values
+const CYCLE_KEYS = [
+  'amount',
+  'threshold',
+  'current',
+  'cycles',
+  'cycles_per_icp',
+];
+// Keys that represent e8s (ICP) values
+const E8S_KEYS = ['icp_e8s', 'transfer_amount_e8s', 'fee'];
+// Keys that represent durations in seconds
+const DURATION_KEYS = ['every'];
+
+/**
+ * Format a value based on its key type.
+ */
+export function formatValue(key: string, value: string): string {
+  const lowerKey = key.toLowerCase();
+
+  if (CYCLE_KEYS.includes(lowerKey)) {
+    return formatCycles(value);
+  }
+  if (E8S_KEYS.includes(lowerKey)) {
+    return formatE8s(value);
+  }
+  if (DURATION_KEYS.includes(lowerKey)) {
+    // Remove trailing 's' if present (e.g., "3600s" -> "3600")
+    const seconds = value.replace(/s$/, '');
+    return formatDuration(seconds);
+  }
+
+  // Interval enum values - already human readable
+  if (lowerKey === 'interval') {
+    return value;
+  }
+
+  // Block index - format as number
+  if (lowerKey === 'block_index') {
+    return `#${value}`;
+  }
+
+  return value;
+}
+
 // --- Private helpers ---
 
 function pad2(n: number): string {
@@ -173,20 +375,25 @@ export function escapeHtml(str: string): string {
 }
 
 function renderLogEntry(entry: ParsedLogEntry): string {
-  const escapedCategory = escapeHtml(entry.category);
+  // Category in UPPERCASE
+  const escapedCategory = escapeHtml(entry.category).toUpperCase();
   const escapedMessage = escapeHtml(entry.message).replace(
     /\r\n|\n|\r/g,
     '<br>'
   );
 
-  // Render key-value pairs as styled spans
+  // Render key-value pairs as table rows (not inline)
   const kvHtml =
     entry.keyValuePairs.length > 0
-      ? `<div class="log-kv-pairs">${entry.keyValuePairs
-          .map(
-            kv =>
-              `<span class="log-kv"><span class="log-kv-key">${escapeHtml(kv.key)}</span>=<span class="log-kv-value">${escapeHtml(kv.value)}</span></span>`
-          )
+      ? `<div class="log-kv-table">${entry.keyValuePairs
+          .map(kv => {
+            const prettyKey = formatKeyName(kv.key);
+            const prettyValue = formatValue(kv.key, kv.value);
+            return `<div class="log-kv-row">
+              <span class="log-kv-key">${escapeHtml(prettyKey)}</span>
+              <span class="log-kv-value">${escapeHtml(prettyValue)}</span>
+            </div>`;
+          })
           .join('')}</div>`
       : '';
 
@@ -270,12 +477,17 @@ export class CanisterLogsManager {
           // Parse message into structured parts
           const { category, message, keyValuePairs } =
             parseLogMessage(rawMessage);
-          const level = inferLogLevel(category, message);
+
+          // Pretty print message and determine level
+          const { text: prettyMessage, level } = prettifyMessage(
+            message,
+            category
+          );
 
           // Build parsed entry
           const entry: ParsedLogEntry = {
             category,
-            message,
+            message: prettyMessage,
             level,
             keyValuePairs,
             absoluteTimestamp: isValidDate
