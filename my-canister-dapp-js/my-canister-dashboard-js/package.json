@@ -4,7 +4,7 @@
   "version": "0.8.0",
   "author": "Web3NL",
   "dependencies": {
-    "@icp-sdk/canisters": "^3.3.0"
+    "@icp-sdk/canisters": "^3.4.0"
   },
   "devDependencies": {
     "@icp-sdk/core": "^5.0.0"
