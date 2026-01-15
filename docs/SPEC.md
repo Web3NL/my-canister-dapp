@@ -1085,6 +1085,7 @@ Goal: Enable third-party developers to build User-Owned Dapps using the publishe
 
 | Version | Date | Changes |
 |---------|------|---------|
+| 2.3 | 2026-01-15 | Revamped canister logs UI in dashboard with structured format: category badges, inferred log levels (info/success/warning/error), relative timestamps, and parsed key=value pairs. |
 | 2.2 | 2026-01-12 | Rewrote my-hello-world-frontend to vanilla TypeScript (removed lit-html). Updated Section 8 with new structure, patterns, and rationale. Updated Sections 3.5 and 7.3 to reflect vanilla TS implementation. |
 | 2.1 | 2026-01-12 | Added @web3nl/my-canister-installer to Section 7.2 (JavaScript Packages). Package extracted from my-canister-app with full test suite. |
 | 2.0 | 2026-01-11 | Major restructure: Added Section 3 (Architecture Overview with diagrams), Section 7.3 (Private Packages), Section 8 (Reference Implementation), Section 9 (Conformance Testing), Section 12.8 (PocketIC), Section 13 (Future Direction). Renumbered all sections. |
