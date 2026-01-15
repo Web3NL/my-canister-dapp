@@ -12,6 +12,10 @@ export const login = async (page: Page): Promise<void> => {
     await popup.getByRole('textbox', { name: 'Identity Anchor' }).fill(iiAnchor);
     await popup.getByRole('button', { name: 'Continue', exact: true }).click();
     await popup.getByRole('button', { name: 'Remind me later' }).click();
+
+    // Wait for popup to close and authentication to complete
+    await popup.waitForEvent('close', { timeout: 10000 });
+    await expect(page.locator('#authenticated-content')).toBeVisible({ timeout: 10000 });
 };
 
 export const checkPrincipal = async (page: Page): Promise<Principal> => {
