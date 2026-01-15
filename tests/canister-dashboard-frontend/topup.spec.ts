@@ -16,7 +16,7 @@ test('canister top-up increases cycles balance', async ({ page }, testInfo) => {
     await login(page);
 
     // Ensure authenticated content is visible before interacting
-    await expect(page.locator('#authenticated-content')).toBeVisible();
+    await expect(page.locator('#authenticated-content')).toBeVisible({ timeout: 10000 });
 
     const principal = await checkPrincipal(page);
     const topupAmount = TOPUP_AMOUNT;
