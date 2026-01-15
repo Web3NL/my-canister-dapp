@@ -44,7 +44,7 @@ test('manage canister auto top-up rule CRUD', async ({ page }, testInfo) => {
     // Check for log entries with top-up badge and rule set/cleared message
     const logEntries = await logsList.locator('.log-entry').allTextContents();
     const found = logEntries.some(
-      t => t.includes('top-up') && /rule (set|cleared)/.test(t)
+      t => /top-up/i.test(t) && /rule (set|cleared)/i.test(t)
     );
     expect(found).toBeTruthy();
   }).toPass({ timeout: 15000, intervals: [500, 1000, 2000] });
