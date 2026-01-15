@@ -38,11 +38,14 @@ test('manage canister auto top-up rule CRUD', async ({ page }, testInfo) => {
 
   await page.click('#refresh-logs-btn');
   const logsList = page.locator('#logs-list');
-  await expect(logsList.locator('li').first()).not.toHaveText(/Loading/);
+  await expect(logsList.locator('.log-entry').first()).toBeVisible();
 
   await expect(async () => {
-    const logTexts = await logsList.locator('li').allTextContents();
-    const found = logTexts.some(t => /top-up: rule (set|cleared)/.test(t));
+    // Check for log entries with top-up badge and rule set/cleared message
+    const logEntries = await logsList.locator('.log-entry').allTextContents();
+    const found = logEntries.some(
+      t => t.includes('top-up') && /rule (set|cleared)/.test(t)
+    );
     expect(found).toBeTruthy();
   }).toPass({ timeout: 15000, intervals: [500, 1000, 2000] });
   console.log('Found top-up rule action in logs');
