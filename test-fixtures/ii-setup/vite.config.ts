@@ -7,14 +7,14 @@ export default defineConfig({
       entry: resolve(__dirname, 'derive-ii-principal.ts'),
       name: 'DeriveIIPrincipal',
       fileName: 'derive-ii-principal',
-      formats: ['iife']
+      formats: ['iife'],
     },
     outDir: __dirname,
     rollupOptions: {
       output: {
-        inlineDynamicImports: true
-      }
+        inlineDynamicImports: true,
+      },
     },
-    minify: false
-  }
+    minify: false,
+  },
 });

@@ -19,11 +19,8 @@ dfx build "$HELLO_WORLD_CANISTER"
 dfx canister install "$HELLO_WORLD_CANISTER" --mode reinstall --yes
 
 echo "Running Internet Identity setup..."
-npx playwright install 
-npm run test:create-ii-account
-npm run build:derive-ii-principal
-DAPP_ORIGIN="$DAPP_ORIGIN_VITE" DAPP_DEV_ENV=vite npm run test:derive-ii-principal
-DAPP_ORIGIN="$DAPP_ORIGIN_DFX" DAPP_DEV_ENV=dfx npm run test:derive-ii-principal
+npx playwright install
+DAPP_ORIGIN_VITE="$DAPP_ORIGIN_VITE" DAPP_ORIGIN_DFX="$DAPP_ORIGIN_DFX" npm run test:setup-ii
 
 echo "Reading canister ID from tests/test.env..."
 CANISTER_ID=$(grep VITE_MY_HELLO_WORLD_CANISTER_ID tests/test.env | cut -d '=' -f2)
@@ -41,8 +38,7 @@ dfx canister update-settings "$HELLO_WORLD_CANISTER" \
   --set-controller "$PRINCIPAL_DFX" \
   --set-controller "$IDENT1"
 
-echo "Setting authorized Internet Identity principals..."
-# dfx canister call "$HELLO_WORLD_CANISTER" manage_ii_principal "(variant { Set = principal \"$PRINCIPAL_VITE\" })"
-dfx canister call "$HELLO_WORLD_CANISTER" manage_ii_principal "(variant { Set = principal \"$PRINCIPAL_DFX\" })"
+echo "Setting authorized Internet Identity principal (Vite origin for first e2e batch)..."
+dfx canister call "$HELLO_WORLD_CANISTER" manage_ii_principal "(variant { Set = principal \"$PRINCIPAL_VITE\" })"
 
 echo "✓ Dashboard development environment setup complete"

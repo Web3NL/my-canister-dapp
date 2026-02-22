@@ -1,5 +1,6 @@
 import { test } from '@playwright/test';
-import { installedHelloWorldExampleCanisterFrontendUrl, loadDfxEnv, readTestData } from '../helpers.js';
+import { installedHelloWorldExampleCanisterFrontendUrl, loadDfxEnv } from '../helpers.js';
+import { handleIIPopup } from '../ii-helpers.js';
 
 // Load global dfx environment variables
 loadDfxEnv();
@@ -12,16 +13,9 @@ test('My Hello World Frontend', async ({ page }) => {
     await page.getByRole('button', { name: 'Login with Internet Identity' }).waitFor({ state: 'visible' });
     await page.getByRole('button', { name: 'Login with Internet Identity' }).click();
     const page1 = await page1Promise;
-    await page1.getByRole('button', { name: 'Use existing' }).waitFor({ state: 'visible' });
-    await page1.getByRole('button', { name: 'Use existing' }).click();
 
-    const iiAnchor = readTestData('ii-anchor.txt');
-    await page1.getByRole('textbox', { name: 'Identity Anchor' }).waitFor({ state: 'visible' });
-    await page1.getByRole('textbox', { name: 'Identity Anchor' }).fill(iiAnchor);
-    await page1.getByRole('button', { name: 'Continue', exact: true }).waitFor({ state: 'visible' });
-    await page1.getByRole('button', { name: 'Continue', exact: true }).click();
-    await page1.getByRole('button', { name: 'Remind me later' }).waitFor({ state: 'visible' });
-    await page1.getByRole('button', { name: 'Remind me later' }).click();
+    // II 2.0: handle passkey authentication flow
+    await handleIIPopup(page1);
 
     // Wait for authentication to complete and check logout button is visible
     await page.getByRole('button', { name: 'Logout' }).waitFor({ state: 'visible' });

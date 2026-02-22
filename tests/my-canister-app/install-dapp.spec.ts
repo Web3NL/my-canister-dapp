@@ -2,10 +2,10 @@ import { test, expect } from '@playwright/test';
 import {
   myCanisterAppDfxUrl,
   loadDfxEnv,
-  readTestData,
   transferToPrincipal,
   saveTestData,
 } from '../helpers.js';
+import { handleIIPopup } from '../ii-helpers.js';
 import { Principal } from '@icp-sdk/core/principal';
 
 // Load global dfx environment variables
@@ -39,21 +39,9 @@ test('My Canister App E2E Suite', async ({ page }) => {
     .getByRole('button', { name: 'Connect with Internet Identity' })
     .click();
   const page1 = await page1Promise;
-  await page1
-    .getByRole('button', { name: 'Use existing' })
-    .waitFor({ state: 'visible' });
-  await page1.getByRole('button', { name: 'Use existing' }).click();
 
-  const iiAnchor = readTestData('ii-anchor.txt');
-  await page1.getByRole('textbox', { name: 'Identity Anchor' }).fill(iiAnchor);
-  await page1
-    .getByRole('button', { name: 'Continue', exact: true })
-    .waitFor({ state: 'visible' });
-  await page1.getByRole('button', { name: 'Continue', exact: true }).click();
-  await page1
-    .getByRole('button', { name: 'Remind me later' })
-    .waitFor({ state: 'visible' });
-  await page1.getByRole('button', { name: 'Remind me later' }).click();
+  // II 2.0: handle passkey authentication flow
+  await handleIIPopup(page1);
 
   // Wait for II to close and authentication to complete
   await page
@@ -119,14 +107,9 @@ test('My Canister App E2E Suite', async ({ page }) => {
 
   const page2Promise = page.waitForEvent('popup');
   const page2 = await page2Promise;
-  await page2
-    .getByRole('button', { name: iiAnchor })
-    .waitFor({ state: 'visible' });
-  await page2.getByRole('button', { name: iiAnchor }).click();
-  await page2
-    .getByRole('button', { name: 'Remind me later' })
-    .waitFor({ state: 'visible' });
-  await page2.getByRole('button', { name: 'Remind me later' }).click();
+
+  // II 2.0: handle passkey authentication flow
+  await handleIIPopup(page2);
 
   await page
     .getByRole('menuitem', { name: 'My Dapps' })

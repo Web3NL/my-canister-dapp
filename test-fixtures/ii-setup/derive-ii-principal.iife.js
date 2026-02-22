@@ -4204,51 +4204,33 @@ Call context:
     const serialized = toStoredKey(key);
     await storage.set(KEY_STORAGE_KEY, serialized);
   }
-  async function performAuth(identityProvider, derivationOrigin) {
-    return new Promise((resolve, reject) => {
-      AuthClient.create({
-        keyType: "Ed25519"
-      }).then(async (client) => {
-        try {
-          const loginOptions = {
-            identityProvider,
-            onSuccess: async () => {
-              const identity = client.getIdentity();
-              const principal = identity.getPrincipal();
-              const principalText = principal.toText();
-              Principal.fromText(principalText);
-              resolve(principalText);
-            },
-            onError: (error) => {
-              reject(new Error(`Authentication failed: ${String(error)}`));
-            }
-          };
-          if (derivationOrigin != null) {
-            loginOptions.derivationOrigin = derivationOrigin;
-          }
-          await client.login(loginOptions);
-        } catch (error) {
-          reject(new Error(`Auth client error: ${String(error)}`));
-        }
-      }).catch(reject);
-    });
-  }
-  function createAuthButton() {
-    const existing = document.querySelector('[data-tid="derive-ii-auth-btn"]');
-    if (existing) {
-      existing.remove();
-    }
+  let client = null;
+  async function setup(identityProvider) {
+    client = await AuthClient.create({ keyType: "Ed25519" });
     const button = document.createElement("button");
-    button.setAttribute("data-tid", "derive-ii-auth-btn");
-    button.textContent = "Derive II Principal";
-    const resultDiv = document.createElement("div");
-    resultDiv.setAttribute("data-tid", "derive-ii-auth-result");
+    button.setAttribute("data-tid", "login-button");
+    button.textContent = "Login";
+    const principalDiv = document.createElement("div");
+    principalDiv.id = "principal";
+    button.onclick = () => {
+      if (!client) {
+        principalDiv.textContent = "ERROR: AuthClient not initialized";
+        return;
+      }
+      const loginOptions = {
+        identityProvider,
+        onSuccess: () => {
+          const principal = client.getIdentity().getPrincipal().toText();
+          principalDiv.textContent = principal;
+        },
+        onError: (error) => {
+          principalDiv.textContent = `ERROR: Authentication failed: ${String(error)}`;
+        }
+      };
+      client.login(loginOptions);
+    };
     document.body.appendChild(button);
-    document.body.appendChild(resultDiv);
+    document.body.appendChild(principalDiv);
   }
-  window.DeriveIIPrincipal = {
-    performAuth,
-    createAuthButton
-  };
-  createAuthButton();
+  window.DeriveIIPrincipal = { setup };
 })();

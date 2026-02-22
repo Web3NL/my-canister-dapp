@@ -10,8 +10,8 @@
 
 set -e
 
-echo "Deploying custom Internet Identity..."
-dfx deploy internet-identity
+echo "Deploying custom Internet Identity (CAPTCHA disabled, dummy auth for e2e tests)..."
+dfx deploy internet-identity --argument '(opt record { captcha_config = opt record { max_unsolved_captchas = 500:nat64; captcha_trigger = variant { Static = variant { CaptchaDisabled } } }; dummy_auth = opt (opt record { prompt_for_index = false }) })'
 
 export DEFAULT_ACCOUNT_ID=$(dfx ledger account-id --identity ident-1)
 

@@ -54,7 +54,7 @@ export function saveTestData(filename: string, data: string): void {
   );
 }
 
-export function readTestData(filename: string): string {
+function readTestData(filename: string): string {
   const outputDir = path.join(process.cwd(), 'test-output');
   const filePath = path.join(outputDir, filename);
 

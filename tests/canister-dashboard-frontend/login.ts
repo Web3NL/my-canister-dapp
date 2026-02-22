@@ -1,17 +1,13 @@
 import { Page, expect } from '@playwright/test';
-import { readTestData } from '../helpers.js';
 import { Principal } from '@icp-sdk/core/principal';
-export const login = async (page: Page): Promise<void> => {
-    const iiAnchor = readTestData('ii-anchor.txt');
+import { handleIIPopup } from '../ii-helpers.js';
 
+export const login = async (page: Page): Promise<void> => {
     const popupPromise = page.waitForEvent('popup');
     await page.getByRole('button', { name: 'Login' }).click();
     const popup = await popupPromise;
 
-    await popup.getByRole('button', { name: 'Use existing' }).click();
-    await popup.getByRole('textbox', { name: 'Identity Anchor' }).fill(iiAnchor);
-    await popup.getByRole('button', { name: 'Continue', exact: true }).click();
-    await popup.getByRole('button', { name: 'Remind me later' }).click();
+    await handleIIPopup(popup);
 
     // Wait for popup to close and authentication to complete
     await popup.waitForEvent('close', { timeout: 10000 });
