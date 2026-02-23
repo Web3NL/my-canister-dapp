@@ -2,7 +2,7 @@
   "name": "my-canister-app",
   "version": "0.6.0",
   "dependencies": {
-    "@dfinity/gix-components": "^9.0.0",
+    "@dfinity/gix-components": "^10.0.0",
     "@web3nl/my-canister-dashboard": "0.8.0",
     "@web3nl/my-canister-installer": "0.1.0"
   },

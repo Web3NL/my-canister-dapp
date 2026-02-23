@@ -3,14 +3,14 @@ import { addEventListener, getElement, showLoading, hideLoading } from '../dom';
 import { NETWORK_ERROR_MESSAGE, reportError } from '../error';
 
 // --- Types ---
-export type LogLevel = 'info' | 'success' | 'warning' | 'error';
+type LogLevel = 'info' | 'success' | 'warning' | 'error';
 
-export interface KeyValuePair {
+interface KeyValuePair {
   key: string;
   value: string;
 }
 
-export interface ParsedLogMessage {
+interface ParsedLogMessage {
   category: string;
   message: string;
   keyValuePairs: KeyValuePair[];

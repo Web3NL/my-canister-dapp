@@ -22,7 +22,7 @@ export function canisterId(): Principal {
     return inferCanisterId();
   } catch (error) {
     reportError(CANISTER_ID_ERROR_MESSAGE, error);
-    throw new Error(CANISTER_ID_ERROR_MESSAGE);
+    throw new Error(CANISTER_ID_ERROR_MESSAGE, { cause: error });
   }
 }
 
