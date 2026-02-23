@@ -3,7 +3,6 @@
   "description": "Reusable utilities for Internet Computer canister installation logic",
   "version": "0.1.0",
   "author": "Web3NL",
-  "dependencies": {},
   "devDependencies": {
     "@icp-sdk/core": "^5.0.0"
   },

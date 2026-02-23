@@ -48,7 +48,6 @@ export async function getCreatedCanister(
   const canisterId = await cmc.notifyCreateCanister(blockId, principal);
 
   let name = 'Private Dapp';
-  let version = 1;
   let memo: string | undefined;
 
   const agent = await createHttpAgent();
@@ -57,7 +56,7 @@ export async function getCreatedCanister(
   if (status.name.length > 0) {
     name = status.name;
   }
-  version = status.version;
+  const version = status.version;
   if (status.memo.length > 0) {
     memo = status.memo[0];
   }
