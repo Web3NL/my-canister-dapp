@@ -46,9 +46,6 @@
   let wasmModule: Uint8Array | null = null;
   let wasmFetchError: string | null = null;
 
-  $: wasmId = $page.url.searchParams.get('id');
-  $: wasmIdNumber = wasmId != null ? parseInt(wasmId, 10) : null;
-
   $: dappName = $page.url.searchParams.get('name');
   $: dappNameText =
     dappName != null && dappName.length > 0 ? dappName.toString() : null;
@@ -297,16 +294,11 @@
           err instanceof Error ? err.message : 'Failed to fetch WASM';
         showErrorToast('Failed to fetch WASM from remote URL');
       }
-    } else if (
-      (source === 'registry' || source === null) &&
-      wasmIdNumber &&
-      dappNameText
-    ) {
-      // Support both ?source=registry&id=X&name=Y and ?id=X&name=Y (backward compatibility)
+    } else if ((source === 'registry' || source === null) && dappNameText) {
       installMode = 'registry';
-      // Fetch WASM from registry
+      // Fetch WASM from registry canister
       try {
-        const wasmSource: WasmSource = { type: 'registry', id: wasmIdNumber };
+        const wasmSource: WasmSource = { type: 'registry', name: dappNameText };
         wasmModule = await fetchWasmModule(wasmSource);
       } catch (err) {
         console.error('Failed to fetch WASM from registry', err);

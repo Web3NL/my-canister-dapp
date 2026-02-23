@@ -23,12 +23,6 @@ export const MAX_TIME_TO_LIVE = PROD
   ? PROD_MAX_TIME_TO_LIVE
   : DEV_MAX_TIME_TO_LIVE;
 
-// Registry constants
-const PROD_REGISTRY_URL = '/wasm-registry/registry.json';
-const DEV_REGISTRY_URL = '/wasm-registry/registry-dev.json';
-
-export const REGISTRY_URL = PROD ? PROD_REGISTRY_URL : DEV_REGISTRY_URL;
-
 // ICP constants
 export const CREATE_CANISTER_MEMO = new Uint8Array([
   0x43, 0x52, 0x45, 0x41, 0x00, 0x00, 0x00, 0x00,

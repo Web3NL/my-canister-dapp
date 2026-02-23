@@ -59,3 +59,37 @@ echo "Generating JavaScript idlFactory (didc js) -> $JS_OUT"
 didc bind --target js "$INPUT_DID" > "$JS_OUT"
 
 echo "✅ Declarations generated in $OUT_DIR"
+
+# --- wasm-registry ---
+REGISTRY_DID="wasm-registry/wasm-registry.did"
+REGISTRY_OUT_DIR="my-canister-app/src/lib/declarations/wasm-registry"
+REGISTRY_TS_OUT="$REGISTRY_OUT_DIR/wasm-registry.did.d.ts"
+REGISTRY_JS_OUT="$REGISTRY_OUT_DIR/wasm-registry.did.js"
+
+if [[ ! -f "$REGISTRY_DID" ]]; then
+  echo "Skipping wasm-registry declarations: $REGISTRY_DID not found."
+else
+  mkdir -p "$REGISTRY_OUT_DIR"
+
+  echo "Generating TypeScript declarations (didc ts) -> $REGISTRY_TS_OUT"
+  didc bind --target ts "$REGISTRY_DID" > "$REGISTRY_TS_OUT"
+  # Fix imports: didc generates @dfinity/ but this project uses @icp-sdk/core/
+  sed -i.bak \
+    -e "s|from '@dfinity/principal'|from '@icp-sdk/core/principal'|g" \
+    -e "s|from '@dfinity/agent'|from '@icp-sdk/core/agent'|g" \
+    -e "s|from '@dfinity/candid'|from '@icp-sdk/core/candid'|g" \
+    "$REGISTRY_TS_OUT"
+  rm -f "${REGISTRY_TS_OUT}.bak"
+
+  echo "Generating JavaScript idlFactory (didc js) -> $REGISTRY_JS_OUT"
+  didc bind --target js "$REGISTRY_DID" > "$REGISTRY_JS_OUT"
+
+  # Format generated JS to match project Prettier config (didc output uses
+  # quoted keys and spacing that differs from the project style)
+  if command -v npx >/dev/null 2>&1; then
+    echo "Formatting $REGISTRY_JS_OUT with Prettier"
+    npx prettier --write "$REGISTRY_JS_OUT" 2>/dev/null || true
+  fi
+
+  echo "✅ Declarations generated in $REGISTRY_OUT_DIR"
+fi

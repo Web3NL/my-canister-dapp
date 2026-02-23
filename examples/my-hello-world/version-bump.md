@@ -3,11 +3,11 @@ Versions to bump:
 - examples/my-hello-world/src/my-hello-world-frontend/package.json
 - examples/my-hello-world/src/my-hello-world/Cargo.toml
 - examples/my-hello-world/src/my-hello-world/src/lib.rs
-- my-canister-app/static/wasm-registry/registry.json
 
-update commit hash in:
+Upload new WASM to wasm-registry canister:
 
-- my-canister-app/static/wasm-registry/registry.json
+- Build and compress: ./scripts/copy-example-wasm.sh
+- Upload: ./scripts/upload-wasm-to-registry.sh "my-hello-world" "The Internet Computer Hello World Dapp" "<new-version>" wasm/my-hello-world.wasm.gz -e mainnet --identity web3nl
 
 use tag:
 

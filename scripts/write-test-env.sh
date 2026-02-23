@@ -25,6 +25,12 @@ if [ -n "$APP_CANISTER_ID" ]; then
   echo "VITE_MY_CANISTER_APP_CANISTER_ID=${APP_CANISTER_ID}" >> tests/test.env
 fi
 
+# Add wasm-registry canister ID if it exists
+WASM_REGISTRY_ID=$(icp canister status wasm-registry -e local --id-only 2>/dev/null || echo "")
+if [ -n "$WASM_REGISTRY_ID" ]; then
+  echo "VITE_WASM_REGISTRY_CANISTER_ID=${WASM_REGISTRY_ID}" >> tests/test.env
+fi
+
 echo ""
 echo "System canisters ready:"
 echo "  - CMC:     rkp4c-7iaaa-aaaaa-aaaca-cai (NNS)"

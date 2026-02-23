@@ -1,0 +1,31 @@
+type WasmEntry = record {
+  name : text;
+  description : text;
+  version : text;
+  wasm_hash : text;
+  wasm_size : nat64;
+  created_at : nat64;
+};
+
+type UploadWasmArg = record {
+  name : text;
+  description : text;
+  version : text;
+  wasm_bytes : vec nat8;
+};
+
+type UploadWasmResult = variant { Ok : WasmEntry; Err : text };
+type RemoveWasmResult = variant { Ok; Err : text };
+
+service : {
+  // Public queries (anonymous)
+  "list_wasms"       : () -> (vec WasmEntry) query;
+  "get_wasm_entry"   : (text) -> (opt WasmEntry) query;
+  "get_wasm_bytes"   : (text) -> (opt vec nat8) query;
+  "get_wasm_version" : (text, text) -> (opt WasmEntry) query;
+  "list_versions"    : (text) -> (vec WasmEntry) query;
+
+  // Controller-only updates
+  "upload_wasm" : (UploadWasmArg) -> (UploadWasmResult);
+  "remove_wasm" : (text) -> (RemoveWasmResult);
+}

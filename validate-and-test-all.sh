@@ -28,6 +28,8 @@ for arg in "$@"; do
 done
 
 if [ "$CLEAN_FLAG" = "true" ]; then
+    # Stop network before cleaning so git clean -fdX doesn't orphan the process
+    icp network stop local 2>/dev/null || true
     ./scripts/clean.sh
 fi
 
@@ -67,9 +69,25 @@ set +a
 echo "Setting up dashboard dev environment..."
 ./scripts/setup-dashboard-dev-env.sh
 
+echo "Deploying wasm-registry canister..."
+icp deploy wasm-registry -e local --identity ident-1 --cycles "$CANISTER_INITIAL_CYCLES"
+
+echo "Uploading my-hello-world WASM to registry..."
+./scripts/upload-wasm-to-registry.sh \
+  "my-hello-world" \
+  "The Internet Computer Hello World Dapp" \
+  "5.0.0" \
+  "wasm/my-hello-world.wasm.gz" \
+  -e local --identity ident-1
+
+# Append wasm-registry canister ID to test.env
+WASM_REGISTRY_ID=$(icp canister status wasm-registry -e local --id-only)
+if ! grep -q "VITE_WASM_REGISTRY_CANISTER_ID" tests/test.env; then
+  echo "VITE_WASM_REGISTRY_CANISTER_ID=${WASM_REGISTRY_ID}" >> tests/test.env
+fi
+
 echo "Setup my-canister-app canister..."
-./scripts/generate-registry-dev.sh
-# Re-source test.env (setup-dashboard-dev-env.sh may have added canister IDs)
+# Re-source test.env (setup-dashboard-dev-env.sh and registry deploy may have added canister IDs)
 set -a
 source tests/test.env
 set +a

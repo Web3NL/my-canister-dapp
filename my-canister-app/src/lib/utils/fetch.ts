@@ -1,26 +1,14 @@
-import { REGISTRY_URL } from '../constants';
-
-interface WasmModule {
-  id: number;
-  name: string;
-  version: number;
-  wasm_url: string;
-  memo: string;
-}
-
-interface Registry {
-  canister_dapps: WasmModule[];
-}
+import { WasmRegistryApi } from '$lib/api/wasmRegistry';
 
 export type WasmSource =
-  | { type: 'registry'; id: number }
+  | { type: 'registry'; name: string }
   | { type: 'file'; data: Uint8Array }
   | { type: 'remote'; url: string };
 
 export async function fetchWasmModule(source: WasmSource): Promise<Uint8Array> {
   switch (source.type) {
     case 'registry':
-      return fetchDappWasmFromRegistry(source.id);
+      return fetchDappWasmFromRegistry(source.name);
     case 'file':
       return source.data;
     case 'remote':
@@ -28,30 +16,15 @@ export async function fetchWasmModule(source: WasmSource): Promise<Uint8Array> {
   }
 }
 
-async function fetchDappWasmFromRegistry(id: number): Promise<Uint8Array> {
-  const response = await fetch(REGISTRY_URL);
-  if (!response.ok) {
-    throw new Error(
-      `Failed to load registry: ${response.status} ${response.statusText}`
-    );
+async function fetchDappWasmFromRegistry(name: string): Promise<Uint8Array> {
+  const registryApi = await WasmRegistryApi.create();
+  const wasmBytes = await registryApi.getWasmBytes(name);
+
+  if (!wasmBytes) {
+    throw new Error(`WASM '${name}' not found in registry`);
   }
 
-  const registry = (await response.json()) as Registry;
-  const wasmModule = registry.canister_dapps.find(module => module.id === id);
-
-  if (!wasmModule) {
-    throw new Error(`WASM module with id ${id} not found in registry`);
-  }
-
-  const wasmResponse = await fetch(wasmModule.wasm_url);
-  if (!wasmResponse.ok) {
-    throw new Error(
-      `Failed to fetch WASM: ${wasmResponse.status} ${wasmResponse.statusText}`
-    );
-  }
-
-  const arrayBuffer = await wasmResponse.arrayBuffer();
-  return new Uint8Array(arrayBuffer);
+  return wasmBytes;
 }
 
 async function fetchWasmFromRemoteUrl(url: string): Promise<Uint8Array> {
