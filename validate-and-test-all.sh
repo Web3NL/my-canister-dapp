@@ -14,14 +14,15 @@ trap print_total_time EXIT
 
 CLEAN_FLAG=""
 SKIP_CHECKS_FLAG=""
-SKIP_DFX_BOOTSTRAP_FLAG=""
+SKIP_BOOTSTRAP_FLAG=""
 SKIP_E2E_FLAG=""
 
 for arg in "$@"; do
     case $arg in
         --clean) CLEAN_FLAG="true" ;;
         --skip-checks) SKIP_CHECKS_FLAG="true" ;;
-        --skip-dfx-bootstrap) SKIP_DFX_BOOTSTRAP_FLAG="true" ;;
+        --skip-bootstrap) SKIP_BOOTSTRAP_FLAG="true" ;;
+
         --skip-e2e) SKIP_E2E_FLAG="true" ;;
     esac
 done
@@ -35,31 +36,55 @@ if [ "$SKIP_CHECKS_FLAG" != "true" ]; then
     ./scripts/check.sh
 fi
 
-if [ "$SKIP_DFX_BOOTSTRAP_FLAG" != "true" ]; then
-    echo "Starting DFX bootstrap"
+if [ "$SKIP_BOOTSTRAP_FLAG" != "true" ]; then
+    echo "Starting local network..."
 
-    dfxvm install "$DFX_VERSION"
-    dfxvm default "$DFX_VERSION"
+    ./scripts/setup-identity.sh
 
-    ./scripts/setup-dfx-identity.sh
+    # Stop any running network
+    icp network stop local 2>/dev/null || true
 
-    rm -rf .dfx
-    cd dfx-env
+    # Start fresh local network (PocketIC with NNS + II)
+    icp network start local -d
 
-    dfx killall
-    dfx start --clean --background --system-canisters > dfx.log 2>&1
+    # Deploy custom II with dummy_auth for e2e tests
+    ./scripts/deploy-test-ii.sh
 
-    ./deploy-all.sh
-
-    cd ..
+    # Transfer ICP to ident-1 for testing
+    echo "Transferring ICP to ident-1..."
+    IDENT1_PRINCIPAL=$(icp identity principal --identity ident-1)
+    icp token transfer 100 "$IDENT1_PRINCIPAL" -n local
+    echo "ident-1 balance:"
+    icp token balance --identity ident-1 -n local
 fi
+
+# Export test env vars so Vite builds use the correct identity provider URL
+# (test.env was written by deploy-test-ii.sh with the custom II canister ID)
+set -a
+source tests/test.env
+set +a
 
 echo "Setting up dashboard dev environment..."
 ./scripts/setup-dashboard-dev-env.sh
 
 echo "Setup my-canister-app canister..."
 ./scripts/generate-registry-dev.sh
-dfx deploy my-canister-app
+# Re-source test.env (setup-dashboard-dev-env.sh may have added canister IDs)
+set -a
+source tests/test.env
+set +a
+# Build my-canister-app with test env vars (asset canister recipe doesn't run build)
+npm run build --workspace=my-canister-app
+icp deploy my-canister-app -e local
+# Append my-canister-app canister ID to test.env (not available when deploy-test-ii.sh ran)
+APP_CANISTER_ID=$(icp canister status my-canister-app -e local --id-only)
+if ! grep -q "VITE_MY_CANISTER_APP_CANISTER_ID" tests/test.env; then
+  echo "VITE_MY_CANISTER_APP_CANISTER_ID=${APP_CANISTER_ID}" >> tests/test.env
+fi
+# Re-source with the app canister ID now available
+set -a
+source tests/test.env
+set +a
 
 echo "Running tests..."
 ./scripts/run-test.sh

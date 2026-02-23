@@ -141,10 +141,15 @@ export function canisterDappEnvironmentConfig(
 
     // Configure Vite to inject environment configs and setup proxy for dev server
     config(viteConfig, { mode }) {
+      // Allow VITE_IDENTITY_PROVIDER env var to override dev identity provider
+      const effectiveDevConfig = process.env.VITE_IDENTITY_PROVIDER
+        ? { ...devConfig, identityProvider: process.env.VITE_IDENTITY_PROVIDER }
+        : devConfig;
+
       // Inject both dev and prod configs as global constants
       viteConfig.define = {
         ...viteConfig.define,
-        __CANISTER_DAPP_DEV_CONFIG__: JSON.stringify(devConfig),
+        __CANISTER_DAPP_DEV_CONFIG__: JSON.stringify(effectiveDevConfig),
         __CANISTER_DAPP_PROD_CONFIG__: JSON.stringify(prodConfig),
         __VITE_DEV_CANISTER_ID__: JSON.stringify(
           config.viteDevCanisterId || null
