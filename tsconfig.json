@@ -39,7 +39,7 @@
     }
   },
   "include": [
-    "my-canister-dapp-js/canister-dashboard-frontend/src/**/*",
+    "my-canister-dapp-rs/my-canister-dashboard/frontend/src/**/*",
     "my-canister-dapp-js/my-canister-dashboard-js/src/**/*",
     "my-canister-dapp-js/vite-plugin-canister-dapp/src/**/*",
     "tests/**/*",

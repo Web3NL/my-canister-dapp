@@ -568,7 +568,7 @@ These packages are not published to npm or crates.io. They are deployment artifa
 
 #### canister-dashboard-frontend
 
-**Location**: `my-canister-dapp-js/canister-dashboard-frontend/`
+**Location**: `my-canister-dapp-rs/my-canister-dashboard/frontend/`
 
 **Purpose**: Source code for the embedded dashboard UI (vanilla TypeScript + Vite).
 
