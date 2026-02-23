@@ -1,7 +1,7 @@
 import type { Page } from '@playwright/test';
 
 /**
- * Handle the II v2 popup authentication flow with dummy_auth enabled.
+ * Handle the II v2 popup authentication flow.
  *
  * Supports three scenarios:
  * - Existing canister: "Continue with passkey" → "Use existing identity" → "Continue"
