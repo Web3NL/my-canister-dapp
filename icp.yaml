@@ -15,13 +15,6 @@ canisters:
         shrink: true
         candid: examples/my-hello-world/src/my-hello-world/my-hello-world.did
 
-  - name: internet-identity
-    build:
-      steps:
-        - type: pre-built
-          path: internet-identity/internet-identity.wasm.gz
-    init_args: "(opt record { captcha_config = opt record { max_unsolved_captchas = 500 : nat64; captcha_trigger = variant { Static = variant { CaptchaDisabled } } }; dummy_auth = opt (opt record { prompt_for_index = false }) })"
-
 networks:
   - name: local
     mode: managed
@@ -33,7 +26,7 @@ networks:
 environments:
   - name: local
     network: local
-    canisters: [my-canister-app, my-hello-world, internet-identity]
+    canisters: [my-canister-app, my-hello-world]
 
   - name: mainnet
     network: ic

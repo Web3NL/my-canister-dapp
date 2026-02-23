@@ -47,8 +47,8 @@ if [ "$SKIP_BOOTSTRAP_FLAG" != "true" ]; then
     # Start fresh local network (PocketIC with NNS + II)
     icp network start local -d
 
-    # Deploy custom II with dummy_auth for e2e tests
-    ./scripts/deploy-test-ii.sh
+    # Write test.env with NNS II URL and discovered canister IDs
+    ./scripts/write-test-env.sh
 
     # Transfer ICP to ident-1 for testing
     echo "Transferring ICP to ident-1..."
@@ -59,7 +59,7 @@ if [ "$SKIP_BOOTSTRAP_FLAG" != "true" ]; then
 fi
 
 # Export test env vars so Vite builds use the correct identity provider URL
-# (test.env was written by deploy-test-ii.sh with the custom II canister ID)
+# (test.env was written by write-test-env.sh with the NNS II canister ID)
 set -a
 source tests/test.env
 set +a
@@ -76,7 +76,7 @@ set +a
 # Build my-canister-app with test env vars (asset canister recipe doesn't run build)
 npm run build --workspace=my-canister-app
 icp deploy my-canister-app -e local
-# Append my-canister-app canister ID to test.env (not available when deploy-test-ii.sh ran)
+# Append my-canister-app canister ID to test.env (not available when write-test-env.sh ran)
 APP_CANISTER_ID=$(icp canister status my-canister-app -e local --id-only)
 if ! grep -q "VITE_MY_CANISTER_APP_CANISTER_ID" tests/test.env; then
   echo "VITE_MY_CANISTER_APP_CANISTER_ID=${APP_CANISTER_ID}" >> tests/test.env
