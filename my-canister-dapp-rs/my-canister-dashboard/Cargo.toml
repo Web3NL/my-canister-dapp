@@ -36,7 +36,7 @@ pre-release-replacements = [
   { file = "CHANGELOG.md", search = "(?m)^# Changelog\\n", replace = "# Changelog\n\n## [Unreleased]\n", exactly = 1 },
 
   # Update the version in package.json for My Canister Dashboard
-  { file = "../../my-canister-dapp-js/canister-dashboard-frontend/package.json", search = "\"version\": \".*\"", replace = "\"version\": \"{{version}}\"", exactly = 1 },
+  { file = "frontend/package.json", search = "\"version\": \".*\"", replace = "\"version\": \"{{version}}\"", exactly = 1 },
 ]
 
 pre-release-hook = [

@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { login, checkPrincipal } from './login';
-import { formatIcpBalance } from '../../my-canister-dapp-js/canister-dashboard-frontend/src/helpers';
+import { formatIcpBalance } from '../../my-canister-dapp-rs/my-canister-dashboard/frontend/src/helpers';
 import { TOPUP_AMOUNT } from './shared';
 import { transferToPrincipal } from '../helpers.js';
 
