@@ -9,7 +9,7 @@ export default defineConfig(() => {
     publicDir: false as const,
     plugins: [
       canisterDappEnvironmentConfig({
-        viteDevCanisterId: '22ajg-aqaaa-aaaap-adukq-cai',
+        viteDevCanisterId: process.env.VITE_MY_HELLO_WORLD_CANISTER_ID || '22ajg-aqaaa-aaaap-adukq-cai',
         serverProxies: {
           canisterDashboard: false,
         }

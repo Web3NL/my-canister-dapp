@@ -1,11 +1,11 @@
 import { test } from '@playwright/test';
-import { saveTestData, getDfxEnv } from '../../tests/helpers.js';
+import { saveTestData, getTestEnv } from '../../tests/helpers.js';
 import { handleIIPopup } from '../../tests/ii-helpers.js';
 import { readFileSync } from 'fs';
 import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
 
-const identityProvider = getDfxEnv('VITE_IDENTITY_PROVIDER');
+const identityProvider = getTestEnv('VITE_IDENTITY_PROVIDER');
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 
@@ -22,7 +22,7 @@ test.describe('setup II identity and derive principals', () => {
       // For each origin, derive the principal
       const origins = [
         { origin: process.env.DAPP_ORIGIN_VITE!, envSuffix: 'vite' },
-        { origin: process.env.DAPP_ORIGIN_DFX!, envSuffix: 'dfx' },
+        { origin: process.env.DAPP_ORIGIN_CANISTER!, envSuffix: 'canister' },
       ];
 
       for (const { origin, envSuffix } of origins) {

@@ -1,0 +1,40 @@
+# yaml-language-server: $schema=https://github.com/dfinity/icp-cli/raw/refs/tags/v0.1.0/docs/schemas/icp-yaml-schema.json
+
+canisters:
+  - name: my-canister-app
+    recipe:
+      type: "@dfinity/asset-canister@v2.1.0"
+      configuration:
+        dir: my-canister-app/build
+
+  - name: my-hello-world
+    recipe:
+      type: "@dfinity/rust@v3.0.0"
+      configuration:
+        package: my-hello-world
+        shrink: true
+        candid: examples/my-hello-world/src/my-hello-world/my-hello-world.did
+
+  - name: internet-identity
+    build:
+      steps:
+        - type: pre-built
+          path: internet-identity/internet-identity.wasm.gz
+    init_args: "(opt record { captcha_config = opt record { max_unsolved_captchas = 500 : nat64; captcha_trigger = variant { Static = variant { CaptchaDisabled } } }; dummy_auth = opt (opt record { prompt_for_index = false }) })"
+
+networks:
+  - name: local
+    mode: managed
+    nns: true
+    ii: true
+    gateway:
+      port: 8080
+
+environments:
+  - name: local
+    network: local
+    canisters: [my-canister-app, my-hello-world, internet-identity]
+
+  - name: mainnet
+    network: ic
+    canisters: [my-canister-app]

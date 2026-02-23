@@ -5,14 +5,23 @@
  * Verifies config injection, proxy setup, and environment configuration.
  */
 
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
 import type { UserConfig } from 'vite';
 import { canisterDappEnvironmentConfig } from '../src/plugin.js';
 import { callConfigHook } from './helpers.js';
 
 describe('canisterDappEnvironmentConfig', () => {
+  const savedViteIdentityProvider = process.env.VITE_IDENTITY_PROVIDER;
+
   beforeEach(() => {
     vi.clearAllMocks();
+    delete process.env.VITE_IDENTITY_PROVIDER;
+  });
+
+  afterEach(() => {
+    if (savedViteIdentityProvider !== undefined) {
+      process.env.VITE_IDENTITY_PROVIDER = savedViteIdentityProvider;
+    }
   });
 
   describe('config merging', () => {
@@ -25,7 +34,7 @@ describe('canisterDappEnvironmentConfig', () => {
       expect(viteConfig.define?.__CANISTER_DAPP_DEV_CONFIG__).toBe(
         JSON.stringify({
           host: 'http://localhost:8080',
-          identityProvider: 'http://uxrrr-q7777-77774-qaaaq-cai.localhost:8080',
+          identityProvider: 'http://rdmx6-jaaaa-aaaaa-aaadq-cai.localhost:8080',
         })
       );
       expect(viteConfig.define?.__CANISTER_DAPP_PROD_CONFIG__).toBe(

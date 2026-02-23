@@ -23,6 +23,7 @@ export default [
       '.svelte-kit/**',
       'target/**',
       '.dfx/**',
+      '.icp/**',
       'assets/**',
       '**/*.config.js',
       '**/*.config.ts',

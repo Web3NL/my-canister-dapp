@@ -1,15 +1,15 @@
 import { test, expect } from '@playwright/test';
 import {
   myCanisterAppDfxUrl,
-  loadDfxEnv,
+  loadTestEnv,
   transferToPrincipal,
   saveTestData,
 } from '../helpers.js';
 import { handleIIPopup } from '../ii-helpers.js';
 import { Principal } from '@icp-sdk/core/principal';
 
-// Load global dfx environment variables
-loadDfxEnv();
+// Load test environment variables
+loadTestEnv();
 
 const maintenanceMode = false;
 

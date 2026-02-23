@@ -1,9 +1,9 @@
 import { test } from '@playwright/test';
-import { installedHelloWorldExampleCanisterFrontendUrl, loadDfxEnv } from '../helpers.js';
+import { installedHelloWorldExampleCanisterFrontendUrl, loadTestEnv } from '../helpers.js';
 import { handleIIPopup } from '../ii-helpers.js';
 
-// Load global dfx environment variables
-loadDfxEnv();
+// Load test environment variables
+loadTestEnv();
 
 test('My Hello World Frontend', async ({ page }) => {
     const frontendUrl = installedHelloWorldExampleCanisterFrontendUrl();

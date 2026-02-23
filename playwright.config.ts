@@ -21,19 +21,19 @@ export default defineConfig({
       }
     },
     {
-      name: 'canister-dashboard-frontend-dfx',
+      name: 'canister-dashboard-frontend-canister',
       testMatch: /.*canister-dashboard-frontend.*\.spec\.ts/,
       metadata: {
         testUrl: installedHelloWorldExampleCanisterDashboardUrl(),
-        principalFile: 'derived-ii-principal-dfx.txt'
+        principalFile: 'derived-ii-principal-canister.txt'
       }
     },
     {
-      name: 'my-hello-world-frontend-dfx',
+      name: 'my-hello-world-frontend-canister',
       testMatch: /.*my-hello-world-frontend.*\.spec\.ts/,
     },
     {
-      name: 'my-canister-app-dfx',
+      name: 'my-canister-app-canister',
       testMatch: /.*my-canister-app.*\.spec\.ts/,
     },
     {

@@ -16,7 +16,7 @@ export default defineConfig({
   },
   define: {
     global: 'globalThis',
-    PROD: process.env.DFX_NETWORK === 'ic',
+    PROD: process.env.DFX_NETWORK === 'ic' || process.env.ICP_NETWORK === 'ic',
   },
   css: {
     preprocessorOptions: {

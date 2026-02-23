@@ -73,7 +73,6 @@ export { getPendingCanister, PartialCreationError } from './pendingCanister';
 export async function installAndTakeControl(
   canisterPrincipal: Principal
 ): Promise<void> {
-  const iiPrincipal = await remoteAuth(canisterPrincipal);
   const agent = await createHttpAgent();
 
   const myDashboardBackend = MyDashboardBackend.create({
@@ -81,8 +80,12 @@ export async function installAndTakeControl(
     canisterId: canisterPrincipal,
   });
 
-  await setIIPrincipal(iiPrincipal, myDashboardBackend);
+  // Add the installer's origin to the new canister's alternative origins
+  // so II can verify the caller during remote authentication
+  await addInstallerOrigin(myDashboardBackend);
 
+  const iiPrincipal = await remoteAuth(canisterPrincipal);
+  await setIIPrincipal(iiPrincipal, myDashboardBackend);
   await setControllers(canisterPrincipal, [canisterPrincipal, iiPrincipal]);
 }
 
@@ -105,6 +108,18 @@ async function createCanister(blockIndex: bigint): Promise<Principal> {
   );
 
   return canisterPrincipal;
+}
+
+async function addInstallerOrigin(
+  myDashboardBackend: MyDashboardBackend
+): Promise<void> {
+  const origin = globalThis.location.origin;
+  const result = await myDashboardBackend.manageAlternativeOrigins({
+    Add: origin,
+  });
+  if ('Err' in result) {
+    throw new Error(`Failed to add installer origin: ${result.Err}`);
+  }
 }
 
 async function installCodeToCanister(

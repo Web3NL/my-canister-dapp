@@ -19,7 +19,7 @@ pub const MIN_CANISTER_CREATION_BALANCE: u128 = 500_000_000_000;
 pub const ICP_LEDGER_CANISTER_ID_TEXT: &str = "ryjl3-tyaaa-aaaaa-aaaba-cai";
 pub const ICP_INDEX_CANISTER_ID_TEXT: &str = "qhbym-qaaaa-aaaaa-aaafq-cai";
 pub const CMC_CANISTER_ID_TEXT: &str = "rkp4c-7iaaa-aaaaa-aaaca-cai";
-pub const II_CANISTER_ID_TEXT: &str = "uxrrr-q7777-77774-qaaaq-cai";
+pub const II_CANISTER_ID_TEXT: &str = "rdmx6-jaaaa-aaaaa-aaadq-cai";
 
 // Ledger transfer configuration used in tests
 pub const LEDGER_INIT_TRANSFER_FEE_E8S: u64 = 10_000; // 0.0001 ICP

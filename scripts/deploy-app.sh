@@ -26,13 +26,9 @@ if [[ -n $(git status --porcelain) ]]; then
     exit 1
 fi
 
-# Set dfx identity
-echo "🔑 Setting dfx identity to web3nl..."
-dfx identity use web3nl
-
-# Deploy the app
+# Deploy the app (ICP_NETWORK=ic triggers production build)
 echo "🚢 Deploying to IC..."
-dfx deploy my-canister-app --ic
+ICP_NETWORK=ic icp deploy my-canister-app -e mainnet --identity web3nl
 
 # Get current commit hash after successful deploy
 COMMIT_HASH=$(git rev-parse HEAD)

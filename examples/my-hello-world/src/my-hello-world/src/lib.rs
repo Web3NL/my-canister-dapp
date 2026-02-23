@@ -22,11 +22,7 @@ static FRONTEND_DIR: Dir = include_dir!("$CARGO_MANIFEST_DIR/../my-hello-world-f
 
 /// Alternative origins allowed for Internet Identity derivation.
 /// These domains can authenticate users with principals derived at this canister's domain.
-const ALTERNATIVE_ORIGINS: &[&str] = &[
-    "https://mycanister.app",
-    "http://localhost:5174",
-    "http://c7lwu-3qaaa-aaaam-qbgia-cai.localhost:8080",
-];
+const ALTERNATIVE_ORIGINS: &[&str] = &["https://mycanister.app", "http://localhost:5174"];
 
 // ============================================================================
 // Initialization
