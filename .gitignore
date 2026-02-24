@@ -3,7 +3,6 @@
 .env.*
 !.env.example
 !.env.test*
-!tests/test.env
 
 # Vite local env files
 **/.env
@@ -76,6 +75,7 @@ build/
 # Test output
 test-results/
 test-output/
+tests/test.env
 
 # WASM build artifacts (uploaded to wasm-registry canister)
 wasm/
