@@ -1,5 +1,5 @@
 import { describe, it, expect } from 'vitest';
-import { createDerivationOriginFromHost } from '../src/derivationOrigin';
+import { createDerivationOriginFromHost } from '../derivationOrigin';
 
 describe('createDerivationOriginFromHost', () => {
   const TEST_CANISTER_ID = 'rrkah-fqaaa-aaaaa-aaaaq-cai';

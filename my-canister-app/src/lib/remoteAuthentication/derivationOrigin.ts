@@ -1,9 +1,18 @@
 import { HOST } from '$lib/constants';
-import { createDerivationOriginFromHost } from '@web3nl/my-canister-installer';
 
-/**
- * Creates derivation origin for a canister using the configured HOST.
- */
+export function createDerivationOriginFromHost(
+  canisterId: string,
+  host: string
+): string {
+  const url = new URL(host);
+
+  if (url.hostname === 'localhost') {
+    return `${url.protocol}//${canisterId}.${url.hostname}:${url.port}`;
+  } else {
+    return `${url.protocol}//${canisterId}.${url.hostname}`;
+  }
+}
+
 export function createDerivationOrigin(canisterId: string): string {
   return createDerivationOriginFromHost(canisterId, HOST);
 }

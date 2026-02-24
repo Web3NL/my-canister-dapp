@@ -8,12 +8,11 @@ import {
   setStorage,
   resetStorage,
   type PendingCanisterStorage,
-} from '../src/pendingCanister';
+} from '../pendingCanister';
 
 const TEST_CANISTER_ID = 'rrkah-fqaaa-aaaaa-aaaaq-cai';
 
 describe('pendingCanister', () => {
-  // Use mock storage for isolation
   let mockStorage: Map<string, string>;
   let mockStorageImpl: PendingCanisterStorage;
 
@@ -33,14 +32,6 @@ describe('pendingCanister', () => {
 
   describe('setPendingCanister', () => {
     it('stores canister ID in storage', () => {
-      const principal = Principal.fromText(TEST_CANISTER_ID);
-      setPendingCanister(principal);
-
-      const stored = mockStorage.get('pending_canister_creation');
-      expect(stored).toBe(TEST_CANISTER_ID);
-    });
-
-    it('converts Principal to text', () => {
       const principal = Principal.fromText(TEST_CANISTER_ID);
       setPendingCanister(principal);
 

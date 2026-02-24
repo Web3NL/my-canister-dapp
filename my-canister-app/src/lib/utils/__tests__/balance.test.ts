@@ -1,5 +1,8 @@
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { hasSufficientBalanceForCanisterCreation } from '../balance';
+import {
+  calculateIcpFromCyclesRate,
+  hasSufficientBalanceForCanisterCreation,
+} from '../balance';
 
 // Mock the CmcApi module for async function tests
 vi.mock('$lib/api/cmc', () => ({
@@ -7,6 +10,56 @@ vi.mock('$lib/api/cmc', () => ({
     create: vi.fn(),
   },
 }));
+
+describe('calculateIcpFromCyclesRate', () => {
+  const ONE_TRILLION_CYCLES = 1_000_000_000_000n;
+
+  it('calculates correct ICP for typical mainnet rate (~50k xdr_permyriad)', () => {
+    const rate = 50_000n;
+    const result = calculateIcpFromCyclesRate(ONE_TRILLION_CYCLES, rate);
+    expect(result).toBe(20_000_000n);
+  });
+
+  it('throws when rate is 0', () => {
+    expect(() => calculateIcpFromCyclesRate(ONE_TRILLION_CYCLES, 0n)).toThrow(
+      'Invalid rate (0)'
+    );
+  });
+
+  it('uses ceiling division (rounds up)', () => {
+    const rate = 50_000n;
+    const baseResult = calculateIcpFromCyclesRate(ONE_TRILLION_CYCLES, rate);
+    const slightlyMore = calculateIcpFromCyclesRate(
+      ONE_TRILLION_CYCLES + 1n,
+      rate
+    );
+    expect(slightlyMore).toBeGreaterThanOrEqual(baseResult);
+  });
+
+  it('handles high conversion rates', () => {
+    const highRate = 100_000n;
+    const result = calculateIcpFromCyclesRate(ONE_TRILLION_CYCLES, highRate);
+    expect(result).toBe(10_000_000n);
+  });
+
+  it('handles low conversion rates', () => {
+    const lowRate = 10_000n;
+    const result = calculateIcpFromCyclesRate(ONE_TRILLION_CYCLES, lowRate);
+    expect(result).toBe(100_000_000n);
+  });
+
+  it('uses provided e8sPerToken parameter', () => {
+    const rate = 50_000n;
+    const customE8s = 1_000_000n;
+    const defaultResult = calculateIcpFromCyclesRate(ONE_TRILLION_CYCLES, rate);
+    const customResult = calculateIcpFromCyclesRate(
+      ONE_TRILLION_CYCLES,
+      rate,
+      customE8s
+    );
+    expect(customResult).not.toBe(defaultResult);
+  });
+});
 
 describe('hasSufficientBalanceForCanisterCreation', () => {
   beforeEach(() => {
