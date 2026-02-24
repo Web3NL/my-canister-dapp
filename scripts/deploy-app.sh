@@ -28,7 +28,7 @@ fi
 
 # Deploy the app (ICP_NETWORK=ic triggers production build)
 echo "🚢 Deploying to IC..."
-(cd canisters && ICP_NETWORK=ic icp deploy my-canister-app -e mainnet --identity web3nl)
+ICP_NETWORK=ic icp deploy my-canister-app -e mainnet --identity web3nl
 
 # Get current commit hash after successful deploy
 COMMIT_HASH=$(git rev-parse HEAD)

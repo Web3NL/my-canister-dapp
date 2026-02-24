@@ -33,14 +33,13 @@ echo "Uploading $NAME v$VERSION ($FILE_SIZE bytes) to wasm-registry..."
 # Encode argument as Candid binary hex written to a temp file
 # (hex string is ~1.6MB which exceeds ARG_MAX for command-line args)
 SCRIPT_DIR="$(dirname "$0")"
+
 TMPFILE=$(mktemp)
 echo "Encoding Candid argument to $TMPFILE..."
 node "$SCRIPT_DIR/encode-upload-arg.mjs" "$NAME" "$DESCRIPTION" "$VERSION" "$WASM_GZ_PATH" > "$TMPFILE"
 
 echo "Calling wasm-registry upload_wasm..."
-# Run from canisters/ where the wasm-registry icp.yaml lives
-REPO_ROOT="$(dirname "$0")/.."
-(cd "$REPO_ROOT/canisters" && icp canister call wasm-registry upload_wasm "$TMPFILE" "${EXTRA_ARGS[@]}")
+icp canister call wasm-registry upload_wasm "$TMPFILE" "${EXTRA_ARGS[@]}"
 rm -f "$TMPFILE"
 
 echo "Upload complete!"

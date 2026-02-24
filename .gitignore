@@ -55,12 +55,7 @@ build/
 
 # dfx / icp-cli files
 .dfx
-.icp/*
-!.icp/data/
-.icp/data/*
-!.icp/data/mappings/
-.icp/data/mappings/*
-!.icp/data/mappings/*.ids.json
+.icp
 
 # Claude
 .claude

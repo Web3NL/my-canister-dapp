@@ -5,12 +5,7 @@ set -euo pipefail
 source "$(dirname "$0")/constants.sh"
 
 # Ensure we're in the project root directory
-ROOT="$(dirname "$0")/.."
-cd "$ROOT"
-
-# Helper functions to run icp commands in the correct project context
-icp_examples() { (cd examples && icp "$@"); }
-icp_canisters() { (cd canisters && icp "$@"); }
+cd "$REPO_ROOT"
 
 echo "Setting up dashboard development environment..."
 
@@ -19,11 +14,11 @@ echo "Deploying $HELLO_WORLD_CANISTER canister..."
 # Build hello-world frontend with test env vars (identity provider URL)
 # before the Rust canister embeds it via include_dir!
 npm run build --workspace=my-hello-world-frontend
-icp_examples deploy "$HELLO_WORLD_CANISTER" -e local --identity ident-1 --cycles "$CANISTER_INITIAL_CYCLES"
+icp deploy "$HELLO_WORLD_CANISTER" -e local --identity ident-1 --cycles "$CANISTER_INITIAL_CYCLES"
 ./scripts/copy-example-wasm.sh
 
 # Update test.env with the hello-world canister ID
-HELLO_WORLD_ID=$(icp_examples canister status my-hello-world -e local --id-only)
+HELLO_WORLD_ID=$(icp canister status my-hello-world -e local --id-only)
 if ! grep -q "VITE_MY_HELLO_WORLD_CANISTER_ID" tests/test.env 2>/dev/null; then
   echo "VITE_MY_HELLO_WORLD_CANISTER_ID=${HELLO_WORLD_ID}" >> tests/test.env
 fi
@@ -42,10 +37,10 @@ echo "Reading principals from both files..."
 PRINCIPAL_VITE=$(cat test-output/derived-ii-principal-vite.txt)
 PRINCIPAL_CANISTER=$(cat test-output/derived-ii-principal-canister.txt)
 
-IDENT1=$(icp_canisters identity principal --identity ident-1)
+IDENT1=$(icp identity principal --identity ident-1)
 
 echo "Setting controllers for $HELLO_WORLD_CANISTER canister..."
-icp_examples canister settings update "$HELLO_WORLD_CANISTER" -e local --identity ident-1 \
+icp canister settings update "$HELLO_WORLD_CANISTER" -e local --identity ident-1 \
   --set-controller "$CANISTER_ID" \
   --set-controller "$PRINCIPAL_VITE" \
   --set-controller "$PRINCIPAL_CANISTER" \
@@ -53,6 +48,6 @@ icp_examples canister settings update "$HELLO_WORLD_CANISTER" -e local --identit
   -f
 
 echo "Setting authorized Internet Identity principal (Vite origin for first e2e batch)..."
-icp_examples canister call "$HELLO_WORLD_CANISTER" manage_ii_principal "(variant { Set = principal \"$PRINCIPAL_VITE\" })" -e local --identity ident-1
+icp canister call "$HELLO_WORLD_CANISTER" manage_ii_principal "(variant { Set = principal \"$PRINCIPAL_VITE\" })" -e local --identity ident-1
 
 echo "✓ Dashboard development environment setup complete"

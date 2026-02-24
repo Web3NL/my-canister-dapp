@@ -4,10 +4,6 @@ set -euo pipefail
 # Source shared constants
 source "$(dirname "$0")/scripts/constants.sh"
 
-# Helper functions to run icp commands in the correct project context
-icp_canisters() { (cd canisters && icp "$@"); }
-icp_examples() { (cd examples && icp "$@"); }
-
 # Minimal total runtime reporting (MM:SS)
 SCRIPT_START_TIME=$(date +%s)
 print_total_time() {
@@ -33,7 +29,7 @@ done
 
 if [ "$CLEAN_FLAG" = "true" ]; then
     # Stop network before cleaning so git clean -fdX doesn't orphan the process
-    icp_canisters network stop local 2>/dev/null || true
+    icp network stop local 2>/dev/null || true
     ./scripts/clean.sh
 fi
 
@@ -48,20 +44,20 @@ if [ "$SKIP_BOOTSTRAP_FLAG" != "true" ]; then
     ./scripts/setup-identity.sh
 
     # Stop any running network
-    icp_canisters network stop local 2>/dev/null || true
+    icp network stop local 2>/dev/null || true
 
     # Start fresh local network (PocketIC with NNS + II)
-    icp_canisters network start local -d
+    icp network start local -d
 
     # Write test.env with NNS II URL and discovered canister IDs
     ./scripts/write-test-env.sh
 
     # Transfer ICP to ident-1 for testing
     echo "Transferring ICP to ident-1..."
-    IDENT1_PRINCIPAL=$(icp_canisters identity principal --identity ident-1)
-    icp_canisters token transfer 100 "$IDENT1_PRINCIPAL" -n local
+    IDENT1_PRINCIPAL=$(icp identity principal --identity ident-1)
+    icp token transfer 100 "$IDENT1_PRINCIPAL" -n local
     echo "ident-1 balance:"
-    icp_canisters token balance --identity ident-1 -n local
+    icp token balance --identity ident-1 -n local
 fi
 
 # Export test env vars so Vite builds use the correct identity provider URL
@@ -74,7 +70,7 @@ echo "Setting up dashboard dev environment..."
 ./scripts/setup-dashboard-dev-env.sh
 
 echo "Deploying wasm-registry canister..."
-icp_canisters deploy wasm-registry -e local --identity ident-1 --cycles "$CANISTER_INITIAL_CYCLES"
+icp deploy wasm-registry -e local --identity ident-1 --cycles "$CANISTER_INITIAL_CYCLES"
 
 echo "Uploading my-hello-world WASM to registry..."
 ./scripts/upload-wasm-to-registry.sh \
@@ -86,7 +82,7 @@ echo "Uploading my-hello-world WASM to registry..."
 
 echo "Deploying my-notepad canister..."
 npm run build --workspace=my-notepad-frontend
-icp_examples deploy my-notepad -e local --identity ident-1 --cycles "$CANISTER_INITIAL_CYCLES"
+icp deploy my-notepad -e local --identity ident-1 --cycles "$CANISTER_INITIAL_CYCLES"
 
 echo "Copying my-notepad WASM to registry..."
 NOTEPAD_WASM="target/wasm32-unknown-unknown/release/deps/my_notepad.wasm"
@@ -106,7 +102,7 @@ echo "Uploading my-notepad WASM to registry..."
   -e local --identity ident-1
 
 # Append wasm-registry canister ID to test.env
-WASM_REGISTRY_ID=$(icp_canisters canister status wasm-registry -e local --id-only)
+WASM_REGISTRY_ID=$(icp canister status wasm-registry -e local --id-only)
 if ! grep -q "VITE_WASM_REGISTRY_CANISTER_ID" tests/test.env; then
   echo "VITE_WASM_REGISTRY_CANISTER_ID=${WASM_REGISTRY_ID}" >> tests/test.env
 fi
@@ -118,9 +114,9 @@ source tests/test.env
 set +a
 # Build my-canister-app with test env vars (asset canister recipe doesn't run build)
 npm run build --workspace=my-canister-app
-icp_canisters deploy my-canister-app -e local
+icp deploy my-canister-app -e local
 # Append my-canister-app canister ID to test.env (not available when write-test-env.sh ran)
-APP_CANISTER_ID=$(icp_canisters canister status my-canister-app -e local --id-only)
+APP_CANISTER_ID=$(icp canister status my-canister-app -e local --id-only)
 if ! grep -q "VITE_MY_CANISTER_APP_CANISTER_ID" tests/test.env; then
   echo "VITE_MY_CANISTER_APP_CANISTER_ID=${APP_CANISTER_ID}" >> tests/test.env
 fi

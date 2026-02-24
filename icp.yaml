@@ -5,7 +5,7 @@ canisters:
     recipe:
       type: "@dfinity/asset-canister@v2.1.0"
       configuration:
-        dir: my-canister-app/build
+        dir: canisters/my-canister-app/build
 
   - name: wasm-registry
     recipe:
@@ -13,7 +13,23 @@ canisters:
       configuration:
         package: wasm-registry
         shrink: true
-        candid: wasm-registry/wasm-registry.did
+        candid: canisters/wasm-registry/wasm-registry.did
+
+  - name: my-hello-world
+    recipe:
+      type: "@dfinity/rust@v3.0.0"
+      configuration:
+        package: my-hello-world
+        shrink: true
+        candid: examples/my-hello-world/src/backend/my-hello-world.did
+
+  - name: my-notepad
+    recipe:
+      type: "@dfinity/rust@v3.0.0"
+      configuration:
+        package: my-notepad
+        shrink: true
+        candid: examples/my-notepad/src/backend/my-notepad.did
 
 networks:
   - name: local
@@ -26,7 +42,7 @@ networks:
 environments:
   - name: local
     network: local
-    canisters: [my-canister-app, wasm-registry]
+    canisters: [my-canister-app, wasm-registry, my-hello-world, my-notepad]
 
   - name: mainnet
     network: ic
