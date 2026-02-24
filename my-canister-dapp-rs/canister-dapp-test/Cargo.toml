@@ -1,21 +1,23 @@
 [package]
 name = "canister-dapp-test"
 version = "0.2.0"
-description = "Test for wasm binaries compatible with my-canister-dashboard"
+description = "Acceptance suite for WASM binaries built with my-canister-dashboard"
 edition = { workspace = true }
+
+[[bin]]
+name = "canister-dapp-test"
+path = "src/main.rs"
 
 [dependencies]
 candid = { workspace = true }
-serde = { workspace = true }
-serde_json = { workspace = true }
-sha2 = { workspace = true }
+clap = { workspace = true }
 hex = { workspace = true }
-
-[dev-dependencies]
 ic-cdk = { workspace = true }
-pocket-ic = { workspace = true }
 ic-http-certification = { workspace = true }
 ic-ledger-types = { workspace = true }
+pocket-ic = { workspace = true }
+serde_json = { workspace = true }
+sha2 = { workspace = true }
 
 my-canister-dashboard = { path = "../my-canister-dashboard" }
 
