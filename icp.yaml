@@ -15,6 +15,14 @@ canisters:
         shrink: true
         candid: examples/my-hello-world/src/my-hello-world/my-hello-world.did
 
+  - name: my-notepad
+    recipe:
+      type: "@dfinity/rust@v3.0.0"
+      configuration:
+        package: my-notepad
+        shrink: true
+        candid: examples/my-notepad/src/my-notepad/my-notepad.did
+
   - name: wasm-registry
     recipe:
       type: "@dfinity/rust@v3.0.0"
@@ -34,7 +42,7 @@ networks:
 environments:
   - name: local
     network: local
-    canisters: [my-canister-app, my-hello-world, wasm-registry]
+    canisters: [my-canister-app, my-hello-world, my-notepad, wasm-registry]
 
   - name: mainnet
     network: ic

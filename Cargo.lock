@@ -1268,6 +1268,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "my-notepad"
+version = "1.0.0"
+dependencies = [
+ "candid",
+ "ic-asset-certification",
+ "ic-cdk",
+ "ic-http-certification",
+ "include_dir",
+ "my-canister-dashboard",
+ "my-canister-frontend",
+ "serde",
+]
+
+[[package]]
 name = "nu-ansi-term"
 version = "0.50.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"

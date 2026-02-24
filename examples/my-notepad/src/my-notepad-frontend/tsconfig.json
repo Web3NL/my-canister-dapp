@@ -1,0 +1,14 @@
+{
+  "extends": "../../tsconfig.json",
+  "compilerOptions": {
+    "noEmit": true,
+    "jsx": "react-jsx",
+    "types": ["vite/client"],
+    "paths": {
+      "$declarations/*": ["../declarations/*"]
+    }
+  },
+  "include": [
+    "src/**/*"
+  ]
+}
