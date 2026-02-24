@@ -19,5 +19,8 @@ cargo test -p my-canister-dashboard
 echo "Unit testing my-canister-frontend (Rust)"
 cargo test -p my-canister-frontend
 
-echo "Wasm testing with canister-dapp-test"
-cargo test -p canister-dapp-test
+echo "Acceptance testing my-hello-world"
+cargo run -p canister-dapp-test -- wasm/my-hello-world.wasm.gz
+
+echo "Acceptance testing my-notepad"
+cargo run -p canister-dapp-test -- wasm/my-notepad.wasm.gz
