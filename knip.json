@@ -2,10 +2,12 @@
   "ignore": [
     "declarations/**",
     "examples/my-hello-world/src/declarations/**",
+    "my-canister-app/src/lib/declarations/**",
     "my-canister-app/src/routes/**",
     "my-canister-app/src/lib/components/dapp-store/*",
     "my-canister-dapp-js/my-canister-dashboard-js/declarations/**",
     "my-canister-dapp-rs/my-canister-dashboard/assets/**",
+    "scripts/**",
     "test-fixtures/**"
   ]
 }

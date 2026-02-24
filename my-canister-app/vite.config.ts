@@ -1,8 +1,6 @@
 import { sveltekit } from '@sveltejs/kit/vite';
 import { defineConfig } from 'vitest/config';
 import devtoolsJson from 'vite-plugin-devtools-json';
-import path from 'path';
-import fs from 'fs';
 
 export default defineConfig({
   test: {
@@ -49,35 +47,5 @@ export default defineConfig({
     },
   },
 
-  plugins: [
-    sveltekit(),
-    devtoolsJson(),
-    {
-      name: 'serve-wasm',
-      configureServer(server) {
-        // Serve wasm directory from project root
-        server.middlewares.use('/wasm', (req, res, next) => {
-          if (!req.url) {
-            next();
-            return;
-          }
-
-          const wasmPath = path.resolve(process.cwd(), '../wasm');
-          const filePath = path.join(wasmPath, req.url);
-
-          if (fs.existsSync(filePath) && fs.statSync(filePath).isFile()) {
-            const content = fs.readFileSync(filePath);
-            res.writeHead(200, {
-              'Content-Type': req.url!.endsWith('.wasm.gz')
-                ? 'application/wasm'
-                : 'application/octet-stream',
-            });
-            res.end(content);
-          } else {
-            next();
-          }
-        });
-      },
-    },
-  ],
+  plugins: [sveltekit(), devtoolsJson()],
 });

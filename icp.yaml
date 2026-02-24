@@ -15,6 +15,14 @@ canisters:
         shrink: true
         candid: examples/my-hello-world/src/my-hello-world/my-hello-world.did
 
+  - name: wasm-registry
+    recipe:
+      type: "@dfinity/rust@v3.0.0"
+      configuration:
+        package: wasm-registry
+        shrink: true
+        candid: wasm-registry/wasm-registry.did
+
 networks:
   - name: local
     mode: managed
@@ -26,8 +34,8 @@ networks:
 environments:
   - name: local
     network: local
-    canisters: [my-canister-app, my-hello-world]
+    canisters: [my-canister-app, my-hello-world, wasm-registry]
 
   - name: mainnet
     network: ic
-    canisters: [my-canister-app]
+    canisters: [my-canister-app, wasm-registry]

@@ -19,13 +19,9 @@ ic-wasm "$CARGO_WASM" -o "$TMPDIR/my-hello-world.wasm" shrink
 gzip -9 "$TMPDIR/my-hello-world.wasm"
 WASM_GZ="$TMPDIR/my-hello-world.wasm.gz"
 
-# Copy to root wasm directory (for vite dev server)
+# Copy to root wasm directory (for upload to wasm-registry canister)
 mkdir -p wasm
 cp "$WASM_GZ" wasm/my-hello-world.wasm.gz
-
-# Copy to static directory (for production build)
-mkdir -p my-canister-app/static/wasm
-cp "$WASM_GZ" my-canister-app/static/wasm/my-hello-world.wasm.gz
 
 rm -rf "$TMPDIR"
 

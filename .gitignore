@@ -77,7 +77,5 @@ build/
 test-results/
 test-output/
 
-# Registry development files
-my-canister-app/static/wasm-registry/registry-dev.json
-wasm/dev/
-my-canister-app/static/wasm/dev/
+# WASM build artifacts (uploaded to wasm-registry canister)
+wasm/
