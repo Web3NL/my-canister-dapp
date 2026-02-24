@@ -54,8 +54,8 @@ enum DeleteNoteResult {
 // ============================================================================
 
 thread_local! {
-    static NOTES: RefCell<Vec<Note>> = RefCell::new(Vec::new());
-    static NEXT_ID: RefCell<u32> = RefCell::new(0);
+    static NOTES: RefCell<Vec<Note>> = const { RefCell::new(Vec::new()) };
+    static NEXT_ID: RefCell<u32> = const { RefCell::new(0) };
 }
 
 // ============================================================================
@@ -157,7 +157,7 @@ fn delete_note(id: u32) -> DeleteNoteResult {
         let len_before = notes.len();
         notes.retain(|n| n.id != id);
         if notes.len() == len_before {
-            DeleteNoteResult::Err(format!("Note with id {} not found", id))
+            DeleteNoteResult::Err(format!("Note with id {id} not found"))
         } else {
             DeleteNoteResult::Ok
         }
