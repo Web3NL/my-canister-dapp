@@ -4,7 +4,6 @@ use candid::Principal;
 use serde::{Deserialize, Serialize};
 use sha2::{Digest, Sha256};
 use std::collections::HashMap;
-use std::fs;
 use std::path::Path;
 
 const TARGET_WASM_DIR: &str = "../../wasm";
@@ -26,32 +25,11 @@ pub const LEDGER_INIT_TRANSFER_FEE_E8S: u64 = 10_000; // 0.0001 ICP
 pub const LEDGER_PREFUND_E8S: u64 = 20_000_000_000; // 200 ICP
 
 pub fn get_wasm_file_name() -> Result<String, String> {
-    if !Path::new(TARGET_WASM_DIR).exists() {
-        return Err("target-wasm directory not found".to_string());
-    }
-
-    let entries = fs::read_dir(TARGET_WASM_DIR)
-        .map_err(|e| format!("Failed to read target-wasm directory: {e}"))?;
-
-    let wasm_files: Vec<String> = entries
-        .filter_map(|entry| {
-            let entry = entry.ok()?;
-            let path = entry.path();
-            if path.is_file() && path.to_string_lossy().ends_with(".wasm.gz") {
-                Some(path.to_string_lossy().to_string())
-            } else {
-                None
-            }
-        })
-        .collect();
-
-    match wasm_files.len() {
-        0 => Err("No .wasm.gz files found in target-wasm directory".to_string()),
-        1 => Ok(wasm_files[0].clone()),
-        _ => Err(format!(
-            "Multiple .wasm.gz files found: expected exactly one, found {}",
-            wasm_files.len()
-        )),
+    let path = Path::new(TARGET_WASM_DIR).join("my-hello-world.wasm.gz");
+    if path.exists() {
+        Ok(path.to_string_lossy().to_string())
+    } else {
+        Err(format!("{} not found", path.display()))
     }
 }
 
