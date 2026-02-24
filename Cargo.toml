@@ -3,8 +3,8 @@ members = [
     "my-canister-dapp-rs/my-canister-dashboard",
     "my-canister-dapp-rs/my-canister-frontend",
     "my-canister-dapp-rs/canister-dapp-test",
-    "examples/my-hello-world/src/my-hello-world",
-    "examples/my-notepad/src/my-notepad",
+    "examples/my-hello-world/src/backend",
+    "examples/my-notepad/src/backend",
     "wasm-registry",
 ]
 resolver = "2"

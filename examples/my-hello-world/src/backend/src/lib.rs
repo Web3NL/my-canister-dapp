@@ -18,7 +18,7 @@ use my_canister_dashboard::{
 use my_canister_frontend::{asset_router::with_asset_router_mut, setup_frontend};
 
 /// Embedded frontend assets from the build output.
-static FRONTEND_DIR: Dir = include_dir!("$CARGO_MANIFEST_DIR/../my-hello-world-frontend/dist");
+static FRONTEND_DIR: Dir = include_dir!("$CARGO_MANIFEST_DIR/../frontend/dist");
 
 /// Alternative origins allowed for Internet Identity derivation.
 /// These domains can authenticate users with principals derived at this canister's domain.

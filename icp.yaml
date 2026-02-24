@@ -13,7 +13,7 @@ canisters:
       configuration:
         package: my-hello-world
         shrink: true
-        candid: examples/my-hello-world/src/my-hello-world/my-hello-world.did
+        candid: examples/my-hello-world/src/backend/my-hello-world.did
 
   - name: my-notepad
     recipe:
@@ -21,7 +21,7 @@ canisters:
       configuration:
         package: my-notepad
         shrink: true
-        candid: examples/my-notepad/src/my-notepad/my-notepad.did
+        candid: examples/my-notepad/src/backend/my-notepad.did
 
   - name: wasm-registry
     recipe:
