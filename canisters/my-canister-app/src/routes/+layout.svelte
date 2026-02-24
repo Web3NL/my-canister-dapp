@@ -65,7 +65,7 @@
 </Layout>
 
 <style lang="scss" global>
-  @import '../../../node_modules/@dfinity/gix-components/dist/styles/global.scss';
+  @import '../../../../node_modules/@dfinity/gix-components/dist/styles/global.scss';
 
   .development-warning {
     background-color: #ffcc00;

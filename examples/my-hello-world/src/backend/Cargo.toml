@@ -15,5 +15,5 @@ ic-asset-certification.workspace = true
 ic-http-certification.workspace = true
 include_dir.workspace = true
 
-my-canister-frontend = { path = "../../../../my-canister-dapp-rs/my-canister-frontend" }
-my-canister-dashboard = { path = "../../../../my-canister-dapp-rs/my-canister-dashboard" }
+my-canister-frontend = { path = "../../../../packages-rs/my-canister-frontend" }
+my-canister-dashboard = { path = "../../../../packages-rs/my-canister-dashboard" }

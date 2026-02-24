@@ -1,16 +1,13 @@
 {
-  "name": "@web3nl/vite-plugin-canister-dapp",
-  "description": "Vite plugin for Internet Computer canister dapp development configuration",
-  "version": "1.0.0",
+  "name": "@web3nl/my-canister-dashboard",
+  "description": "Utility functions for canisters using My Canister Dashboard",
+  "version": "0.8.0",
   "author": "Web3NL",
-  "bugs": "https://github.com/Web3NL/my-canister-dapp/issues",
   "dependencies": {
-    "@icp-sdk/core": "^5.0.0",
-    "@web3nl/my-canister-dashboard": "0.8.0"
+    "@icp-sdk/canisters": "^3.5.0"
   },
   "devDependencies": {
-    "typedoc": "^0.28.17",
-    "typescript": "^5.9.3"
+    "@icp-sdk/core": "^5.0.0"
   },
   "engines": {
     "node": ">=22.0.0"
@@ -19,34 +16,27 @@
     ".": {
       "types": "./dist/index.d.ts",
       "import": "./dist/index.js"
-    },
-    "./runtime": {
-      "types": "./dist/runtime.d.ts",
-      "import": "./dist/runtime.js"
     }
   },
   "files": [
     "dist",
+    "declarations",
     "README.md",
     "LICENSE"
   ],
-  "homepage": "https://github.com/Web3NL/my-canister-dapp/tree/main/my-canister-dapp-js/vite-plugin-canister-dapp",
+  "homepage": "https://github.com/Web3NL/my-canister-dapp/tree/main/packages-js/my-canister-dashboard-js",
   "keywords": [
     "canister",
-    "configuration",
-    "dapp",
-    "development",
     "dfinity",
     "ic",
     "internet-computer",
-    "plugin",
-    "vite",
-    "web3"
+    "utilities"
   ],
   "license": "MIT",
   "main": "dist/index.js",
+  "module": "dist/index.js",
   "peerDependencies": {
-    "vite": "^7.3.1"
+    "@icp-sdk/core": "^5.0.0"
   },
   "publishConfig": {
     "access": "public"
@@ -54,19 +44,17 @@
   "repository": {
     "type": "git",
     "url": "git+https://github.com/Web3NL/my-canister-dapp.git",
-    "directory": "my-canister-dapp-js/vite-plugin-canister-dapp"
+    "directory": "packages-js/my-canister-dashboard-js"
   },
   "scripts": {
-    "build": "tsc",
-    "clean": "rm -rf dist",
-    "dev": "tsc --watch",
+    "build": "vite build",
     "docs:build": "typedoc",
     "docs:clean": "rm -rf docs",
     "format": "prettier --check src",
     "format:fix": "prettier --write src",
     "lint": "eslint src",
     "lint:fix": "eslint src --fix",
-    "prepublishOnly": "npm run clean && npm run build",
+    "prebuild": "../../scripts/generate-declarations.sh",
     "test": "vitest --run",
     "typecheck": "tsc --noEmit"
   },

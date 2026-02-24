@@ -51,11 +51,11 @@ jobs:
 
           # Copy My Canister Dashboard JS docs
           mkdir -p ./pages-deploy/web3nl-my-canister-dashboard-js
-          cp -r ./my-canister-dapp-js/my-canister-dashboard-js/docs/* ./pages-deploy/web3nl-my-canister-dashboard-js/
+          cp -r ./packages-js/my-canister-dashboard-js/docs/* ./pages-deploy/web3nl-my-canister-dashboard-js/
 
           # Copy Vite Plugin docs
           mkdir -p ./pages-deploy/web3nl-vite-plugin-canister-dapp
-          cp -r ./my-canister-dapp-js/vite-plugin-canister-dapp/docs/* ./pages-deploy/web3nl-vite-plugin-canister-dapp/
+          cp -r ./packages-js/vite-plugin-canister-dapp/docs/* ./pages-deploy/web3nl-vite-plugin-canister-dapp/
 
       - name: Upload docs to Pages
         uses: actions/upload-pages-artifact@v3

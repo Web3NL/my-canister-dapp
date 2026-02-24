@@ -1,0 +1,31 @@
+# yaml-language-server: $schema=https://github.com/dfinity/icp-cli/raw/refs/tags/v0.1.0/docs/schemas/icp-yaml-schema.json
+
+canisters:
+  - name: my-hello-world
+    recipe:
+      type: "@dfinity/rust@v3.0.0"
+      configuration:
+        package: my-hello-world
+        shrink: true
+        candid: my-hello-world/src/backend/my-hello-world.did
+
+  - name: my-notepad
+    recipe:
+      type: "@dfinity/rust@v3.0.0"
+      configuration:
+        package: my-notepad
+        shrink: true
+        candid: my-notepad/src/backend/my-notepad.did
+
+networks:
+  - name: local
+    mode: managed
+    nns: true
+    ii: true
+    gateway:
+      port: 8080
+
+environments:
+  - name: local
+    network: local
+    canisters: [my-hello-world, my-notepad]

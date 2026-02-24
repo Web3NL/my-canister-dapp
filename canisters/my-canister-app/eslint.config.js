@@ -1,4 +1,4 @@
-import rootConfig from '../eslint.config.js';
+import rootConfig from '../../eslint.config.js';
 import svelte from 'eslint-plugin-svelte';
 import tseslint from 'typescript-eslint';
 import globals from 'globals';

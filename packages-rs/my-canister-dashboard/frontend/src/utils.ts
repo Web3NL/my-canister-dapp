@@ -60,7 +60,7 @@ export function isValidPrincipal(text: string): boolean {
   }
 }
 
-// Mirror backend my-canister-dapp-rs/my-canister-dashboard/src/dashboard/alternative_origins.rs
+// Mirror backend packages-rs/my-canister-dashboard/src/dashboard/alternative_origins.rs
 // Allowed:
 // - http://localhost:<port>
 // - http://<subdomain>.localhost:<port>

@@ -5,9 +5,12 @@ set -euo pipefail
 # The NNS II (rdmx6-jaaaa-aaaaa-aaadq-cai) is provisioned automatically by
 # the local network (nns: true, ii: true in icp.yaml).
 
+# Ensure we're in the project root directory
+cd "$(dirname "$0")/.."
+
 II_CANISTER_ID="rdmx6-jaaaa-aaaaa-aaadq-cai"
-HELLO_WORLD_ID=$(icp canister status my-hello-world -e local --id-only 2>/dev/null || echo "")
-APP_CANISTER_ID=$(icp canister status my-canister-app -e local --id-only 2>/dev/null || echo "")
+HELLO_WORLD_ID=$((cd examples && icp canister status my-hello-world -e local --id-only) 2>/dev/null || echo "")
+APP_CANISTER_ID=$((cd canisters && icp canister status my-canister-app -e local --id-only) 2>/dev/null || echo "")
 
 # Write test.env with discovered canister IDs
 cat > tests/test.env <<EOF
@@ -26,7 +29,7 @@ if [ -n "$APP_CANISTER_ID" ]; then
 fi
 
 # Add wasm-registry canister ID if it exists
-WASM_REGISTRY_ID=$(icp canister status wasm-registry -e local --id-only 2>/dev/null || echo "")
+WASM_REGISTRY_ID=$((cd canisters && icp canister status wasm-registry -e local --id-only) 2>/dev/null || echo "")
 if [ -n "$WASM_REGISTRY_ID" ]; then
   echo "VITE_WASM_REGISTRY_CANISTER_ID=${WASM_REGISTRY_ID}" >> tests/test.env
 fi

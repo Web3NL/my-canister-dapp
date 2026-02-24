@@ -20,8 +20,8 @@ npm run build --workspace=canister-dashboard-frontend
 
 # Copy assets from frontend dist to Rust crate assets
 echo "📦 Copying assets from frontend dist to Rust crate..."
-mkdir -p my-canister-dapp-rs/my-canister-dashboard/assets
-rm -rf my-canister-dapp-rs/my-canister-dashboard/assets/*
-cp -r my-canister-dapp-rs/my-canister-dashboard/frontend/dist/* my-canister-dapp-rs/my-canister-dashboard/assets/
+mkdir -p packages-rs/my-canister-dashboard/assets
+rm -rf packages-rs/my-canister-dashboard/assets/*
+cp -r packages-rs/my-canister-dashboard/frontend/dist/* packages-rs/my-canister-dashboard/assets/
 
 echo "✅ Crate my-canister-dashboard built successfully!"

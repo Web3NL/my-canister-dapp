@@ -15,7 +15,8 @@ DASHBOARD_VITE_SERVER=true npx playwright test \
 # Swap II principal to canister-served origin for the second batch
 PRINCIPAL_CANISTER=$(cat test-output/derived-ii-principal-canister.txt)
 echo "Switching II principal to canister-served origin for second test batch..."
-icp canister call "$HELLO_WORLD_CANISTER" manage_ii_principal "(variant { Set = principal \"$PRINCIPAL_CANISTER\" })" -e local --identity ident-1
+REPO_ROOT="$(dirname "$0")/.."
+(cd "$REPO_ROOT/examples" && icp canister call "$HELLO_WORLD_CANISTER" manage_ii_principal "(variant { Set = principal \"$PRINCIPAL_CANISTER\" })" -e local --identity ident-1)
 
 # Batch 2: Canister-served dashboard + hello-world frontend
 npx playwright test \

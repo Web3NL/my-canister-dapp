@@ -38,7 +38,7 @@ export default defineConfig({
     port: 5174,
     host: 'localhost',
     fs: {
-      allow: ['..', './test'],
+      allow: ['../..', './test'],
     },
     proxy: {
       '/api': {

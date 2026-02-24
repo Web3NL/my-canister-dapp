@@ -28,7 +28,7 @@ fi
 
 # Deploy the app (ICP_NETWORK=ic triggers production build)
 echo "🚢 Deploying to IC..."
-ICP_NETWORK=ic icp deploy my-canister-app -e mainnet --identity web3nl
+(cd canisters && ICP_NETWORK=ic icp deploy my-canister-app -e mainnet --identity web3nl)
 
 # Get current commit hash after successful deploy
 COMMIT_HASH=$(git rev-parse HEAD)
@@ -36,7 +36,7 @@ echo "📝 Current commit: $COMMIT_HASH"
 
 # Add deployedAtCommit to package.json
 echo "📦 Updating package.json with deployedAtCommit..."
-cd my-canister-app
+cd canisters/my-canister-app
 npm pkg set deployedAtCommit="$COMMIT_HASH"
 
 # Bump version and commit if deploy succeeded

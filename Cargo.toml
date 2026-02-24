@@ -1,11 +1,11 @@
 [workspace]
 members = [
-    "my-canister-dapp-rs/my-canister-dashboard",
-    "my-canister-dapp-rs/my-canister-frontend",
-    "my-canister-dapp-rs/canister-dapp-test",
+    "packages-rs/my-canister-dashboard",
+    "packages-rs/my-canister-frontend",
+    "packages-rs/canister-dapp-test",
     "examples/my-hello-world/src/backend",
     "examples/my-notepad/src/backend",
-    "wasm-registry",
+    "canisters/wasm-registry",
 ]
 resolver = "2"
 

@@ -5,8 +5,8 @@ set -euo pipefail
 # Ensure we're in the project root directory
 cd "$(dirname "$0")/.."
 
-INPUT_DID="my-canister-dapp-js/my-canister-dashboard-js/candid/my-canister-dashboard.did"
-OUT_DIR="my-canister-dapp-js/my-canister-dashboard-js/declarations"
+INPUT_DID="packages-js/my-canister-dashboard-js/candid/my-canister-dashboard.did"
+OUT_DIR="packages-js/my-canister-dashboard-js/declarations"
 TS_OUT="$OUT_DIR/my-canister-dashboard.did.d.ts"
 JS_OUT="$OUT_DIR/my-canister-dashboard.did.js"
 
@@ -61,8 +61,8 @@ didc bind --target js "$INPUT_DID" > "$JS_OUT"
 echo "✅ Declarations generated in $OUT_DIR"
 
 # --- wasm-registry ---
-REGISTRY_DID="wasm-registry/wasm-registry.did"
-REGISTRY_OUT_DIR="my-canister-app/src/lib/declarations/wasm-registry"
+REGISTRY_DID="canisters/wasm-registry/wasm-registry.did"
+REGISTRY_OUT_DIR="canisters/my-canister-app/src/lib/declarations/wasm-registry"
 REGISTRY_TS_OUT="$REGISTRY_OUT_DIR/wasm-registry.did.d.ts"
 REGISTRY_JS_OUT="$REGISTRY_OUT_DIR/wasm-registry.did.js"
 
