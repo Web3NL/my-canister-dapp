@@ -5,11 +5,17 @@
 [![Build Status](https://github.com/Web3NL/my-canister-dapp/workflows/Release/badge.svg)](https://github.com/Web3NL/my-canister-dapp/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
 
-A testing library for Canister Dapps on the Internet Computer, providing pocket-ic tests for Wasm modules.
+Acceptance suite for canister dapps built with [`my-canister-dashboard`](https://crates.io/crates/my-canister-dashboard).
 
-## Features
+Validates that a WASM module correctly implements every endpoint in the dashboard interface:
 
-## Usage
+- **`http_request`** — certified asset serving (dashboard HTML/JS/CSS, 404 handling, CSP headers)
+- **`wasm_status`** — dapp metadata (name, version, memo)
+- **`manage_ii_principal`** — Internet Identity principal CRUD + controller guard
+- **`manage_alternative_origins`** — II alternative origins CRUD + origin validation
+- **`manage_top_up_rule`** — auto top-up rule CRUD + timer-driven ICP→cycles minting
+
+Each WASM is installed into a fresh [PocketIC](https://crates.io/crates/pocket-ic) canister with ICP Ledger and CMC system canisters for end-to-end top-up testing.
 
 ## License
 

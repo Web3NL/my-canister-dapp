@@ -191,7 +191,6 @@ dependencies = [
  "ic-ledger-types",
  "my-canister-dashboard",
  "pocket-ic",
- "serde",
  "serde_json",
  "sha2",
 ]
