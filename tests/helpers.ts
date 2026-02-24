@@ -77,7 +77,7 @@ export function installedHelloWorldExampleCanisterFrontendUrl(): string {
 
 export function installedHelloWorldExampleCanisterDashboardUrl(): string {
   const canisterId = readTestData('installed-canister-id');
-  const hostname = getTestEnv('VITE_HOSTNAME');
+  const hostname = process.env.VITE_HOSTNAME ?? '';
 
   return `http://${canisterId}.${hostname}/canister-dashboard`;
 }
