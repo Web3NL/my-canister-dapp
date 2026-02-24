@@ -4,6 +4,7 @@ members = [
     "my-canister-dapp-rs/my-canister-frontend",
     "my-canister-dapp-rs/canister-dapp-test",
     "examples/my-hello-world/src/my-hello-world",
+    "examples/my-notepad/src/my-notepad",
     "wasm-registry",
 ]
 resolver = "2"

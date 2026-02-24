@@ -80,6 +80,27 @@ echo "Uploading my-hello-world WASM to registry..."
   "wasm/my-hello-world.wasm.gz" \
   -e local --identity ident-1
 
+echo "Deploying my-notepad canister..."
+npm run build --workspace=my-notepad-frontend
+icp deploy my-notepad -e local --identity ident-1 --cycles "$CANISTER_INITIAL_CYCLES"
+
+echo "Copying my-notepad WASM to registry..."
+NOTEPAD_WASM="target/wasm32-unknown-unknown/release/deps/my_notepad.wasm"
+NOTEPAD_TMPDIR=$(mktemp -d)
+ic-wasm "$NOTEPAD_WASM" -o "$NOTEPAD_TMPDIR/my-notepad.wasm" shrink
+gzip -9 "$NOTEPAD_TMPDIR/my-notepad.wasm"
+mkdir -p wasm
+cp "$NOTEPAD_TMPDIR/my-notepad.wasm.gz" wasm/my-notepad.wasm.gz
+rm -rf "$NOTEPAD_TMPDIR"
+
+echo "Uploading my-notepad WASM to registry..."
+./scripts/upload-wasm-to-registry.sh \
+  "my-notepad" \
+  "A personal notepad on the Internet Computer" \
+  "1.0.0" \
+  "wasm/my-notepad.wasm.gz" \
+  -e local --identity ident-1
+
 # Append wasm-registry canister ID to test.env
 WASM_REGISTRY_ID=$(icp canister status wasm-registry -e local --id-only)
 if ! grep -q "VITE_WASM_REGISTRY_CANISTER_ID" tests/test.env; then
