@@ -54,10 +54,13 @@ test('My Canister App E2E Suite', async ({ page }) => {
     .filter({ hasText: 'Install a Dapp +' })
     .waitFor({ state: 'visible' });
   await page.getByRole('link').filter({ hasText: 'Install a Dapp +' }).click();
-  await page
+  const helloWorldCard = page
+    .getByRole('article')
+    .filter({ hasText: 'my-hello-world' });
+  await helloWorldCard
     .getByRole('button', { name: 'Install' })
     .waitFor({ state: 'visible' });
-  await page.getByRole('button', { name: 'Install' }).click();
+  await helloWorldCard.getByRole('button', { name: 'Install' }).click();
 
   // Wait until minimum deposit amount (number) is loaded instead of placeholder '...'
   const depositLocator = page
