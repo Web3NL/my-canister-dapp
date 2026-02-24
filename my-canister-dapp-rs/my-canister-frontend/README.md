@@ -38,7 +38,7 @@ fn http_request(req: HttpRequest) -> HttpResponse {
 - `index.html` auto-configured as fallback for `/`
 - Certification using [`ic-asset-certification`](https://docs.rs/ic-asset-certification)
 - Exposes `with_asset_router` and `with_asset_router_mut` for access to the asset router, see example below.
-- Exposes `asset_router_configs` if you want to implement your own asset router, see [this example](https://github.com/Web3NL/my-canister-dapp/blob/e8fdc0ac81f7bdc702418c05130ace3f9f5399fb/examples/my-hello-world/src/my-hello-world/src/lib.rs).
+- Exposes `asset_router_configs` if you want to implement your own asset router, see [this example](https://github.com/Web3NL/my-canister-dapp/blob/e8fdc0ac81f7bdc702418c05130ace3f9f5399fb/examples/my-hello-world/src/backend/src/lib.rs).
 
 ## Usage with [`my_canister_dashboard`](https://crates.io/crates/my-canister-dashboard)
 

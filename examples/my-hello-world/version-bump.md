@@ -1,8 +1,8 @@
 Versions to bump:
 
-- examples/my-hello-world/src/my-hello-world-frontend/package.json
-- examples/my-hello-world/src/my-hello-world/Cargo.toml
-- examples/my-hello-world/src/my-hello-world/src/lib.rs
+- examples/my-hello-world/src/frontend/package.json
+- examples/my-hello-world/src/backend/Cargo.toml
+- examples/my-hello-world/src/backend/src/lib.rs
 
 Upload new WASM to wasm-registry canister:
 

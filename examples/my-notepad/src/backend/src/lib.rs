@@ -20,7 +20,7 @@ use my_canister_frontend::{asset_router::with_asset_router_mut, setup_frontend};
 use serde::Deserialize;
 
 /// Embedded frontend assets from the build output.
-static FRONTEND_DIR: Dir = include_dir!("$CARGO_MANIFEST_DIR/../my-notepad-frontend/dist");
+static FRONTEND_DIR: Dir = include_dir!("$CARGO_MANIFEST_DIR/../frontend/dist");
 
 /// Alternative origins allowed for Internet Identity derivation.
 const ALTERNATIVE_ORIGINS: &[&str] = &["http://localhost:5174"];

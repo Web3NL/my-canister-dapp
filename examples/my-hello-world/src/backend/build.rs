@@ -3,11 +3,11 @@ use std::path::Path;
 use std::process::Command;
 
 fn main() {
-    println!("cargo:rerun-if-changed=../my-notepad-frontend/src");
-    println!("cargo:rerun-if-changed=../my-notepad-frontend/package.json");
-    println!("cargo:rerun-if-changed=../my-notepad-frontend/vite.config.ts");
+    println!("cargo:rerun-if-changed=../frontend/src");
+    println!("cargo:rerun-if-changed=../frontend/package.json");
+    println!("cargo:rerun-if-changed=../frontend/vite.config.ts");
 
-    let frontend_dir = Path::new(env!("CARGO_MANIFEST_DIR")).join("../my-notepad-frontend");
+    let frontend_dir = Path::new(env!("CARGO_MANIFEST_DIR")).join("../frontend");
 
     if !frontend_dir.exists() {
         panic!("Frontend directory not found: {}", frontend_dir.display());
