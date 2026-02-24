@@ -5,10 +5,10 @@ use ic_cdk::management_canister::CanisterSettings;
 use ic_http_certification::{HttpRequest, HttpResponse};
 use ic_ledger_types::{AccountIdentifier, Memo, Subaccount, Tokens, TransferArgs};
 use my_canister_dashboard::{
-    CyclesAmount, ManageAlternativeOriginsArg, ManageAlternativeOriginsResult,
-    ManageIIPrincipalArg, ManageIIPrincipalResult, ManageTopUpRuleArg, ManageTopUpRuleResult,
-    TopUpInterval, TopUpRule, WasmStatus, ALTERNATIVE_ORIGINS_PATH, CANISTER_DASHBOARD_CSS_PATH,
-    CANISTER_DASHBOARD_HTML_PATH, CANISTER_DASHBOARD_JS_PATH,
+    ALTERNATIVE_ORIGINS_PATH, CANISTER_DASHBOARD_CSS_PATH, CANISTER_DASHBOARD_HTML_PATH,
+    CANISTER_DASHBOARD_JS_PATH, CyclesAmount, ManageAlternativeOriginsArg,
+    ManageAlternativeOriginsResult, ManageIIPrincipalArg, ManageIIPrincipalResult,
+    ManageTopUpRuleArg, ManageTopUpRuleResult, TopUpInterval, TopUpRule, WasmStatus,
 };
 use pocket_ic::common::rest::{IcpFeatures, IcpFeaturesConfig};
 use pocket_ic::{query_candid, update_candid_as};
@@ -226,9 +226,8 @@ pub fn run_acceptance_suite(wasm_bytes: &[u8], wasm_label: &str) {
     // ─── wasm_status ─────────────────────────────────────────────────────
     // Every conforming dapp must return a valid WasmStatus with a non-empty
     // name and a positive version number.
-    let (wasm_status,) =
-        query_candid::<(), (WasmStatus,)>(&pic, canister_id, "wasm_status", ())
-            .expect("wasm_status query failed");
+    let (wasm_status,) = query_candid::<(), (WasmStatus,)>(&pic, canister_id, "wasm_status", ())
+        .expect("wasm_status query failed");
 
     assert!(
         !wasm_status.name.is_empty(),
@@ -247,23 +246,35 @@ pub fn run_acceptance_suite(wasm_bytes: &[u8], wasm_label: &str) {
     // ─── manage_ii_principal ─────────────────────────────────────────────
     // Get before Set → Err (no principal configured yet).
     let (get_before_set,) = update_candid_as::<_, (ManageIIPrincipalResult,)>(
-        &pic, canister_id, user,
-        "manage_ii_principal", (ManageIIPrincipalArg::Get,),
-    ).expect("manage_ii_principal Get failed");
+        &pic,
+        canister_id,
+        user,
+        "manage_ii_principal",
+        (ManageIIPrincipalArg::Get,),
+    )
+    .expect("manage_ii_principal Get failed");
     assert!(matches!(get_before_set, ManageIIPrincipalResult::Err(_)));
 
     // Set → Ok(principal).
     let (set_result,) = update_candid_as::<_, (ManageIIPrincipalResult,)>(
-        &pic, canister_id, user,
-        "manage_ii_principal", (ManageIIPrincipalArg::Set(owner),),
-    ).expect("manage_ii_principal Set failed");
+        &pic,
+        canister_id,
+        user,
+        "manage_ii_principal",
+        (ManageIIPrincipalArg::Set(owner),),
+    )
+    .expect("manage_ii_principal Set failed");
     assert!(matches!(set_result, ManageIIPrincipalResult::Ok(p) if p == owner));
 
     // Get after Set → Ok(principal).
     let (get_after_set,) = update_candid_as::<_, (ManageIIPrincipalResult,)>(
-        &pic, canister_id, user,
-        "manage_ii_principal", (ManageIIPrincipalArg::Get,),
-    ).expect("manage_ii_principal Get after Set failed");
+        &pic,
+        canister_id,
+        user,
+        "manage_ii_principal",
+        (ManageIIPrincipalArg::Get,),
+    )
+    .expect("manage_ii_principal Get after Set failed");
     assert!(matches!(get_after_set, ManageIIPrincipalResult::Ok(p) if p == owner));
 
     // Transfer controller role to the owner (simulates post-install handoff).
@@ -292,23 +303,40 @@ pub fn run_acceptance_suite(wasm_bytes: &[u8], wasm_label: &str) {
 
     // Fetch the three dashboard assets and validate status codes.
     let (html_resp,) = query_candid::<_, (HttpResponse,)>(
-        &pic, canister_id, "http_request",
+        &pic,
+        canister_id,
+        "http_request",
         (HttpRequest::get(CANISTER_DASHBOARD_HTML_PATH).build(),),
-    ).expect("http_request for dashboard HTML failed");
+    )
+    .expect("http_request for dashboard HTML failed");
 
     let (js_resp,) = query_candid::<_, (HttpResponse,)>(
-        &pic, canister_id, "http_request",
+        &pic,
+        canister_id,
+        "http_request",
         (HttpRequest::get(CANISTER_DASHBOARD_JS_PATH).build(),),
-    ).expect("http_request for dashboard JS failed");
+    )
+    .expect("http_request for dashboard JS failed");
 
     let (css_resp,) = query_candid::<_, (HttpResponse,)>(
-        &pic, canister_id, "http_request",
+        &pic,
+        canister_id,
+        "http_request",
         (HttpRequest::get(CANISTER_DASHBOARD_CSS_PATH).build(),),
-    ).expect("http_request for dashboard CSS failed");
+    )
+    .expect("http_request for dashboard CSS failed");
 
-    assert_eq!(html_resp.status_code(), 200, "Dashboard HTML should return 200");
+    assert_eq!(
+        html_resp.status_code(),
+        200,
+        "Dashboard HTML should return 200"
+    );
     assert_eq!(js_resp.status_code(), 200, "Dashboard JS should return 200");
-    assert_eq!(css_resp.status_code(), 200, "Dashboard CSS should return 200");
+    assert_eq!(
+        css_resp.status_code(),
+        200,
+        "Dashboard CSS should return 200"
+    );
 
     // Validate response headers.
     assert_header_contains(&html_resp, "content-type", "text/html");
@@ -326,12 +354,20 @@ pub fn run_acceptance_suite(wasm_bytes: &[u8], wasm_label: &str) {
         &asset_hashes.css_hash[..12],
     );
 
-    // 404 for non-existent paths.
-    let (not_found_resp,) = query_candid::<_, (HttpResponse,)>(
-        &pic, canister_id, "http_request",
+    // SPA fallback: unknown paths under "/" serve index.html with 200 (client-side routing).
+    let (fallback_resp,) = query_candid::<_, (HttpResponse,)>(
+        &pic,
+        canister_id,
+        "http_request",
         (HttpRequest::get("/this-path-does-not-exist").build(),),
-    ).expect("http_request for 404 path failed");
-    assert_eq!(not_found_resp.status_code(), 404, "Non-existent path should return 404");
+    )
+    .expect("http_request for unknown path failed");
+    assert_eq!(
+        fallback_resp.status_code(),
+        200,
+        "Unknown path should fall back to index.html (SPA routing)"
+    );
+    assert_header_contains(&fallback_resp, "content-type", "text/html");
 
     // ─── manage_alternative_origins ──────────────────────────────────────
 
@@ -353,20 +389,29 @@ pub fn run_acceptance_suite(wasm_bytes: &[u8], wasm_label: &str) {
     for origin in &test_origins {
         assert_add_origin(&pic, canister_id, owner, origin);
         let after_add = fetch_alternative_origins(&pic, canister_id);
-        assert!(after_add.contains(origin), "Origin {origin} should be present after Add");
+        assert!(
+            after_add.contains(origin),
+            "Origin {origin} should be present after Add"
+        );
 
         assert_remove_origin(&pic, canister_id, owner, origin);
         let after_remove = fetch_alternative_origins(&pic, canister_id);
-        assert!(!after_remove.contains(origin), "Origin {origin} should be gone after Remove");
+        assert!(
+            !after_remove.contains(origin),
+            "Origin {origin} should be gone after Remove"
+        );
     }
 
     // Invalid origin (ftp://) should be rejected.
     let invalid_origin = "ftp://invalid-protocol.com".to_string();
     let (invalid_result,) = update_candid_as::<_, (ManageAlternativeOriginsResult,)>(
-        &pic, canister_id, owner,
+        &pic,
+        canister_id,
+        owner,
         "manage_alternative_origins",
         (ManageAlternativeOriginsArg::Add(invalid_origin),),
-    ).expect("manage_alternative_origins Add (invalid) call failed");
+    )
+    .expect("manage_alternative_origins Add (invalid) call failed");
     assert!(
         matches!(invalid_result, ManageAlternativeOriginsResult::Err(_)),
         "Invalid origin should be rejected"
@@ -377,43 +422,65 @@ pub fn run_acceptance_suite(wasm_bytes: &[u8], wasm_label: &str) {
 
     assert!(
         update_candid_as::<_, (ManageIIPrincipalResult,)>(
-            &pic, canister_id, stranger,
-            "manage_ii_principal", (ManageIIPrincipalArg::Get,),
-        ).is_err(),
+            &pic,
+            canister_id,
+            stranger,
+            "manage_ii_principal",
+            (ManageIIPrincipalArg::Get,),
+        )
+        .is_err(),
         "Stranger should be rejected by manage_ii_principal guard"
     );
 
     assert!(
         update_candid_as::<_, (ManageIIPrincipalResult,)>(
-            &pic, canister_id, stranger,
-            "manage_ii_principal", (ManageIIPrincipalArg::Set(owner),),
-        ).is_err(),
+            &pic,
+            canister_id,
+            stranger,
+            "manage_ii_principal",
+            (ManageIIPrincipalArg::Set(owner),),
+        )
+        .is_err(),
         "Stranger should be rejected by manage_ii_principal guard (Set)"
     );
 
     assert!(
         update_candid_as::<_, (ManageAlternativeOriginsResult,)>(
-            &pic, canister_id, stranger,
+            &pic,
+            canister_id,
+            stranger,
             "manage_alternative_origins",
-            (ManageAlternativeOriginsArg::Add("http://localhost:9999".to_string()),),
-        ).is_err(),
+            (ManageAlternativeOriginsArg::Add(
+                "http://localhost:9999".to_string()
+            ),),
+        )
+        .is_err(),
         "Stranger should be rejected by manage_alternative_origins guard (Add)"
     );
 
     assert!(
         update_candid_as::<_, (ManageAlternativeOriginsResult,)>(
-            &pic, canister_id, stranger,
+            &pic,
+            canister_id,
+            stranger,
             "manage_alternative_origins",
-            (ManageAlternativeOriginsArg::Remove("http://localhost:9999".to_string()),),
-        ).is_err(),
+            (ManageAlternativeOriginsArg::Remove(
+                "http://localhost:9999".to_string()
+            ),),
+        )
+        .is_err(),
         "Stranger should be rejected by manage_alternative_origins guard (Remove)"
     );
 
     assert!(
         update_candid_as::<_, (ManageTopUpRuleResult,)>(
-            &pic, canister_id, stranger,
-            "manage_top_up_rule", (ManageTopUpRuleArg::Get,),
-        ).is_err(),
+            &pic,
+            canister_id,
+            stranger,
+            "manage_top_up_rule",
+            (ManageTopUpRuleArg::Get,),
+        )
+        .is_err(),
         "Stranger should be rejected by manage_top_up_rule guard"
     );
 
@@ -421,9 +488,13 @@ pub fn run_acceptance_suite(wasm_bytes: &[u8], wasm_label: &str) {
 
     // Get when empty → Ok(None).
     let (get_empty,) = update_candid_as::<_, (ManageTopUpRuleResult,)>(
-        &pic, canister_id, owner,
-        "manage_top_up_rule", (ManageTopUpRuleArg::Get,),
-    ).expect("manage_top_up_rule Get failed");
+        &pic,
+        canister_id,
+        owner,
+        "manage_top_up_rule",
+        (ManageTopUpRuleArg::Get,),
+    )
+    .expect("manage_top_up_rule Get failed");
     assert!(matches!(get_empty, ManageTopUpRuleResult::Ok(None)));
 
     // Add rule → Ok(Some(rule)).
@@ -433,9 +504,13 @@ pub fn run_acceptance_suite(wasm_bytes: &[u8], wasm_label: &str) {
         cycles_amount: CyclesAmount::_1T,
     };
     let (add_result,) = update_candid_as::<_, (ManageTopUpRuleResult,)>(
-        &pic, canister_id, owner,
-        "manage_top_up_rule", (ManageTopUpRuleArg::Add(rule.clone()),),
-    ).expect("manage_top_up_rule Add failed");
+        &pic,
+        canister_id,
+        owner,
+        "manage_top_up_rule",
+        (ManageTopUpRuleArg::Add(rule.clone()),),
+    )
+    .expect("manage_top_up_rule Add failed");
     match add_result {
         ManageTopUpRuleResult::Ok(Some(r)) => {
             assert!(matches!(r.interval, TopUpInterval::Hourly));
@@ -447,9 +522,13 @@ pub fn run_acceptance_suite(wasm_bytes: &[u8], wasm_label: &str) {
 
     // Get after Add → same rule.
     let (get_after_add,) = update_candid_as::<_, (ManageTopUpRuleResult,)>(
-        &pic, canister_id, owner,
-        "manage_top_up_rule", (ManageTopUpRuleArg::Get,),
-    ).expect("manage_top_up_rule Get after Add failed");
+        &pic,
+        canister_id,
+        owner,
+        "manage_top_up_rule",
+        (ManageTopUpRuleArg::Get,),
+    )
+    .expect("manage_top_up_rule Get after Add failed");
     match get_after_add {
         ManageTopUpRuleResult::Ok(Some(r)) => {
             assert!(matches!(r.interval, TopUpInterval::Hourly));
@@ -461,16 +540,24 @@ pub fn run_acceptance_suite(wasm_bytes: &[u8], wasm_label: &str) {
 
     // Clear → Ok(None).
     let (clear_result,) = update_candid_as::<_, (ManageTopUpRuleResult,)>(
-        &pic, canister_id, owner,
-        "manage_top_up_rule", (ManageTopUpRuleArg::Clear,),
-    ).expect("manage_top_up_rule Clear failed");
+        &pic,
+        canister_id,
+        owner,
+        "manage_top_up_rule",
+        (ManageTopUpRuleArg::Clear,),
+    )
+    .expect("manage_top_up_rule Clear failed");
     assert!(matches!(clear_result, ManageTopUpRuleResult::Ok(None)));
 
     // Get after Clear → Ok(None).
     let (get_after_clear,) = update_candid_as::<_, (ManageTopUpRuleResult,)>(
-        &pic, canister_id, owner,
-        "manage_top_up_rule", (ManageTopUpRuleArg::Get,),
-    ).expect("manage_top_up_rule Get after Clear failed");
+        &pic,
+        canister_id,
+        owner,
+        "manage_top_up_rule",
+        (ManageTopUpRuleArg::Get,),
+    )
+    .expect("manage_top_up_rule Get after Clear failed");
     assert!(matches!(get_after_clear, ManageTopUpRuleResult::Ok(None)));
 
     // ─── manage_top_up_rule: timer-driven cycle minting ──────────────────
@@ -485,9 +572,13 @@ pub fn run_acceptance_suite(wasm_bytes: &[u8], wasm_label: &str) {
         cycles_amount: CyclesAmount::_1T,
     };
     let (add_trigger,) = update_candid_as::<_, (ManageTopUpRuleResult,)>(
-        &pic, canister_id, owner,
-        "manage_top_up_rule", (ManageTopUpRuleArg::Add(trigger_rule),),
-    ).expect("manage_top_up_rule Add (trigger) failed");
+        &pic,
+        canister_id,
+        owner,
+        "manage_top_up_rule",
+        (ManageTopUpRuleArg::Add(trigger_rule),),
+    )
+    .expect("manage_top_up_rule Add (trigger) failed");
     assert!(matches!(add_trigger, ManageTopUpRuleResult::Ok(Some(_))));
 
     // The Add spawns an immediate tick. Process it.
@@ -533,9 +624,10 @@ pub fn run_acceptance_suite(wasm_bytes: &[u8], wasm_label: &str) {
 
 /// Asserts that an HTTP response contains a header whose value includes `substring`.
 fn assert_header_contains(response: &HttpResponse, header_name: &str, substring: &str) {
-    let found = response.headers().iter().any(|(k, v)| {
-        k.eq_ignore_ascii_case(header_name) && v.to_lowercase().contains(substring)
-    });
+    let found = response
+        .headers()
+        .iter()
+        .any(|(k, v)| k.eq_ignore_ascii_case(header_name) && v.to_lowercase().contains(substring));
     assert!(
         found,
         "Expected header '{header_name}' containing '{substring}' in response (status {})",
@@ -546,9 +638,12 @@ fn assert_header_contains(response: &HttpResponse, header_name: &str, substring:
 /// Fetches the II alternative origins JSON and returns the list of origin strings.
 fn fetch_alternative_origins(pic: &pocket_ic::PocketIc, canister_id: Principal) -> Vec<String> {
     let (resp,) = query_candid::<_, (HttpResponse,)>(
-        pic, canister_id, "http_request",
+        pic,
+        canister_id,
+        "http_request",
         (HttpRequest::get(ALTERNATIVE_ORIGINS_PATH).build(),),
-    ).expect("Failed to fetch alternative origins");
+    )
+    .expect("Failed to fetch alternative origins");
 
     let json: serde_json::Value =
         serde_json::from_slice(resp.body()).expect("Failed to parse alternative origins JSON");
@@ -569,10 +664,13 @@ fn assert_add_origin(
     origin: &str,
 ) {
     let (result,) = update_candid_as::<_, (ManageAlternativeOriginsResult,)>(
-        pic, canister_id, caller,
+        pic,
+        canister_id,
+        caller,
         "manage_alternative_origins",
         (ManageAlternativeOriginsArg::Add(origin.to_string()),),
-    ).unwrap_or_else(|e| panic!("Add origin '{origin}' call failed: {e:?}"));
+    )
+    .unwrap_or_else(|e| panic!("Add origin '{origin}' call failed: {e:?}"));
     assert!(
         matches!(result, ManageAlternativeOriginsResult::Ok),
         "Add origin '{origin}' should succeed",
@@ -587,10 +685,13 @@ fn assert_remove_origin(
     origin: &str,
 ) {
     let (result,) = update_candid_as::<_, (ManageAlternativeOriginsResult,)>(
-        pic, canister_id, caller,
+        pic,
+        canister_id,
+        caller,
         "manage_alternative_origins",
         (ManageAlternativeOriginsArg::Remove(origin.to_string()),),
-    ).unwrap_or_else(|e| panic!("Remove origin '{origin}' call failed: {e:?}"));
+    )
+    .unwrap_or_else(|e| panic!("Remove origin '{origin}' call failed: {e:?}"));
     assert!(
         matches!(result, ManageAlternativeOriginsResult::Ok),
         "Remove origin '{origin}' should succeed",

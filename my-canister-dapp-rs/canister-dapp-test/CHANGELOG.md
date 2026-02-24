@@ -6,7 +6,7 @@
 
 - CLI binary: `canister-dapp-test <wasm-path>` runs the full acceptance suite against any dapp WASM.
 - HTTP response header validation: Content-Type for HTML/JS/CSS, Content-Security-Policy for dashboard HTML.
-- 404 response test for non-existent paths.
+- SPA fallback test: unknown paths serve index.html with 200 (client-side routing).
 - `wasm_status` assertions: name must be non-empty, version must be > 0.
 - Stranger rejection test for `manage_top_up_rule` (was missing).
 - Doc comments on all public functions and constants.
