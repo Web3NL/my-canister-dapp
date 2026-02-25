@@ -7,6 +7,7 @@ dotenv.config({ path: './tests/test.env' });
 
 export default defineConfig({
   testDir: './tests',
+  timeout: 120_000,
   use: {
     ...devices['Desktop Chrome'],
     // headless: false,

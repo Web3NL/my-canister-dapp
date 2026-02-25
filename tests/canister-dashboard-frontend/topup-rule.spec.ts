@@ -1,5 +1,6 @@
 import { test, expect } from '@playwright/test';
 import { login } from './login';
+import { setupConsoleErrorMonitoring } from './shared';
 
 test('manage canister auto top-up rule CRUD', async ({ page }, testInfo) => {
   const testUrl = testInfo.project.metadata.testUrl;
@@ -7,6 +8,8 @@ test('manage canister auto top-up rule CRUD', async ({ page }, testInfo) => {
   if (!testUrl) {
     throw new Error('testUrl not found in project metadata');
   }
+
+  const getConsoleErrors = setupConsoleErrorMonitoring(page);
 
   await page.goto(testUrl);
   await login(page);
@@ -49,4 +52,6 @@ test('manage canister auto top-up rule CRUD', async ({ page }, testInfo) => {
     expect(found).toBeTruthy();
   }).toPass({ timeout: 15000, intervals: [500, 1000, 2000] });
   console.log('Found top-up rule action in logs');
+
+  expect(getConsoleErrors()).toEqual([]);
 });

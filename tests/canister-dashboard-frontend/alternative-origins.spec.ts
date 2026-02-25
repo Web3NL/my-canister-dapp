@@ -1,14 +1,20 @@
 import { test, expect } from '@playwright/test';
 import { login } from './login';
-import { TEST_ORIGINS, waitForListUpdate, waitForInputToClear } from './shared';
+import {
+  TEST_ORIGINS,
+  waitForListUpdate,
+  waitForInputToClear,
+  setupConsoleErrorMonitoring,
+} from './shared';
 
 test('manage alternative HTTP origins', async ({ page }, testInfo) => {
-  test.setTimeout(120_000);
   const testUrl = testInfo.project.metadata.testUrl;
 
   if (!testUrl) {
     throw new Error('testUrl not found in project metadata');
   }
+
+  const getConsoleErrors = setupConsoleErrorMonitoring(page);
 
   await page.goto(testUrl);
   await login(page);
@@ -69,4 +75,55 @@ test('manage alternative HTTP origins', async ({ page }, testInfo) => {
   }
 
   console.log('Alternative origins management tests completed successfully');
+  expect(getConsoleErrors()).toEqual([]);
+});
+
+test('reject invalid origin (http without localhost)', async ({ page }, testInfo) => {
+  const testUrl = testInfo.project.metadata.testUrl;
+
+  if (!testUrl) {
+    throw new Error('testUrl not found in project metadata');
+  }
+
+  const getConsoleErrors = setupConsoleErrorMonitoring(page);
+
+  await page.goto(testUrl);
+  await login(page);
+
+  await page.waitForSelector('#alternative-origins-list');
+  await expect(async () => {
+    const items = await page
+      .locator('#alternative-origins-list li')
+      .allTextContents();
+    const realItems = items.filter(t => t.trim() && !/loading/i.test(t));
+    expect(realItems.length).toBeGreaterThan(0);
+  }).toPass({ timeout: 10000 });
+
+  // Capture origins before the invalid attempt
+  const originsBefore = await page
+    .locator('#alternative-origins-list li .data-display')
+    .allTextContents();
+
+  const invalidOrigin = 'http://example.com';
+  await page.fill('#alternative-origin-input', invalidOrigin);
+  await page.click('#alternative-origin-add');
+
+  // Error section should become visible
+  const errorSection = page.locator('#error-section');
+  await expect(errorSection).toBeVisible({ timeout: 10000 });
+  const errorMessages = await errorSection.locator('.error-message').allTextContents();
+  expect(errorMessages.length).toBeGreaterThan(0);
+  console.log(`Error displayed: ${errorMessages.join('; ')}`);
+
+  // Origins list should not have changed
+  const originsAfter = await page
+    .locator('#alternative-origins-list li .data-display')
+    .allTextContents();
+  expect(originsAfter.map(t => t.trim())).toEqual(originsBefore.map(t => t.trim()));
+
+  console.log('Invalid origin rejection test completed successfully');
+
+  // Allow the expected console error from the invalid origin attempt
+  const errors = getConsoleErrors().filter(e => !/origin/i.test(e) && !/alternative/i.test(e));
+  expect(errors).toEqual([]);
 });

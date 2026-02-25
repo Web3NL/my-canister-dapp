@@ -14,8 +14,6 @@ loadTestEnv();
 const maintenanceMode = false;
 
 test('My Canister App E2E Suite', async ({ page }) => {
-  test.setTimeout(60000); // 1 minute timeout
-
   const appUrl = myCanisterAppDfxUrl();
   await page.goto(appUrl);
 
