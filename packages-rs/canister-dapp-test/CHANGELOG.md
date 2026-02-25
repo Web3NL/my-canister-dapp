@@ -4,6 +4,8 @@
 
 ### Added
 
+- Security header validation: all 8 security/privacy headers verified on frontend fallback responses
+- Gzip compression test: verifies Accept-Encoding negotiation returns compressed responses with correct headers
 - CLI binary: `canister-dapp-test <wasm-path>` runs the full acceptance suite against any dapp WASM.
 - HTTP response header validation: Content-Type for HTML/JS/CSS, Content-Security-Policy for dashboard HTML.
 - SPA fallback test: unknown paths serve index.html with 200 (client-side routing).
