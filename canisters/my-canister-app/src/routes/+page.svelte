@@ -21,10 +21,10 @@
   </div>
 
   <div slot="actions" class="final-buttons">
-    <button class="primary" on:click={() => goto('/dapp-store')}
+    <button class="primary" on:click={async () => await goto('/dapp-store')}
       >Dapp Store</button
     >
-    <button class="secondary" on:click={() => goto('/my-dapps')}>
+    <button class="secondary" on:click={async () => await goto('/my-dapps')}>
       My Dapps
     </button>
   </div>

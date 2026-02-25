@@ -37,7 +37,7 @@ pub fn add_dashboard_assets_to_router(asset_router: &mut AssetRouter) -> Result<
 
     asset_router
         .certify_assets(assets, asset_configs)
-        .map_err(|e| format!("Failed to certify dashboard assets: {e:?}"))
+        .map_err(|e| format!("Failed to certify dashboard assets: {e}"))
 }
 
 // Functions from dashboard_asset_configs.rs
@@ -94,7 +94,10 @@ pub fn alternative_origins_asset_config() -> AssetConfig {
     AssetConfig::File {
         path: ALTERNATIVE_ORIGINS_PATH.to_string(),
         content_type: Some("application/json".to_string()),
-        headers: vec![],
+        headers: vec![(
+            "Cache-Control".to_string(),
+            "no-cache, no-store, must-revalidate".to_string(),
+        )],
         fallback_for: vec![],
         aliased_by: vec![],
         encodings: vec![(AssetEncoding::Identity, "".to_string())],

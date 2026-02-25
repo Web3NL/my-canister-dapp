@@ -115,6 +115,35 @@ fn admin_only_function() { /* ... */ }
 fn user_only_function() { /* ... */ }
 ```
 
+## Usage with [`my_canister_frontend`](https://crates.io/crates/my-canister-frontend)
+
+When using the [`my_canister_frontend`](https://crates.io/crates/my-canister-frontend) crate, add dashboard assets to its internal router instead of managing your own `AssetRouter`:
+
+```rust,ignore
+use ic_cdk::init;
+use include_dir::{include_dir, Dir};
+use my_canister_dashboard::setup::setup_dashboard_assets;
+use my_canister_frontend::setup_frontend;
+use my_canister_frontend::asset_router::with_asset_router_mut;
+
+static FRONTEND_DIR: Dir = include_dir!("$CARGO_MANIFEST_DIR/../dapp-frontend/dist");
+
+#[init]
+fn init() {
+    // Setup frontend assets with certification
+    setup_frontend(&FRONTEND_DIR).expect("Failed to setup frontend");
+
+    // Add dashboard UI to the frontend's internal router
+    with_asset_router_mut(|router| {
+        let origins = vec!["https://mycanister.app".to_string()];
+        setup_dashboard_assets(router, Some(origins))
+            .expect("Failed to setup dashboard assets");
+    });
+}
+```
+
+See the [examples](https://github.com/Web3NL/my-canister-dapp/tree/main/examples) directory for complete working implementations.
+
 ## Asset Paths
 
 The dashboard assets are served at these paths:
