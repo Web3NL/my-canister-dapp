@@ -2,6 +2,19 @@
 
 ## [Unreleased]
 
+### Fixed
+
+- User-friendly log output: added `Display` impls for `TopUpInterval` and `NotifyError`, replaced debug formatting (`{:?}`) with display formatting in all log and error messages
+- Added `Cache-Control: no-cache, no-store, must-revalidate` header to alternative origins endpoint
+
+### Changed
+
+- Improved help text for Manual Top-up and Automatic Top-up sections to clarify one-time vs recurring behavior
+
+### Docs
+
+- Added "Usage with `my_canister_frontend`" section to README with code example
+
 ## [0.11.0] - 2026-01-11
 
 ### Added
