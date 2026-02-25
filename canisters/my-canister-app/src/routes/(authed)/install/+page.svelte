@@ -24,6 +24,7 @@
   import GoodNewsCard from '$lib/components/install/GoodNewsCard.svelte';
   import ConnectIICard from '$lib/components/install/ConnectIICard.svelte';
   import FundAccountCard from '$lib/components/install/FundAccountCard.svelte';
+  import AgreeTermsCard from '$lib/components/install/AgreeTermsCard.svelte';
   import { goto, beforeNavigate } from '$app/navigation';
   import { fetchWasmModule, type WasmSource } from '$lib/utils/fetch';
 
@@ -91,7 +92,7 @@
       if (requiredBalanceE8s > 0n) {
         if (currentBalance >= requiredBalanceE8s) {
           stopBalanceTimer();
-          advanceToStep(2);
+          advanceToStep(3);
         } else if (!lowDepositWarnShown) {
           showWarnToast('Balance too low.');
           lowDepositWarnShown = true;
@@ -130,9 +131,14 @@
 
   let steps: [ProgressStep, ...ProgressStep[]] = [
     {
+      step: 'agree',
+      text: 'Agree to Terms',
+      state: 'in_progress',
+    },
+    {
       step: 'fund',
       text: 'Fund Account',
-      state: 'in_progress',
+      state: 'next',
     },
     {
       step: 'create',
@@ -154,12 +160,17 @@
   $: currentStep =
     steps.findIndex(step => step.state === 'in_progress') + 1 || steps.length;
 
-  function advanceToStep(targetStep: 2 | 3 | 4) {
-    // targetStep is 1-based for the step the user is entering (or completing if 4)
+  function handleAgreeToTerms() {
+    advanceToStep(2);
+    startBalanceTimer();
+  }
+
+  function advanceToStep(targetStep: 2 | 3 | 4 | 5) {
+    // targetStep is 1-based for the step the user is entering (or completing if 5)
     steps = steps.map((s, idx) => {
       const stepIndex = idx + 1; // 1-based
       let state: ProgressStep['state'];
-      if (targetStep === 4) {
+      if (targetStep === 5) {
         // All steps completed
         state = 'completed';
       } else if (stepIndex < targetStep) {
@@ -193,11 +204,11 @@
   function retryFailedStep() {
     if (lastFailedStep === 'create') {
       clearFailedState();
-      advanceToStep(2);
+      advanceToStep(3);
       createCanister();
     } else if (lastFailedStep === 'connect-ii') {
       clearFailedState();
-      advanceToStep(3);
+      advanceToStep(4);
       takeControlOfCanister();
     }
   }
@@ -220,7 +231,7 @@
         localStorage.setItem(CANISTER_STORAGE_KEY, canisterPrincipal.toText());
       }
 
-      advanceToStep(3);
+      advanceToStep(4);
     } catch (err) {
       console.error('Failed to create canister', err);
       setFailed('create');
@@ -257,7 +268,7 @@
         localStorage.removeItem(CANISTER_STORAGE_KEY);
       }
 
-      advanceToStep(4);
+      advanceToStep(5);
     } catch (err) {
       console.error('Failed to install code / connect II', err);
       setFailed('connect-ii');
@@ -323,20 +334,24 @@
       if (pendingFromInstall) {
         canisterPrincipal = pendingFromInstall;
         recoveredCanister = true;
-        // Stay on step 2 to retry - createNewCanister will detect and retry install
-        advanceToStep(2);
+        // Stay on step 3 to retry - createNewCanister will detect and retry install
+        advanceToStep(3);
       } else {
         // Check for pending canister from successful create (waiting for II connect)
         const storedCanisterId = localStorage.getItem(CANISTER_STORAGE_KEY);
         if (storedCanisterId != null) {
           canisterPrincipal = Principal.fromText(storedCanisterId);
           recoveredCanister = true;
-          advanceToStep(3);
+          advanceToStep(4);
         }
       }
     }
 
-    startBalanceTimer();
+    // Only start balance timer immediately when recovering a previous install
+    // Otherwise, it starts when the user agrees to terms via handleAgreeToTerms()
+    if (recoveredCanister) {
+      startBalanceTimer();
+    }
   });
 
   onDestroy(() => {
@@ -406,7 +421,9 @@
     </p>
     <button class="primary" on:click={retryFailedStep}>Retry</button>
   </div>
-{:else if currentStep === 1 || currentStep === 2}
+{:else if currentStep === 1}
+  <AgreeTermsCard onAgree={handleAgreeToTerms} dappName={dappNameText} />
+{:else if currentStep === 2 || currentStep === 3}
   <FundAccountCard
     {principalText}
     {minimumBalance}
@@ -418,9 +435,9 @@
     onCreate={createCanister}
     onRefreshBalance={loadBalance}
   />
-{:else if currentStep === 3}
+{:else if currentStep === 4}
   <ConnectIICard onConnect={takeControlOfCanister} />
-{:else if currentStep === 4 && canisterPrincipal}
+{:else if currentStep === 5 && canisterPrincipal}
   <GoodNewsCard
     frontPageUrl={createFrontpageUrl(canisterPrincipal.toText())}
     dashboardUrl={createDashboardUrl(canisterPrincipal.toText())}

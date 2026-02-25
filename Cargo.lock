@@ -1349,6 +1349,7 @@ name = "my-canister-frontend"
 version = "0.2.1"
 dependencies = [
  "candid",
+ "flate2",
  "ic-asset-certification",
  "ic-cdk",
  "ic-http-certification",

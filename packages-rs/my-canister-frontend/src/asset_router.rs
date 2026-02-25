@@ -1,5 +1,5 @@
-use flate2::write::GzEncoder;
 use flate2::Compression;
+use flate2::write::GzEncoder;
 use ic_asset_certification::{Asset, AssetConfig, AssetEncoding, AssetFallbackConfig, AssetRouter};
 use ic_http_certification::StatusCode;
 use include_dir::Dir;
@@ -12,8 +12,8 @@ use std::io::Write;
 /// Files with extensions not in this list will be rejected unless
 /// explicitly allowed via [`FrontendConfig::extra_allowed_extensions`].
 pub const DEFAULT_ALLOWED_EXTENSIONS: &[&str] = &[
-    "html", "js", "mjs", "css", "png", "jpg", "jpeg", "gif", "webp", "svg", "ico", "avif",
-    "woff", "woff2", "ttf", "otf", "eot", "json", "xml", "txt", "wasm", "map",
+    "html", "js", "mjs", "css", "png", "jpg", "jpeg", "gif", "webp", "svg", "ico", "avif", "woff",
+    "woff2", "ttf", "otf", "eot", "json", "xml", "txt", "wasm", "map",
 ];
 
 /// Maximum file size in bytes (2 MB).
@@ -158,7 +158,14 @@ fn process_dir_recursive(
         } else {
             format!("{base_path}/{subdir_name}")
         };
-        process_dir_recursive(subdir, &new_base_path, assets, asset_configs, seen_paths, config)?;
+        process_dir_recursive(
+            subdir,
+            &new_base_path,
+            assets,
+            asset_configs,
+            seen_paths,
+            config,
+        )?;
     }
     Ok(())
 }
@@ -276,17 +283,13 @@ fn create_default_headers(_content_type: &str) -> Vec<(String, String)> {
         ),
         (
             "Permissions-Policy".into(),
-            "accelerometer=(), camera=(), geolocation=(), microphone=(), payment=(), usb=()"
-                .into(),
+            "accelerometer=(), camera=(), geolocation=(), microphone=(), payment=(), usb=()".into(),
         ),
         (
             "Cross-Origin-Opener-Policy".into(),
             "same-origin-allow-popups".into(),
         ),
-        (
-            "Cross-Origin-Resource-Policy".into(),
-            "same-origin".into(),
-        ),
+        ("Cross-Origin-Resource-Policy".into(), "same-origin".into()),
     ]
 }
 
@@ -562,12 +565,10 @@ mod tests {
         #[test]
         fn includes_cross_origin_opener_policy() {
             let headers = create_default_headers("text/html");
-            assert!(
-                headers.contains(&(
-                    "Cross-Origin-Opener-Policy".into(),
-                    "same-origin-allow-popups".into(),
-                ))
-            );
+            assert!(headers.contains(&(
+                "Cross-Origin-Opener-Policy".into(),
+                "same-origin-allow-popups".into(),
+            )));
         }
 
         #[test]
