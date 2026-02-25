@@ -95,6 +95,10 @@ Developers can submit their dapps to the registry, or users can install custom w
 | [@web3nl/my-canister-dashboard](https://www.npmjs.com/package/@web3nl/my-canister-dashboard) | npm | Dashboard interaction utilities |
 | [@web3nl/vite-plugin-canister-dapp](https://www.npmjs.com/package/@web3nl/vite-plugin-canister-dapp) | npm | Vite plugin for environment config |
 
+## Development
+
+See [CLAUDE.md](CLAUDE.md) for the full project map, commands, and architecture details.
+
 ## License
 
 MIT
