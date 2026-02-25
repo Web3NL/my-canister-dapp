@@ -62,6 +62,11 @@ test('My Canister App E2E Suite', async ({ page }) => {
     .waitFor({ state: 'visible' });
   await helloWorldCard.getByRole('button', { name: 'Install' }).click();
 
+  // Accept terms and disclaimer
+  await page.locator('[data-tid="checkbox"]').waitFor({ state: 'visible' });
+  await page.locator('[data-tid="checkbox"]').click();
+  await page.getByRole('button', { name: 'Continue' }).click();
+
   // Wait until minimum deposit amount (number) is loaded instead of placeholder '...'
   const depositLocator = page
     .locator('p')
