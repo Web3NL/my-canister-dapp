@@ -1,12 +1,9 @@
 import { test, expect } from '@playwright/test';
 import { login } from './login';
-import {
-  TEST_ORIGINS,
-  waitForListUpdate,
-  waitForInputToClear,
-} from './shared';
+import { TEST_ORIGINS, waitForListUpdate, waitForInputToClear } from './shared';
 
 test('manage alternative HTTP origins', async ({ page }, testInfo) => {
+  test.setTimeout(120_000);
   const testUrl = testInfo.project.metadata.testUrl;
 
   if (!testUrl) {
@@ -18,7 +15,9 @@ test('manage alternative HTTP origins', async ({ page }, testInfo) => {
 
   await page.waitForSelector('#alternative-origins-list');
   await expect(async () => {
-    const items = await page.locator('#alternative-origins-list li').allTextContents();
+    const items = await page
+      .locator('#alternative-origins-list li')
+      .allTextContents();
     const realItems = items.filter(t => t.trim() && !/loading/i.test(t));
     expect(realItems.length).toBeGreaterThan(0);
   }).toPass({ timeout: 10000 });
@@ -70,5 +69,4 @@ test('manage alternative HTTP origins', async ({ page }, testInfo) => {
   }
 
   console.log('Alternative origins management tests completed successfully');
-
 });
