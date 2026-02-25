@@ -21,6 +21,7 @@ ic-http-certification.workspace = true
 ic-cdk.workspace = true
 include_dir.workspace = true
 mime_guess.workspace = true
+flate2.workspace = true
 
 [package.metadata.release]
 pre-release-replacements = [

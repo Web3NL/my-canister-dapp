@@ -1,9 +1,12 @@
+use flate2::write::GzEncoder;
+use flate2::Compression;
 use ic_asset_certification::{Asset, AssetConfig, AssetEncoding, AssetFallbackConfig, AssetRouter};
 use ic_http_certification::StatusCode;
 use include_dir::Dir;
 use mime_guess;
 use std::cell::RefCell;
 use std::collections::HashSet;
+use std::io::Write;
 
 /// Default file extensions allowed for web frontend assets.
 /// Files with extensions not in this list will be rejected unless
@@ -15,6 +18,12 @@ pub const DEFAULT_ALLOWED_EXTENSIONS: &[&str] = &[
 
 /// Maximum file size in bytes (2 MB).
 pub const DEFAULT_MAX_FILE_SIZE: usize = 2 * 1024 * 1024;
+
+/// File extensions that benefit from gzip compression.
+/// Binary formats (images, fonts, wasm) are already compressed.
+const COMPRESSIBLE_EXTENSIONS: &[&str] = &[
+    "html", "js", "mjs", "css", "json", "svg", "xml", "txt", "map",
+];
 
 /// Configuration for frontend asset processing.
 ///
@@ -130,8 +139,13 @@ fn process_dir_recursive(
             return Err(format!("Duplicate asset path: {full_path}"));
         }
 
+        let compressible = is_compressible(&full_path);
         assets.push(Asset::new(full_path.clone(), contents.to_vec()));
-        let cfg = create_asset_config(&full_path);
+        if compressible {
+            let gzipped = gzip_compress(contents)?;
+            assets.push(Asset::new(format!("{full_path}.gz"), gzipped));
+        }
+        let cfg = create_asset_config(&full_path, compressible);
         asset_configs.push(cfg);
     }
     for subdir in dir.dirs() {
@@ -194,7 +208,24 @@ fn validate_asset(path: &str, size: usize, config: &FrontendConfig) -> Result<()
     Ok(())
 }
 
-fn create_asset_config(path: &str) -> AssetConfig {
+fn is_compressible(path: &str) -> bool {
+    std::path::Path::new(path)
+        .extension()
+        .and_then(|e| e.to_str())
+        .is_some_and(|e| COMPRESSIBLE_EXTENSIONS.contains(&e.to_lowercase().as_str()))
+}
+
+fn gzip_compress(data: &[u8]) -> Result<Vec<u8>, String> {
+    let mut encoder = GzEncoder::new(Vec::new(), Compression::default());
+    encoder
+        .write_all(data)
+        .map_err(|e| format!("Gzip compression failed: {e}"))?;
+    encoder
+        .finish()
+        .map_err(|e| format!("Gzip finalization failed: {e}"))
+}
+
+fn create_asset_config(path: &str, include_gzip: bool) -> AssetConfig {
     let content_type = infer_content_type(path);
     let headers = create_default_headers(&content_type);
     let (fallback_for, aliased_by) = if path == "/index.html" {
@@ -215,7 +246,14 @@ fn create_asset_config(path: &str) -> AssetConfig {
         headers,
         fallback_for,
         aliased_by,
-        encodings: vec![(AssetEncoding::Identity, "".to_string())],
+        encodings: if include_gzip {
+            vec![
+                (AssetEncoding::Identity, "".to_string()),
+                (AssetEncoding::Gzip, ".gz".to_string()),
+            ]
+        } else {
+            vec![(AssetEncoding::Identity, "".to_string())]
+        },
     }
 }
 
@@ -365,7 +403,7 @@ mod tests {
 
         #[test]
         fn index_html_has_fallback_and_alias() {
-            let config = create_asset_config("/index.html");
+            let config = create_asset_config("/index.html", false);
 
             match config {
                 AssetConfig::File {
@@ -388,7 +426,7 @@ mod tests {
 
         #[test]
         fn non_index_html_has_no_fallback() {
-            let config = create_asset_config("/other.html");
+            let config = create_asset_config("/other.html", false);
 
             match config {
                 AssetConfig::File {
@@ -409,7 +447,7 @@ mod tests {
 
         #[test]
         fn js_file_config() {
-            let config = create_asset_config("/app.js");
+            let config = create_asset_config("/app.js", false);
 
             match config {
                 AssetConfig::File {
@@ -438,7 +476,7 @@ mod tests {
 
         #[test]
         fn nested_path_config() {
-            let config = create_asset_config("/assets/images/logo.png");
+            let config = create_asset_config("/assets/images/logo.png", false);
 
             match config {
                 AssetConfig::File {
@@ -453,7 +491,7 @@ mod tests {
 
         #[test]
         fn config_uses_identity_encoding() {
-            let config = create_asset_config("/style.css");
+            let config = create_asset_config("/style.css", false);
 
             match config {
                 AssetConfig::File { encodings, .. } => {
@@ -686,6 +724,91 @@ mod tests {
         fn allows_hyphens_and_underscores() {
             let config = FrontendConfig::default();
             assert!(validate_asset("/my-app_v2.js", 100, &config).is_ok());
+        }
+    }
+
+    mod gzip_compression {
+        use super::*;
+
+        #[test]
+        fn compress_and_decompress_roundtrip() {
+            let original = b"Hello, World! This is a test of gzip compression for IC canisters.";
+            let compressed = gzip_compress(original).expect("compression failed");
+
+            // Verify gzip magic bytes
+            assert!(compressed.len() >= 2);
+            assert_eq!(compressed[0], 0x1f);
+            assert_eq!(compressed[1], 0x8b);
+
+            // Verify roundtrip
+            use flate2::read::GzDecoder;
+            use std::io::Read;
+            let mut decoder = GzDecoder::new(&compressed[..]);
+            let mut decompressed = Vec::new();
+            decoder
+                .read_to_end(&mut decompressed)
+                .expect("decompression failed");
+            assert_eq!(decompressed, original);
+        }
+
+        #[test]
+        fn compressed_is_smaller_for_repetitive_data() {
+            let original = "a]".repeat(1000);
+            let compressed = gzip_compress(original.as_bytes()).expect("compression failed");
+            assert!(compressed.len() < original.len());
+        }
+
+        #[test]
+        fn text_types_are_compressible() {
+            assert!(is_compressible("/index.html"));
+            assert!(is_compressible("/app.js"));
+            assert!(is_compressible("/app.mjs"));
+            assert!(is_compressible("/style.css"));
+            assert!(is_compressible("/data.json"));
+            assert!(is_compressible("/icon.svg"));
+            assert!(is_compressible("/data.xml"));
+            assert!(is_compressible("/readme.txt"));
+            assert!(is_compressible("/bundle.js.map"));
+        }
+
+        #[test]
+        fn binary_types_are_not_compressible() {
+            assert!(!is_compressible("/image.png"));
+            assert!(!is_compressible("/photo.jpg"));
+            assert!(!is_compressible("/photo.jpeg"));
+            assert!(!is_compressible("/animation.gif"));
+            assert!(!is_compressible("/image.webp"));
+            assert!(!is_compressible("/favicon.ico"));
+            assert!(!is_compressible("/font.woff"));
+            assert!(!is_compressible("/font.woff2"));
+            assert!(!is_compressible("/font.ttf"));
+            assert!(!is_compressible("/module.wasm"));
+        }
+
+        #[test]
+        fn compressible_config_has_two_encodings() {
+            let config = create_asset_config("/app.js", true);
+            match config {
+                AssetConfig::File { encodings, .. } => {
+                    assert_eq!(encodings.len(), 2);
+                    assert!(matches!(encodings[0].0, AssetEncoding::Identity));
+                    assert!(matches!(encodings[1].0, AssetEncoding::Gzip));
+                    assert_eq!(encodings[1].1, ".gz");
+                }
+                _ => panic!("Expected AssetConfig::File"),
+            }
+        }
+
+        #[test]
+        fn non_compressible_config_has_one_encoding() {
+            let config = create_asset_config("/image.png", false);
+            match config {
+                AssetConfig::File { encodings, .. } => {
+                    assert_eq!(encodings.len(), 1);
+                    assert!(matches!(encodings[0].0, AssetEncoding::Identity));
+                }
+                _ => panic!("Expected AssetConfig::File"),
+            }
         }
     }
 }
