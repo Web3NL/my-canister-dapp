@@ -1,6 +1,10 @@
 <script lang="ts">
   import { authStore } from '$lib/stores/auth';
-  import { ProgressSteps, busyStore } from '@dfinity/gix-components';
+  import {
+    ProgressSteps,
+    busyStore,
+    toastsStore,
+  } from '@dfinity/gix-components';
   import { showWarnToast, showErrorToast } from '$lib/utils/toast';
   import type { ProgressStep } from '@dfinity/gix-components';
   import { LedgerApi } from '$lib/api/ledgerIcp';
@@ -38,6 +42,7 @@
   let currentBalance = BigInt(0);
   let balanceFetchFailedToastShown = false;
   let lowDepositWarnShown = false;
+  let lowDepositWarnToastId: symbol | undefined;
   let lastFailedStep: 'create' | 'connect-ii' | null = null;
   let recoveredCanister = false;
 
@@ -91,10 +96,14 @@
       formattedBalance = formatIcpBalance(currentBalance);
       if (requiredBalanceE8s > 0n) {
         if (currentBalance >= requiredBalanceE8s) {
+          if (lowDepositWarnToastId !== undefined) {
+            toastsStore.hide(lowDepositWarnToastId);
+            lowDepositWarnToastId = undefined;
+          }
           stopBalanceTimer();
           advanceToStep(3);
         } else if (!lowDepositWarnShown) {
-          showWarnToast('Balance too low.');
+          lowDepositWarnToastId = showWarnToast('Balance too low.');
           lowDepositWarnShown = true;
         }
       }
@@ -319,7 +328,7 @@
       }
     } else {
       // Invalid parameters, redirect to dapp store
-      goto('/dapp-store');
+      await goto('/dapp-store');
       return;
     }
 

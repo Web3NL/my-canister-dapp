@@ -32,6 +32,8 @@ export default [
         'warn',
         { args: 'none', ignoreRestSiblings: true },
       ],
+      // Disabled: project uses direct absolute paths without base path/i18n,
+      // so resolve() wrapping adds no value. See issue #166.
       'svelte/no-navigation-without-resolve': 'off',
     },
   },

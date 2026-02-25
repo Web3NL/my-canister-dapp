@@ -6,8 +6,8 @@
   export let description: string;
   export let version: string;
 
-  function handleInstall() {
-    goto(`/install?source=registry&name=${encodeURIComponent(name)}`);
+  async function handleInstall() {
+    await goto(`/install?source=registry&name=${encodeURIComponent(name)}`);
   }
 </script>
 
