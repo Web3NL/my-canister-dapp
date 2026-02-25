@@ -2,6 +2,24 @@
 
 ## [Unreleased]
 
+### Added
+
+- 8 default security/privacy HTTP headers on all asset responses: X-Content-Type-Options, X-Frame-Options, Referrer-Policy, X-XSS-Protection, Strict-Transport-Security, Permissions-Policy, Cross-Origin-Opener-Policy, Cross-Origin-Resource-Policy
+- Asset validation: file type allowlist, 2 MB size limit, duplicate path detection, path traversal and malformed URL rejection
+- Gzip compression for text-based assets (HTML, JS, CSS, JSON, SVG, XML, TXT, source maps)
+- `FrontendConfig` struct for customization (extra allowed extensions, custom size limit)
+- `setup_frontend_with_config()` for configurable frontend initialization
+- `asset_router_configs_with_config()` for configurable asset processing
+
+### Changed
+
+- `asset_router_configs()` now returns `Result` to surface validation errors (breaking)
+- Compressible assets are served with both Identity and Gzip encodings
+
+### Dependencies
+
+- Added `flate2` for gzip compression
+
 ## [0.2.1] - 2025-09-11
 
 ### Changed

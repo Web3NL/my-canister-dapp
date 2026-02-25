@@ -37,8 +37,33 @@ fn http_request(req: HttpRequest) -> HttpResponse {
 - Automatic MIME type detection using `mime_guess`
 - `index.html` auto-configured as fallback for `/`
 - Certification using [`ic-asset-certification`](https://docs.rs/ic-asset-certification)
+- **Security headers**: 8 default security/privacy headers on all responses (HSTS, X-Frame-Options, Referrer-Policy, etc.)
+- **Asset validation**: File type allowlist, 2 MB size limit, path traversal protection, duplicate detection
+- **Gzip compression**: Automatic gzip for text-based assets (HTML, JS, CSS, JSON, SVG)
+- **Configurable**: Use `FrontendConfig` to allow additional file types or adjust size limits
 - Exposes `with_asset_router` and `with_asset_router_mut` for access to the asset router, see example below.
 - Exposes `asset_router_configs` if you want to implement your own asset router, see [this example](https://github.com/Web3NL/my-canister-dapp/blob/e8fdc0ac81f7bdc702418c05130ace3f9f5399fb/examples/my-hello-world/src/backend/src/lib.rs).
+
+## Configuration
+
+To allow additional file types or customize settings:
+
+```rust,ignore
+use ic_cdk::init;
+use include_dir::{include_dir, Dir};
+use my_canister_frontend::{setup_frontend_with_config, FrontendConfig};
+
+static ASSETS: Dir = include_dir!("$CARGO_MANIFEST_DIR/../dapp-frontend/dist");
+
+#[init]
+fn init() {
+    let config = FrontendConfig {
+        extra_allowed_extensions: vec!["webmanifest".to_string()],
+        ..Default::default()
+    };
+    setup_frontend_with_config(&ASSETS, &config).expect("Failed to setup frontend");
+}
+```
 
 ## Usage with [`my_canister_dashboard`](https://crates.io/crates/my-canister-dashboard)
 

@@ -2,6 +2,8 @@
 
 pub mod asset_router;
 
+pub use asset_router::FrontendConfig;
+
 use ic_cdk::api::certified_data_set;
 use ic_http_certification::{HttpRequest, HttpResponse, StatusCode};
 use include_dir::Dir;
@@ -12,6 +14,8 @@ use std::borrow::Cow;
 /// Embeds files from an [`include_dir`](https://docs.rs/include_dir/latest/include_dir/) `Dir` into the internal
 /// [`AssetRouter`](https://docs.rs/ic-asset-certification/latest/ic_asset_certification/struct.AssetRouter.html)
 /// and certifies them.
+///
+/// Uses the default [`FrontendConfig`] (see [`setup_frontend_with_config`] for custom settings).
 ///
 /// Arguments:
 /// * `assets_dir` - Static [`include_dir`](https://docs.rs/include_dir/latest/include_dir/) `Dir` for your built frontend (e.g. `dist`).
@@ -31,7 +35,29 @@ use std::borrow::Cow;
 /// }
 /// ```
 pub fn setup_frontend(assets_dir: &Dir<'static>) -> Result<(), String> {
-    let (assets, configs) = asset_router::asset_router_configs(assets_dir);
+    setup_frontend_with_config(assets_dir, &FrontendConfig::default())
+}
+
+/// Initialize and certify your Canister Dapp frontend assets with custom configuration.
+///
+/// Like [`setup_frontend`], but allows specifying additional allowed file
+/// extensions and other options via [`FrontendConfig`].
+///
+/// # Example
+/// ```rust,ignore
+/// use my_canister_frontend::{setup_frontend_with_config, FrontendConfig};
+///
+/// let config = FrontendConfig {
+///     extra_allowed_extensions: vec!["webmanifest".to_string()],
+///     ..Default::default()
+/// };
+/// setup_frontend_with_config(&ASSETS, &config).expect("Failed to setup frontend");
+/// ```
+pub fn setup_frontend_with_config(
+    assets_dir: &Dir<'static>,
+    config: &FrontendConfig,
+) -> Result<(), String> {
+    let (assets, configs) = asset_router::asset_router_configs_with_config(assets_dir, config)?;
     asset_router::with_asset_router_mut(|router| {
         router
             .certify_assets(assets, configs)
@@ -73,9 +99,12 @@ pub fn http_request(request: HttpRequest) -> HttpResponse {
 #[deprecated(note = "Use my_canister_frontend::asset_router::asset_router_configs")]
 pub fn asset_router_configs(
     assets_dir: &Dir<'static>,
-) -> (
-    Vec<ic_asset_certification::Asset<'static, 'static>>,
-    Vec<ic_asset_certification::AssetConfig>,
-) {
+) -> Result<
+    (
+        Vec<ic_asset_certification::Asset<'static, 'static>>,
+        Vec<ic_asset_certification::AssetConfig>,
+    ),
+    String,
+> {
     asset_router::asset_router_configs(assets_dir)
 }

@@ -369,6 +369,56 @@ pub fn run_acceptance_suite(wasm_bytes: &[u8], wasm_label: &str) {
     );
     assert_header_contains(&fallback_resp, "content-type", "text/html");
 
+    // ─── Security/privacy headers on frontend responses ─────────────────
+    // The frontend crate adds 8 security headers to every asset response.
+    assert_header_contains(&fallback_resp, "x-content-type-options", "nosniff");
+    assert_header_contains(&fallback_resp, "x-frame-options", "deny");
+    assert_header_contains(&fallback_resp, "referrer-policy", "no-referrer");
+    assert_header_contains(&fallback_resp, "x-xss-protection", "0");
+    assert_header_contains(
+        &fallback_resp,
+        "strict-transport-security",
+        "max-age=31536000",
+    );
+    assert_header_contains(&fallback_resp, "permissions-policy", "accelerometer=()");
+    assert_header_contains(
+        &fallback_resp,
+        "cross-origin-opener-policy",
+        "same-origin-allow-popups",
+    );
+    assert_header_contains(
+        &fallback_resp,
+        "cross-origin-resource-policy",
+        "same-origin",
+    );
+    println!("Frontend security headers OK (8/8 verified on fallback response)");
+
+    // ─── Gzip compression ───────────────────────────────────────────────
+    // Request with Accept-Encoding: gzip should return compressed content.
+    let (gzip_resp,) = query_candid::<_, (HttpResponse,)>(
+        &pic,
+        canister_id,
+        "http_request",
+        (HttpRequest::get("/this-path-does-not-exist")
+            .with_headers(vec![("Accept-Encoding".into(), "gzip".into())])
+            .build(),),
+    )
+    .expect("http_request with gzip encoding failed");
+    assert_eq!(
+        gzip_resp.status_code(),
+        200,
+        "Gzip fallback should return 200"
+    );
+    let body = gzip_resp.body();
+    assert!(
+        body.len() >= 2 && body[0] == 0x1f && body[1] == 0x8b,
+        "Response body should be gzip-compressed (expected magic bytes 0x1f 0x8b, got 0x{:02x} 0x{:02x})",
+        body.first().unwrap_or(&0),
+        body.get(1).unwrap_or(&0),
+    );
+    assert_header_contains(&gzip_resp, "content-encoding", "gzip");
+    println!("Gzip compression OK (verified on fallback response)");
+
     // ─── manage_alternative_origins ──────────────────────────────────────
 
     // Verify the initial origins JSON is valid and doesn't contain our test origins.
