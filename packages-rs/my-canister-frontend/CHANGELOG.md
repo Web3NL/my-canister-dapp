@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Fixed
+
+- Use display formatting (`{e}`) instead of debug formatting (`{e:?}`) in asset certification error message
+
 ### Added
 
 - 8 default security/privacy HTTP headers on all asset responses: X-Content-Type-Options, X-Frame-Options, Referrer-Policy, X-XSS-Protection, Strict-Transport-Security, Permissions-Policy, Cross-Origin-Opener-Policy, Cross-Origin-Resource-Policy
