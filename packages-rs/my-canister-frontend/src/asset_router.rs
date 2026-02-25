@@ -279,7 +279,10 @@ fn create_default_headers(_content_type: &str) -> Vec<(String, String)> {
             "accelerometer=(), camera=(), geolocation=(), microphone=(), payment=(), usb=()"
                 .into(),
         ),
-        ("Cross-Origin-Opener-Policy".into(), "same-origin".into()),
+        (
+            "Cross-Origin-Opener-Policy".into(),
+            "same-origin-allow-popups".into(),
+        ),
         (
             "Cross-Origin-Resource-Policy".into(),
             "same-origin".into(),
@@ -560,7 +563,10 @@ mod tests {
         fn includes_cross_origin_opener_policy() {
             let headers = create_default_headers("text/html");
             assert!(
-                headers.contains(&("Cross-Origin-Opener-Policy".into(), "same-origin".into()))
+                headers.contains(&(
+                    "Cross-Origin-Opener-Policy".into(),
+                    "same-origin-allow-popups".into(),
+                ))
             );
         }
 

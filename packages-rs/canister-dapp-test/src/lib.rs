@@ -384,7 +384,7 @@ pub fn run_acceptance_suite(wasm_bytes: &[u8], wasm_label: &str) {
     assert_header_contains(
         &fallback_resp,
         "cross-origin-opener-policy",
-        "same-origin",
+        "same-origin-allow-popups",
     );
     assert_header_contains(
         &fallback_resp,
