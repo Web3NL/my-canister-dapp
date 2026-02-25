@@ -20,6 +20,10 @@
 - `asset_router_configs()` now returns `Result` to surface validation errors (breaking)
 - Compressible assets are served with both Identity and Gzip encodings
 
+### Tests
+
+- Added unit tests for `FrontendConfig` defaults (max file size, allowed extensions, compressible subset)
+
 ### Dependencies
 
 - Added `flate2` for gzip compression

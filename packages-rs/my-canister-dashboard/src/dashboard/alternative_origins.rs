@@ -240,4 +240,77 @@ mod tests {
         origins.remove_origin("https://nonexistent.com");
         assert_eq!(origins.alternative_origins.len(), 1);
     }
+
+    mod validate_alternative_origin_tests {
+        use super::*;
+
+        #[test]
+        fn accepts_https_url() {
+            assert!(validate_alternative_origin("https://example.com").is_ok());
+        }
+
+        #[test]
+        fn accepts_https_with_subdomain() {
+            assert!(validate_alternative_origin("https://sub.example.com").is_ok());
+        }
+
+        #[test]
+        fn accepts_https_with_port() {
+            assert!(validate_alternative_origin("https://example.com:8443").is_ok());
+        }
+
+        #[test]
+        fn accepts_http_localhost_with_port() {
+            assert!(validate_alternative_origin("http://localhost:8080").is_ok());
+            assert!(validate_alternative_origin("http://localhost:3000").is_ok());
+            assert!(validate_alternative_origin("http://localhost:4943").is_ok());
+        }
+
+        #[test]
+        fn accepts_http_subdomain_localhost_with_port() {
+            assert!(validate_alternative_origin("http://canister-id.localhost:8080").is_ok());
+            assert!(
+                validate_alternative_origin("http://22ajg-aqaaa-aaaap-adukq-cai.localhost:8080")
+                    .is_ok()
+            );
+        }
+
+        #[test]
+        fn rejects_http_non_localhost() {
+            let result = validate_alternative_origin("http://example.com");
+            assert!(result.is_err());
+            assert!(result.unwrap_err().contains("must start with"));
+        }
+
+        #[test]
+        fn rejects_http_non_localhost_with_port() {
+            assert!(validate_alternative_origin("http://example.com:8080").is_err());
+        }
+
+        #[test]
+        fn rejects_http_localhost_without_port() {
+            // "http://localhost" doesn't match "http://localhost:" (note trailing colon)
+            assert!(validate_alternative_origin("http://localhost").is_err());
+        }
+
+        #[test]
+        fn rejects_ftp_protocol() {
+            assert!(validate_alternative_origin("ftp://example.com").is_err());
+        }
+
+        #[test]
+        fn rejects_empty_string() {
+            assert!(validate_alternative_origin("").is_err());
+        }
+
+        #[test]
+        fn rejects_plain_hostname() {
+            assert!(validate_alternative_origin("example.com").is_err());
+        }
+
+        #[test]
+        fn rejects_ws_protocol() {
+            assert!(validate_alternative_origin("ws://example.com").is_err());
+        }
+    }
 }

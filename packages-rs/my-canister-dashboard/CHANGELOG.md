@@ -11,6 +11,12 @@
 
 - Improved help text for Manual Top-up and Automatic Top-up sections to clarify one-time vs recurring behavior
 
+### Tests
+
+- Added unit tests for `validate_alternative_origin()` covering HTTPS, HTTP localhost, subdomain localhost, and invalid inputs
+- Added unit tests for `Display` impls on `TopUpInterval` and `NotifyError`
+- Added edge case tests for `isValidOrigin()` in dashboard frontend (data URLs, javascript URLs, port 80 normalization)
+
 ### Docs
 
 - Added "Usage with `my_canister_frontend`" section to README with code example

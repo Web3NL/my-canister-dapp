@@ -297,6 +297,49 @@ fn create_default_headers(_content_type: &str) -> Vec<(String, String)> {
 mod tests {
     use super::*;
 
+    mod frontend_config_defaults {
+        use super::*;
+
+        #[test]
+        fn default_max_file_size_is_2mb() {
+            let config = FrontendConfig::default();
+            assert_eq!(config.max_file_size, 2 * 1024 * 1024);
+        }
+
+        #[test]
+        fn default_extra_extensions_is_empty() {
+            let config = FrontendConfig::default();
+            assert!(config.extra_allowed_extensions.is_empty());
+        }
+
+        #[test]
+        fn default_allowed_extensions_count() {
+            // Ensure the allowlist has the expected number of entries
+            assert_eq!(DEFAULT_ALLOWED_EXTENSIONS.len(), 22);
+        }
+
+        #[test]
+        fn default_allowed_extensions_contains_web_essentials() {
+            assert!(DEFAULT_ALLOWED_EXTENSIONS.contains(&"html"));
+            assert!(DEFAULT_ALLOWED_EXTENSIONS.contains(&"js"));
+            assert!(DEFAULT_ALLOWED_EXTENSIONS.contains(&"css"));
+            assert!(DEFAULT_ALLOWED_EXTENSIONS.contains(&"json"));
+            assert!(DEFAULT_ALLOWED_EXTENSIONS.contains(&"svg"));
+            assert!(DEFAULT_ALLOWED_EXTENSIONS.contains(&"png"));
+            assert!(DEFAULT_ALLOWED_EXTENSIONS.contains(&"wasm"));
+        }
+
+        #[test]
+        fn compressible_extensions_are_text_based() {
+            for ext in COMPRESSIBLE_EXTENSIONS {
+                assert!(
+                    DEFAULT_ALLOWED_EXTENSIONS.contains(ext),
+                    "Compressible extension '{ext}' is not in the allowed list"
+                );
+            }
+        }
+    }
+
     mod infer_content_type {
         use super::*;
 
