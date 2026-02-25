@@ -61,7 +61,7 @@ pub fn setup_frontend_with_config(
     asset_router::with_asset_router_mut(|router| {
         router
             .certify_assets(assets, configs)
-            .map_err(|e| format!("Failed to certify frontend assets: {e:?}"))?;
+            .map_err(|e| format!("Failed to certify frontend assets: {e}"))?;
         certified_data_set(router.root_hash());
         Ok(())
     })

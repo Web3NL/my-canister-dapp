@@ -157,7 +157,7 @@ pub fn manage_top_up_rule(arg: ManageTopUpRuleArg) -> ManageTopUpRuleResult {
                 *cell.borrow_mut() = Some(rule.clone());
             });
             ic_cdk::println!(
-                "top-up: rule set amount={} threshold={} interval={:?}",
+                "top-up: rule set amount={} threshold={} interval={}",
                 rule.cycles_amount.as_cycles(),
                 rule.cycles_threshold.as_cycles(),
                 rule.interval
@@ -202,7 +202,7 @@ async fn on_top_up_interval_tick() {
     if let Some(rule) = current_rule() {
         let every = interval_duration(&rule.interval).as_secs();
         ic_cdk::println!(
-            "top-up: active rule amount={} threshold={} interval={:?} every={}s",
+            "top-up: active rule amount={} threshold={} interval={} every={}s",
             rule.cycles_amount.as_cycles(),
             rule.cycles_threshold.as_cycles(),
             rule.interval,
@@ -229,13 +229,13 @@ async fn on_top_up_interval_tick() {
                     // Skip if previous mint is still in flight
                     let busy = TOP_UP_MINT_INFLIGHT.with(|f| *f.borrow());
                     if busy {
-                        ic_cdk::println!("Mint in-flight; skipping this tick");
+                        ic_cdk::println!("top-up: mint in-flight, skipping this tick");
                     } else {
                         TOP_UP_MINT_INFLIGHT.with(|f| *f.borrow_mut() = true);
                         ic_cdk::println!("top-up: starting transfer + notify flow");
                         let res = cmc_deposit_and_mint(needed_icp_e8s).await;
                         if let Err(e) = res {
-                            ic_cdk::println!("CMC mint error: {}", e);
+                            ic_cdk::println!("top-up: CMC mint error: {}", e);
                         } else {
                             ic_cdk::println!("top-up: flow completed");
                         }
@@ -259,6 +259,17 @@ async fn on_top_up_interval_tick() {
         }
     } else {
         ic_cdk::println!("top-up: no rule set; skipping");
+    }
+}
+
+impl std::fmt::Display for TopUpInterval {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            TopUpInterval::Hourly => write!(f, "hourly"),
+            TopUpInterval::Daily => write!(f, "daily"),
+            TopUpInterval::Weekly => write!(f, "weekly"),
+            TopUpInterval::Monthly => write!(f, "monthly"),
+        }
     }
 }
 
@@ -319,10 +330,10 @@ async fn fetch_cycles_per_icp() -> Result<u64, String> {
     let res = Call::unbounded_wait(cmc, "get_icp_xdr_conversion_rate")
         .with_arg(())
         .await
-        .map_err(|e| format!("get_icp_xdr_conversion_rate failed: {e:?}"))?;
+        .map_err(|e| format!("get_icp_xdr_conversion_rate failed: {e}"))?;
     let resp: IcpXdrConversionRateResponse = res
         .candid()
-        .map_err(|e| format!("get_icp_xdr_conversion_rate candid decode failed: {e:?}"))?;
+        .map_err(|e| format!("get_icp_xdr_conversion_rate candid decode failed: {e}"))?;
 
     let permyriad = resp.data.xdr_permyriad_per_icp as u128; // XDR*10_000 per 1 ICP
     // cycles_per_icp = (permyriad / 10_000) * 1e12 = permyriad * 1e8
@@ -394,7 +405,7 @@ async fn cmc_deposit_and_mint(amount_e8s: u64) -> Result<(), String> {
         Err(e) => {
             // Drop stored index on non-retriable errors
             TOP_UP_LAST_BLOCK_INDEX.with(|c| *c.borrow_mut() = None);
-            Err(format!("CMC notify_top_up error: {e:?}"))
+            Err(format!("CMC notify_top_up error: {e}"))
         }
     }
 }
@@ -436,13 +447,13 @@ async fn ledger_transfer_to_cmc_topup(
     let res = Call::unbounded_wait(ledger, "transfer")
         .with_arg(arg)
         .await
-        .map_err(|e| format!("transfer failed: {e:?}"))?;
+        .map_err(|e| format!("transfer failed: {e}"))?;
 
     let result: Result<BlockIndex, TransferError> = res
         .candid()
-        .map_err(|e| format!("transfer candid decode failed: {e:?}"))?;
+        .map_err(|e| format!("transfer candid decode failed: {e}"))?;
 
-    result.map_err(|e| format!("transfer error: {e:?}"))
+    result.map_err(|e| format!("transfer error: {e}"))
 }
 
 // notify_top_up definitions and call
@@ -467,6 +478,29 @@ enum NotifyError {
     },
 }
 
+impl std::fmt::Display for NotifyError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            NotifyError::Refunded {
+                reason,
+                block_index,
+            } => match block_index {
+                Some(idx) => write!(f, "refunded: {reason} (block_index={idx})"),
+                None => write!(f, "refunded: {reason}"),
+            },
+            NotifyError::Processing => write!(f, "processing"),
+            NotifyError::TransactionTooOld(block) => {
+                write!(f, "transaction too old (block_index={block})")
+            }
+            NotifyError::InvalidTransaction(msg) => write!(f, "invalid transaction: {msg}"),
+            NotifyError::Other {
+                error_code,
+                error_message,
+            } => write!(f, "{error_message} (code={error_code})"),
+        }
+    }
+}
+
 #[derive(CandidType, Deserialize, Debug)]
 enum NotifyTopUpResult {
     Ok(Nat),
@@ -487,11 +521,11 @@ async fn cmc_notify_top_up(block_index: u64, canister_id: Principal) -> Result<N
         .await
         .map_err(|e| NotifyError::Other {
             error_code: 1,
-            error_message: format!("notify_top_up failed: {e:?}"),
+            error_message: format!("notify_top_up failed: {e}"),
         })?;
     let result: NotifyTopUpResult = res.candid().map_err(|e| NotifyError::Other {
         error_code: 2,
-        error_message: format!("notify_top_up candid decode failed: {e:?}"),
+        error_message: format!("notify_top_up candid decode failed: {e}"),
     })?;
 
     match result {
