@@ -42,12 +42,16 @@ describe('utils', () => {
       it('should accept https URLs', () => {
         expect(isValidOrigin('https://example.com')).toBe(true);
         expect(isValidOrigin('https://subdomain.example.com')).toBe(true);
-        expect(isValidOrigin('https://deep.nested.subdomain.example.com')).toBe(true);
+        expect(isValidOrigin('https://deep.nested.subdomain.example.com')).toBe(
+          true
+        );
       });
 
       it('should accept https URLs with paths', () => {
         expect(isValidOrigin('https://example.com/path')).toBe(true);
-        expect(isValidOrigin('https://example.com/path/to/resource')).toBe(true);
+        expect(isValidOrigin('https://example.com/path/to/resource')).toBe(
+          true
+        );
       });
 
       it('should accept http localhost with port', () => {
@@ -114,6 +118,19 @@ describe('utils', () => {
       it('should handle IP-like localhost (though not typical)', () => {
         // This is http with non-localhost hostname, should be false
         expect(isValidOrigin('http://127.0.0.1:8080')).toBe(false);
+      });
+
+      it('should reject data URLs', () => {
+        expect(isValidOrigin('data:text/html,<h1>Hi</h1>')).toBe(false);
+      });
+
+      it('should reject javascript URLs', () => {
+        expect(isValidOrigin('javascript:alert(1)')).toBe(false);
+      });
+
+      it('should handle http localhost port 80 (normalized away by URL parser)', () => {
+        // URL parser normalizes port 80 away for http, so host becomes "localhost" without port
+        expect(isValidOrigin('http://localhost:80')).toBe(false);
       });
     });
   });

@@ -582,6 +582,65 @@ mod tests {
         }
     }
 
+    mod display_impls {
+        use super::*;
+
+        #[test]
+        fn top_up_interval_display() {
+            assert_eq!(format!("{}", TopUpInterval::Hourly), "hourly");
+            assert_eq!(format!("{}", TopUpInterval::Daily), "daily");
+            assert_eq!(format!("{}", TopUpInterval::Weekly), "weekly");
+            assert_eq!(format!("{}", TopUpInterval::Monthly), "monthly");
+        }
+
+        #[test]
+        fn notify_error_display_refunded_with_block() {
+            let err = NotifyError::Refunded {
+                reason: "insufficient funds".to_string(),
+                block_index: Some(42),
+            };
+            assert_eq!(
+                format!("{err}"),
+                "refunded: insufficient funds (block_index=42)"
+            );
+        }
+
+        #[test]
+        fn notify_error_display_refunded_without_block() {
+            let err = NotifyError::Refunded {
+                reason: "bad request".to_string(),
+                block_index: None,
+            };
+            assert_eq!(format!("{err}"), "refunded: bad request");
+        }
+
+        #[test]
+        fn notify_error_display_processing() {
+            assert_eq!(format!("{}", NotifyError::Processing), "processing");
+        }
+
+        #[test]
+        fn notify_error_display_transaction_too_old() {
+            let err = NotifyError::TransactionTooOld(100);
+            assert_eq!(format!("{err}"), "transaction too old (block_index=100)");
+        }
+
+        #[test]
+        fn notify_error_display_invalid_transaction() {
+            let err = NotifyError::InvalidTransaction("bad memo".to_string());
+            assert_eq!(format!("{err}"), "invalid transaction: bad memo");
+        }
+
+        #[test]
+        fn notify_error_display_other() {
+            let err = NotifyError::Other {
+                error_code: 42,
+                error_message: "something broke".to_string(),
+            };
+            assert_eq!(format!("{err}"), "something broke (code=42)");
+        }
+    }
+
     mod interval_duration_tests {
         use super::*;
         use std::time::Duration;

@@ -1,7 +1,12 @@
 import { test, expect } from '@playwright/test';
 import { login, checkPrincipal } from './login';
 import { formatIcpBalance } from '../../packages-rs/my-canister-dashboard/frontend/src/helpers';
-import { TOPUP_AMOUNT } from './shared';
+import {
+    TOPUP_AMOUNT,
+    setupConsoleErrorMonitoring,
+    waitForAuthenticatedContent,
+    parseNumericText,
+} from './shared';
 import { transferToPrincipal } from '../helpers.js';
 
 test('canister top-up increases cycles balance', async ({ page }, testInfo) => {
@@ -11,12 +16,13 @@ test('canister top-up increases cycles balance', async ({ page }, testInfo) => {
         throw new Error('testUrl not found in project metadata');
     }
 
+    const getConsoleErrors = setupConsoleErrorMonitoring(page);
+
     await page.goto(testUrl);
 
     await login(page);
 
-    // Ensure authenticated content is visible before interacting
-    await expect(page.locator('#authenticated-content')).toBeVisible();
+    await waitForAuthenticatedContent(page);
 
     const principal = await checkPrincipal(page);
     const topupAmount = TOPUP_AMOUNT;
@@ -72,13 +78,7 @@ test('canister top-up increases cycles balance', async ({ page }, testInfo) => {
     await expect(overlay).toBeHidden({ timeout: 60000 });
     await expect(cyclesValue).not.toHaveText(/Loading\.\.\./);
 
-    const parseCycles = (text: string | null): number => {
-        const raw = (text ?? '').replace(/,/g, '').trim();
-        // UI shows like "0.00 T"; strip trailing unit
-        const numeric = raw.replace(/\s*[A-Za-z]+\s*$/i, '').trim();
-        return parseFloat(numeric);
-    };
-    const beforeNum = parseCycles(cyclesBalanceBefore);
+    const beforeNum = parseNumericText(cyclesBalanceBefore);
     if (isNaN(beforeNum)) {
         throw new Error(`Invalid before cycles balance: "${cyclesBalanceBefore}" - cannot parse as number`);
     }
@@ -86,7 +86,7 @@ test('canister top-up increases cycles balance', async ({ page }, testInfo) => {
     await expect(async () => {
         const cyclesTextNow = (await cyclesValue.textContent())?.trim() ?? '';
         expect(cyclesTextNow).not.toBe(cyclesBalanceBefore);
-        const currentNum = parseCycles(cyclesTextNow);
+        const currentNum = parseNumericText(cyclesTextNow);
         if (isNaN(currentNum)) {
             throw new Error(`Invalid current cycles balance: "${cyclesTextNow}" - cannot parse as number`);
         }
@@ -98,4 +98,5 @@ test('canister top-up increases cycles balance', async ({ page }, testInfo) => {
     console.log(`Recorded cycles balance after top-up: ${cyclesBalanceAfter}`);
     console.log('Top-up successfully completed - cycles balance has changed');
 
+    expect(getConsoleErrors()).toEqual([]);
 });
