@@ -1,4 +1,5 @@
 {
+  "ignoreDependencies": ["@icp-sdk/bindgen"],
   "ignore": [
     "declarations/**",
     "examples/my-hello-world/src/declarations/**",
