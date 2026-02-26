@@ -13,11 +13,14 @@ done
 
 echo "Running End-to-End Tests"
 
+# Installer app test must run first — it writes the installed canister ID
+# needed by dashboard and hello-world frontend tests
+npx playwright test --project=my-canister-app-canister
+
 if [ "$SKIP_VITE_E2E" != "true" ]; then
-  # Batch 1: Vite dev server dashboard + installer app
+  # Batch 1: Vite dev server dashboard
   # The Vite principal is already set by setup-dashboard-dev-env.sh
   DASHBOARD_VITE_SERVER=true npx playwright test \
-      --project=my-canister-app-canister \
       --project=canister-dashboard-frontend-vite
 
   # Swap II principal to canister-served origin for the second batch
@@ -31,10 +34,9 @@ else
   icp canister call "$HELLO_WORLD_CANISTER" manage_ii_principal "(variant { Set = principal \"$PRINCIPAL_CANISTER\" })" -e local --identity ident-1
 fi
 
-# Batch 2: Canister-served dashboard + hello-world frontend + installer app
+# Canister-served dashboard + hello-world frontend
 npx playwright test \
     --project=canister-dashboard-frontend-canister \
-    --project=my-hello-world-frontend-canister \
-    --project=my-canister-app-canister
+    --project=my-hello-world-frontend-canister
 
 echo "E2E test completed successfully!"
