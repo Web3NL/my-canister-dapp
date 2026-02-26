@@ -8,37 +8,27 @@
   </head>
 
   <body>
-    <!-- Theme Toggle -->
-    <button id="theme-toggle" class="theme-toggle" aria-label="Toggle theme">
-      <span id="theme-icon">🌙</span>
-    </button>
-
     <main>
-      <!-- Logo -->
-      <img id="logo" src="/src/logo2.svg" alt="Internet Computer logo" class="logo" />
-
-      <!-- Dashboard Button (shown when authenticated) -->
-      <div id="dashboard-section" class="hidden">
-        <button id="dashboard-btn" class="dashboard-btn">
-          Go to Canister Dashboard
-        </button>
-      </div>
-
       <!-- Authentication Section -->
       <div class="auth-section">
-        <!-- Login Button (shown when logged out) -->
         <div id="auth-logged-out">
           <button id="login-btn" class="login-btn">
             Login with Internet Identity
           </button>
         </div>
 
-        <!-- User Info (shown when logged in) -->
         <div id="auth-logged-in" class="user-info hidden">
           <p><strong>Logged in as:</strong></p>
           <p id="principal" class="principal"></p>
           <button id="logout-btn" class="logout-btn">Logout</button>
         </div>
+      </div>
+
+      <!-- Dashboard Button (shown when authenticated) -->
+      <div id="dashboard-section" class="hidden">
+        <a href="/canister-dashboard" target="_blank" rel="noopener noreferrer" class="dashboard-link">
+          Go to Canister Dashboard
+        </a>
       </div>
 
       <!-- Greeting Form (shown when authenticated) -->
