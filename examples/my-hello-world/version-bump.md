@@ -6,7 +6,7 @@ Versions to bump:
 
 Upload new WASM to wasm-registry canister:
 
-- Build and compress: ./scripts/copy-example-wasm.sh
+- Build and compress: ./scripts/build-all-wasm.sh
 - Upload: ./scripts/upload-wasm-to-registry.sh "my-hello-world" "The Internet Computer Hello World Dapp" "<new-version>" wasm/my-hello-world.wasm.gz -e mainnet --identity web3nl
 
 use tag:

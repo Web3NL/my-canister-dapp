@@ -1,7 +1,6 @@
 #!/bin/bash
 set -euo pipefail
 
-# Main workspace
+# Rust formatting and linting (no tests — those run in the test phase)
 cargo fmt
 cargo clippy --all-targets --all-features -- -D warnings
-cargo test --workspace --exclude canister-dapp-test
