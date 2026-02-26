@@ -47,7 +47,7 @@
     "build:docs": "npm run build:docs:dashboard && npm run build:docs:vite-plugin",
     "build:docs:dashboard": "npm run docs:clean --workspace=@web3nl/my-canister-dashboard && npm run docs:build --workspace=@web3nl/my-canister-dashboard",
     "build:docs:vite-plugin": "npm run docs:clean --workspace=@web3nl/vite-plugin-canister-dapp && npm run docs:build --workspace=@web3nl/vite-plugin-canister-dapp",
-    "build:setup-ii": "cd test-fixtures/ii-setup && vite build",
+    "build:setup-ii": "cd tests/ii-setup && vite build",
     "changeset": "changeset",
     "check": "npm run lint --workspaces && npm run format --workspaces && npm run typecheck --workspaces",
     "deps:check": "syncpack lint && syncpack format --check && knip",

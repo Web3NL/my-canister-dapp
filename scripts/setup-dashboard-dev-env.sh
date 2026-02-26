@@ -43,8 +43,8 @@ echo "Reading canister ID from tests/test.env..."
 CANISTER_ID=$(grep VITE_MY_HELLO_WORLD_CANISTER_ID tests/test.env | cut -d '=' -f2)
 
 echo "Reading principals from both files..."
-PRINCIPAL_VITE=$(cat test-output/derived-ii-principal-vite.txt)
-PRINCIPAL_CANISTER=$(cat test-output/derived-ii-principal-canister.txt)
+PRINCIPAL_VITE=$(cat tests/output/derived-ii-principal-vite.txt)
+PRINCIPAL_CANISTER=$(cat tests/output/derived-ii-principal-canister.txt)
 
 IDENT1=$(icp identity principal --identity ident-1)
 

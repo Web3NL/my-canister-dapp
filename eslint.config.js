@@ -31,7 +31,7 @@ export default [
       'coverage/**',
       '.nyc_output/**',
       'test-results/**',
-      'test-output/**',
+      'tests/output/**',
       '**/*.d.ts',
       '**/declarations/**',
       '**/wasm/**',

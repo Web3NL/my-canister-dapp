@@ -19,7 +19,7 @@ export async function transferToPrincipal(principal: Principal, amount: string):
 }
 
 export function saveTestData(filename: string, data: string): void {
-  const outputDir = path.join(process.cwd(), 'test-output');
+  const outputDir = path.join(process.cwd(), 'tests', 'output');
   if (!fs.existsSync(outputDir)) {
     fs.mkdirSync(outputDir, { recursive: true });
   }
@@ -31,7 +31,7 @@ export function saveTestData(filename: string, data: string): void {
 }
 
 function readTestData(filename: string): string {
-  const outputDir = path.join(process.cwd(), 'test-output');
+  const outputDir = path.join(process.cwd(), 'tests', 'output');
   const filePath = path.join(outputDir, filename);
 
   if (!fs.existsSync(filePath)) {

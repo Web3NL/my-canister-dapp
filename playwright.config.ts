@@ -39,7 +39,7 @@ export default defineConfig({
     },
     {
       name: 'setup-ii',
-      testDir: './test-fixtures/ii-setup',
+      testDir: './tests/ii-setup',
       testMatch: /.*setup-ii.*\.spec\.ts/,
     },
   ],

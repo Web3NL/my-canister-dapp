@@ -13,7 +13,7 @@ DASHBOARD_VITE_SERVER=true npx playwright test \
     --project=canister-dashboard-frontend-vite
 
 # Swap II principal to canister-served origin for the second batch
-PRINCIPAL_CANISTER=$(cat test-output/derived-ii-principal-canister.txt)
+PRINCIPAL_CANISTER=$(cat tests/output/derived-ii-principal-canister.txt)
 echo "Switching II principal to canister-served origin for second test batch..."
 icp canister call "$HELLO_WORLD_CANISTER" manage_ii_principal "(variant { Set = principal \"$PRINCIPAL_CANISTER\" })" -e local --identity ident-1
 

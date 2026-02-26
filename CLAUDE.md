@@ -25,9 +25,9 @@ examples/                     Example dapps (used for testing and as developer t
 
 scripts/                      Shell scripts for build, test, deploy, publish
 tests/                        E2E tests (Playwright) + shared helpers
+  ii-setup/                     Internet Identity setup (Playwright + Vite)
+  output/                       Runtime test artifacts (derived principals, etc.)
 declarations/                 Generated Candid interface bindings (icp-index)
-test-fixtures/                Test setup (II configuration)
-test-output/                  Runtime test artifacts (derived principals, etc.)
 wasm/                         Built wasm files for deployment/testing
 .github/workflows/            CI/CD pipelines
 ```
