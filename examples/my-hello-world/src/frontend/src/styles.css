@@ -67,6 +67,14 @@ button {
   padding: 0.5rem 1rem;
 }
 
+.dashboard-link {
+  display: inline-block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #3b82f6;
+  margin-bottom: 1.5rem;
+}
+
 form {
   width: 100%;
   display: flex;

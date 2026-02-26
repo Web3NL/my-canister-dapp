@@ -92,6 +92,7 @@ function setLoggedIn(): void {
   hide('auth-logged-out');
   show('auth-logged-in');
   $('principal').textContent = principal;
+  show('dashboard-section');
   show('greeting-section');
 }
 
@@ -99,6 +100,7 @@ function setLoggedOut(): void {
   show('auth-logged-out');
   hide('auth-logged-in');
   $('principal').textContent = '';
+  hide('dashboard-section');
   hide('greeting-section');
   hide('greeting');
 }
