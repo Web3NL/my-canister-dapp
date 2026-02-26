@@ -21,6 +21,9 @@ npx icp-bindgen \
   --actor-disabled \
   --force
 
+# Format generated files to match project Prettier config
+npx prettier --write "$DASHBOARD_OUT/declarations/"*.js "$DASHBOARD_OUT/declarations/"*.ts 2>/dev/null || true
+
 echo "Declarations generated in $DASHBOARD_OUT/declarations"
 
 # --- wasm-registry ---
@@ -41,6 +44,9 @@ else
   mkdir -p "$REGISTRY_OUT"
   cp "$TMPDIR/declarations/"* "$REGISTRY_OUT/"
   rm -rf "$TMPDIR"
+
+  # Format generated files to match project Prettier config
+  npx prettier --write "$REGISTRY_OUT/"*.js "$REGISTRY_OUT/"*.ts 2>/dev/null || true
 
   echo "Declarations generated in $REGISTRY_OUT"
 fi
