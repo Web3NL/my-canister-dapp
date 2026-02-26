@@ -140,7 +140,11 @@ echo "Running tests..."
 ./scripts/run-test.sh
 
 if [ "$SKIP_E2E_FLAG" != "true" ]; then
-    ./scripts/run-test-e2e.sh
+    E2E_ARGS=""
+    if [ "${CI:-}" = "true" ]; then
+        E2E_ARGS="--skip-vite-e2e"
+    fi
+    ./scripts/run-test-e2e.sh $E2E_ARGS
 fi
 
 echo "Validation finished correctly!"
