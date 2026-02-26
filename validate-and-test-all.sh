@@ -65,11 +65,15 @@ set -a
 source tests/test.env
 set +a
 
-# --- Phase 1: Build all frontend assets for Rust canister embedding ---
+# --- Phase 1: Build all frontend assets in parallel ---
 echo "Building frontend assets..."
-./scripts/prebuild-mcd.sh
-npm run build --workspace=my-hello-world-frontend
-npm run build --workspace=my-notepad-frontend
+./scripts/prebuild-mcd.sh &
+pid_mcd=$!
+npm run build --workspace=my-hello-world-frontend &
+pid_hw=$!
+npm run build --workspace=my-notepad-frontend &
+pid_np=$!
+wait $pid_mcd $pid_hw $pid_np
 
 # --- Phase 2: Batch-build all Rust canister wasms ---
 echo "Batch-building all canister wasms..."

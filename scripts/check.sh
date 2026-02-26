@@ -1,21 +1,32 @@
 #!/bin/bash
 set -euo pipefail
 
-echo "🔍 Running prerelease validation checks..."
+echo "Running prerelease validation checks..."
 
-echo "📦 Installing dependencies..."
+echo "Installing dependencies..."
 npm ci
 
-echo "🏗️  Building all workspace packages..."
+echo "Building all workspace packages..."
 npm run build
 
-echo "🔍 Running lint, format, and typecheck..."
-npm run check
+# Run JS checks, dependency checks, and Rust checks in parallel
+echo "Running checks in parallel (JS + deps + Rust)..."
 
-echo "🔗 Checking dependency consistency and usage..."
-npm run deps:check
+npm run check &
+pid_js=$!
 
-echo "Rust lint and format..."
-./scripts/rust-lint-format.sh
+npm run deps:check &
+pid_deps=$!
+
+./scripts/rust-lint-format.sh &
+pid_rust=$!
+
+# Wait for each — set -e will exit on first failure
+wait $pid_js
+echo "JS checks passed"
+wait $pid_deps
+echo "Dependency checks passed"
+wait $pid_rust
+echo "Rust checks passed"
 
 echo "Validation checks complete!"
