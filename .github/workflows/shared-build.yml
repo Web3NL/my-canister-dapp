@@ -21,6 +21,31 @@ jobs:
           node-version: '22'
           cache: 'npm'
 
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: '1.88.0'
+          targets: wasm32-unknown-unknown
+          components: rustfmt, clippy
+
+      - name: Cache Rust artifacts
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            target/
+          key: rust-${{ runner.os }}-${{ hashFiles('rust-toolchain.toml') }}-${{ hashFiles('Cargo.lock') }}
+          restore-keys: |
+            rust-${{ runner.os }}-${{ hashFiles('rust-toolchain.toml') }}-
+
+      - name: Cache PocketIC binary
+        uses: actions/cache@v4
+        with:
+          path: ~/.local/share/icp-cli/pkg/
+          key: pocket-ic-${{ runner.os }}-v1
+
       - name: Install icp-cli
         run: npm install -g @icp-sdk/icp-cli @icp-sdk/ic-wasm
 

@@ -7,15 +7,24 @@ source "$(dirname "$0")/constants.sh"
 # Ensure we're in the project root directory
 cd "$REPO_ROOT"
 
+SKIP_BUILD=""
+for arg in "$@"; do
+  case $arg in
+    --skip-build) SKIP_BUILD="true" ;;
+  esac
+done
+
 echo "Setting up dashboard development environment..."
 
-echo "Deploying $HELLO_WORLD_CANISTER canister..."
-./scripts/prebuild-mcd.sh
-# Build hello-world frontend with test env vars (identity provider URL)
-# before the Rust canister embeds it via include_dir!
-npm run build --workspace=my-hello-world-frontend
-icp deploy "$HELLO_WORLD_CANISTER" -e local --identity ident-1 --cycles "$CANISTER_INITIAL_CYCLES"
-./scripts/copy-example-wasm.sh
+if [ "$SKIP_BUILD" != "true" ]; then
+  echo "Deploying $HELLO_WORLD_CANISTER canister..."
+  ./scripts/prebuild-mcd.sh
+  # Build hello-world frontend with test env vars (identity provider URL)
+  # before the Rust canister embeds it via include_dir!
+  npm run build --workspace=my-hello-world-frontend
+  icp deploy "$HELLO_WORLD_CANISTER" -e local --identity ident-1 --cycles "$CANISTER_INITIAL_CYCLES"
+  ./scripts/copy-example-wasm.sh
+fi
 
 # Update test.env with the hello-world canister ID
 HELLO_WORLD_ID=$(icp canister status my-hello-world -e local --id-only)
@@ -50,4 +59,4 @@ icp canister settings update "$HELLO_WORLD_CANISTER" -e local --identity ident-1
 echo "Setting authorized Internet Identity principal (Vite origin for first e2e batch)..."
 icp canister call "$HELLO_WORLD_CANISTER" manage_ii_principal "(variant { Set = principal \"$PRINCIPAL_VITE\" })" -e local --identity ident-1
 
-echo "✓ Dashboard development environment setup complete"
+echo "Dashboard development environment setup complete"

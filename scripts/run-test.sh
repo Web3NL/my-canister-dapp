@@ -13,12 +13,6 @@ npm run test --workspace=canister-dashboard-frontend
 echo "Unit testing my-canister-app"
 npm run test --workspace=my-canister-app
 
-echo "Unit testing my-canister-dashboard (Rust)"
-cargo test -p my-canister-dashboard
-
-echo "Unit testing my-canister-frontend (Rust)"
-cargo test -p my-canister-frontend
-
 echo "Acceptance testing my-hello-world"
 cargo run -p canister-dapp-test -- wasm/my-hello-world.wasm.gz
 

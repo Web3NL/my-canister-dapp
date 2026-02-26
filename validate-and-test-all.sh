@@ -22,7 +22,6 @@ for arg in "$@"; do
         --clean) CLEAN_FLAG="true" ;;
         --skip-checks) SKIP_CHECKS_FLAG="true" ;;
         --skip-bootstrap) SKIP_BOOTSTRAP_FLAG="true" ;;
-
         --skip-e2e) SKIP_E2E_FLAG="true" ;;
     esac
 done
@@ -66,11 +65,28 @@ set -a
 source tests/test.env
 set +a
 
-echo "Setting up dashboard dev environment..."
-./scripts/setup-dashboard-dev-env.sh
+# --- Phase 1: Build all frontend assets for Rust canister embedding ---
+echo "Building frontend assets..."
+./scripts/prebuild-mcd.sh
+npm run build --workspace=my-hello-world-frontend
+npm run build --workspace=my-notepad-frontend
 
+# --- Phase 2: Batch-build all Rust canister wasms ---
+echo "Batch-building all canister wasms..."
+./scripts/build-all-wasm.sh
+
+# --- Phase 3: Deploy canisters using prebuilt wasms ---
 echo "Deploying wasm-registry canister..."
-icp deploy wasm-registry -e local --identity ident-1 --cycles "$CANISTER_INITIAL_CYCLES"
+icp canister create wasm-registry -e local --identity ident-1 --cycles "$CANISTER_INITIAL_CYCLES"
+icp canister install wasm-registry --wasm wasm/wasm-registry.wasm.gz -e local --identity ident-1
+
+echo "Deploying my-hello-world canister..."
+icp canister create my-hello-world -e local --identity ident-1 --cycles "$CANISTER_INITIAL_CYCLES"
+icp canister install my-hello-world --wasm wasm/my-hello-world.wasm.gz -e local --identity ident-1
+
+# --- Phase 4: Dashboard setup (II principals, controllers) ---
+echo "Setting up dashboard dev environment..."
+./scripts/setup-dashboard-dev-env.sh --skip-build
 
 echo "Uploading my-hello-world WASM to registry..."
 ./scripts/upload-wasm-to-registry.sh \
@@ -81,17 +97,8 @@ echo "Uploading my-hello-world WASM to registry..."
   -e local --identity ident-1
 
 echo "Deploying my-notepad canister..."
-npm run build --workspace=my-notepad-frontend
-icp deploy my-notepad -e local --identity ident-1 --cycles "$CANISTER_INITIAL_CYCLES"
-
-echo "Copying my-notepad WASM to registry..."
-NOTEPAD_WASM="target/wasm32-unknown-unknown/release/deps/my_notepad.wasm"
-NOTEPAD_TMPDIR=$(mktemp -d)
-ic-wasm "$NOTEPAD_WASM" -o "$NOTEPAD_TMPDIR/my-notepad.wasm" shrink
-gzip -9 "$NOTEPAD_TMPDIR/my-notepad.wasm"
-mkdir -p wasm
-cp "$NOTEPAD_TMPDIR/my-notepad.wasm.gz" wasm/my-notepad.wasm.gz
-rm -rf "$NOTEPAD_TMPDIR"
+icp canister create my-notepad -e local --identity ident-1 --cycles "$CANISTER_INITIAL_CYCLES"
+icp canister install my-notepad --wasm wasm/my-notepad.wasm.gz -e local --identity ident-1
 
 echo "Uploading my-notepad WASM to registry..."
 ./scripts/upload-wasm-to-registry.sh \
