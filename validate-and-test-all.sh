@@ -79,6 +79,11 @@ wait $pid_mcd $pid_hw $pid_np
 echo "Batch-building all canister wasms..."
 ./scripts/build-all-wasm.sh
 
+# Pre-compile acceptance test binary in background (no wasm needed at compile time)
+echo "Pre-compiling canister-dapp-test..."
+cargo build -p canister-dapp-test &
+pid_cdt=$!
+
 # --- Phase 3: Deploy canisters using prebuilt wasms ---
 echo "Deploying wasm-registry canister..."
 icp canister create wasm-registry -e local --identity ident-1 --cycles "$CANISTER_INITIAL_CYCLES"
@@ -137,6 +142,8 @@ source tests/test.env
 set +a
 
 echo "Running tests..."
+wait $pid_cdt
+echo "canister-dapp-test compiled"
 ./scripts/run-test.sh
 
 if [ "$SKIP_E2E_FLAG" != "true" ]; then
