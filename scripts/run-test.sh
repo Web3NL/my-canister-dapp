@@ -15,6 +15,7 @@ wait $pid1 $pid2 $pid3 $pid4
 echo "JS unit tests passed"
 
 # Acceptance tests run sequentially (each uses PocketIC)
+# Use cargo run which reuses the pre-compiled binary from validate-and-test-all.sh
 echo "Acceptance testing my-hello-world"
 cargo run -p canister-dapp-test -- wasm/my-hello-world.wasm.gz
 

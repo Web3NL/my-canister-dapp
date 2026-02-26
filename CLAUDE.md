@@ -90,6 +90,7 @@ npm run deps:fix              # Auto-fix dependency consistency
 ```sh
 ./scripts/run-test.sh         # All unit tests (JS vitest + Rust cargo test + acceptance)
 ./scripts/run-test-e2e.sh     # E2E tests only (Playwright, requires running local network)
+                              #   --skip-vite-e2e: skip Vite dev server batch (auto in CI)
 ./validate-and-test-all.sh    # Full pipeline: checks + local network + deploy + all tests
 ```
 

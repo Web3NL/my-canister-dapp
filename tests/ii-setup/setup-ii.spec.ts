@@ -1,6 +1,6 @@
 import { test } from '@playwright/test';
-import { saveTestData, getTestEnv } from '../../tests/helpers.js';
-import { handleIIPopup } from '../../tests/ii-helpers.js';
+import { saveTestData, getTestEnv } from '../helpers.js';
+import { handleIIPopup } from '../ii-helpers.js';
 import { readFileSync } from 'fs';
 import { resolve, dirname } from 'path';
 import { fileURLToPath } from 'url';
