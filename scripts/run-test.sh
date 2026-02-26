@@ -1,24 +1,20 @@
 #!/bin/bash
 set -euo pipefail
 
-echo "Unit testing my-canister-dashboard"
-npm run test --workspace=@web3nl/my-canister-dashboard
+# Run JS unit tests in parallel
+echo "Running JS unit tests in parallel..."
+npm run test --workspace=@web3nl/my-canister-dashboard &
+pid1=$!
+npm run test --workspace=@web3nl/vite-plugin-canister-dapp &
+pid2=$!
+npm run test --workspace=canister-dashboard-frontend &
+pid3=$!
+npm run test --workspace=my-canister-app &
+pid4=$!
+wait $pid1 $pid2 $pid3 $pid4
+echo "JS unit tests passed"
 
-echo "Unit testing vite-plugin-canister-dapp"
-npm run test --workspace=@web3nl/vite-plugin-canister-dapp
-
-echo "Unit testing canister-dashboard-frontend"
-npm run test --workspace=canister-dashboard-frontend
-
-echo "Unit testing my-canister-app"
-npm run test --workspace=my-canister-app
-
-echo "Unit testing my-canister-dashboard (Rust)"
-cargo test -p my-canister-dashboard
-
-echo "Unit testing my-canister-frontend (Rust)"
-cargo test -p my-canister-frontend
-
+# Acceptance tests run sequentially (each uses PocketIC)
 echo "Acceptance testing my-hello-world"
 cargo run -p canister-dapp-test -- wasm/my-hello-world.wasm.gz
 
