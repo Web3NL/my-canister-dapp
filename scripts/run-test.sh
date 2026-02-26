@@ -1,8 +1,9 @@
 #!/bin/bash
 set -euo pipefail
 
-# Run JS unit tests in parallel
-echo "Running JS unit tests in parallel..."
+# Run all unit tests (JS + Rust) in parallel, then acceptance tests sequentially.
+
+echo "Running unit tests (JS + Rust) in parallel..."
 npm run test --workspace=@web3nl/my-canister-dashboard &
 pid1=$!
 npm run test --workspace=@web3nl/vite-plugin-canister-dapp &
@@ -11,11 +12,13 @@ npm run test --workspace=canister-dashboard-frontend &
 pid3=$!
 npm run test --workspace=my-canister-app &
 pid4=$!
-wait $pid1 $pid2 $pid3 $pid4
-echo "JS unit tests passed"
+cargo test --workspace --exclude canister-dapp-test &
+pid5=$!
+wait $pid1 $pid2 $pid3 $pid4 $pid5
+echo "Unit tests passed"
 
 # Acceptance tests run sequentially (each uses PocketIC)
-# Use cargo run which reuses the pre-compiled binary from validate-and-test-all.sh
+# Uses cargo run which reuses the pre-compiled binary from 03-build.sh
 echo "Acceptance testing my-hello-world"
 cargo run -p canister-dapp-test -- wasm/my-hello-world.wasm.gz
 

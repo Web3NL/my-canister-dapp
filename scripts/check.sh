@@ -1,32 +1,8 @@
 #!/bin/bash
 set -euo pipefail
 
-echo "Running prerelease validation checks..."
+# Backward-compatible wrapper — delegates to 01-check.sh.
+# Kept because it is referenced as a Cargo pre-release hook
+# (packages-rs/my-canister-dashboard/Cargo.toml) and in CLAUDE.md.
 
-echo "Installing dependencies..."
-npm ci
-
-echo "Building all workspace packages..."
-npm run build
-
-# Run JS checks, dependency checks, and Rust checks in parallel
-echo "Running checks in parallel (JS + deps + Rust)..."
-
-npm run check &
-pid_js=$!
-
-npm run deps:check &
-pid_deps=$!
-
-./scripts/rust-lint-format.sh &
-pid_rust=$!
-
-# Wait for each — set -e will exit on first failure
-wait $pid_js
-echo "JS checks passed"
-wait $pid_deps
-echo "Dependency checks passed"
-wait $pid_rust
-echo "Rust checks passed"
-
-echo "Validation checks complete!"
+exec "$(dirname "$0")/01-check.sh" "$@"
