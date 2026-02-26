@@ -29,7 +29,6 @@ declarations/                 Generated Candid interface bindings (icp-index)
 test-fixtures/                Test setup (II configuration)
 test-output/                  Runtime test artifacts (derived principals, etc.)
 wasm/                         Built wasm files for deployment/testing
-bin/                          Binary tools (didc)
 .github/workflows/            CI/CD pipelines
 ```
 
