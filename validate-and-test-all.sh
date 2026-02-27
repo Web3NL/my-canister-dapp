@@ -4,14 +4,15 @@ set -euo pipefail
 # Full validation pipeline: check → bootstrap → build → deploy → test.
 #
 # Flags:
-#   --clean           Clean build artifacts first
-#   --skip-checks     Skip lint/format/typecheck phase
-#   --skip-bootstrap  Reuse existing local network
-#   --skip-e2e        Skip E2E tests
+#   --clean              Clean build artifacts first
+#   --skip-checks        Skip lint/format/typecheck phase
+#   --skip-bootstrap     Reuse existing local network
+#   --skip-e2e           Skip E2E tests
+#   --include-vite-e2e   Force Vite E2E tests (even in CI)
 #
 # Behavior:
 #   Local:  runs all phases including Vite E2E tests
-#   CI:     auto-skips Vite E2E (CI=true detected)
+#   CI:     auto-skips Vite E2E unless --include-vite-e2e is passed
 
 source "$(dirname "$0")/scripts/constants.sh"
 
@@ -27,6 +28,7 @@ CLEAN_FLAG=""
 SKIP_CHECKS_FLAG=""
 SKIP_BOOTSTRAP_FLAG=""
 SKIP_E2E_FLAG=""
+INCLUDE_VITE_E2E_FLAG=""
 
 for arg in "$@"; do
     case $arg in
@@ -34,6 +36,7 @@ for arg in "$@"; do
         --skip-checks) SKIP_CHECKS_FLAG="true" ;;
         --skip-bootstrap) SKIP_BOOTSTRAP_FLAG="true" ;;
         --skip-e2e) SKIP_E2E_FLAG="true" ;;
+        --include-vite-e2e) INCLUDE_VITE_E2E_FLAG="true" ;;
     esac
 done
 
@@ -71,8 +74,8 @@ echo "canister-dapp-test compiled"
 TEST_ARGS=""
 if [ "$SKIP_E2E_FLAG" = "true" ]; then
     TEST_ARGS="--skip-e2e"
-elif [ "${CI:-}" != "true" ]; then
-    # Local runs include Vite E2E; CI skips it
+elif [ "$INCLUDE_VITE_E2E_FLAG" = "true" ] || [ "${CI:-}" != "true" ]; then
+    # Include Vite E2E when explicitly requested or running locally
     TEST_ARGS="--include-vite-e2e"
 fi
 ./scripts/05-test.sh $TEST_ARGS

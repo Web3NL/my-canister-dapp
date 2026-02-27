@@ -11,3 +11,5 @@ jobs:
   release:
     name: Release Build
     uses: ./.github/workflows/shared-build.yml
+    with:
+      include-vite-e2e: true
