@@ -1,10 +1,12 @@
 import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react';
 import { fileURLToPath, URL } from 'url';
 import { canisterDappEnvironmentConfig } from '@web3nl/vite-plugin-canister-dapp';
 
 export default defineConfig(() => {
   return {
     plugins: [
+      react(),
       canisterDappEnvironmentConfig({
         viteDevCanisterId: process.env.VITE_MY_NOTEPAD_CANISTER_ID || '',
       })
