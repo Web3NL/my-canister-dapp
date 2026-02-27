@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-02-27
+
 ### Fixed
 
 - Use display formatting (`{e}`) instead of debug formatting (`{e:?}`) in asset certification error message
