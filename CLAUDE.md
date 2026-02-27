@@ -99,6 +99,7 @@ npm run deps:fix              # Auto-fix dependency consistency
 - `--skip-checks` — skip lint/format/typecheck
 - `--skip-bootstrap` — skip local network setup (reuse existing)
 - `--skip-e2e` — skip E2E tests
+- `--include-vite-e2e` — force Vite E2E tests (even in CI)
 
 **Pipeline phases** (each independently runnable):
 ```sh
@@ -136,11 +137,11 @@ npm run release:publish       # Publish npm packages + push git tags
 
 | Workflow | Trigger | Purpose |
 |----------|---------|---------|
-| `pr.yml` | Pull requests to main | Full validation (build + test + E2E) |
-| `ci.yml` | Git tags / manual | Release build (same validation) |
+| `pr.yml` | Pull requests to main | Validation (build + test + E2E, skips Vite E2E) |
+| `ci.yml` | Push to main / tags / manual | Full validation (includes Vite E2E) |
 | `publish-docs.yml` | npm package tags | Build TypeDoc + deploy to GitHub Pages |
 
-All use `shared-build.yml` which runs `./validate-and-test-all.sh` on ubuntu-latest with icp-cli and a local ICP network (PocketIC with NNS + II).
+Both `pr.yml` and `ci.yml` use `shared-build.yml` which runs `./validate-and-test-all.sh` on ubuntu-latest with icp-cli and a local ICP network (PocketIC with NNS + II). The `ci.yml` workflow passes `include-vite-e2e: true` for the most complete validation on main.
 
 ## Testing Architecture
 

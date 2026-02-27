@@ -2,6 +2,11 @@ name: Shared Build and Test
 
 on:
   workflow_call:
+    inputs:
+      include-vite-e2e:
+        description: 'Include Vite dev server E2E tests'
+        type: boolean
+        default: false
 
 jobs:
   build-and-test:
@@ -24,7 +29,7 @@ jobs:
       - name: Install Rust toolchain
         uses: dtolnay/rust-toolchain@master
         with:
-          toolchain: '1.88.0'
+          toolchain: '1.93.1'
           targets: wasm32-unknown-unknown
           components: rustfmt, clippy
 
@@ -59,4 +64,4 @@ jobs:
           getent hosts localhost || true
 
       - name: Build, validate and run tests (E2E)
-        run: ./validate-and-test-all.sh
+        run: ./validate-and-test-all.sh ${{ inputs.include-vite-e2e && '--include-vite-e2e' || '' }}
