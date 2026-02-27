@@ -66,8 +66,27 @@ export const idlFactory = ({ IDL }) => {
     'title' : IDL.Text,
     'content' : IDL.Text,
     'created_at' : IDL.Nat64,
+    'updated_at' : IDL.Nat64,
+    'color' : IDL.Text,
+    'pinned' : IDL.Bool,
+  });
+  const AddNoteArg = IDL.Record({
+    'title' : IDL.Text,
+    'content' : IDL.Text,
+    'color' : IDL.Opt(IDL.Text),
   });
   const AddNoteResult = IDL.Variant({
+    'Ok' : Note,
+    'Err' : IDL.Text,
+  });
+  const UpdateNoteArg = IDL.Record({
+    'id' : IDL.Nat32,
+    'title' : IDL.Opt(IDL.Text),
+    'content' : IDL.Opt(IDL.Text),
+    'color' : IDL.Opt(IDL.Text),
+    'pinned' : IDL.Opt(IDL.Bool),
+  });
+  const UpdateNoteResult = IDL.Variant({
     'Ok' : Note,
     'Err' : IDL.Text,
   });
@@ -76,7 +95,7 @@ export const idlFactory = ({ IDL }) => {
     'Err' : IDL.Text,
   });
   return IDL.Service({
-    'add_note' : IDL.Func([IDL.Text, IDL.Text], [AddNoteResult], []),
+    'add_note' : IDL.Func([AddNoteArg], [AddNoteResult], []),
     'delete_note' : IDL.Func([IDL.Nat32], [DeleteNoteResult], []),
     'get_notes' : IDL.Func([], [IDL.Vec(Note)], ['query']),
     'http_request' : IDL.Func([HttpRequest], [HttpResponse], ['query']),
@@ -95,6 +114,7 @@ export const idlFactory = ({ IDL }) => {
         [ManageTopUpRuleResult],
         [],
       ),
+    'update_note' : IDL.Func([UpdateNoteArg], [UpdateNoteResult], []),
     'wasm_status' : IDL.Func([], [WasmStatus], ['query']),
   });
 };

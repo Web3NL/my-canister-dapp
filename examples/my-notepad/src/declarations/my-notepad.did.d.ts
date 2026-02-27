@@ -53,13 +53,30 @@ export interface Note {
   'title' : string,
   'content' : string,
   'created_at' : bigint,
+  'updated_at' : bigint,
+  'color' : string,
+  'pinned' : boolean,
+}
+export interface AddNoteArg {
+  'title' : string,
+  'content' : string,
+  'color' : [] | [string],
 }
 export type AddNoteResult = { 'Ok' : Note } |
+  { 'Err' : string };
+export interface UpdateNoteArg {
+  'id' : number,
+  'title' : [] | [string],
+  'content' : [] | [string],
+  'color' : [] | [string],
+  'pinned' : [] | [boolean],
+}
+export type UpdateNoteResult = { 'Ok' : Note } |
   { 'Err' : string };
 export type DeleteNoteResult = { 'Ok' : null } |
   { 'Err' : string };
 export interface _SERVICE {
-  'add_note' : ActorMethod<[string, string], AddNoteResult>,
+  'add_note' : ActorMethod<[AddNoteArg], AddNoteResult>,
   'delete_note' : ActorMethod<[number], DeleteNoteResult>,
   'get_notes' : ActorMethod<[], Array<Note>>,
   'http_request' : ActorMethod<[HttpRequest], HttpResponse>,
@@ -75,6 +92,7 @@ export interface _SERVICE {
     [ManageTopUpRuleArg],
     ManageTopUpRuleResult
   >,
+  'update_note' : ActorMethod<[UpdateNoteArg], UpdateNoteResult>,
   'wasm_status' : ActorMethod<[], WasmStatus>,
 }
 export declare const idlFactory: IDL.InterfaceFactory;

@@ -76,10 +76,32 @@ type Note = record {
   id : nat32;
   title : text;
   content : text;
-  created_at : nat64
+  created_at : nat64;
+  updated_at : nat64;
+  color : text;
+  pinned : bool
+};
+
+type AddNoteArg = record {
+  title : text;
+  content : text;
+  color : opt text
 };
 
 type AddNoteResult = variant {
+  Ok : Note;
+  Err : text
+};
+
+type UpdateNoteArg = record {
+  id : nat32;
+  title : opt text;
+  content : opt text;
+  color : opt text;
+  pinned : opt bool
+};
+
+type UpdateNoteResult = variant {
   Ok : Note;
   Err : text
 };
@@ -96,6 +118,7 @@ service : {
   "manage_alternative_origins" : (ManageAlternativeOriginsArg) -> (ManageAlternativeOriginsResult);
   "manage_top_up_rule" : (ManageTopUpRuleArg) -> (ManageTopUpRuleResult);
   "get_notes" : () -> (vec Note) query;
-  "add_note" : (text, text) -> (AddNoteResult);
+  "add_note" : (AddNoteArg) -> (AddNoteResult);
+  "update_note" : (UpdateNoteArg) -> (UpdateNoteResult);
   "delete_note" : (nat32) -> (DeleteNoteResult)
 }
