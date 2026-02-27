@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.11.1] - 2026-02-27
+
 ### Fixed
 
 - User-friendly log output: added `Display` impls for `TopUpInterval` and `NotifyError`, replaced debug formatting (`{:?}`) with display formatting in all log and error messages
