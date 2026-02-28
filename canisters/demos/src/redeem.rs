@@ -10,13 +10,32 @@ use crate::wasm_registry;
 pub async fn redeem_code(code: String, wasm_name: String) -> RedeemResult {
     let caller = ic_cdk::api::msg_caller();
 
-    // 1. Validate code is Available
-    let code_valid = storage::with_state(|s| {
-        s.access_codes
-            .get(&code)
-            .is_some_and(|ac| matches!(ac.status, AccessCodeStatus::Available))
+    // Input validation
+    if wasm_name.is_empty() || wasm_name.len() > 100 {
+        return RedeemResult::Err("Invalid wasm name".to_string());
+    }
+
+    // 1. Atomically claim the code (prevents TOCTOU race across await points)
+    let claimed = storage::with_state_mut(|s| {
+        let ac = s
+            .access_codes
+            .get_mut(&code)
+            .filter(|ac| matches!(ac.status, AccessCodeStatus::Available));
+        match ac {
+            Some(ac) => {
+                ac.status = AccessCodeStatus::Redeemed {
+                    canister_id: Principal::anonymous(), // placeholder until canister assigned
+                    service_principal: caller,
+                    dapp_principal: None,
+                    wasm_name: wasm_name.clone(),
+                };
+                ac.redeemed_at = Some(ic_cdk::api::time());
+                true
+            }
+            None => false,
+        }
     });
-    if !code_valid {
+    if !claimed {
         return RedeemResult::Err("Invalid or already used access code".to_string());
     }
 
@@ -27,13 +46,17 @@ pub async fn redeem_code(code: String, wasm_name: String) -> RedeemResult {
             .map(|c| (c.wasm_registry_id, c.installer_origin.clone()))
     }) {
         Some(config) => config,
-        None => return RedeemResult::Err("Demos canister not configured".to_string()),
+        None => {
+            reset_code_to_available(&code);
+            return RedeemResult::Err("Demos canister not configured".to_string());
+        }
     };
 
     // 3. Take canister from pool
     let canister_id = match pool::take_from_pool() {
         Some(id) => id,
         None => {
+            reset_code_to_available(&code);
             return RedeemResult::Err("No demo canisters available. Try again later.".to_string());
         }
     };
@@ -42,8 +65,8 @@ pub async fn redeem_code(code: String, wasm_name: String) -> RedeemResult {
     let wasm_bytes = match wasm_registry::fetch_wasm_bytes(registry_id, &wasm_name).await {
         Ok(bytes) => bytes,
         Err(e) => {
-            // Return canister to pool on failure
             let _ = pool::return_to_pool(canister_id).await;
+            reset_code_to_available(&code);
             return RedeemResult::Err(format!("Failed to fetch wasm: {e}"));
         }
     };
@@ -51,21 +74,18 @@ pub async fn redeem_code(code: String, wasm_name: String) -> RedeemResult {
     // 5. Install wasm on demo canister
     if let Err(e) = ic_management::install_code(canister_id, wasm_bytes, vec![0]).await {
         let _ = pool::return_to_pool(canister_id).await;
+        reset_code_to_available(&code);
         return RedeemResult::Err(format!("Failed to install wasm: {e}"));
     }
 
-    // 6. Add installer origin to alternative origins
+    // 6. Add installer origin to alternative origins (fatal — user can't auth without it)
     if let Err(e) = dashboard_calls::add_alternative_origin(canister_id, installer_origin).await {
-        // Non-fatal but log it — the II auth step might fail later
-        ic_cdk::println!(
-            "redeem: warning - failed to add alternative origin to {}: {}",
-            canister_id,
-            e
-        );
+        let _ = pool::return_to_pool(canister_id).await;
+        reset_code_to_available(&code);
+        return RedeemResult::Err(format!("Failed to configure demo canister: {e}"));
     }
 
-    // 7. Update access code status (partial — no dapp_principal yet)
-    let now = ic_cdk::api::time();
+    // 7. Finalize the code status with the actual canister_id
     storage::with_state_mut(|s| {
         if let Some(ac) = s.access_codes.get_mut(&code) {
             ac.status = AccessCodeStatus::Redeemed {
@@ -74,7 +94,6 @@ pub async fn redeem_code(code: String, wasm_name: String) -> RedeemResult {
                 dapp_principal: None,
                 wasm_name: wasm_name.clone(),
             };
-            ac.redeemed_at = Some(now);
         }
     });
 
@@ -87,6 +106,16 @@ pub async fn redeem_code(code: String, wasm_name: String) -> RedeemResult {
     );
 
     RedeemResult::Ok { canister_id }
+}
+
+/// Reset an access code back to Available after a failed redemption attempt.
+fn reset_code_to_available(code: &str) {
+    storage::with_state_mut(|s| {
+        if let Some(ac) = s.access_codes.get_mut(code) {
+            ac.status = AccessCodeStatus::Available;
+            ac.redeemed_at = None;
+        }
+    });
 }
 
 /// Finalize a demo after the user has completed remote II authentication.

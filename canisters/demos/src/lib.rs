@@ -23,31 +23,64 @@ use storage::{
 #[init]
 fn init() {}
 
+/// Stable memory layout: [8-byte LE length][CBOR bytes]
+const STABLE_HEADER_BYTES: u64 = 8;
+const WASM_PAGE_SIZE: u64 = 65536;
+
 #[pre_upgrade]
 fn pre_upgrade() {
     timers::stop_timers();
     let bytes = storage::with_state(|s| serde_cbor::to_vec(s).expect("failed to serialize state"));
-    ic_cdk::stable::stable_grow(
-        bytes.len().div_ceil(8) as u64, // pages needed (round up to 8-byte boundary)
-    )
-    .expect("failed to grow stable memory");
-    ic_cdk::stable::stable_write(0, &bytes);
+
+    let total = STABLE_HEADER_BYTES + bytes.len() as u64;
+    let needed_pages = total.div_ceil(WASM_PAGE_SIZE);
+    let current_pages = ic_cdk::stable::stable_size();
+    if needed_pages > current_pages {
+        ic_cdk::stable::stable_grow(needed_pages - current_pages)
+            .expect("failed to grow stable memory");
+    }
+
+    ic_cdk::stable::stable_write(0, &(bytes.len() as u64).to_le_bytes());
+    ic_cdk::stable::stable_write(STABLE_HEADER_BYTES, &bytes);
 }
 
 #[post_upgrade]
 fn post_upgrade() {
-    let len = ic_cdk::stable::stable_size() * 65536; // pages -> bytes
-    if len > 0 {
-        let mut bytes = vec![0u8; len as usize];
-        ic_cdk::stable::stable_read(0, &mut bytes);
-        // Trim trailing zeros for serde_cbor
-        if let Some(pos) = bytes.iter().rposition(|&b| b != 0) {
-            bytes.truncate(pos + 1);
-        }
-        if !bytes.is_empty() {
+    let stable_pages = ic_cdk::stable::stable_size();
+    if stable_pages > 0 {
+        let total_stable_bytes = stable_pages * WASM_PAGE_SIZE;
+
+        // Read candidate length header (new format stores u64 LE length at offset 0)
+        let mut len_buf = [0u8; 8];
+        ic_cdk::stable::stable_read(0, &mut len_buf);
+        let candidate_len = u64::from_le_bytes(len_buf);
+
+        // Heuristic: new format has a small length (< 10 MB) that fits in stable memory.
+        // Legacy format has raw CBOR at offset 0 whose first 8 bytes decode to a huge u64.
+        if candidate_len > 0
+            && candidate_len < 10_000_000
+            && candidate_len + STABLE_HEADER_BYTES <= total_stable_bytes
+        {
+            // New format: [8-byte LE length][CBOR bytes]
+            let len = candidate_len as usize;
+            let mut bytes = vec![0u8; len];
+            ic_cdk::stable::stable_read(STABLE_HEADER_BYTES, &mut bytes);
             let state: storage::DemosState =
                 serde_cbor::from_slice(&bytes).expect("failed to deserialize state");
             storage::STATE.with(|s| *s.borrow_mut() = state);
+        } else {
+            // Legacy format: raw CBOR written at offset 0, trailing zeros trimmed
+            let read_limit = total_stable_bytes.min(10_000_000) as usize;
+            let mut bytes = vec![0u8; read_limit];
+            ic_cdk::stable::stable_read(0, &mut bytes);
+            if let Some(pos) = bytes.iter().rposition(|&b| b != 0) {
+                bytes.truncate(pos + 1);
+            }
+            if !bytes.is_empty() {
+                let state: storage::DemosState =
+                    serde_cbor::from_slice(&bytes).expect("failed to deserialize legacy state");
+                storage::STATE.with(|s| *s.borrow_mut() = state);
+            }
         }
     }
     timers::start_timers();
@@ -59,6 +92,19 @@ fn post_upgrade() {
 
 #[update(guard = "guards::only_controllers")]
 fn configure(config: DemosConfig) -> GenericResult {
+    if config.trial_duration_ns == 0 {
+        return GenericResult::Err("trial_duration_ns must be > 0".to_string());
+    }
+    if config.pool_target_size == 0 {
+        return GenericResult::Err("pool_target_size must be > 0".to_string());
+    }
+    if config.cycles_per_demo_canister < 500_000_000_000 {
+        return GenericResult::Err("cycles_per_demo_canister must be >= 0.5T".to_string());
+    }
+    if config.installer_origin.is_empty() {
+        return GenericResult::Err("installer_origin must not be empty".to_string());
+    }
+
     storage::with_state_mut(|s| {
         s.config = Some(config);
     });
