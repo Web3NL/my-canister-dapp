@@ -31,6 +31,13 @@ DEMOS_CYCLES="5000000000000"
 icp canister create demos -e local --identity ident-1 --cycles "$DEMOS_CYCLES"
 icp canister install demos --wasm wasm/demos.wasm.gz -e local --identity ident-1
 
+# Create my-canister-app canister early so its ID is available for II principal derivation
+echo "Creating my-canister-app canister..."
+icp canister create my-canister-app -e local --identity ident-1 --cycles "$CANISTER_INITIAL_CYCLES"
+
+# Re-write test.env so the my-canister-app canister ID is discoverable
+./scripts/write-test-env.sh
+
 # --- Dashboard setup (II principals, controllers) ---
 echo "Setting up dashboard dev environment..."
 ./scripts/setup-dashboard-dev-env.sh
