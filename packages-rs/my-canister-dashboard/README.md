@@ -5,7 +5,7 @@
 [![Build Status](https://github.com/Web3NL/my-canister-dapp/workflows/Release/badge.svg)](https://github.com/Web3NL/my-canister-dapp/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
 
-Dashboard assets and management utilities for Internet Computer Canister Dapps.
+Dashboard assets and management utilities for user-owned dapps on the Internet Computer.
 
 Integrates with [`AssetRouter`](https://docs.rs/ic-asset-certification/latest/ic_asset_certification/struct.AssetRouter.html) for asset certification.
 

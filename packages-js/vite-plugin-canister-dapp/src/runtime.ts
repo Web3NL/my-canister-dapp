@@ -36,7 +36,7 @@ function detectDevModeFromOrigin(): boolean {
 }
 
 /**
- * Infer the canister dapp environment at runtime based on URL origin
+ * Infer the user-owned dapp environment at runtime based on URL origin
  *
  * This helper function automatically determines the environment configuration by
  * analyzing the current URL origin. It returns the development configuration if

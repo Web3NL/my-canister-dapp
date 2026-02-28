@@ -1,7 +1,7 @@
 /**
  * @web3nl/vite-plugin-canister-dapp
  *
- * A Vite plugin for Internet Computer Canister Dapp environment configuration.
+ * A Vite plugin for Internet Computer user-owned dapp environment configuration.
  *
  * This plugin enables building a single WASM/frontend that works in all environments by:
  * - Embedding both development and production configurations at build time

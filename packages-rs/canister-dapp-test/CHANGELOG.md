@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Changed
+
+- Updated terminology: "canister dapp" → "user-owned dapp" in documentation and doc comments
+
 ### Added
 
 - Security header validation: all 8 security/privacy headers verified on frontend fallback responses

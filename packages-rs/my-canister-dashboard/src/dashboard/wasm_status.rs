@@ -1,7 +1,7 @@
 use candid::CandidType;
 use serde::{Deserialize, Serialize};
 
-/// Status information for a Canister Dapp's WASM module.
+/// Status information for a user-owned dapp's WASM module.
 ///
 /// # Example
 ///
@@ -20,7 +20,7 @@ use serde::{Deserialize, Serialize};
 /// ```
 #[derive(CandidType, Serialize, Deserialize, Clone, Debug, PartialEq, Eq)]
 pub struct WasmStatus {
-    /// Name of the Canister Dapp.
+    /// Name of the user-owned dapp.
     pub name: String,
     /// Version number of the WASM.
     pub version: u16,

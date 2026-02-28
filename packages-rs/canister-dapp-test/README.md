@@ -5,7 +5,7 @@
 [![Build Status](https://github.com/Web3NL/my-canister-dapp/workflows/Release/badge.svg)](https://github.com/Web3NL/my-canister-dapp/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
 
-Acceptance suite for canister dapps built with [`my-canister-dashboard`](https://crates.io/crates/my-canister-dashboard).
+Acceptance suite for user-owned dapps built with [`my-canister-dashboard`](https://crates.io/crates/my-canister-dashboard).
 
 Validates that a WASM module correctly implements every endpoint in the dashboard interface:
 

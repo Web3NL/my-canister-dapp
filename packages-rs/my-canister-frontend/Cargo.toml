@@ -1,7 +1,7 @@
 [package]
 name = "my-canister-frontend"
 version = "0.3.0"
-description = "Frontend asset utilities Canister Dapps"
+description = "Frontend asset utilities for user-owned dapps on the Internet Computer"
 documentation = "https://docs.rs/my-canister-frontend"
 readme = "README.md"
 keywords = ["internet-computer", "canister", "frontend", "assets", "dapp"]

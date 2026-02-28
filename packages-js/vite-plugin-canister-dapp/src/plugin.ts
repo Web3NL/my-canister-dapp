@@ -6,7 +6,7 @@ import {
 } from './constants.js';
 
 /**
- * Environment configuration interface for Internet Computer Canister Dapp
+ * Environment configuration interface for Internet Computer user-owned dapp
  */
 export interface CanisterDappEnvironmentConfig {
   /** Host URL for the Internet Computer API (e.g., http://localhost:8080 in dev, https://icp-api.io in prod) */
@@ -49,7 +49,7 @@ export interface CanisterDappEnvironmentPluginConfig {
 }
 
 /**
- * Vite plugin that provides Internet Computer Canister Dapp environment configuration
+ * Vite plugin that provides Internet Computer user-owned dapp environment configuration
  *
  * Features:
  * - Works in all build modes (development and production)
@@ -70,7 +70,7 @@ export interface CanisterDappEnvironmentPluginConfig {
  * - Providing canister ID inference with automatic URL-based detection and Vite dev server fallback
  *
  * This plugin is designed to:
- * - Enable runtime environment inference for any canister dapp frontend
+ * - Enable runtime environment inference for any user-owned dapp frontend
  * - Signal the environment to the canister dashboard (which shares the same environment)
  * - Support development of the dashboard frontend itself
  * - Provide canister ID inference that works in all deployment scenarios

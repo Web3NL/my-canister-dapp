@@ -2,7 +2,7 @@ use clap::Parser;
 use std::fs;
 use std::process;
 
-/// Acceptance suite for canister dapps built with my-canister-dashboard.
+/// Acceptance suite for user-owned dapps built with my-canister-dashboard.
 ///
 /// Validates that a WASM module correctly implements every endpoint
 /// defined in `my-canister-dashboard.did`.

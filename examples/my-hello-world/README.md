@@ -1,1 +1,1 @@
-# My Hello World Canister Dapp Example
+# My Hello World - User-Owned Dapp Example
