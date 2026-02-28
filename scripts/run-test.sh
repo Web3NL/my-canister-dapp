@@ -12,7 +12,7 @@ npm run test --workspace=canister-dashboard-frontend &
 pid3=$!
 npm run test --workspace=my-canister-app &
 pid4=$!
-cargo test --workspace --exclude canister-dapp-test &
+cargo test --workspace --exclude canister-dapp-test --exclude demos-test &
 pid5=$!
 wait $pid1 $pid2 $pid3 $pid4 $pid5
 echo "Unit tests passed"
@@ -24,3 +24,6 @@ cargo run -p canister-dapp-test -- wasm/my-hello-world.wasm.gz
 
 echo "Acceptance testing my-notepad"
 cargo run -p canister-dapp-test -- wasm/my-notepad.wasm.gz
+
+echo "Acceptance testing demos canister"
+cargo run -p demos-test

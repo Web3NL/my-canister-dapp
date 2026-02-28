@@ -36,6 +36,12 @@ if [ -n "$WASM_REGISTRY_ID" ]; then
   echo "VITE_WASM_REGISTRY_CANISTER_ID=${WASM_REGISTRY_ID}" >> tests/test.env
 fi
 
+# Add demos canister ID if it exists
+DEMOS_ID=$(icp canister status demos -e local --id-only 2>/dev/null || echo "")
+if [ -n "$DEMOS_ID" ]; then
+  echo "VITE_DEMOS_CANISTER_ID=${DEMOS_ID}" >> tests/test.env
+fi
+
 echo ""
 echo "System canisters ready:"
 echo "  - CMC:     rkp4c-7iaaa-aaaaa-aaaca-cai (NNS)"

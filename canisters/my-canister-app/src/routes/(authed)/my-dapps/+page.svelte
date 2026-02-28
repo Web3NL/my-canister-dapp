@@ -1,5 +1,6 @@
 <script lang="ts">
   import CreatedCanistersList from '$lib/components/my-dapps/CreatedCanistersList.svelte';
+  import ActiveDemosList from '$lib/components/my-dapps/ActiveDemosList.svelte';
   import { Card } from '@dfinity/gix-components';
 </script>
 
@@ -13,6 +14,8 @@
     <div class="install-icon">+</div>
   </Card>
 </a>
+
+<ActiveDemosList />
 
 <CreatedCanistersList />
 

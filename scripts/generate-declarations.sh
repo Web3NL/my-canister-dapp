@@ -50,3 +50,26 @@ else
 
   echo "Declarations generated in $REGISTRY_OUT"
 fi
+
+# --- demos ---
+DEMOS_DID="canisters/demos/demos.did"
+DEMOS_OUT="canisters/my-canister-app/src/lib/declarations/demos"
+
+if [[ ! -f "$DEMOS_DID" ]]; then
+  echo "Skipping demos declarations: $DEMOS_DID not found."
+else
+  TMPDIR="$(mktemp -d)"
+  npx icp-bindgen \
+    --did-file "$DEMOS_DID" \
+    --out-dir "$TMPDIR" \
+    --actor-disabled \
+    --force
+
+  mkdir -p "$DEMOS_OUT"
+  cp "$TMPDIR/declarations/"* "$DEMOS_OUT/"
+  rm -rf "$TMPDIR"
+
+  npx prettier --write "$DEMOS_OUT/"*.js "$DEMOS_OUT/"*.ts 2>/dev/null || true
+
+  echo "Declarations generated in $DEMOS_OUT"
+fi

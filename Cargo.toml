@@ -6,6 +6,8 @@ members = [
     "examples/my-hello-world/src/backend",
     "examples/my-notepad/src/backend",
     "canisters/wasm-registry",
+    "canisters/demos",
+    "packages-rs/demos-test",
 ]
 resolver = "2"
 

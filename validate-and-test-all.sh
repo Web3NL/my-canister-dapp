@@ -58,18 +58,18 @@ fi
 # --- Phase 3: Build ---
 ./scripts/03-build.sh
 
-# Pre-compile acceptance test binary in background while deploy runs
-echo "Pre-compiling canister-dapp-test..."
-cargo build -p canister-dapp-test &
+# Pre-compile acceptance test binaries in background while deploy runs
+echo "Pre-compiling acceptance test binaries..."
+cargo build -p canister-dapp-test -p demos-test &
 pid_cdt=$!
 
 # --- Phase 4: Deploy ---
 ./scripts/04-deploy.sh
 
 # --- Phase 5: Test ---
-echo "Waiting for canister-dapp-test compilation..."
+echo "Waiting for acceptance test compilation..."
 wait $pid_cdt
-echo "canister-dapp-test compiled"
+echo "Acceptance test binaries compiled"
 
 TEST_ARGS=""
 if [ "$SKIP_E2E_FLAG" = "true" ]; then
