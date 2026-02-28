@@ -8,6 +8,7 @@ members = [
     "canisters/wasm-registry",
     "canisters/demos",
     "tests/demos-test",
+    "packages-rs/my-canister-dapp-cli",
 ]
 resolver = "2"
 
@@ -36,3 +37,7 @@ sha2 = "0.10.9"
 num-traits = "0.2.19"
 clap = { version = "4", features = ["derive"] }
 flate2 = "1.1"
+anyhow = "1"
+tiny_http = "0.12"
+open = "5"
+canister-dapp-test = { path = "packages-rs/canister-dapp-test", version = "0.2.0" }

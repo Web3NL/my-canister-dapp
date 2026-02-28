@@ -60,7 +60,7 @@ fi
 
 # Pre-compile acceptance test binaries in background while deploy runs
 echo "Pre-compiling acceptance test binaries..."
-cargo build -p canister-dapp-test -p demos-test &
+cargo build -p my-canister-dapp-cli -p demos-test &
 pid_cdt=$!
 
 # --- Phase 4: Deploy ---
