@@ -7,6 +7,7 @@ use crate::icp::IcpCli;
 use super::page::generate_auth_page;
 
 /// Result of a successful authentication flow.
+#[derive(Debug)]
 pub struct AuthResult {
     /// The II-derived principal for the canister's origin.
     pub principal: String,
@@ -35,7 +36,10 @@ pub fn run_auth_flow(
 ) -> Result<AuthResult> {
     // Start server on random port
     let server = Server::http("127.0.0.1:0").map_err(|e| anyhow::anyhow!("{e}"))?;
-    let addr = server.server_addr().to_ip().expect("bound to IP address");
+    let addr = server
+        .server_addr()
+        .to_ip()
+        .ok_or_else(|| anyhow::anyhow!("Auth server did not bind to an IP address"))?;
     let port = addr.port();
     let cli_origin = format!("http://localhost:{port}");
     let callback_url = format!("{cli_origin}/callback");
@@ -338,5 +342,30 @@ mod tests {
             "POST /callback HTTP/1.1\r\nHost: localhost\r\nContent-Length: 9\r\n\r\n2vxsx-fae",
         );
         handle.join().unwrap().ok();
+    }
+
+    #[test]
+    fn server_times_out_without_callback() {
+        let server = Server::http("127.0.0.1:0").unwrap();
+        let addr = server.server_addr().to_ip().unwrap();
+        let port = addr.port();
+        let cli_origin = format!("http://localhost:{port}");
+
+        let handle = std::thread::spawn(move || {
+            serve_auth_requests(
+                server,
+                "<html></html>",
+                cli_origin,
+                Duration::from_millis(200),
+            )
+        });
+
+        // Wait for timeout without sending any callback
+        let result = handle.join().unwrap();
+        assert!(result.is_err());
+        assert!(
+            result.unwrap_err().to_string().contains("timed out"),
+            "expected timeout error"
+        );
     }
 }

@@ -9,7 +9,8 @@ packages-rs/                  Publishable Rust crates (crates.io)
   my-canister-dashboard/        Dashboard UI + management endpoints (embedded in user canisters)
     frontend/                   Svelte dashboard app (compiled into the Rust crate)
   my-canister-frontend/         Certified HTTP asset serving with security headers + gzip
-  canister-dapp-test/           Acceptance test harness — validates any dapp wasm via PocketIC
+  canister-dapp-test/           Acceptance test library — validates any dapp wasm via PocketIC
+  my-canister-dapp-cli/         CLI tool (`dapp`) for deploying + testing user-owned dapps
 
 packages-js/                  Publishable npm packages
   my-canister-dashboard-js/     JS utilities for interacting with dashboard endpoints
@@ -43,8 +44,11 @@ Developer builds a dapp using:
 User installs dapp via:
   my-canister-app (installer) ── browses wasm-registry, creates canister, installs wasm
 
+Developer deploys + tests via:
+  my-canister-dapp-cli (`dapp`) ── deploy to local/mainnet with II auth, run acceptance tests
+
 Testing validates via:
-  canister-dapp-test ── loads any wasm into PocketIC, runs acceptance checks
+  canister-dapp-test (library) ── loads any wasm into PocketIC, runs acceptance checks
   demos-test ── validates demos canister access code flow via PocketIC
   Playwright E2E ── tests full flows against local ICP network
 ```
@@ -54,7 +58,7 @@ Testing validates via:
 - **Backend**: Rust, ic-cdk, ic-http-certification, ic-asset-certification
 - **Frontend**: Svelte 5, SvelteKit, Vite 7, TypeScript
 - **Canister tooling**: icp-cli (`icp` command), PocketIC, ic-wasm
-- **Testing**: Vitest (unit), cargo test (Rust unit), canister-dapp-test (acceptance), Playwright (E2E)
+- **Testing**: Vitest (unit), cargo test (Rust unit), canister-dapp-test library via `dapp test` (acceptance), Playwright (E2E)
 - **CI**: GitHub Actions on ubuntu-latest with local ICP network
 - **Package management**: npm workspaces + Cargo workspace
 
@@ -152,7 +156,7 @@ Both `pr.yml` and `ci.yml` use `shared-build.yml` which runs `./validate-and-tes
 - Rust: `cargo test` per crate (my-canister-dashboard, my-canister-frontend)
 
 **Acceptance tests** — validate wasm behavior via PocketIC:
-- `cargo run -p canister-dapp-test -- wasm/<name>.wasm.gz`
+- `cargo run -p my-canister-dapp-cli -- test wasm/<name>.wasm.gz`
 - `cargo run -p demos-test`
 - Tests HTTP responses, security headers, dashboard endpoints, demos access code flow
 

@@ -14,6 +14,13 @@ pub fn generate_auth_page(
     derivation_origin: &str,
     callback_url: &str,
 ) -> String {
+    // Use serde_json to safely escape values embedded in JavaScript.
+    let config = serde_json::json!({
+        "identityProvider": ii_provider,
+        "derivationOrigin": derivation_origin,
+        "callbackUrl": callback_url,
+    });
+
     format!(
         r#"<!DOCTYPE html>
 <html>
@@ -72,11 +79,7 @@ pub fn generate_auth_page(
     <div id="status"></div>
   </div>
   <script>
-    window.CLI_AUTH_CONFIG = {{
-      identityProvider: "{ii_provider}",
-      derivationOrigin: "{derivation_origin}",
-      callbackUrl: "{callback_url}"
-    }};
+    window.CLI_AUTH_CONFIG = {config};
   </script>
   <script>{JS_BUNDLE}</script>
 </body>
@@ -128,31 +131,30 @@ mod tests {
 
     #[test]
     fn page_config_has_identity_provider() {
+        // serde_json outputs JSON keys with quotes
         assert!(
-            sample_page().contains(r#"identityProvider: "https://identity.internetcomputer.org""#)
+            sample_page().contains(r#""identityProvider":"https://identity.internetcomputer.org""#)
         );
     }
 
     #[test]
     fn page_config_has_derivation_origin() {
-        assert!(sample_page().contains(r#"derivationOrigin: "https://abc123.icp0.io""#));
+        assert!(sample_page().contains(r#""derivationOrigin":"https://abc123.icp0.io""#));
     }
 
     #[test]
     fn page_config_has_callback_url() {
-        assert!(sample_page().contains(r#"callbackUrl: "http://localhost:12345/callback""#));
+        assert!(sample_page().contains(r#""callbackUrl":"http://localhost:12345/callback""#));
     }
 
     #[test]
     fn page_embeds_js_bundle() {
         let page = sample_page();
-        // Count <script> tags — should be exactly 2 (config + bundle)
         let script_count = page.matches("<script>").count();
         assert_eq!(
             script_count, 2,
             "expected 2 <script> tags (config + bundle)"
         );
-        // The bundle script should contain the AuthClient class from @icp-sdk/auth
         assert!(
             page.contains("AuthClient"),
             "JS bundle should contain AuthClient"
@@ -175,10 +177,31 @@ mod tests {
         );
         assert!(
             page.contains(
-                r#"identityProvider: "http://rdmx6-jaaaa-aaaaa-aaadq-cai.localhost:8080""#
+                r#""identityProvider":"http://rdmx6-jaaaa-aaaaa-aaadq-cai.localhost:8080""#
             )
         );
-        assert!(page.contains(r#"derivationOrigin: "http://xyz.localhost:8080""#));
-        assert!(page.contains(r#"callbackUrl: "http://localhost:9999/callback""#));
+        assert!(page.contains(r#""derivationOrigin":"http://xyz.localhost:8080""#));
+        assert!(page.contains(r#""callbackUrl":"http://localhost:9999/callback""#));
+    }
+
+    #[test]
+    fn page_escapes_special_characters_in_values() {
+        // Verify that quotes in --ii-provider are JSON-escaped, preventing JS breakout
+        let page = generate_auth_page(
+            r#"https://evil.com";alert("xss");//"#,
+            "https://abc.icp0.io",
+            "http://localhost:8080/callback",
+        );
+        // serde_json escapes " as \" — the value stays inside the JSON string
+        assert!(page.contains(r#"alert(\"xss\")"#));
+        // The config is valid JSON (serde_json guarantees this), verify it parses
+        let config_start = page.find("CLI_AUTH_CONFIG = ").unwrap() + "CLI_AUTH_CONFIG = ".len();
+        let config_end = page[config_start..].find(";\n").unwrap() + config_start;
+        let config_json = &page[config_start..config_end];
+        let parsed: serde_json::Value = serde_json::from_str(config_json).unwrap();
+        assert_eq!(
+            parsed["identityProvider"],
+            r#"https://evil.com";alert("xss");//"#
+        );
     }
 }

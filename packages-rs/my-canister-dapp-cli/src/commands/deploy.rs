@@ -181,7 +181,11 @@ fn build_wasm(package: Option<&str>) -> Result<String> {
         .context("Failed to run cargo build")?;
 
     if !status.success() {
-        bail!("cargo build failed");
+        bail!(
+            "cargo build failed for '{package_name}'.\n\
+             Ensure the wasm32-unknown-unknown target is installed:\n  \
+             rustup target add wasm32-unknown-unknown"
+        );
     }
 
     // The cargo output uses underscores in filenames
@@ -204,7 +208,10 @@ fn build_wasm(package: Option<&str>) -> Result<String> {
         .context("Failed to run ic-wasm shrink")?;
 
     if !status.success() {
-        bail!("ic-wasm shrink failed");
+        bail!(
+            "ic-wasm shrink failed for '{raw_wasm}'.\n\
+             Check ic-wasm is up to date: cargo install ic-wasm"
+        );
     }
 
     // gzip

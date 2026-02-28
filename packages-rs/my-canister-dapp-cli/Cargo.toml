@@ -2,7 +2,6 @@
 name = "my-canister-dapp-cli"
 version = "0.1.0"
 description = "CLI for deploying and testing user-owned dapps on the Internet Computer"
-readme = "README.md"
 keywords = ["internet-computer", "canister", "cli", "deploy", "dapp"]
 categories = ["command-line-utilities", "development-tools"]
 edition = { workspace = true }
