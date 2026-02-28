@@ -24,7 +24,8 @@ examples/                     Example dapps (used for testing and as developer t
   my-notepad/                   Notepad example — persistent storage
 
 scripts/                      Shell scripts for build, test, deploy, publish
-tests/                        E2E tests (Playwright) + shared helpers
+tests/                        E2E tests (Playwright) + shared helpers + acceptance tests
+  demos-test/                   Acceptance test binary for demos canister access code flow
   ii-setup/                     Internet Identity setup (Playwright + Vite)
   output/                       Runtime test artifacts (derived principals, etc.)
 declarations/                 Generated Candid interface bindings (icp-index)
@@ -44,6 +45,7 @@ User installs dapp via:
 
 Testing validates via:
   canister-dapp-test ── loads any wasm into PocketIC, runs acceptance checks
+  demos-test ── validates demos canister access code flow via PocketIC
   Playwright E2E ── tests full flows against local ICP network
 ```
 
@@ -151,7 +153,8 @@ Both `pr.yml` and `ci.yml` use `shared-build.yml` which runs `./validate-and-tes
 
 **Acceptance tests** — validate wasm behavior via PocketIC:
 - `cargo run -p canister-dapp-test -- wasm/<name>.wasm.gz`
-- Tests HTTP responses, security headers, dashboard endpoints
+- `cargo run -p demos-test`
+- Tests HTTP responses, security headers, dashboard endpoints, demos access code flow
 
 **E2E tests** — full browser flows against local ICP network:
 - Installer app test (always runs first — writes installed canister ID)

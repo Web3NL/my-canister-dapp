@@ -7,7 +7,7 @@ members = [
     "examples/my-notepad/src/backend",
     "canisters/wasm-registry",
     "canisters/demos",
-    "packages-rs/demos-test",
+    "tests/demos-test",
 ]
 resolver = "2"
 
