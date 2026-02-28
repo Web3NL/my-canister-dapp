@@ -1391,7 +1391,6 @@ dependencies = [
  "anyhow",
  "canister-dapp-test",
  "clap",
- "flate2",
  "open",
  "serde",
  "serde_json",

@@ -38,6 +38,12 @@ impl IcpCli {
         args
     }
 
+    /// Build a canister using its icp.yaml recipe.
+    pub fn build(&self, name: &str) -> Result<()> {
+        self.run(&["build", name])
+            .with_context(|| format!("Failed to build canister '{name}'"))
+    }
+
     /// Create a new canister on the network.
     pub fn canister_create(&self, name: &str, cycles: &str) -> Result<()> {
         self.run(&["canister", "create", name, "--cycles", cycles])
@@ -45,8 +51,15 @@ impl IcpCli {
     }
 
     /// Install a wasm module into a canister.
-    pub fn canister_install(&self, name: &str, wasm_path: &str) -> Result<()> {
-        self.run(&["canister", "install", name, "--wasm", wasm_path])
+    ///
+    /// If `wasm_path` is `None`, icp-cli uses the build output from `icp build`.
+    pub fn canister_install(&self, name: &str, wasm_path: Option<&str>) -> Result<()> {
+        let mut args: Vec<&str> = vec!["canister", "install", name];
+        if let Some(path) = wasm_path {
+            args.push("--wasm");
+            args.push(path);
+        }
+        self.run(&args)
             .with_context(|| format!("Failed to install wasm into canister '{name}'"))
     }
 
@@ -121,15 +134,6 @@ impl IcpCli {
     }
 }
 
-/// Check that an external tool is available in PATH.
-pub fn check_tool(name: &str, install_hint: &str) -> Result<()> {
-    let result = Command::new("which").arg(name).output();
-    match result {
-        Ok(o) if o.status.success() => Ok(()),
-        _ => bail!("{name} is not installed or not in PATH.\n{install_hint}"),
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -173,22 +177,5 @@ mod tests {
             icp.base_args(),
             vec!["-e", "ic", "--identity", "prod-identity"]
         );
-    }
-
-    // -- check_tool tests --
-
-    #[test]
-    fn check_tool_exists() {
-        // `ls` is available on all unix systems
-        assert!(check_tool("ls", "install ls").is_ok());
-    }
-
-    #[test]
-    fn check_tool_missing() {
-        let result = check_tool("nonexistent-tool-xyz-12345", "Install it from nowhere");
-        assert!(result.is_err());
-        let err = result.unwrap_err().to_string();
-        assert!(err.contains("nonexistent-tool-xyz-12345"));
-        assert!(err.contains("Install it from nowhere"));
     }
 }

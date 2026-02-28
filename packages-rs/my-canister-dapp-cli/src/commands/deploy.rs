@@ -1,9 +1,8 @@
-use anyhow::{Context, Result, bail};
+use anyhow::{Result, bail};
 use std::path::Path;
-use std::process::Command;
 
 use crate::auth;
-use crate::icp::{IcpCli, check_tool};
+use crate::icp::IcpCli;
 
 /// Default II provider for local development (PocketIC with NNS).
 const LOCAL_II_PROVIDER: &str = "http://rdmx6-jaaaa-aaaaa-aaadq-cai.localhost:8080";
@@ -20,14 +19,13 @@ const MAINNET_HOST: &str = "https://icp0.io";
 /// Arguments for the `dapp deploy` command.
 #[derive(clap::Args)]
 pub struct DeployArgs {
-    /// Path to a pre-built .wasm.gz file (skips build step)
+    /// Canister name (must match a canister defined in icp.yaml for build/install).
+    /// If omitted with --wasm, the name is derived from the wasm filename.
+    pub canister: Option<String>,
+
+    /// Path to a pre-built .wasm or .wasm.gz file (skips build step)
     #[arg(long)]
     pub wasm: Option<String>,
-
-    /// Cargo package name to build (required if --wasm is not provided
-    /// and the workspace has multiple cdylib targets)
-    #[arg(long, short)]
-    pub package: Option<String>,
 
     /// Environment: "local" or "ic"
     #[arg(short = 'e', long, default_value = "local")]
@@ -40,10 +38,6 @@ pub struct DeployArgs {
     /// Cycles for canister creation
     #[arg(long, default_value = "1000000000000")]
     pub cycles: String,
-
-    /// Canister name for icp-cli tracking
-    #[arg(long)]
-    pub canister_name: Option<String>,
 
     /// Skip Internet Identity authentication (deploy only, no owner setup)
     #[arg(long)]
@@ -67,46 +61,31 @@ pub fn deploy(args: DeployArgs) -> Result<()> {
         identity: args.identity.clone(),
     };
 
-    // Step 2: Resolve the wasm file
-    let wasm_path = match &args.wasm {
-        Some(path) => {
-            // Using pre-built wasm
-            if !Path::new(path).exists() {
-                bail!("Wasm file not found: {path}");
-            }
-            path.clone()
-        }
-        None => {
-            // Build the wasm
-            build_wasm(args.package.as_deref())?
-        }
-    };
+    // Step 2: Resolve canister name and wasm strategy
+    let (canister_name, wasm_path) = resolve_canister_and_wasm(&args)?;
 
-    println!("Wasm: {wasm_path}");
+    // Step 3: Build (only when no --wasm)
+    if let Some(ref path) = wasm_path {
+        println!("\nWasm: {path}");
+    } else {
+        println!("\nBuilding '{canister_name}'...");
+        icp.build(&canister_name)?;
+        println!("Build complete.");
+    }
 
-    // Derive the canister name from the wasm filename or --canister-name
-    let canister_name = args.canister_name.unwrap_or_else(|| {
-        Path::new(&wasm_path)
-            .file_stem()
-            .and_then(|s| s.to_str())
-            .unwrap_or("my-dapp")
-            .trim_end_matches(".wasm")
-            .to_string()
-    });
-
-    // Step 3: Create canister
+    // Step 4: Create canister
     println!("\nCreating canister '{canister_name}'...");
     icp.canister_create(&canister_name, &args.cycles)?;
 
     let canister_id = icp.canister_id(&canister_name)?;
     println!("Canister ID: {canister_id}");
 
-    // Step 4: Install wasm
+    // Step 5: Install wasm
     println!("Installing wasm...");
-    icp.canister_install(&canister_name, &wasm_path)?;
+    icp.canister_install(&canister_name, wasm_path.as_deref())?;
     println!("Wasm installed.");
 
-    // Step 5: II authentication
+    // Step 6: II authentication
     if args.skip_auth {
         println!("\nSkipping II authentication (--skip-auth).");
         print_summary(&canister_id, is_mainnet, None);
@@ -126,18 +105,18 @@ pub fn deploy(args: DeployArgs) -> Result<()> {
     let canister_origin = create_canister_origin(&canister_id, host);
     println!("\nCanister origin: {canister_origin}");
 
-    // 5a. Start auth server and get the port
+    // 6a. Start auth server and get the port
     println!("Starting authentication server...");
     let auth_result = auth::run_auth_flow(&ii_provider, &canister_origin, &icp, &canister_name)?;
     let principal = &auth_result.principal;
     println!("Derived II principal: {principal}");
 
-    // 5b. Set II principal in canister (deployer is still controller)
+    // 6b. Set II principal in canister (deployer is still controller)
     println!("Setting II principal...");
     let set_principal_arg = format!("(variant {{ Set = principal \"{principal}\" }})");
     icp.canister_call(&canister_name, "manage_ii_principal", &set_principal_arg)?;
 
-    // 5c. Remove CLI origin from alternative origins (deployer is still controller)
+    // 6c. Remove CLI origin from alternative origins (deployer is still controller)
     println!("Cleaning up alternative origins...");
     let remove_origin_arg = format!("(variant {{ Remove = \"{}\" }})", auth_result.cli_origin);
     icp.canister_call(
@@ -146,7 +125,7 @@ pub fn deploy(args: DeployArgs) -> Result<()> {
         &remove_origin_arg,
     )?;
 
-    // 5d. Update controllers (deployer relinquishes control — must be LAST)
+    // 6d. Update controllers (deployer relinquishes control — must be LAST)
     println!("Setting controllers...");
     icp.canister_update_settings(&canister_name, &[&canister_id, principal])?;
 
@@ -155,120 +134,39 @@ pub fn deploy(args: DeployArgs) -> Result<()> {
     Ok(())
 }
 
-/// Build a wasm from source using cargo + ic-wasm + gzip.
-fn build_wasm(package: Option<&str>) -> Result<String> {
-    check_tool("cargo", "Install Rust from: https://rustup.rs")?;
-    check_tool("ic-wasm", "Install with: cargo install ic-wasm")?;
-
-    let package_name = match package {
-        Some(name) => name.to_string(),
-        None => detect_cdylib_package()?,
-    };
-
-    println!("Building {package_name}...");
-
-    // cargo build --target wasm32-unknown-unknown --release -p <name>
-    let status = Command::new("cargo")
-        .args([
-            "build",
-            "--target",
-            "wasm32-unknown-unknown",
-            "--release",
-            "-p",
-            &package_name,
-        ])
-        .status()
-        .context("Failed to run cargo build")?;
-
-    if !status.success() {
-        bail!(
-            "cargo build failed for '{package_name}'.\n\
-             Ensure the wasm32-unknown-unknown target is installed:\n  \
-             rustup target add wasm32-unknown-unknown"
-        );
-    }
-
-    // The cargo output uses underscores in filenames
-    let wasm_filename = package_name.replace('-', "_");
-    let raw_wasm = format!("target/wasm32-unknown-unknown/release/{wasm_filename}.wasm");
-
-    if !Path::new(&raw_wasm).exists() {
-        bail!(
-            "Expected wasm output not found at: {raw_wasm}\n\
-             The crate may not produce a cdylib target."
-        );
-    }
-
-    // ic-wasm shrink
-    let shrunk_wasm = format!("target/{package_name}.wasm");
-    println!("Shrinking wasm...");
-    let status = Command::new("ic-wasm")
-        .args([&raw_wasm, "-o", &shrunk_wasm, "shrink"])
-        .status()
-        .context("Failed to run ic-wasm shrink")?;
-
-    if !status.success() {
-        bail!(
-            "ic-wasm shrink failed for '{raw_wasm}'.\n\
-             Check ic-wasm is up to date: cargo install ic-wasm"
-        );
-    }
-
-    // gzip
-    let gzipped_wasm = format!("target/{package_name}.wasm.gz");
-    println!("Compressing wasm...");
-    let status = Command::new("gzip")
-        .args(["-9", "-f", "-k", &shrunk_wasm])
-        .status()
-        .context("Failed to run gzip")?;
-
-    if !status.success() {
-        bail!("gzip failed");
-    }
-
-    // gzip -k produces <name>.wasm.gz alongside the input
-    let gz_output = format!("{shrunk_wasm}.gz");
-    if gz_output != gzipped_wasm {
-        std::fs::rename(&gz_output, &gzipped_wasm)
-            .with_context(|| format!("Failed to rename {gz_output} to {gzipped_wasm}"))?;
-    }
-
-    println!("Built: {gzipped_wasm}");
-    Ok(gzipped_wasm)
-}
-
-/// Attempt to detect a single cdylib package from the workspace/project Cargo.toml.
-fn detect_cdylib_package() -> Result<String> {
-    let cargo_toml = std::fs::read_to_string("Cargo.toml").context(
-        "No Cargo.toml found in current directory.\n\
-         Use --package <name> to specify the crate to build,\n\
-         or --wasm <path> to provide a pre-built wasm.",
-    )?;
-    parse_cdylib_package(&cargo_toml)
-}
-
-/// Parse a cdylib package name from Cargo.toml contents.
-///
-/// Simple heuristic: look for `crate-type = ["cdylib"]` and extract the `[package]` name.
-fn parse_cdylib_package(cargo_toml: &str) -> Result<String> {
-    if cargo_toml.contains("cdylib") {
-        for line in cargo_toml.lines() {
-            let trimmed = line.trim();
-            if trimmed.starts_with("name")
-                && trimmed.contains('=')
-                && let Some(name) = trimmed.split('=').nth(1)
-            {
-                let name = name.trim().trim_matches('"');
-                return Ok(name.to_string());
+/// Resolve the canister name and optional wasm path from CLI arguments.
+fn resolve_canister_and_wasm(args: &DeployArgs) -> Result<(String, Option<String>)> {
+    match (&args.canister, &args.wasm) {
+        (Some(name), Some(wasm)) => {
+            if !Path::new(wasm).exists() {
+                bail!("Wasm file not found: {wasm}");
             }
+            Ok((name.clone(), Some(wasm.clone())))
         }
+        (Some(name), None) => Ok((name.clone(), None)),
+        (None, Some(wasm)) => {
+            if !Path::new(wasm).exists() {
+                bail!("Wasm file not found: {wasm}");
+            }
+            let name = derive_canister_name(wasm);
+            Ok((name, Some(wasm.clone())))
+        }
+        (None, None) => bail!(
+            "Canister name is required.\n\
+             Usage: dapp deploy <CANISTER> [-e <env>]\n\
+             Or:    dapp deploy --wasm <path>"
+        ),
     }
+}
 
-    bail!(
-        "Could not detect a cdylib package from Cargo.toml.\n\
-         Use --package <name> to specify the crate to build,\n\
-         or --wasm <path> to provide a pre-built wasm."
-    )
+/// Derive a canister name from a wasm filename.
+fn derive_canister_name(wasm_path: &str) -> String {
+    Path::new(wasm_path)
+        .file_stem()
+        .and_then(|s| s.to_str())
+        .unwrap_or("my-dapp")
+        .trim_end_matches(".wasm")
+        .to_string()
 }
 
 /// Construct the canister origin URL from its ID and host.
@@ -348,73 +246,78 @@ mod tests {
         assert_eq!(origin, "https://bkyz2-fmaaa-aaaaa-qaaaq-cai.icp0.io");
     }
 
-    // -- parse_cdylib_package tests --
+    // -- derive_canister_name tests --
 
     #[test]
-    fn parse_cdylib_valid() {
-        let toml = r#"
-[package]
-name = "my-backend"
-version = "0.1.0"
-
-[lib]
-crate-type = ["cdylib"]
-"#;
-        assert_eq!(parse_cdylib_package(toml).unwrap(), "my-backend");
+    fn derive_name_from_wasm_gz() {
+        assert_eq!(derive_canister_name("target/my-dapp.wasm.gz"), "my-dapp");
     }
 
     #[test]
-    fn parse_cdylib_no_cdylib() {
-        let toml = r#"
-[package]
-name = "my-lib"
-version = "0.1.0"
-
-[lib]
-crate-type = ["rlib"]
-"#;
-        assert!(parse_cdylib_package(toml).is_err());
+    fn derive_name_from_wasm() {
+        assert_eq!(derive_canister_name("my-dapp.wasm"), "my-dapp");
     }
 
     #[test]
-    fn parse_cdylib_empty() {
-        assert!(parse_cdylib_package("").is_err());
+    fn derive_name_from_path_with_directories() {
+        assert_eq!(derive_canister_name("/tmp/build/my-app.wasm.gz"), "my-app");
     }
 
     #[test]
-    fn parse_cdylib_name_with_spaces() {
-        let toml = r#"
-[package]
-name   =   "spaced-name"
+    fn derive_name_fallback() {
+        assert_eq!(derive_canister_name(""), "my-dapp");
+    }
 
-[lib]
-crate-type = ["cdylib"]
-"#;
-        assert_eq!(parse_cdylib_package(toml).unwrap(), "spaced-name");
+    // -- resolve_canister_and_wasm tests --
+
+    fn make_args(canister: Option<&str>, wasm: Option<&str>) -> DeployArgs {
+        DeployArgs {
+            canister: canister.map(String::from),
+            wasm: wasm.map(String::from),
+            environment: "local".into(),
+            identity: None,
+            cycles: "1000000000000".into(),
+            skip_auth: false,
+            ii_provider: None,
+        }
     }
 
     #[test]
-    fn parse_cdylib_name_before_crate_type() {
-        // name appears before the cdylib declaration — should still work
-        let toml = r#"
-[package]
-name = "early-name"
-version = "0.1.0"
-edition = "2024"
-
-[lib]
-crate-type = ["cdylib"]
-"#;
-        assert_eq!(parse_cdylib_package(toml).unwrap(), "early-name");
+    fn resolve_explicit_canister_no_wasm() {
+        let args = make_args(Some("my-dapp"), None);
+        let (name, wasm) = resolve_canister_and_wasm(&args).unwrap();
+        assert_eq!(name, "my-dapp");
+        assert!(wasm.is_none());
     }
 
     #[test]
-    fn parse_cdylib_has_cdylib_word_but_no_name() {
-        // Contains "cdylib" but no valid name line
-        let toml = r#"
-[lib]
-crate-type = ["cdylib"]
-"#;
-        assert!(parse_cdylib_package(toml).is_err());
+    fn resolve_neither_provided_errors() {
+        let args = make_args(None, None);
+        let err = resolve_canister_and_wasm(&args).unwrap_err().to_string();
+        assert!(err.contains("Canister name is required"));
+    }
+
+    #[test]
+    fn resolve_wasm_not_found_errors() {
+        let args = make_args(Some("my-dapp"), Some("/nonexistent/path.wasm.gz"));
+        let err = resolve_canister_and_wasm(&args).unwrap_err().to_string();
+        assert!(err.contains("Wasm file not found"));
+    }
+
+    #[test]
+    fn resolve_wasm_only_derives_name() {
+        // Use a file that exists on all systems
+        let args = make_args(None, Some("/dev/null"));
+        let (name, wasm) = resolve_canister_and_wasm(&args).unwrap();
+        assert_eq!(name, "null");
+        assert_eq!(wasm.unwrap(), "/dev/null");
+    }
+
+    #[test]
+    fn resolve_both_canister_and_wasm() {
+        let args = make_args(Some("custom-name"), Some("/dev/null"));
+        let (name, wasm) = resolve_canister_and_wasm(&args).unwrap();
+        assert_eq!(name, "custom-name");
+        assert_eq!(wasm.unwrap(), "/dev/null");
     }
 }
