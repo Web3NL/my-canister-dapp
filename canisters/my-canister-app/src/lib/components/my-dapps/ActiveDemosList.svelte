@@ -1,15 +1,17 @@
 <script lang="ts">
   import { onMount } from 'svelte';
   import { DemosApi, type ActiveDemo } from '$lib/api/demos';
+  import { WasmRegistryApi, type WasmEntry } from '$lib/api/wasmRegistry';
   import { DEMOS_CANISTER_ID } from '$lib/constants/canisterIds';
   import {
     createFrontpageUrl,
     createDashboardUrl,
   } from '$lib/services/createdCanisters';
-  import { Card, SkeletonText } from '@dfinity/gix-components';
+  import { Card, IconNorthEast, SkeletonText } from '@dfinity/gix-components';
   import { showErrorToast } from '$lib/utils/toast';
 
   let demos: ActiveDemo[] = [];
+  let wasmEntries: Map<string, WasmEntry> = new Map();
   let loading = false;
 
   onMount(async () => {
@@ -22,6 +24,19 @@
     try {
       const demosApi = await DemosApi.create();
       demos = await demosApi.getMyDemos();
+
+      // Fetch wasm metadata for each unique wasm_name
+      const uniqueNames = [...new Set(demos.map(d => d.wasm_name))];
+      const registryApi = await WasmRegistryApi.create();
+      const entries = await Promise.all(
+        uniqueNames.map(async name => {
+          const entry = await registryApi.getWasmEntry(name);
+          return [name, entry] as const;
+        })
+      );
+      wasmEntries = new Map(
+        entries.filter((e): e is [string, WasmEntry] => e[1] !== undefined)
+      );
     } catch {
       showErrorToast('Failed to load active demos');
     }
@@ -59,8 +74,15 @@
     {:else if demos.length > 0}
       <div class="demo-grid">
         {#each demos as demo (demo.canister_id.toText())}
+          {@const entry = wasmEntries.get(demo.wasm_name)}
           <Card>
             <h3>{demo.wasm_name}</h3>
+            {#if entry?.description}
+              <p class="description-subtitle">{entry.description}</p>
+            {/if}
+            {#if entry?.version}
+              <p class="version-subtitle">Version {entry.version}</p>
+            {/if}
             <p class="demo-expiry">{formatExpiry(demo.expires_at)}</p>
             <p class="demo-canister-id">
               {demo.canister_id.toText()}
@@ -72,7 +94,7 @@
                 rel="noopener noreferrer"
                 class="btn"
               >
-                Dapp Frontpage
+                Frontpage <IconNorthEast />
               </a>
               <a
                 href={createDashboardUrl(demo.canister_id.toText())}
@@ -80,7 +102,7 @@
                 rel="noopener noreferrer"
                 class="btn"
               >
-                Dashboard
+                Dashboard <IconNorthEast />
               </a>
             </div>
           </Card>
@@ -102,35 +124,56 @@
     margin-top: 1rem;
   }
 
+  .description-subtitle {
+    font-size: var(--font-size-small);
+    color: var(--description-color);
+    margin: 0 0 var(--padding-0_5x) 0;
+    font-style: italic;
+  }
+
+  .version-subtitle {
+    font-size: var(--font-size-standard);
+    color: var(--description-color);
+    margin: 0 0 var(--padding-1x) 0;
+  }
+
   .demo-expiry {
     color: #856404;
     font-weight: 500;
-    font-size: 0.9rem;
+    font-size: var(--font-size-small);
   }
 
   .demo-canister-id {
     font-family: monospace;
     font-size: 0.8rem;
-    color: #666;
+    color: var(--description-color);
     word-break: break-all;
   }
 
   .demo-actions {
     display: flex;
+    flex-wrap: wrap;
     gap: 0.5rem;
-    margin-top: 1rem;
+    margin-top: var(--padding-1x);
   }
 
   .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.25rem;
     padding: 0.5rem 1rem;
-    border: 1px solid #ccc;
-    border-radius: 4px;
+    border: 1px solid var(--border-color);
+    border-radius: 6px;
     text-decoration: none;
     color: inherit;
-    font-size: 0.85rem;
+    font-size: var(--font-size-small);
+    transition:
+      background-color 0.2s,
+      border-color 0.2s;
   }
 
   .btn:hover {
-    background-color: #f0f0f0;
+    background-color: var(--primary-contrast-background);
+    border-color: var(--primary-contrast);
   }
 </style>
