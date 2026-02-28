@@ -135,11 +135,11 @@ test('My Canister App E2E Suite', async ({ page }) => {
     .first();
   const dappFrontpageLink = cardElement
     .locator('a')
-    .filter({ hasText: 'Dapp frontpage' });
+    .filter({ hasText: 'Frontpage' });
   const href = await dappFrontpageLink.getAttribute('href');
 
   if (!href) {
-    throw new Error('Dapp frontpage href not found');
+    throw new Error('Frontpage href not found');
   }
 
   // Extract canister ID from URL like: http://u6s2n-gx777-77774-qaaba-cai.localhost:8080

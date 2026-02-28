@@ -11,6 +11,7 @@ export CANISTER_INITIAL_CYCLES="1000000000000"
 # Canister names
 export HELLO_WORLD_CANISTER="my-hello-world"
 export WASM_REGISTRY_CANISTER="wasm-registry"
+export DEMOS_CANISTER="demos"
 
 # Test environment origins (canister origin is set dynamically after canister creation)
 export DAPP_ORIGIN_VITE="http://localhost:5173"

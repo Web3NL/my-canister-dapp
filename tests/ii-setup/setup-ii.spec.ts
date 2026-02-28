@@ -23,6 +23,7 @@ test.describe('setup II identity and derive principals', () => {
       const origins = [
         { origin: process.env.DAPP_ORIGIN_VITE!, envSuffix: 'vite' },
         { origin: process.env.DAPP_ORIGIN_CANISTER!, envSuffix: 'canister' },
+        { origin: process.env.DAPP_ORIGIN_APP!, envSuffix: 'app' },
       ];
 
       for (const { origin, envSuffix } of origins) {

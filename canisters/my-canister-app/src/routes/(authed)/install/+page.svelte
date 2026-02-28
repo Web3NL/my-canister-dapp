@@ -31,6 +31,9 @@
   import AgreeTermsCard from '$lib/components/install/AgreeTermsCard.svelte';
   import { goto, beforeNavigate } from '$app/navigation';
   import { fetchWasmModule, type WasmSource } from '$lib/utils/fetch';
+  import AccessCodeCard from '$lib/components/install/AccessCodeCard.svelte';
+  import { redeemDemoCode, completeDemoSetup } from '$lib/flows/redeemDemo';
+  import { DEMOS_CANISTER_ID } from '$lib/constants/canisterIds';
 
   const principalText = $authStore ? $authStore.toText() : '';
   let requiredBalanceE8s: bigint = 0n;
@@ -45,6 +48,11 @@
   let lowDepositWarnToastId: symbol | undefined;
   let lastFailedStep: 'create' | 'connect-ii' | null = null;
   let recoveredCanister = false;
+
+  // Demo install mode
+  let isDemoInstall = false;
+  let accessCode = '';
+  let showAccessCodeInput = false;
 
   // Installation mode detection
   type InstallMode = 'registry' | 'file' | 'remote';
@@ -174,6 +182,30 @@
     startBalanceTimer();
   }
 
+  function handleCodeValidated(code: string) {
+    accessCode = code;
+    isDemoInstall = true;
+    stopBalanceTimer();
+    // Update step labels for demo flow
+    steps = steps.map(s => {
+      if (s.step === 'fund') return { ...s, text: 'Access Code' };
+      if (s.step === 'create') return { ...s, text: 'Setting Up Demo' };
+      return s;
+    }) as typeof steps;
+    advanceToStep(3);
+    createCanister();
+  }
+
+  function switchToCodeMode() {
+    showAccessCodeInput = true;
+    stopBalanceTimer();
+  }
+
+  function switchToFundMode() {
+    showAccessCodeInput = false;
+    startBalanceTimer();
+  }
+
   function advanceToStep(targetStep: 2 | 3 | 4 | 5) {
     // targetStep is 1-based for the step the user is entering (or completing if 5)
     steps = steps.map((s, idx) => {
@@ -223,6 +255,34 @@
   }
 
   async function createCanister() {
+    if (isDemoInstall) {
+      if (!dappNameText) {
+        showErrorToast('No dapp name available');
+        return;
+      }
+
+      busyStore.startBusy({
+        initiator: 'create-canister',
+        text: 'Keep window open. Setting up demo...',
+      });
+
+      try {
+        canisterPrincipal = await redeemDemoCode(accessCode, dappNameText);
+        advanceToStep(4);
+      } catch (err) {
+        console.error('Failed to redeem demo code', err);
+        setFailed('create');
+        const errorMsg =
+          err instanceof Error ? err.message : 'Unknown error occurred';
+        showErrorToast(
+          `Failed to set up demo: ${errorMsg}. Click "Retry" to try again.`
+        );
+      } finally {
+        busyStore.stopBusy('create-canister');
+      }
+      return;
+    }
+
     if (!wasmModule) {
       showErrorToast('WASM module not loaded');
       return;
@@ -267,13 +327,19 @@
   async function takeControlOfCanister() {
     busyStore.startBusy({
       initiator: 'connect-ii',
-      text: 'Keep window open. Installing and connecting II to Dapp...',
+      text: isDemoInstall
+        ? 'Keep window open. Connecting II to demo...'
+        : 'Keep window open. Installing and connecting II to Dapp...',
     });
 
     try {
-      await installAndTakeControl(canisterPrincipal!);
+      if (isDemoInstall) {
+        await completeDemoSetup(accessCode, canisterPrincipal!);
+      } else {
+        await installAndTakeControl(canisterPrincipal!);
+      }
 
-      if (browser) {
+      if (!isDemoInstall && browser) {
         localStorage.removeItem(CANISTER_STORAGE_KEY);
       }
 
@@ -433,17 +499,36 @@
 {:else if currentStep === 1}
   <AgreeTermsCard onAgree={handleAgreeToTerms} dappName={dappNameText} />
 {:else if currentStep === 2 || currentStep === 3}
-  <FundAccountCard
-    {principalText}
-    {minimumBalance}
-    {formattedBalance}
-    showSpinner={balanceTimer !== null}
-    disabled={requiredBalanceE8s === 0n ||
-      currentBalance < requiredBalanceE8s ||
-      !wasmModule}
-    onCreate={createCanister}
-    onRefreshBalance={loadBalance}
-  />
+  {#if isDemoInstall}
+    <!-- Demo creation in progress — busy overlay handles UI -->
+  {:else if showAccessCodeInput}
+    <AccessCodeCard onCodeValidated={handleCodeValidated} />
+    <p class="mode-toggle">
+      <button class="link-button" on:click={switchToFundMode}
+        >Pay with ICP instead</button
+      >
+    </p>
+  {:else}
+    <FundAccountCard
+      {principalText}
+      {minimumBalance}
+      {formattedBalance}
+      showSpinner={balanceTimer !== null}
+      disabled={requiredBalanceE8s === 0n ||
+        currentBalance < requiredBalanceE8s ||
+        !wasmModule}
+      onCreate={createCanister}
+      onRefreshBalance={loadBalance}
+    />
+    {#if DEMOS_CANISTER_ID}
+      <p class="mode-toggle">
+        Have an access code? <button
+          class="link-button"
+          on:click={switchToCodeMode}>Enter code</button
+        >
+      </p>
+    {/if}
+  {/if}
 {:else if currentStep === 4}
   <ConnectIICard onConnect={takeControlOfCanister} />
 {:else if currentStep === 5 && canisterPrincipal}
@@ -451,6 +536,14 @@
     frontPageUrl={createFrontpageUrl(canisterPrincipal.toText())}
     dashboardUrl={createDashboardUrl(canisterPrincipal.toText())}
   />
+  {#if isDemoInstall}
+    <div class="demo-notice">
+      <p>
+        <strong>Demo Mode</strong> — This is a time-limited demo dapp. It will be
+        automatically removed after the trial period expires.
+      </p>
+    </div>
+  {/if}
 {/if}
 
 <style>
@@ -525,5 +618,38 @@
 
   .retry-section button {
     min-width: 120px;
+  }
+
+  .mode-toggle {
+    text-align: center;
+    margin-top: 1rem;
+    color: #666;
+  }
+
+  .link-button {
+    background: none;
+    border: none;
+    color: #3b82f6;
+    cursor: pointer;
+    text-decoration: underline;
+    font-size: inherit;
+    padding: 0;
+  }
+
+  .link-button:hover {
+    color: #2563eb;
+  }
+
+  .demo-notice {
+    margin: 1rem 0;
+    padding: 1rem;
+    background-color: #fff3cd;
+    border: 1px solid #ffc107;
+    border-radius: 4px;
+    color: #856404;
+  }
+
+  .demo-notice p {
+    margin: 0;
   }
 </style>

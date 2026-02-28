@@ -30,7 +30,7 @@ export function saveTestData(filename: string, data: string): void {
   );
 }
 
-function readTestData(filename: string): string {
+export function readTestData(filename: string): string {
   const outputDir = path.join(process.cwd(), 'tests', 'output');
   const filePath = path.join(outputDir, filename);
 

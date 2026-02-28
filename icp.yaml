@@ -31,6 +31,14 @@ canisters:
         shrink: true
         candid: examples/my-notepad/src/backend/my-notepad.did
 
+  - name: demos
+    recipe:
+      type: "@dfinity/rust@v3.0.0"
+      configuration:
+        package: demos
+        shrink: true
+        candid: canisters/demos/demos.did
+
 networks:
   - name: local
     mode: managed
@@ -42,8 +50,8 @@ networks:
 environments:
   - name: local
     network: local
-    canisters: [my-canister-app, wasm-registry, my-hello-world, my-notepad]
+    canisters: [my-canister-app, wasm-registry, my-hello-world, my-notepad, demos]
 
   - name: mainnet
     network: ic
-    canisters: [my-canister-app, wasm-registry]
+    canisters: [my-canister-app, wasm-registry, demos]

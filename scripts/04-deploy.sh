@@ -25,6 +25,19 @@ echo "Deploying my-notepad canister..."
 icp canister create my-notepad -e local --identity ident-1 --cycles "$CANISTER_INITIAL_CYCLES"
 icp canister install my-notepad --wasm wasm/my-notepad.wasm.gz -e local --identity ident-1
 
+echo "Deploying demos canister..."
+# Demos needs extra cycles to create sub-canisters for the demo pool
+DEMOS_CYCLES="5000000000000"
+icp canister create demos -e local --identity ident-1 --cycles "$DEMOS_CYCLES"
+icp canister install demos --wasm wasm/demos.wasm.gz -e local --identity ident-1
+
+# Create my-canister-app canister early so its ID is available for II principal derivation
+echo "Creating my-canister-app canister..."
+icp canister create my-canister-app -e local --identity ident-1 --cycles "$CANISTER_INITIAL_CYCLES"
+
+# Re-write test.env so the my-canister-app canister ID is discoverable
+./scripts/write-test-env.sh
+
 # --- Dashboard setup (II principals, controllers) ---
 echo "Setting up dashboard dev environment..."
 ./scripts/setup-dashboard-dev-env.sh
@@ -57,9 +70,42 @@ set +a
 
 echo "Building and deploying my-canister-app..."
 npm run build --workspace=my-canister-app
-icp deploy my-canister-app -e local
+icp deploy my-canister-app -e local --identity ident-1
 
 # Final write-test-env.sh to capture my-canister-app canister ID
 ./scripts/write-test-env.sh
+
+# --- Configure demos canister for testing ---
+echo "Configuring demos canister..."
+
+# Re-source to get all IDs
+set -a
+source tests/test.env
+set +a
+
+INSTALLER_ORIGIN="http://${VITE_MY_CANISTER_APP_CANISTER_ID}.localhost:8080"
+
+icp canister call demos configure "(record {
+  wasm_registry_id = principal \"$VITE_WASM_REGISTRY_CANISTER_ID\";
+  trial_duration_ns = 300000000000 : nat64;
+  pool_target_size = 2 : nat32;
+  cycles_per_demo_canister = 1000000000000 : nat;
+  installer_origin = \"$INSTALLER_ORIGIN\"
+})" -e local --identity ident-1
+
+echo "Replenishing demos pool..."
+icp canister call demos replenish_pool "()" -e local --identity ident-1
+
+echo "Generating demo access codes for E2E tests..."
+CODES_RESULT=$(icp canister call demos generate_access_codes "(5 : nat32)" -e local --identity ident-1)
+
+FIRST_CODE=$(echo "$CODES_RESULT" | grep -oE '[A-Z2-9]{4}-[A-Z2-9]{4}-[A-Z2-9]{4}' | head -1)
+if [ -n "$FIRST_CODE" ]; then
+  mkdir -p tests/output
+  echo -n "$FIRST_CODE" > tests/output/demo-access-code
+  echo "Saved demo access code: $FIRST_CODE"
+else
+  echo "WARNING: Could not extract access code from result: $CODES_RESULT"
+fi
 
 echo "All canisters deployed!"

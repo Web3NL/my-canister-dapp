@@ -11,7 +11,8 @@ echo "Building all Rust canister wasms..."
 cargo build --target wasm32-unknown-unknown --release \
   -p wasm-registry \
   -p my-hello-world \
-  -p my-notepad
+  -p my-notepad \
+  -p demos
 
 WASM_DIR="target/wasm32-unknown-unknown/release/deps"
 OUT_DIR="wasm"
@@ -33,5 +34,6 @@ shrink_and_compress() {
 shrink_and_compress "wasm_registry" "wasm-registry"
 shrink_and_compress "my_hello_world" "my-hello-world"
 shrink_and_compress "my_notepad" "my-notepad"
+shrink_and_compress "demos" "demos"
 
 echo "All wasms built and compressed in ${OUT_DIR}/"
