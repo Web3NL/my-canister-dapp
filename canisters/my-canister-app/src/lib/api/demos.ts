@@ -8,10 +8,20 @@ import type {
   ActiveDemo,
   RedeemResult,
   GenericResult,
+  GenerateCodesResult,
+  AccessCode,
+  PoolStatus,
+  DemosConfig,
 } from '$lib/declarations/demos/demos.did.d.ts';
 import type { Principal } from '@icp-sdk/core/principal';
 
-export type { ActiveDemo };
+export type {
+  ActiveDemo,
+  AccessCode,
+  PoolStatus,
+  DemosConfig,
+  GenerateCodesResult,
+};
 
 export class DemosApi {
   private actor: ActorSubclass<DemosService>;
@@ -48,5 +58,44 @@ export class DemosApi {
 
   async getMyDemos(): Promise<ActiveDemo[]> {
     return await this.actor.get_my_demos();
+  }
+
+  // --- Admin methods ---
+
+  async isAdmin(): Promise<boolean> {
+    return await this.actor.is_admin();
+  }
+
+  async getPoolStatus(): Promise<PoolStatus> {
+    return await this.actor.get_pool_status();
+  }
+
+  async getConfig(): Promise<DemosConfig | undefined> {
+    const result = await this.actor.get_config();
+    return result.length > 0 ? result[0] : undefined;
+  }
+
+  async listAccessCodes(): Promise<AccessCode[]> {
+    return await this.actor.list_access_codes();
+  }
+
+  async generateAccessCodes(count: number): Promise<GenerateCodesResult> {
+    return await this.actor.generate_access_codes(count);
+  }
+
+  async listActiveDemos(): Promise<ActiveDemo[]> {
+    return await this.actor.list_active_demos();
+  }
+
+  async replenishPool(): Promise<GenericResult> {
+    return await this.actor.replenish_pool();
+  }
+
+  async reclaimExpired(): Promise<GenericResult> {
+    return await this.actor.reclaim_expired();
+  }
+
+  async configure(config: DemosConfig): Promise<GenericResult> {
+    return await this.actor.configure(config);
   }
 }

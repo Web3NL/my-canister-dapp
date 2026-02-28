@@ -59,13 +59,16 @@ export const idlFactory = ({ IDL }) => {
     configure: IDL.Func([DemosConfig], [GenericResult], []),
     finalize_demo: IDL.Func([IDL.Text, IDL.Principal], [GenericResult], []),
     generate_access_codes: IDL.Func([IDL.Nat32], [GenerateCodesResult], []),
+    get_config: IDL.Func([], [IDL.Opt(DemosConfig)], ['query']),
     get_my_demos: IDL.Func([], [IDL.Vec(ActiveDemo)], ['query']),
     get_pool_status: IDL.Func([], [PoolStatus], ['query']),
+    is_admin: IDL.Func([], [IDL.Bool], ['query']),
     list_access_codes: IDL.Func([], [IDL.Vec(AccessCode)], ['query']),
     list_active_demos: IDL.Func([], [IDL.Vec(ActiveDemo)], ['query']),
     reclaim_expired: IDL.Func([], [GenericResult], []),
     redeem_code: IDL.Func([IDL.Text, IDL.Text], [RedeemResult], []),
     replenish_pool: IDL.Func([], [GenericResult], []),
+    set_admins: IDL.Func([IDL.Vec(IDL.Principal)], [GenericResult], []),
     validate_code: IDL.Func([IDL.Text], [IDL.Bool], ['query']),
   });
 };

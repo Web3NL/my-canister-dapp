@@ -145,6 +145,35 @@ async fn reclaim_expired() -> GenericResult {
     timers::reclaim_all_expired().await
 }
 
+/// Set the admin principals list. Controller-only (not the shared guard,
+/// so admins cannot escalate by calling this themselves).
+#[update]
+fn set_admins(admins: Vec<Principal>) -> GenericResult {
+    if !ic_cdk::api::is_controller(&ic_cdk::api::msg_caller()) {
+        return GenericResult::Err("Only controllers can set admins".to_string());
+    }
+    storage::with_state_mut(|s| {
+        s.admins = admins;
+    });
+    GenericResult::Ok
+}
+
+/// Check whether the caller is a controller or admin.
+#[query]
+fn is_admin() -> bool {
+    let caller = ic_cdk::api::msg_caller();
+    if ic_cdk::api::is_controller(&caller) {
+        return true;
+    }
+    storage::with_state(|s| s.admins.contains(&caller))
+}
+
+/// Return the current configuration.
+#[query(guard = "guards::only_controllers")]
+fn get_config() -> Option<DemosConfig> {
+    storage::with_state(|s| s.config.clone())
+}
+
 // ---------------------------------------------------------------------------
 // User endpoints
 // ---------------------------------------------------------------------------

@@ -53,6 +53,11 @@ service : {
     "replenish_pool" : () -> (GenericResult);
     "reclaim_expired" : () -> (GenericResult);
 
+    // Admin management
+    "set_admins" : (vec principal) -> (GenericResult);
+    "is_admin" : () -> (bool) query;
+    "get_config" : () -> (opt DemosConfig) query;
+
     // User endpoints
     "validate_code" : (text) -> (bool) query;
     "redeem_code" : (text, text) -> (RedeemResult);

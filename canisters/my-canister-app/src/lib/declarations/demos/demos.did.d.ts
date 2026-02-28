@@ -54,13 +54,16 @@ export interface _SERVICE {
   configure: ActorMethod<[DemosConfig], GenericResult>;
   finalize_demo: ActorMethod<[string, Principal], GenericResult>;
   generate_access_codes: ActorMethod<[number], GenerateCodesResult>;
+  get_config: ActorMethod<[], [] | [DemosConfig]>;
   get_my_demos: ActorMethod<[], Array<ActiveDemo>>;
   get_pool_status: ActorMethod<[], PoolStatus>;
+  is_admin: ActorMethod<[], boolean>;
   list_access_codes: ActorMethod<[], Array<AccessCode>>;
   list_active_demos: ActorMethod<[], Array<ActiveDemo>>;
   reclaim_expired: ActorMethod<[], GenericResult>;
   redeem_code: ActorMethod<[string, string], RedeemResult>;
   replenish_pool: ActorMethod<[], GenericResult>;
+  set_admins: ActorMethod<[Array<Principal>], GenericResult>;
   validate_code: ActorMethod<[string], boolean>;
 }
 export declare const idlFactory: IDL.InterfaceFactory;

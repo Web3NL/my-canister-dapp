@@ -99,6 +99,9 @@ pub struct DemosState {
     pub active_demos: HashMap<Principal, ActiveDemo>,
     /// Reverse index: service_principal -> list of demo canister IDs
     pub service_principal_index: HashMap<Principal, Vec<Principal>>,
+    /// Principals allowed to call admin endpoints (in addition to controllers)
+    #[serde(default)]
+    pub admins: Vec<Principal>,
 }
 
 thread_local! {
