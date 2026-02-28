@@ -33,4 +33,7 @@ icp canister settings update "$HELLO_WORLD_CANISTER" -e local --identity ident-1
 echo "Setting authorized Internet Identity principal (Vite origin for first E2E batch)..."
 icp canister call "$HELLO_WORLD_CANISTER" manage_ii_principal "(variant { Set = principal \"$PRINCIPAL_VITE\" })" -e local --identity ident-1
 
+echo "Setting demos canister admins..."
+icp canister call demos set_admins "(vec { principal \"$PRINCIPAL_CANISTER\" })" -e local --identity ident-1
+
 echo "Dashboard development environment setup complete"
