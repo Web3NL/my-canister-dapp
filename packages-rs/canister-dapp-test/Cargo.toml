@@ -2,7 +2,14 @@
 name = "canister-dapp-test"
 version = "0.2.0"
 description = "Acceptance suite for WASM binaries built with my-canister-dashboard"
+readme = "README.md"
+documentation = "https://docs.rs/canister-dapp-test"
+keywords = ["internet-computer", "canister", "testing", "acceptance", "wasm"]
+categories = ["development-tools::testing"]
 edition = { workspace = true }
+license = { workspace = true }
+authors = { workspace = true }
+repository = "https://github.com/Web3NL/my-canister-dapp/tree/main/packages-rs/canister-dapp-test"
 
 [[bin]]
 name = "canister-dapp-test"
@@ -19,7 +26,7 @@ pocket-ic = { workspace = true }
 serde_json = { workspace = true }
 sha2 = { workspace = true }
 
-my-canister-dashboard = { path = "../my-canister-dashboard" }
+my-canister-dashboard = { path = "../my-canister-dashboard", version = "0.11.1" }
 
 [package.metadata.release]
 pre-release-replacements = [
