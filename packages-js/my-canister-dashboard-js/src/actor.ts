@@ -56,7 +56,7 @@ export function createMyCanisterActor(
 }
 
 /**
- * MyDashboardBackend actor class for the dashboard of a Canister Dapp
+ * MyDashboardBackend actor class for the dashboard of a user-owned dapp
  */
 export class MyDashboardBackend {
   private actor: ActorSubclass<MyDashboardService>;
@@ -74,7 +74,7 @@ export class MyDashboardBackend {
   }
 
   /**
-   * Handle HTTP requests to the Canister Dapp
+   * Handle HTTP requests to the user-owned dapp
    */
   async httpRequest(request: HttpRequest): Promise<HttpResponse> {
     return await (
@@ -83,7 +83,7 @@ export class MyDashboardBackend {
   }
 
   /**
-   * Update alternative origins for the Canister Dapp
+   * Update alternative origins for the user-owned dapp
    */
   async manageAlternativeOrigins(
     arg: ManageAlternativeOriginsArg
@@ -96,7 +96,7 @@ export class MyDashboardBackend {
   }
 
   /**
-   * Update or get the Internet Identity principal of the Canister Dapp
+   * Update or get the Internet Identity principal of the user-owned dapp
    */
   async manageIIPrincipal(
     arg: ManageIIPrincipalArg
@@ -109,14 +109,14 @@ export class MyDashboardBackend {
   }
 
   /**
-   * Get the WASM status of the Canister Dapp
+   * Get the WASM status of the user-owned dapp
    */
   async wasmStatus(): Promise<WasmStatus> {
     return await (this.actor.wasm_status as () => Promise<WasmStatus>)();
   }
 
   /**
-   * Manage the Top-Up Rule for the Canister Dapp
+   * Manage the Top-Up Rule for the user-owned dapp
    */
   async manageTopUpRule(
     arg: ManageTopUpRuleArg

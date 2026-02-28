@@ -9,7 +9,7 @@ use ic_http_certification::{HttpRequest, HttpResponse, StatusCode};
 use include_dir::Dir;
 use std::borrow::Cow;
 
-/// Initialize and certify your Canister Dapp frontend assets.
+/// Initialize and certify your user-owned dapp frontend assets.
 ///
 /// Embeds files from an [`include_dir`](https://docs.rs/include_dir/latest/include_dir/) `Dir` into the internal
 /// [`AssetRouter`](https://docs.rs/ic-asset-certification/latest/ic_asset_certification/struct.AssetRouter.html)
@@ -38,7 +38,7 @@ pub fn setup_frontend(assets_dir: &Dir<'static>) -> Result<(), String> {
     setup_frontend_with_config(assets_dir, &FrontendConfig::default())
 }
 
-/// Initialize and certify your Canister Dapp frontend assets with custom configuration.
+/// Initialize and certify your user-owned dapp frontend assets with custom configuration.
 ///
 /// Like [`setup_frontend`], but allows specifying additional allowed file
 /// extensions and other options via [`FrontendConfig`].

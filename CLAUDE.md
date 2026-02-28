@@ -1,6 +1,6 @@
 # Project Guide
 
-Monorepo for building user-owned canister dapps on the Internet Computer. Users create and own canisters from a browser using ICP + Internet Identity — no CLI needed.
+Monorepo for building user-owned dapps on the Internet Computer. Users create and own canisters from a browser using ICP + Internet Identity — no CLI needed.
 
 ## Project Map
 

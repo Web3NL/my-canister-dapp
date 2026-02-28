@@ -3,7 +3,7 @@
 [![npm version](https://img.shields.io/npm/v/@web3nl/vite-plugin-canister-dapp)](https://www.npmjs.com/package/@web3nl/vite-plugin-canister-dapp)
 [![Documentation](https://img.shields.io/badge/docs-GitHub%20Pages-blue)](https://web3nl.github.io/my-canister-dapp/web3nl-vite-plugin-canister-dapp/)
 
-A Vite plugin for Internet Computer Canister Dapp environment configuration.
+A Vite plugin for Internet Computer user-owned dapp environment configuration.
 
 This plugin enables building a **single frontend/WASM that works in all environments** by:
 

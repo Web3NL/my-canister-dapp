@@ -5,7 +5,7 @@
 [![Build Status](https://github.com/Web3NL/my-canister-dapp/workflows/Publish%20Dashboard%20Package/badge.svg)](https://github.com/Web3NL/my-canister-dapp/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
 
-Utility functions for Canister Dapps on the Internet Computer.
+Utility functions for user-owned dapps on the Internet Computer.
 
 Used in conjunction with [my-canister-dashboard Rust crate](https://crates.io/crates/my-canister-dashboard)
 

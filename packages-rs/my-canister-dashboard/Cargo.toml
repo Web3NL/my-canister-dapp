@@ -1,7 +1,7 @@
 [package]
 name = "my-canister-dashboard"
 version = "0.11.1"
-description = "Dashboard assets and management utilities for Internet Computer Canister Dapps"
+description = "Dashboard assets and management utilities for user-owned dapps on the Internet Computer"
 edition = { workspace = true }
 license = { workspace = true }
 authors = { workspace = true }

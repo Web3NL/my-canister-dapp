@@ -11,9 +11,9 @@
 
   <div class="faq-item">
     <Collapsible iconSize="medium">
-      {#snippet header()}<h2>What is a Canister Dapp?</h2>{/snippet}
+      {#snippet header()}<h2>What is a User-owned dapp?</h2>{/snippet}
       <p>
-        A Canister Dapp is a decentralized application that runs on the <a
+        A User-owned dapp is a decentralized application that runs on the <a
           href="https://internetcomputer.org"
           target="_blank"
           rel="noopener noreferrer">Internet Computer</a
@@ -30,7 +30,7 @@
 
   <div class="faq-item">
     <Collapsible iconSize="medium">
-      {#snippet header()}<h2>Why do we need Canister Dapps?</h2>{/snippet}
+      {#snippet header()}<h2>Why do we need User-owned dapps?</h2>{/snippet}
       <p>
         The <a
           href="https://internetcomputer.org"
@@ -70,7 +70,7 @@
         their app.
       </p>
       <p>
-        Canister Dapps allow non-technical users to create and fully own their
+        User-owned dapps allow non-technical users to create and fully own their
         decentralized applications. This allows for true decentralized software
         without any intermediaries.
       </p>
@@ -80,10 +80,10 @@
   <div class="faq-item">
     <Collapsible iconSize="medium">
       {#snippet header()}<h2>
-          What is a Canister Dapp more technically?
+          What is a User-owned dapp more technically?
         </h2>{/snippet}
       <p>
-        A Canister Dapp is a single canister that functions as both a frontend
+        A User-owned dapp is a single canister that functions as both a frontend
         server and a backend. It is controlled by the user's <a
           href="https://identity.internetcomputer.org"
           target="_blank"
@@ -100,8 +100,8 @@
       <p>
         A user can use a service like <a href="https://mycanister.app"
           >mycanister.app</a
-        > to create a new canister with their own funds, install a Canister Dapp and
-        be the sole controller. The user can use the Canister Dashboard to top-up
+        > to create a new canister with their own funds, install a user-owned dapp
+        and be the sole controller. The user can use the Canister Dashboard to top-up
         their Dapp with cycles and perform other management tasks.
       </p>
     </Collapsible>
@@ -135,7 +135,7 @@
         maintained.
       </p>
       <p>
-        Appart from this, a Canister Dapp lives on-chain and is at all times
+        Apart from this, a user-owned dapp lives on-chain and is at all times
         fully controlled by the user. A mature Dapp, for instance a secure <a
           href="https://wiki.internetcomputer.org/wiki/VetKD"
           target="_blank"
@@ -148,9 +148,9 @@
 
   <div class="faq-item">
     <Collapsible iconSize="medium">
-      {#snippet header()}<h2>Who should use Canister Dapps?</h2>{/snippet}
+      {#snippet header()}<h2>Who should use User-owned dapps?</h2>{/snippet}
       <p>
-        Canister Dapps are meant for users who want to create their own
+        User-owned dapps are meant for users who want to create their own
         decentralized applications with the guarantee that they are the only
         controller without any intermediaries. These users are typically
         blockchain enthusiasts, developers, or those who value privacy, security

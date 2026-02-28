@@ -18,7 +18,7 @@ export interface CheckCyclesBalanceOptions {
 export type CheckCyclesBalanceResult = { ok: bigint } | { error: string };
 
 /**
- * MyCanisterDashboard class for Canister Dapp management
+ * MyCanisterDashboard class for user-owned dapp management
  */
 export class MyCanisterDashboard {
   private icManagement: IcManagementCanister;

@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Changed
+
+- Updated terminology: "Canister Dapp" → "User-owned dapp" in package description and documentation
+
 ## [0.11.1] - 2026-02-27
 
 ### Fixed
