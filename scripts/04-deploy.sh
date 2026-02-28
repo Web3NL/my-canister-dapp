@@ -70,7 +70,7 @@ set +a
 
 echo "Building and deploying my-canister-app..."
 npm run build --workspace=my-canister-app
-icp deploy my-canister-app -e local
+icp deploy my-canister-app -e local --identity ident-1
 
 # Final write-test-env.sh to capture my-canister-app canister ID
 ./scripts/write-test-env.sh
