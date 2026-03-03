@@ -1,11 +1,11 @@
 # yaml-language-server: $schema=https://github.com/dfinity/icp-cli/raw/refs/tags/v0.1.0/docs/schemas/icp-yaml-schema.json
 
 canisters:
-  - name: my-canister-app
+  - name: icp-dapp-launcher
     recipe:
       type: "@dfinity/asset-canister@v2.1.0"
       configuration:
-        dir: canisters/my-canister-app/build
+        dir: canisters/icp-dapp-launcher/build
 
   - name: wasm-registry
     recipe:
@@ -50,8 +50,8 @@ networks:
 environments:
   - name: local
     network: local
-    canisters: [my-canister-app, wasm-registry, my-hello-world, my-notepad, demos]
+    canisters: [icp-dapp-launcher, wasm-registry, my-hello-world, my-notepad, demos]
 
   - name: mainnet
     network: ic
-    canisters: [my-canister-app, wasm-registry, demos]
+    canisters: [icp-dapp-launcher, wasm-registry, demos]

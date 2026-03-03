@@ -10,7 +10,7 @@ npm run test --workspace=@web3nl/vite-plugin-canister-dapp &
 pid2=$!
 npm run test --workspace=canister-dashboard-frontend &
 pid3=$!
-npm run test --workspace=my-canister-app &
+npm run test --workspace=icp-dapp-launcher &
 pid4=$!
 cargo test --workspace --exclude demos-test &
 pid5=$!

@@ -12,7 +12,7 @@ cd "$REPO_ROOT"
 
 II_CANISTER_ID="rdmx6-jaaaa-aaaaa-aaadq-cai"
 HELLO_WORLD_ID=$(icp canister status my-hello-world -e local --id-only 2>/dev/null || echo "")
-APP_CANISTER_ID=$(icp canister status my-canister-app -e local --id-only 2>/dev/null || echo "")
+APP_CANISTER_ID=$(icp canister status icp-dapp-launcher -e local --id-only 2>/dev/null || echo "")
 
 # Write test.env with discovered canister IDs
 cat > tests/test.env <<EOF
@@ -27,7 +27,7 @@ fi
 
 # Add app canister ID if it exists
 if [ -n "$APP_CANISTER_ID" ]; then
-  echo "VITE_MY_CANISTER_APP_CANISTER_ID=${APP_CANISTER_ID}" >> tests/test.env
+  echo "VITE_ICP_DAPP_LAUNCHER_CANISTER_ID=${APP_CANISTER_ID}" >> tests/test.env
 fi
 
 # Add wasm-registry canister ID if it exists

@@ -41,8 +41,8 @@ export function readTestData(filename: string): string {
   return fs.readFileSync(filePath, 'utf8').trim();
 }
 
-export function myCanisterAppDfxUrl(): string {
-  const canisterId = getTestEnv('VITE_MY_CANISTER_APP_CANISTER_ID');
+export function icpDappLauncherUrl(): string {
+  const canisterId = getTestEnv('VITE_ICP_DAPP_LAUNCHER_CANISTER_ID');
   const hostname = getTestEnv('VITE_HOSTNAME');
 
   return `http://${canisterId}.${hostname}`;

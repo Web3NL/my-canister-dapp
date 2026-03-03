@@ -34,8 +34,8 @@ export default defineConfig({
       testMatch: /.*my-hello-world-frontend.*\.spec\.ts/,
     },
     {
-      name: 'my-canister-app-canister',
-      testMatch: /.*my-canister-app.*\.spec\.ts/,
+      name: 'icp-dapp-launcher-canister',
+      testMatch: /.*icp-dapp-launcher.*\.spec\.ts/,
     },
     {
       name: 'setup-ii',

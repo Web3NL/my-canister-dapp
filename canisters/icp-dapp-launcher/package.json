@@ -1,5 +1,5 @@
 {
-  "name": "my-canister-app",
+  "name": "icp-dapp-launcher",
   "version": "0.6.0",
   "dependencies": {
     "@dfinity/gix-components": "^10.0.0",

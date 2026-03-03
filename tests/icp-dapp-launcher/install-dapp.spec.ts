@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 import {
-  myCanisterAppDfxUrl,
+  icpDappLauncherUrl,
   loadTestEnv,
   transferToPrincipal,
   saveTestData,
@@ -13,8 +13,8 @@ loadTestEnv();
 
 const maintenanceMode = false;
 
-test('My Canister App E2E Suite', async ({ page }) => {
-  const appUrl = myCanisterAppDfxUrl();
+test('ICP Dapp Launcher E2E Suite', async ({ page }) => {
+  const appUrl = icpDappLauncherUrl();
   await page.goto(appUrl);
 
   // Dismiss maintenance mode overlay with Shift+M

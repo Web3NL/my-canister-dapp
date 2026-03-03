@@ -17,7 +17,7 @@ packages-js/                  Publishable npm packages
   vite-plugin-canister-dapp/    Vite plugin for dev/prod environment detection
 
 canisters/                    Deployable canisters
-  my-canister-app/              Installer app — SvelteKit frontend hosted as asset canister
+  icp-dapp-launcher/            Installer app — SvelteKit frontend hosted as asset canister
   wasm-registry/                On-chain registry storing dapp wasms for installation
 
 examples/                     Example dapps (used for testing and as developer templates)
@@ -42,7 +42,7 @@ Developer builds a dapp using:
   my-canister-dashboard (Rust) ── embeds dashboard UI + management API
 
 User installs dapp via:
-  my-canister-app (installer) ── browses wasm-registry, creates canister, installs wasm
+  icp-dapp-launcher (installer) ── browses wasm-registry, creates canister, installs wasm
 
 Developer deploys + tests via:
   my-canister-dapp-cli (`dapp`) ── deploy to local/mainnet with II auth, run acceptance tests
@@ -67,7 +67,7 @@ Testing validates via:
 ### Development
 
 ```sh
-npm run dev:app               # Run installer app (my-canister-app) dev server
+npm run dev:app               # Run installer app (icp-dapp-launcher) dev server
 npm run dev:dashboard         # Run dashboard frontend dev server
 ```
 
@@ -76,7 +76,7 @@ npm run dev:dashboard         # Run dashboard frontend dev server
 ```sh
 npm run build                 # Build all JS workspace packages
 cargo build                   # Build all Rust workspace crates
-npm run build:app             # Build just my-canister-app
+npm run build:app             # Build just icp-dapp-launcher
 npm run build:docs            # Build TypeDoc API docs for JS packages
 ```
 
@@ -124,7 +124,7 @@ npm run deps:fix              # Auto-fix dependency consistency
 npm run changeset             # Create a changeset for version bumping
 npm run release:version       # Apply changesets → bump versions
 npm run release:publish       # Publish npm packages + push git tags
-./scripts/deploy-app.sh <patch|minor|major>  # Deploy my-canister-app to IC mainnet + tag
+./scripts/deploy-app.sh <patch|minor|major>  # Deploy icp-dapp-launcher to IC mainnet + tag
 ```
 
 ### Utility Scripts
@@ -152,7 +152,7 @@ Both `pr.yml` and `ci.yml` use `shared-build.yml` which runs `./validate-and-tes
 ## Testing Architecture
 
 **Unit tests** — run in isolation, no network needed:
-- JS: `vitest` per workspace (dashboard-js, vite-plugin, dashboard-frontend, my-canister-app)
+- JS: `vitest` per workspace (dashboard-js, vite-plugin, dashboard-frontend, icp-dapp-launcher)
 - Rust: `cargo test` per crate (my-canister-dashboard, my-canister-frontend)
 
 **Acceptance tests** — validate wasm behavior via PocketIC:

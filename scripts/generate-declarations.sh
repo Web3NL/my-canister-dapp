@@ -28,7 +28,7 @@ echo "Declarations generated in $DASHBOARD_OUT/declarations"
 
 # --- wasm-registry ---
 REGISTRY_DID="canisters/wasm-registry/wasm-registry.did"
-REGISTRY_OUT="canisters/my-canister-app/src/lib/declarations/wasm-registry"
+REGISTRY_OUT="canisters/icp-dapp-launcher/src/lib/declarations/wasm-registry"
 
 if [[ ! -f "$REGISTRY_DID" ]]; then
   echo "Skipping wasm-registry declarations: $REGISTRY_DID not found."
@@ -53,7 +53,7 @@ fi
 
 # --- demos ---
 DEMOS_DID="canisters/demos/demos.did"
-DEMOS_OUT="canisters/my-canister-app/src/lib/declarations/demos"
+DEMOS_OUT="canisters/icp-dapp-launcher/src/lib/declarations/demos"
 
 if [[ ! -f "$DEMOS_DID" ]]; then
   echo "Skipping demos declarations: $DEMOS_DID not found."

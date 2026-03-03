@@ -13,7 +13,7 @@ echo "Setting up dashboard development environment..."
 HELLO_WORLD_ID=$(icp canister status my-hello-world -e local --id-only)
 DAPP_ORIGIN_CANISTER="http://${HELLO_WORLD_ID}.localhost:8080"
 
-APP_ID=$(icp canister status my-canister-app -e local --id-only)
+APP_ID=$(icp canister status icp-dapp-launcher -e local --id-only)
 DAPP_ORIGIN_APP="http://${APP_ID}.localhost:8080"
 
 echo "Running Internet Identity setup..."

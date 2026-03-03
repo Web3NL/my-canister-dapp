@@ -1,6 +1,6 @@
 import { test, expect } from '@playwright/test';
 import {
-  myCanisterAppDfxUrl,
+  icpDappLauncherUrl,
   loadTestEnv,
   saveTestData,
   readTestData,
@@ -16,7 +16,7 @@ test('Demo Install E2E Suite', async ({ page }) => {
   expect(accessCode).toBeTruthy();
   expect(accessCode).toMatch(/^[A-Z2-9]{4}-[A-Z2-9]{4}-[A-Z2-9]{4}$/);
 
-  const appUrl = myCanisterAppDfxUrl();
+  const appUrl = icpDappLauncherUrl();
   await page.goto(appUrl);
 
   // 1. Login with II
