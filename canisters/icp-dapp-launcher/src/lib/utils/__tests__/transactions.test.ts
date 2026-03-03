@@ -1,9 +1,9 @@
 import { describe, it, expect } from 'vitest';
 import { filterCreateCanisterTransactions } from '../transactions';
 import type {
-  GetAccountIdentifierTransactionsResult,
+  GetAccountIdentifierTransactionsResponse,
   TransactionWithId,
-} from '$declarations/icp-index/icp-index.did.d.ts';
+} from '$lib/api/ledgerIndex';
 
 // CREATE_CANISTER_MEMO = [0x43, 0x52, 0x45, 0x41, 0x00, 0x00, 0x00, 0x00] = 'CREA' + padding
 const CREATE_CANISTER_MEMO = new Uint8Array([
@@ -11,7 +11,7 @@ const CREATE_CANISTER_MEMO = new Uint8Array([
 ]);
 
 function createMockTransaction(
-  icrc1Memo: [] | [Uint8Array | number[]]
+  icrc1Memo: [] | [Uint8Array]
 ): TransactionWithId {
   return {
     id: 1n,
@@ -33,53 +33,44 @@ function createMockTransaction(
   };
 }
 
-function createOkResult(
+function createResponse(
   transactions: TransactionWithId[]
-): GetAccountIdentifierTransactionsResult {
+): GetAccountIdentifierTransactionsResponse {
   return {
-    Ok: {
-      transactions,
-      oldest_tx_id: [],
-      balance: 0n,
-    },
+    transactions,
+    oldest_tx_id: [],
+    balance: 0n,
   };
 }
 
 describe('filterCreateCanisterTransactions', () => {
-  it('returns empty array when result contains Err', () => {
-    const errResult: GetAccountIdentifierTransactionsResult = {
-      Err: { message: 'Invalid account' },
-    };
-    expect(filterCreateCanisterTransactions(errResult)).toEqual([]);
-  });
-
   it('returns empty array when transactions is empty', () => {
-    const result = createOkResult([]);
-    expect(filterCreateCanisterTransactions(result)).toEqual([]);
+    const response = createResponse([]);
+    expect(filterCreateCanisterTransactions(response)).toEqual([]);
   });
 
   it('filters transactions with CREATE_CANISTER_MEMO', () => {
     const validTx = createMockTransaction([CREATE_CANISTER_MEMO]);
-    const result = createOkResult([validTx]);
+    const response = createResponse([validTx]);
 
-    const filtered = filterCreateCanisterTransactions(result);
+    const filtered = filterCreateCanisterTransactions(response);
     expect(filtered).toHaveLength(1);
     expect(filtered[0]).toBe(validTx);
   });
 
   it('excludes transactions without icrc1_memo', () => {
     const txWithoutMemo = createMockTransaction([]);
-    const result = createOkResult([txWithoutMemo]);
+    const response = createResponse([txWithoutMemo]);
 
-    expect(filterCreateCanisterTransactions(result)).toEqual([]);
+    expect(filterCreateCanisterTransactions(response)).toEqual([]);
   });
 
   it('excludes transactions with wrong memo length', () => {
     const wrongLengthMemo = new Uint8Array([0x43, 0x52, 0x45, 0x41]); // Only 4 bytes
     const txWithWrongLength = createMockTransaction([wrongLengthMemo]);
-    const result = createOkResult([txWithWrongLength]);
+    const response = createResponse([txWithWrongLength]);
 
-    expect(filterCreateCanisterTransactions(result)).toEqual([]);
+    expect(filterCreateCanisterTransactions(response)).toEqual([]);
   });
 
   it('excludes transactions with partial memo match', () => {
@@ -87,17 +78,17 @@ describe('filterCreateCanisterTransactions', () => {
       0x43, 0x52, 0x45, 0x41, 0x00, 0x00, 0x00, 0x01,
     ]); // Last byte different
     const txWithPartialMatch = createMockTransaction([partialMemo]);
-    const result = createOkResult([txWithPartialMatch]);
+    const response = createResponse([txWithPartialMatch]);
 
-    expect(filterCreateCanisterTransactions(result)).toEqual([]);
+    expect(filterCreateCanisterTransactions(response)).toEqual([]);
   });
 
   it('returns multiple matching transactions', () => {
     const validTx1 = createMockTransaction([CREATE_CANISTER_MEMO]);
     const validTx2 = createMockTransaction([CREATE_CANISTER_MEMO]);
-    const result = createOkResult([validTx1, validTx2]);
+    const response = createResponse([validTx1, validTx2]);
 
-    const filtered = filterCreateCanisterTransactions(result);
+    const filtered = filterCreateCanisterTransactions(response);
     expect(filtered).toHaveLength(2);
   });
 
@@ -107,9 +98,9 @@ describe('filterCreateCanisterTransactions', () => {
     const invalidTx2 = createMockTransaction([
       new Uint8Array([1, 2, 3, 4, 5, 6, 7, 8]),
     ]); // Wrong memo
-    const result = createOkResult([invalidTx1, validTx, invalidTx2]);
+    const response = createResponse([invalidTx1, validTx, invalidTx2]);
 
-    const filtered = filterCreateCanisterTransactions(result);
+    const filtered = filterCreateCanisterTransactions(response);
     expect(filtered).toHaveLength(1);
     expect(filtered[0]).toBe(validTx);
   });

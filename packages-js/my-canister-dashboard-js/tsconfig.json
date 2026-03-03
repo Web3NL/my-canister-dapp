@@ -1,12 +1,5 @@
 {
   "extends": "../../tsconfig.json",
-  "compilerOptions": {
-    "paths": {
-      "$declarations/*": [
-        "../../declarations/*"
-      ]
-    }
-  },
   "include": [
     "src/**/*",
     "test/**/*"

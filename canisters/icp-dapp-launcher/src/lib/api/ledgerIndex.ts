@@ -1,45 +1,42 @@
-import { Actor, type ActorSubclass } from '@icp-sdk/core/agent';
+import {
+  IcpIndexCanister,
+  AccountIdentifier,
+  type IcpIndexDid,
+} from '@icp-sdk/canisters/ledger/icp';
+import { Principal } from '@icp-sdk/core/principal';
 import { createHttpAgent } from '$lib/utils/agent';
-import { idlFactory } from '$declarations/icp-index/icp-index.did.js';
-import type {
-  _SERVICE,
-  GetAccountIdentifierTransactionsResult,
-  Account,
-} from '$declarations/icp-index/icp-index.did.d.ts';
 import { INDEX_CANISTER_ID } from '$lib/constants';
-import type { Principal } from '@icp-sdk/core/principal';
+import { authStore } from '$lib/stores/auth';
+
+export type GetAccountIdentifierTransactionsResponse =
+  IcpIndexDid.GetAccountIdentifierTransactionsResponse;
+export type TransactionWithId = IcpIndexDid.TransactionWithId;
 
 export class LedgerIndex {
-  private indexCanister: ActorSubclass<_SERVICE>;
+  private indexCanister: IcpIndexCanister;
 
-  private constructor(indexCanister: ActorSubclass<_SERVICE>) {
+  private constructor(indexCanister: IcpIndexCanister) {
     this.indexCanister = indexCanister;
   }
 
   static async create(): Promise<LedgerIndex> {
     const agent = await createHttpAgent();
-    const indexCanister = Actor.createActor<_SERVICE>(idlFactory, {
+    const indexCanister = IcpIndexCanister.create({
       agent,
-      canisterId: INDEX_CANISTER_ID,
+      canisterId: Principal.fromText(INDEX_CANISTER_ID),
     });
     return new LedgerIndex(indexCanister);
   }
 
-  async ledger_id(): Promise<Principal> {
-    return await this.indexCanister.ledger_id();
-  }
-
-  async getAccountTransactions(): Promise<GetAccountIdentifierTransactionsResult> {
-    const agent = await createHttpAgent();
-    const principal = await agent.getPrincipal();
-    const account: Account = {
-      owner: principal,
-      subaccount: [],
-    };
-    return await this.indexCanister.get_account_transactions({
-      account,
-      start: [],
-      max_results: BigInt(100),
+  async getAccountTransactions(): Promise<GetAccountIdentifierTransactionsResponse> {
+    const principal = await authStore.getPrincipal();
+    const accountIdentifier = AccountIdentifier.fromPrincipal({
+      principal,
+    });
+    return await this.indexCanister.getTransactions({
+      accountIdentifier,
+      maxResults: BigInt(100),
+      certified: false,
     });
   }
 }

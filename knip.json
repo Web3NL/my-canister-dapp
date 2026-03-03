@@ -1,7 +1,6 @@
 {
   "ignoreDependencies": ["@icp-sdk/bindgen"],
   "ignore": [
-    "declarations/**",
     "examples/my-hello-world/src/declarations/**",
     "examples/my-notepad/src/declarations/**",
     "canisters/icp-dapp-launcher/src/lib/declarations/**",
