@@ -237,21 +237,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "canister-dapp-test"
-version = "0.2.0"
-dependencies = [
- "candid",
- "hex",
- "ic-cdk",
- "ic-http-certification",
- "ic-ledger-types",
- "my-canister-dashboard",
- "pocket-ic",
- "serde_json",
- "sha2",
-]
-
-[[package]]
 name = "cc"
 version = "1.2.51"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1389,12 +1374,27 @@ name = "my-canister-dapp-cli"
 version = "0.1.0"
 dependencies = [
  "anyhow",
- "canister-dapp-test",
  "clap",
+ "my-canister-dapp-test",
  "open",
  "serde",
  "serde_json",
  "tiny_http",
+]
+
+[[package]]
+name = "my-canister-dapp-test"
+version = "0.2.0"
+dependencies = [
+ "candid",
+ "hex",
+ "ic-cdk",
+ "ic-http-certification",
+ "ic-ledger-types",
+ "my-canister-dashboard",
+ "pocket-ic",
+ "serde_json",
+ "sha2",
 ]
 
 [[package]]

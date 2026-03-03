@@ -18,7 +18,7 @@ wait $pid1 $pid2 $pid3 $pid4 $pid5
 echo "Unit tests passed"
 
 # Acceptance tests run sequentially (each uses PocketIC)
-# Uses the dapp CLI which includes the canister-dapp-test library
+# Uses the dapp CLI which includes the my-canister-dapp-test library
 echo "Acceptance testing my-hello-world"
 cargo run -p my-canister-dapp-cli -- test wasm/my-hello-world.wasm.gz
 

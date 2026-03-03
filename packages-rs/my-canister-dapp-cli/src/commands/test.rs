@@ -20,7 +20,7 @@ pub struct TestArgs {
     pub identity: Option<String>,
 }
 
-/// Run the canister-dapp-test acceptance suite.
+/// Run the my-canister-dapp-test acceptance suite.
 ///
 /// If `target` is a file path, reads the wasm directly.
 /// Otherwise treats it as a canister name, builds via `icp build`, and reads
@@ -32,7 +32,7 @@ pub fn test(args: TestArgs) -> Result<()> {
 
     // run_acceptance_suite panics on test failure, so catch it
     let result = std::panic::catch_unwind(move || {
-        canister_dapp_test::run_acceptance_suite(&wasm_bytes, &label)
+        my_canister_dapp_test::run_acceptance_suite(&wasm_bytes, &label)
     });
 
     match result {
