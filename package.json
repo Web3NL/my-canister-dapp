@@ -6,7 +6,7 @@
     "@icp-sdk/core": "^5.0.0"
   },
   "devDependencies": {
-    "@changesets/changelog-github": "^0.5.2",
+    "@changesets/changelog-github": "^0.6.0",
     "@changesets/cli": "^2.29.8",
     "@eslint/js": "^10.0.1",
     "@icp-sdk/bindgen": "^0.2.2",
@@ -35,6 +35,12 @@
     "vite-plugin-devtools-json": "^1.0.0",
     "vite-plugin-dts": "^4.5.4",
     "vitest": "^4.0.18"
+  },
+  "overrides": {
+    "minimatch@>=10.0.0 <10.2.3": "^10.2.3",
+    "@sveltejs/kit": {
+      "cookie": "^0.7.0"
+    }
   },
   "engines": {
     "node": ">=22.0.0"
