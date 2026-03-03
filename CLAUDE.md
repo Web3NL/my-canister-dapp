@@ -9,7 +9,7 @@ packages-rs/                  Publishable Rust crates (crates.io)
   my-canister-dashboard/        Dashboard UI + management endpoints (embedded in user canisters)
     frontend/                   Svelte dashboard app (compiled into the Rust crate)
   my-canister-frontend/         Certified HTTP asset serving with security headers + gzip
-  my-canister-dapp-test/           Acceptance test library — validates any dapp wasm via PocketIC
+  my-canister-dapp-test/        Acceptance test library — validates any dapp wasm via PocketIC
   my-canister-dapp-cli/         CLI tool (`dapp`) for deploying + testing user-owned dapps
 
 packages-js/                  Publishable npm packages
@@ -19,6 +19,7 @@ packages-js/                  Publishable npm packages
 canisters/                    Deployable canisters
   icp-dapp-launcher/            Installer app — SvelteKit frontend hosted as asset canister
   wasm-registry/                On-chain registry storing dapp wasms for installation
+  demos/                        Demo access code flow — time-limited canister access for trials
 
 examples/                     Example dapps (used for testing and as developer templates)
   my-hello-world/               Minimal example — Rust backend + Svelte frontend
@@ -134,7 +135,7 @@ npm run release:publish       # Publish npm packages + push git tags
 ./scripts/setup-dashboard-dev-env.sh  # II principal derivation + controller setup
 ./scripts/upload-wasm-to-registry.sh  # Upload a wasm to the registry canister
 ./scripts/build-all-wasm.sh           # Build, shrink, and compress all canister wasms
-./scripts/generate-declarations.sh    # Regenerate Candid declarations
+./scripts/generate-declarations.sh    # Regenerate Candid declarations (dashboard, wasm-registry, demos)
 ./scripts/clean.sh                    # Remove build artifacts
 ```
 
@@ -144,9 +145,10 @@ npm run release:publish       # Publish npm packages + push git tags
 |----------|---------|---------|
 | `pr.yml` | Pull requests to main | Validation (build + test + E2E, skips Vite E2E) |
 | `ci.yml` | Push to main / tags / manual | Full validation (includes Vite E2E) |
+| `shared-build.yml` | Called by pr.yml / ci.yml | Reusable workflow — runs full build/test pipeline |
 | `publish-docs.yml` | npm package tags | Build TypeDoc + deploy to GitHub Pages |
 
-Both `pr.yml` and `ci.yml` use `shared-build.yml` which runs `./validate-and-test-all.sh` on ubuntu-latest with icp-cli and a local ICP network (PocketIC with NNS + II). The `ci.yml` workflow passes `include-vite-e2e: true` for the most complete validation on main.
+`shared-build.yml` runs `./validate-and-test-all.sh` on ubuntu-latest with icp-cli and a local ICP network (PocketIC with NNS + II). The `ci.yml` workflow passes `include-vite-e2e: true` for the most complete validation on main.
 
 ## Testing Architecture
 
