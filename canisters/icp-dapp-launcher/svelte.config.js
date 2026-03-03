@@ -4,7 +4,6 @@ export default {
   kit: {
     adapter: adapter(),
     alias: {
-      $declarations: '../../declarations',
       '@web3nl/my-canister-dashboard': '../../packages-js/my-canister-dashboard-js/dist',
     },
   },

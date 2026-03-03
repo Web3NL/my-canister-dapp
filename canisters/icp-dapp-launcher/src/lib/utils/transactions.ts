@@ -1,19 +1,13 @@
 import type {
-  GetAccountIdentifierTransactionsResult,
+  GetAccountIdentifierTransactionsResponse,
   TransactionWithId,
-} from '$declarations/icp-index/icp-index.did.d.ts';
+} from '$lib/api/ledgerIndex';
 import { CREATE_CANISTER_MEMO } from '$lib/constants';
 
 export function filterCreateCanisterTransactions(
-  result: GetAccountIdentifierTransactionsResult
+  response: GetAccountIdentifierTransactionsResponse
 ): TransactionWithId[] {
-  if ('Err' in result) {
-    return [];
-  }
-
-  const transactions = result.Ok.transactions;
-
-  return transactions.filter(tx => {
+  return response.transactions.filter(tx => {
     const icrc1Memo = tx.transaction.icrc1_memo;
     if (icrc1Memo.length === 0) return false;
 

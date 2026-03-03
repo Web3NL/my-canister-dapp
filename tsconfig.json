@@ -32,11 +32,6 @@
     // Ensure consistent cross-platform behavior
     "preserveSymlinks": false,
     "preserveWatchOutput": true,
-    "paths": {
-      "$declarations/*": [
-        "./declarations/*"
-      ]
-    }
   },
   "include": [
     "packages-rs/my-canister-dashboard/frontend/src/**/*",

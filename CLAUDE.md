@@ -29,7 +29,6 @@ tests/                        E2E tests (Playwright) + shared helpers + acceptan
   demos-test/                   Acceptance test binary for demos canister access code flow
   ii-setup/                     Internet Identity setup (Playwright + Vite)
   output/                       Runtime test artifacts (derived principals, etc.)
-declarations/                 Generated Candid interface bindings (icp-index)
 wasm/                         Built wasm files for deployment/testing
 .github/workflows/            CI/CD pipelines
 ```
