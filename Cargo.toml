@@ -2,7 +2,7 @@
 members = [
     "packages-rs/my-canister-dashboard",
     "packages-rs/my-canister-frontend",
-    "packages-rs/canister-dapp-test",
+    "packages-rs/my-canister-dapp-test",
     "examples/my-hello-world/src/backend",
     "examples/my-notepad/src/backend",
     "canisters/wasm-registry",
@@ -40,4 +40,4 @@ flate2 = "1.1"
 anyhow = "1"
 tiny_http = "0.12"
 open = "5"
-canister-dapp-test = { path = "packages-rs/canister-dapp-test", version = "0.2.0" }
+my-canister-dapp-test = { path = "packages-rs/my-canister-dapp-test", version = "0.2.0" }

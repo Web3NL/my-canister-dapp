@@ -14,7 +14,7 @@ name = "dapp"
 path = "src/main.rs"
 
 [dependencies]
-canister-dapp-test = { workspace = true }
+my-canister-dapp-test = { workspace = true }
 clap = { workspace = true }
 anyhow = { workspace = true }
 tiny_http = { workspace = true }

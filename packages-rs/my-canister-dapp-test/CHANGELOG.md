@@ -10,7 +10,7 @@
 
 - Security header validation: all 8 security/privacy headers verified on frontend fallback responses
 - Gzip compression test: verifies Accept-Encoding negotiation returns compressed responses with correct headers
-- CLI binary: `canister-dapp-test <wasm-path>` runs the full acceptance suite against any dapp WASM.
+- CLI binary: `my-canister-dapp-test <wasm-path>` runs the full acceptance suite against any dapp WASM.
 - HTTP response header validation: Content-Type for HTML/JS/CSS, Content-Security-Policy for dashboard HTML.
 - SPA fallback test: unknown paths serve index.html with 200 (client-side routing).
 - `wasm_status` assertions: name must be non-empty, version must be > 0.
@@ -26,7 +26,7 @@
 
 ### Removed
 
-- `tests/canister_dapp_test.rs` — replaced by the binary entry point.
+- `tests/my_canister_dapp_test.rs` — replaced by the binary entry point.
 - `get_wasm_file_name()` — callers now pass the WASM path directly.
 - Dead code: `VersionHashes`, `VersionData`, `Assets` structs.
 - Unused dependencies: `serde`.

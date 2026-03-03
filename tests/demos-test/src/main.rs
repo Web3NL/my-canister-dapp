@@ -5,7 +5,7 @@ use std::fs;
 use std::time::Duration;
 
 // ---------------------------------------------------------------------------
-// Synthetic test principals (same byte-pattern convention as canister-dapp-test)
+// Synthetic test principals (same byte-pattern convention as my-canister-dapp-test)
 // ---------------------------------------------------------------------------
 
 const CONTROLLER_BYTE: u8 = 255;

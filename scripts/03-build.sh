@@ -3,7 +3,7 @@ set -euo pipefail
 
 # Phase 3: Build all frontend assets and Rust canister wasms.
 # The orchestrator (validate-and-test-all.sh) handles background tasks like
-# pre-compiling canister-dapp-test across phase boundaries.
+# pre-compiling my-canister-dapp-test across phase boundaries.
 
 source "$(dirname "$0")/constants.sh"
 cd "$REPO_ROOT"
