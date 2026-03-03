@@ -1,0 +1,23 @@
+[package]
+name = "my-canister-dapp-cli"
+version = "0.1.0"
+description = "CLI for deploying and testing user-owned dapps on the Internet Computer"
+keywords = ["internet-computer", "canister", "cli", "deploy", "dapp"]
+categories = ["command-line-utilities", "development-tools"]
+edition = { workspace = true }
+license = { workspace = true }
+authors = { workspace = true }
+repository = "https://github.com/Web3NL/my-canister-dapp/tree/main/packages-rs/my-canister-dapp-cli"
+
+[[bin]]
+name = "dapp"
+path = "src/main.rs"
+
+[dependencies]
+canister-dapp-test = { workspace = true }
+clap = { workspace = true }
+anyhow = { workspace = true }
+tiny_http = { workspace = true }
+open = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }

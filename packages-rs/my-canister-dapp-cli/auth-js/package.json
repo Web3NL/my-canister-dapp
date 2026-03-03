@@ -1,0 +1,14 @@
+{
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "vite build"
+  },
+  "devDependencies": {
+    "vite": "^7.3.1",
+    "typescript": "^5.8.0"
+  },
+  "dependencies": {
+    "@icp-sdk/auth": "^5.0.0"
+  }
+}
