@@ -81,8 +81,10 @@ pub fn deploy(args: DeployArgs) -> Result<()> {
     println!("Canister ID: {canister_id}");
 
     // Step 5: Install wasm
+    // Use canister ID (not name) for all post-creation commands to avoid
+    // icp-cli name→ID resolution issues when --wasm is provided.
     println!("Installing wasm...");
-    icp.canister_install(&canister_name, wasm_path.as_deref())?;
+    icp.canister_install(&canister_id, wasm_path.as_deref())?;
     println!("Wasm installed.");
 
     // Step 6: II authentication
@@ -107,27 +109,27 @@ pub fn deploy(args: DeployArgs) -> Result<()> {
 
     // 6a. Start auth server and get the port
     println!("Starting authentication server...");
-    let auth_result = auth::run_auth_flow(&ii_provider, &canister_origin, &icp, &canister_name)?;
+    let auth_result = auth::run_auth_flow(&ii_provider, &canister_origin, &icp, &canister_id)?;
     let principal = &auth_result.principal;
     println!("Derived II principal: {principal}");
 
     // 6b. Set II principal in canister (deployer is still controller)
     println!("Setting II principal...");
     let set_principal_arg = format!("(variant {{ Set = principal \"{principal}\" }})");
-    icp.canister_call(&canister_name, "manage_ii_principal", &set_principal_arg)?;
+    icp.canister_call(&canister_id, "manage_ii_principal", &set_principal_arg)?;
 
     // 6c. Remove CLI origin from alternative origins (deployer is still controller)
     println!("Cleaning up alternative origins...");
     let remove_origin_arg = format!("(variant {{ Remove = \"{}\" }})", auth_result.cli_origin);
     icp.canister_call(
-        &canister_name,
+        &canister_id,
         "manage_alternative_origins",
         &remove_origin_arg,
     )?;
 
     // 6d. Update controllers (deployer relinquishes control — must be LAST)
     println!("Setting controllers...");
-    icp.canister_update_settings(&canister_name, &[&canister_id, principal])?;
+    icp.canister_update_settings(&canister_id, &[&canister_id, principal])?;
 
     print_summary(&canister_id, is_mainnet, Some(principal));
 
