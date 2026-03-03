@@ -31,11 +31,11 @@ DEMOS_CYCLES="5000000000000"
 icp canister create demos -e local --identity ident-1 --cycles "$DEMOS_CYCLES"
 icp canister install demos --wasm wasm/demos.wasm.gz -e local --identity ident-1
 
-# Create my-canister-app canister early so its ID is available for II principal derivation
-echo "Creating my-canister-app canister..."
-icp canister create my-canister-app -e local --identity ident-1 --cycles "$CANISTER_INITIAL_CYCLES"
+# Create icp-dapp-launcher canister early so its ID is available for II principal derivation
+echo "Creating icp-dapp-launcher canister..."
+icp canister create icp-dapp-launcher -e local --identity ident-1 --cycles "$CANISTER_INITIAL_CYCLES"
 
-# Re-write test.env so the my-canister-app canister ID is discoverable
+# Re-write test.env so the icp-dapp-launcher canister ID is discoverable
 ./scripts/write-test-env.sh
 
 # --- Dashboard setup (II principals, controllers) ---
@@ -68,11 +68,11 @@ set -a
 source tests/test.env
 set +a
 
-echo "Building and deploying my-canister-app..."
-npm run build --workspace=my-canister-app
-icp deploy my-canister-app -e local --identity ident-1
+echo "Building and deploying icp-dapp-launcher..."
+npm run build --workspace=icp-dapp-launcher
+icp deploy icp-dapp-launcher -e local --identity ident-1
 
-# Final write-test-env.sh to capture my-canister-app canister ID
+# Final write-test-env.sh to capture icp-dapp-launcher canister ID
 ./scripts/write-test-env.sh
 
 # --- Configure demos canister for testing ---
@@ -83,7 +83,7 @@ set -a
 source tests/test.env
 set +a
 
-INSTALLER_ORIGIN="http://${VITE_MY_CANISTER_APP_CANISTER_ID}.localhost:8080"
+INSTALLER_ORIGIN="http://${VITE_ICP_DAPP_LAUNCHER_CANISTER_ID}.localhost:8080"
 
 icp canister call demos configure "(record {
   wasm_registry_id = principal \"$VITE_WASM_REGISTRY_CANISTER_ID\";

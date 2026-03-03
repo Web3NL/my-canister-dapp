@@ -15,6 +15,6 @@
   "ignore": [
     "canister-dashboard-frontend",
     "my-hello-world-frontend",
-    "my-canister-app"
+    "icp-dapp-launcher"
   ]
 }

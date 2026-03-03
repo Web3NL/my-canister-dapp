@@ -14,7 +14,7 @@ echo "Running End-to-End Tests"
 
 # Installer app test must run first — it writes the installed canister ID
 # needed by dashboard and hello-world frontend tests
-npx playwright test --project=my-canister-app-canister
+npx playwright test --project=icp-dapp-launcher-canister
 
 # Vite dev server batch (local only, skipped in CI)
 if [ "$INCLUDE_VITE_E2E" = "true" ]; then

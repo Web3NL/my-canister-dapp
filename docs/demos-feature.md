@@ -18,7 +18,7 @@ A Rust canister that manages the full demo lifecycle:
 
 Lives on the same subnet as `wasm-registry`.
 
-### Modified: `my-canister-app`
+### Modified: `icp-dapp-launcher`
 
 - Alternative path in `/install`: "Have an access code?" replaces the Fund Account step
 - Calls demos canister for code redemption and finalization
@@ -34,14 +34,14 @@ No modifications needed. Controller lockdown is achieved through a controller co
 ```
 1. Admin generates access codes via demos canister
 2. Admin gives code to user
-3. User visits my-canister-app, authenticates with II
+3. User visits icp-dapp-launcher, authenticates with II
 4. User selects a dapp from the Dapp Store, clicks Install
 5. On install page, user toggles "Have an access code?" and enters code
-6. my-canister-app calls demos.redeem_code(code, wasm_name)
+6. icp-dapp-launcher calls demos.redeem_code(code, wasm_name)
    -> demos canister: picks canister from pool, installs wasm, adds alt origins
    -> returns canister_id
 7. User does remote II auth at demo canister domain (popup)
-8. my-canister-app calls demos.finalize_demo(code, dapp_principal)
+8. icp-dapp-launcher calls demos.finalize_demo(code, dapp_principal)
    -> demos canister: sets II principal, sets controllers, starts trial timer
 9. User accesses their demo dapp
 10. After trial expires, demos canister reclaims the canister
@@ -59,7 +59,7 @@ No features break because no backend code requires canister self-controller stat
 
 The demos canister tracks two distinct II principals per demo:
 
-- **service_principal** — II principal at my-canister-app domain (used for `get_my_demos` polling)
+- **service_principal** — II principal at icp-dapp-launcher domain (used for `get_my_demos` polling)
 - **dapp_principal** — II principal at demo canister domain (set on the canister, used for dashboard auth)
 
 These are different because Internet Identity derives different principals per origin.
