@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [1.0.0] - 2026-03-08
+
 ### Added
 
 - Asset hash verification: acceptance suite checks served dashboard assets against known-good hashes from all released versions

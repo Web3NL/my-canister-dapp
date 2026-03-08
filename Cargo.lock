@@ -1424,7 +1424,7 @@ dependencies = [
 
 [[package]]
 name = "my-canister-dapp-test"
-version = "0.2.0"
+version = "1.0.0"
 dependencies = [
  "candid",
  "hex",
