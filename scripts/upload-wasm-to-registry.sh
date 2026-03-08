@@ -39,7 +39,7 @@ echo "Encoding Candid argument to $TMPFILE..."
 node "$SCRIPT_DIR/encode-upload-arg.mjs" "$NAME" "$DESCRIPTION" "$VERSION" "$WASM_GZ_PATH" > "$TMPFILE"
 
 echo "Calling wasm-registry upload_wasm..."
-icp canister call wasm-registry upload_wasm "$TMPFILE" "${EXTRA_ARGS[@]}"
+icp canister call wasm-registry upload_wasm --args-file "$TMPFILE" --args-format hex "${EXTRA_ARGS[@]}"
 rm -f "$TMPFILE"
 
 echo "Upload complete!"
