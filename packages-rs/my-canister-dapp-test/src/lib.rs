@@ -153,16 +153,15 @@ pub fn validate_frontend_assets(
 
 // ─── Asset hash verification ─────────────────────────────────────────────────
 
-const ASSET_HASHES_JSON: &str =
-    include_str!("../../my-canister-dashboard/asset-hashes.json");
+const ASSET_HASHES_JSON: &str = include_str!("../../my-canister-dashboard/asset-hashes.json");
 
 /// Verifies that the given asset hashes match at least one entry in `asset-hashes.json`.
 ///
 /// Returns the matching dashboard version string on success, or an error with a
 /// detailed mismatch message listing all known versions and the served hashes.
 pub fn verify_asset_hashes_match_known_version(hashes: &AssetHashes) -> Result<String, String> {
-    let entries: serde_json::Value =
-        serde_json::from_str(ASSET_HASHES_JSON).expect("Failed to parse embedded asset-hashes.json");
+    let entries: serde_json::Value = serde_json::from_str(ASSET_HASHES_JSON)
+        .expect("Failed to parse embedded asset-hashes.json");
 
     let entries = entries
         .as_array()
