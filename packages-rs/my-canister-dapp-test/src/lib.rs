@@ -153,7 +153,7 @@ pub fn validate_frontend_assets(
 
 // ─── Asset hash verification ─────────────────────────────────────────────────
 
-const ASSET_HASHES_JSON: &str = include_str!("../../my-canister-dashboard/asset-hashes.json");
+const ASSET_HASHES_JSON: &str = include_str!("../asset-hashes.json");
 
 /// Verifies that the given asset hashes match at least one entry in `asset-hashes.json`.
 ///

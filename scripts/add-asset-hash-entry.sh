@@ -16,7 +16,7 @@ if [ -z "$VERSION" ]; then
 fi
 
 ASSETS_DIR="packages-rs/my-canister-dashboard/assets"
-HASHES_FILE="packages-rs/my-canister-dashboard/asset-hashes.json"
+HASHES_FILE="packages-rs/my-canister-dapp-test/asset-hashes.json"
 
 if [ ! -f "$ASSETS_DIR/index.html" ] || [ ! -f "$ASSETS_DIR/index.js" ] || [ ! -f "$ASSETS_DIR/style.css" ]; then
   echo "ERROR: Dashboard assets not found in $ASSETS_DIR"
