@@ -47,6 +47,8 @@ with open('$HASHES_FILE', 'w') as f:
     f.write('\n')
 "
 
+git add "$HASHES_FILE"
+
 echo "Updated $HASHES_FILE with version $VERSION"
 echo "  html: $HTML_HASH"
 echo "  js:   $JS_HASH"
