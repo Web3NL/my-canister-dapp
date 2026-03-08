@@ -4,7 +4,7 @@ set -euo pipefail
 # Check if version bump type was provided
 if [ -z "$1" ]; then
     echo "❌ Please provide version bump type: patch, minor, or major"
-    echo "Usage: ./scripts/deploy-app.sh <patch|minor|major>"
+    echo "Usage: ./scripts/deploy-launcher.sh <patch|minor|major>"
     exit 1
 fi
 

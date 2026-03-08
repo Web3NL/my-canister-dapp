@@ -67,7 +67,7 @@ Testing validates via:
 ### Development
 
 ```sh
-npm run dev:app               # Run installer app (icp-dapp-launcher) dev server
+npm run dev:launcher          # Run icp-dapp-launcher dev server
 npm run dev:dashboard         # Run dashboard frontend dev server
 ```
 
@@ -76,7 +76,7 @@ npm run dev:dashboard         # Run dashboard frontend dev server
 ```sh
 npm run build                 # Build all JS workspace packages
 cargo build                   # Build all Rust workspace crates
-npm run build:app             # Build just icp-dapp-launcher
+npm run build:launcher        # Build just icp-dapp-launcher
 npm run build:docs            # Build TypeDoc API docs for JS packages
 ```
 
@@ -124,7 +124,7 @@ npm run deps:fix              # Auto-fix dependency consistency
 npm run changeset             # Create a changeset for version bumping
 npm run release:version       # Apply changesets → bump versions
 npm run release:publish       # Publish npm packages + push git tags
-./scripts/deploy-app.sh <patch|minor|major>  # Deploy icp-dapp-launcher to IC mainnet + tag
+./scripts/deploy-launcher.sh <patch|minor|major>  # Deploy icp-dapp-launcher to IC mainnet + tag
 ```
 
 ### Utility Scripts
