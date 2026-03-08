@@ -151,6 +151,65 @@ pub fn validate_frontend_assets(
     ))
 }
 
+// ─── Asset hash verification ─────────────────────────────────────────────────
+
+const ASSET_HASHES_JSON: &str = include_str!("../../my-canister-dashboard/asset-hashes.json");
+
+/// Verifies that the given asset hashes match at least one entry in `asset-hashes.json`.
+///
+/// Returns the matching dashboard version string on success, or an error with a
+/// detailed mismatch message listing all known versions and the served hashes.
+pub fn verify_asset_hashes_match_known_version(hashes: &AssetHashes) -> Result<String, String> {
+    let entries: serde_json::Value = serde_json::from_str(ASSET_HASHES_JSON)
+        .expect("Failed to parse embedded asset-hashes.json");
+
+    let entries = entries
+        .as_array()
+        .expect("asset-hashes.json must be a JSON array");
+
+    for entry in entries {
+        let version = entry["version"].as_str().unwrap_or("unknown");
+        let html = entry["html"].as_str().unwrap_or("");
+        let js = entry["js"].as_str().unwrap_or("");
+        let css = entry["css"].as_str().unwrap_or("");
+
+        if hashes.html_hash == html && hashes.js_hash == js && hashes.css_hash == css {
+            return Ok(version.to_string());
+        }
+    }
+
+    let mut msg = String::from(
+        "Dashboard asset hash mismatch: served assets do not match any known dashboard version.\n\n",
+    );
+    msg.push_str("  Served hashes:\n");
+    msg.push_str(&format!("    html: {}\n", hashes.html_hash));
+    msg.push_str(&format!("    js:   {}\n", hashes.js_hash));
+    msg.push_str(&format!("    css:  {}\n\n", hashes.css_hash));
+
+    if entries.is_empty() {
+        msg.push_str("  No known versions in asset-hashes.json (empty).\n");
+    } else {
+        msg.push_str("  Known versions:\n");
+        for entry in entries {
+            let v = entry["version"].as_str().unwrap_or("?");
+            let h = &entry["html"].as_str().unwrap_or("?");
+            let j = &entry["js"].as_str().unwrap_or("?");
+            let c = &entry["css"].as_str().unwrap_or("?");
+            msg.push_str(&format!(
+                "    {v}: html={}... js={}... css={}...\n",
+                &h[..h.len().min(16)],
+                &j[..j.len().min(16)],
+                &c[..c.len().min(16)],
+            ));
+        }
+    }
+
+    msg.push_str(
+        "\nRebuild with a released dashboard version or add hashes via:\n  ./scripts/add-asset-hash-entry.sh\n",
+    );
+    Err(msg)
+}
+
 // ─── Acceptance suite ────────────────────────────────────────────────────────
 
 /// Runs the full acceptance suite against a single dapp WASM.
@@ -353,6 +412,10 @@ pub fn run_acceptance_suite(wasm_bytes: &[u8], wasm_label: &str) {
         &asset_hashes.js_hash[..12],
         &asset_hashes.css_hash[..12],
     );
+
+    let matched_version = verify_asset_hashes_match_known_version(&asset_hashes)
+        .expect("Asset hash verification failed");
+    println!("Dashboard assets match version: {matched_version}");
 
     // SPA fallback: unknown paths under "/" serve index.html with 200 (client-side routing).
     let (fallback_resp,) = query_candid::<_, (HttpResponse,)>(

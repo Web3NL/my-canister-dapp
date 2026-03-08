@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Added
+
+- `asset-hashes.json` tracking SHA-256 hashes of dashboard frontend assets per release version
+
 ### Changed
 
 - Updated terminology: "Canister Dapp" → "User-owned dapp" in package description and documentation
