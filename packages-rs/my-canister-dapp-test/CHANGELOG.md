@@ -8,6 +8,7 @@
 
 ### Added
 
+- Asset hash verification: acceptance suite checks served dashboard assets against known-good hashes from all released versions
 - Security header validation: all 8 security/privacy headers verified on frontend fallback responses
 - Gzip compression test: verifies Accept-Encoding negotiation returns compressed responses with correct headers
 - CLI binary: `my-canister-dapp-test <wasm-path>` runs the full acceptance suite against any dapp WASM.

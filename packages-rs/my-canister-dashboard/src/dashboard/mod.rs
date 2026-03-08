@@ -20,7 +20,8 @@ pub const ALTERNATIVE_ORIGINS_PATH: &str = "/.well-known/ii-alternative-origins"
 
 static ASSETS_DIR: Dir<'_> = include_dir!("$CARGO_MANIFEST_DIR/assets");
 
-// Functions from assets.rs
+/// Registers the embedded dashboard frontend assets (HTML, JS, CSS) with the given
+/// [`AssetRouter`], certifying each for HTTP response verification.
 pub fn add_dashboard_assets_to_router(asset_router: &mut AssetRouter) -> Result<(), String> {
     let mut assets = Vec::new();
     let mut asset_configs = Vec::new();
@@ -40,8 +41,8 @@ pub fn add_dashboard_assets_to_router(asset_router: &mut AssetRouter) -> Result<
         .map_err(|e| format!("Failed to certify dashboard assets: {e}"))
 }
 
-// Functions from dashboard_asset_configs.rs
-/// Create appropriate asset config based on file path
+/// Returns the [`AssetConfig`] for a dashboard asset file path (`index.html`,
+/// `index.js`, or `style.css`). Returns an error for unrecognized paths.
 pub fn create_asset_config(path: &str) -> Result<AssetConfig, String> {
     match path {
         "index.html" => Ok(canister_dashboard_html_config()),

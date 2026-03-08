@@ -41,5 +41,6 @@ pre-release-replacements = [
 
 pre-release-hook = [
   "../../scripts/prebuild-mcd.sh",
+  "../../scripts/add-asset-hash-entry.sh",
   "../../scripts/rust-lint-format.sh",
 ]
