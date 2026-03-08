@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [1.0.0] - 2026-03-08
+
 ### Added
 
 - `asset-hashes.json` tracking SHA-256 hashes of dashboard frontend assets per release version
