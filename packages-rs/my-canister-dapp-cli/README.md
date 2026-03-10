@@ -26,19 +26,19 @@ cargo install my-canister-dapp-cli
 Deploy a canister locally:
 
 ```bash
-dapp deploy my-hello-world
+dapp deploy <canister-name>
 ```
 
 Deploy with a pre-built wasm:
 
 ```bash
-dapp deploy my-hello-world --wasm wasm/my-hello-world.wasm.gz
+dapp deploy <canister-name> --wasm path/to/canister.wasm.gz
 ```
 
 Run acceptance tests:
 
 ```bash
-dapp test wasm/my-hello-world.wasm.gz
+dapp test path/to/canister.wasm.gz
 ```
 
 ## Prerequisites
