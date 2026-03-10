@@ -2,6 +2,8 @@
 name = "my-canister-dapp-cli"
 version = "0.1.0"
 description = "CLI for deploying and testing user-owned dapps on the Internet Computer"
+readme = "README.md"
+documentation = "https://docs.rs/my-canister-dapp-cli"
 keywords = ["internet-computer", "canister", "cli", "deploy", "dapp"]
 categories = ["command-line-utilities", "development-tools"]
 edition = { workspace = true }
@@ -23,3 +25,12 @@ serde = { workspace = true }
 serde_json = { workspace = true }
 flate2 = { workspace = true }
 tempfile = { workspace = true }
+
+[package.metadata.release]
+pre-release-replacements = [
+    # Replace the "Unreleased" header with the new version and date
+    { file = "CHANGELOG.md", search = "## \\[Unreleased\\]", replace = "## [{{version}}] - {{date}}", exactly = 1 },
+
+    # Optional: keep an "Unreleased" section at the top after tagging
+    { file = "CHANGELOG.md", search = "(?m)^# Changelog\\n", replace = "# Changelog\n\n## [Unreleased]\n", exactly = 1 },
+]
