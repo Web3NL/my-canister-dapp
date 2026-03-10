@@ -1415,10 +1415,12 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "clap",
+ "flate2",
  "my-canister-dapp-test",
  "open",
  "serde",
  "serde_json",
+ "tempfile",
  "tiny_http",
 ]
 

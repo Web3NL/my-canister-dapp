@@ -1,6 +1,8 @@
 use anyhow::{Context, Result, bail};
-use flate2::write::GzEncoder;
 use flate2::Compression;
+use flate2::write::GzEncoder;
+use serde::Serialize;
+use std::fs::OpenOptions;
 use std::io::Write;
 use std::path::Path;
 use tempfile::NamedTempFile;
@@ -93,7 +95,7 @@ pub fn deploy(args: DeployArgs) -> Result<()> {
     // Step 7: II authentication
     if args.skip_auth {
         println!("\nSkipping II authentication (--skip-auth).");
-        print_summary(&canister_id, is_mainnet, None);
+        print_summary(&canister_id, is_mainnet, &args.environment, None);
         return Ok(());
     }
 
@@ -134,7 +136,7 @@ pub fn deploy(args: DeployArgs) -> Result<()> {
     println!("Setting controllers...");
     icp.canister_update_settings(&canister_id, &[&canister_id, principal])?;
 
-    print_summary(&canister_id, is_mainnet, Some(principal));
+    print_summary(&canister_id, is_mainnet, &args.environment, Some(principal));
 
     Ok(())
 }
@@ -204,6 +206,39 @@ fn ensure_gzipped(bytes: &[u8]) -> Result<NamedTempFile> {
     Ok(tmp)
 }
 
+/// Deployment log directory and file.
+const DEPLOY_LOG_DIR: &str = ".dapp";
+const DEPLOY_LOG_FILE: &str = ".dapp/deployments.jsonl";
+
+#[derive(Serialize)]
+struct DeploymentRecord {
+    canister_id: String,
+    frontend: String,
+    dashboard: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    owner: Option<String>,
+    environment: String,
+    timestamp: String,
+}
+
+/// Append a deployment record to `.dapp/deployments.jsonl`.
+fn log_deployment(record: &DeploymentRecord) {
+    if let Err(e) = try_log_deployment(record) {
+        eprintln!("Warning: failed to write deployment log: {e}");
+    }
+}
+
+fn try_log_deployment(record: &DeploymentRecord) -> Result<()> {
+    std::fs::create_dir_all(DEPLOY_LOG_DIR)?;
+    let mut file = OpenOptions::new()
+        .create(true)
+        .append(true)
+        .open(DEPLOY_LOG_FILE)?;
+    let json = serde_json::to_string(record)?;
+    writeln!(file, "{json}")?;
+    Ok(())
+}
+
 /// Construct the canister origin URL from its ID and host.
 ///
 /// Local:   `http://localhost:8080` → `http://<id>.localhost:8080`
@@ -221,20 +256,37 @@ fn create_canister_origin(canister_id: &str, host: &str) -> String {
     }
 }
 
-fn print_summary(canister_id: &str, is_mainnet: bool, principal: Option<&str>) {
+fn print_summary(canister_id: &str, is_mainnet: bool, environment: &str, principal: Option<&str>) {
     let base = if is_mainnet {
         format!("https://{canister_id}.icp0.io")
     } else {
         format!("http://{canister_id}.localhost:8080")
     };
 
+    let frontend = base.to_string();
+    let dashboard = format!("{base}/canister-dashboard");
+
     println!("\n--- Deployment complete ---");
     println!("  Canister ID: {canister_id}");
-    println!("  Frontend:    {base}");
-    println!("  Dashboard:   {base}/canister-dashboard");
+    println!("  Frontend:    {frontend}");
+    println!("  Dashboard:   {dashboard}");
     if let Some(p) = principal {
         println!("  Owner:       {p}");
     }
+
+    let now = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .map(|d| d.as_secs().to_string())
+        .unwrap_or_default();
+
+    log_deployment(&DeploymentRecord {
+        canister_id: canister_id.to_string(),
+        frontend,
+        dashboard,
+        owner: principal.map(String::from),
+        environment: environment.to_string(),
+        timestamp: now,
+    });
 }
 
 #[cfg(test)]
