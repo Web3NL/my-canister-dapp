@@ -57,6 +57,9 @@ build/
 .dfx
 .icp
 
+# dapp CLI local state
+.dapp
+
 # Claude
 .claude
 

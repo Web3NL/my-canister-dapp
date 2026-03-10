@@ -44,10 +44,10 @@ impl IcpCli {
             .with_context(|| format!("Failed to build canister '{name}'"))
     }
 
-    /// Create a new canister on the network.
-    pub fn canister_create(&self, name: &str, cycles: &str) -> Result<()> {
-        self.run(&["canister", "create", name, "--cycles", cycles])
-            .with_context(|| format!("Failed to create canister '{name}'"))
+    /// Create a new detached canister and return its ID.
+    pub fn canister_create_detached(&self, cycles: &str) -> Result<String> {
+        self.run_capture(&["canister", "create", "--detached", "-q", "--cycles", cycles])
+            .context("Failed to create detached canister")
     }
 
     /// Install a wasm module into a canister.
@@ -61,12 +61,6 @@ impl IcpCli {
         }
         self.run(&args)
             .with_context(|| format!("Failed to install wasm into canister '{name}'"))
-    }
-
-    /// Get the canister ID for a named canister.
-    pub fn canister_id(&self, name: &str) -> Result<String> {
-        self.run_capture(&["canister", "status", name, "--id-only"])
-            .with_context(|| format!("Failed to get canister ID for '{name}'"))
     }
 
     /// Call an update method on a canister with Candid arguments.

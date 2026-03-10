@@ -51,13 +51,10 @@ pub fn run_auth_flow(
     // Generate the auth page
     let html = generate_auth_page(ii_provider, canister_origin, &callback_url);
 
-    // Open browser
-    println!("Opening browser for authentication...");
-    println!("  If the browser doesn't open, visit: {cli_origin}");
-    if let Err(e) = open::that(&cli_origin) {
-        eprintln!("Warning: Could not open browser automatically: {e}");
-        eprintln!("Please open {cli_origin} manually.");
-    }
+    // Print clickable link for authentication
+    println!("Authenticate with Internet Identity:");
+    println!("\n  \x1b]8;;{cli_origin}\x1b\\{cli_origin}\x1b]8;;\x1b\\\n");
+    println!("Open the link above in your browser to continue.");
 
     serve_auth_requests(server, &html, cli_origin, AUTH_TIMEOUT)
 }

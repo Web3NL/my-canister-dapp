@@ -1,5 +1,11 @@
-use anyhow::{Result, bail};
+use anyhow::{Context, Result, bail};
+use flate2::Compression;
+use flate2::write::GzEncoder;
+use serde::Serialize;
+use std::fs::OpenOptions;
+use std::io::Write;
 use std::path::Path;
+use tempfile::NamedTempFile;
 
 use crate::auth;
 use crate::icp::IcpCli;
@@ -19,11 +25,12 @@ const MAINNET_HOST: &str = "https://icp0.io";
 /// Arguments for the `dapp deploy` command.
 #[derive(clap::Args)]
 pub struct DeployArgs {
-    /// Canister name (must match a canister defined in icp.yaml for build/install).
-    /// If omitted with --wasm, the name is derived from the wasm filename.
+    /// Canister name (must match a canister defined in icp.yaml).
+    /// Cannot be combined with --wasm.
+    #[arg(conflicts_with = "wasm")]
     pub canister: Option<String>,
 
-    /// Path to a pre-built .wasm or .wasm.gz file (skips build step)
+    /// Path to a pre-built .wasm or .wasm.gz file (skips build step, no icp.yaml needed)
     #[arg(long)]
     pub wasm: Option<String>,
 
@@ -65,32 +72,46 @@ pub fn deploy(args: DeployArgs) -> Result<()> {
     let (canister_name, wasm_path) = resolve_canister_and_wasm(&args)?;
 
     // Step 3: Build (only when no --wasm)
-    if let Some(ref path) = wasm_path {
-        println!("\nWasm: {path}");
-    } else {
+    if wasm_path.is_none() {
+        // Verify icp.yaml exists before attempting build
+        if !Path::new("icp.yaml").exists() {
+            bail!(
+                "No icp.yaml found in the current directory.\n\
+                 \n\
+                 `dapp deploy <CANISTER>` requires an icp.yaml that defines the canister.\n\
+                 To deploy a pre-built wasm without icp.yaml, use:\n\
+                 \x20 dapp deploy --wasm <PATH>"
+            );
+        }
         println!("\nBuilding '{canister_name}'...");
-        icp.build(&canister_name)?;
+        icp.build(&canister_name).with_context(|| {
+            format!(
+                "Failed to build canister '{canister_name}'.\n\
+                 Make sure '{canister_name}' is defined in icp.yaml."
+            )
+        })?;
         println!("Build complete.");
     }
 
-    // Step 4: Create canister
-    println!("\nCreating canister '{canister_name}'...");
-    icp.canister_create(&canister_name, &args.cycles)?;
+    // Step 4: Resolve wasm bytes and gzip if needed
+    let wasm_bytes = resolve_wasm_bytes(&canister_name, wasm_path.as_deref())?;
+    let gzipped_wasm = ensure_gzipped(&wasm_bytes)?;
+    let gzipped_path = gzipped_wasm.path().to_str().unwrap();
 
-    let canister_id = icp.canister_id(&canister_name)?;
+    // Step 5: Create fresh canister (detached — new ID every time)
+    println!("\nCreating canister...");
+    let canister_id = icp.canister_create_detached(&args.cycles)?;
     println!("Canister ID: {canister_id}");
 
-    // Step 5: Install wasm
-    // Use canister ID (not name) for all post-creation commands to avoid
-    // icp-cli name→ID resolution issues when --wasm is provided.
+    // Step 6: Install wasm
     println!("Installing wasm...");
-    icp.canister_install(&canister_id, wasm_path.as_deref())?;
+    icp.canister_install(&canister_id, Some(gzipped_path))?;
     println!("Wasm installed.");
 
-    // Step 6: II authentication
+    // Step 7: II authentication
     if args.skip_auth {
         println!("\nSkipping II authentication (--skip-auth).");
-        print_summary(&canister_id, is_mainnet, None);
+        print_summary(&canister_id, is_mainnet, &args.environment, None);
         return Ok(());
     }
 
@@ -109,7 +130,12 @@ pub fn deploy(args: DeployArgs) -> Result<()> {
 
     // 6a. Start auth server and get the port
     println!("Starting authentication server...");
-    let auth_result = auth::run_auth_flow(&ii_provider, &canister_origin, &icp, &canister_id)?;
+    let auth_result = auth::run_auth_flow(&ii_provider, &canister_origin, &icp, &canister_id)
+        .context(
+            "Failed to authenticate with Internet Identity.\n\
+             Make sure the II provider is reachable and you complete the auth flow in the browser.\n\
+             To skip authentication, use: dapp deploy <CANISTER> --skip-auth"
+        )?;
     let principal = &auth_result.principal;
     println!("Derived II principal: {principal}");
 
@@ -131,32 +157,37 @@ pub fn deploy(args: DeployArgs) -> Result<()> {
     println!("Setting controllers...");
     icp.canister_update_settings(&canister_id, &[&canister_id, principal])?;
 
-    print_summary(&canister_id, is_mainnet, Some(principal));
+    print_summary(&canister_id, is_mainnet, &args.environment, Some(principal));
 
     Ok(())
 }
 
 /// Resolve the canister name and optional wasm path from CLI arguments.
+///
+/// Two mutually exclusive modes:
+/// - `dapp deploy <name>` — builds from icp.yaml, reads artifact from cache
+/// - `dapp deploy --wasm <path>` — uses pre-built wasm, derives name from filename
 fn resolve_canister_and_wasm(args: &DeployArgs) -> Result<(String, Option<String>)> {
     match (&args.canister, &args.wasm) {
-        (Some(name), Some(wasm)) => {
-            if !Path::new(wasm).exists() {
-                bail!("Wasm file not found: {wasm}");
-            }
-            Ok((name.clone(), Some(wasm.clone())))
-        }
         (Some(name), None) => Ok((name.clone(), None)),
         (None, Some(wasm)) => {
             if !Path::new(wasm).exists() {
-                bail!("Wasm file not found: {wasm}");
+                bail!(
+                    "Wasm file not found: {wasm}\n\
+                     Check that the path is correct and the file exists."
+                );
             }
             let name = derive_canister_name(wasm);
             Ok((name, Some(wasm.clone())))
         }
+        // clap's conflicts_with handles (Some, Some) — this arm is unreachable
+        (Some(_), Some(_)) => unreachable!("clap prevents --wasm with positional canister name"),
         (None, None) => bail!(
-            "Canister name is required.\n\
-             Usage: dapp deploy <CANISTER> [-e <env>]\n\
-             Or:    dapp deploy --wasm <path>"
+            "Missing canister name or --wasm flag.\n\
+             \n\
+             Usage:\n\
+             \x20 dapp deploy <CANISTER>       Build and deploy a canister defined in icp.yaml\n\
+             \x20 dapp deploy --wasm <PATH>    Deploy a pre-built .wasm or .wasm.gz file"
         ),
     }
 }
@@ -169,6 +200,82 @@ fn derive_canister_name(wasm_path: &str) -> String {
         .unwrap_or("my-dapp")
         .trim_end_matches(".wasm")
         .to_string()
+}
+
+/// Artifact directory where `icp build` places compiled wasms.
+const ARTIFACT_DIR: &str = ".icp/cache/artifacts";
+
+/// Read wasm bytes from the build artifact or a user-provided path.
+fn resolve_wasm_bytes(canister_name: &str, wasm_path: Option<&str>) -> Result<Vec<u8>> {
+    match wasm_path {
+        Some(p) => std::fs::read(p).with_context(|| {
+            format!(
+                "Wasm file not found: {p}\n\
+                 Check that the path is correct and the file exists."
+            )
+        }),
+        None => {
+            let path = format!("{ARTIFACT_DIR}/{canister_name}");
+            std::fs::read(&path).with_context(|| {
+                format!(
+                    "Build artifact not found: {path}\n\
+                     `icp build` completed but no wasm was produced for '{canister_name}'.\n\
+                     Check that '{canister_name}' is correctly configured in icp.yaml."
+                )
+            })
+        }
+    }
+}
+
+/// Check if bytes are gzip-compressed (magic bytes 0x1f 0x8b).
+fn is_gzipped(bytes: &[u8]) -> bool {
+    bytes.len() >= 2 && bytes[0] == 0x1f && bytes[1] == 0x8b
+}
+
+/// Ensure wasm bytes are gzipped, writing to a temp file for icp-cli to consume.
+fn ensure_gzipped(bytes: &[u8]) -> Result<NamedTempFile> {
+    let mut tmp = NamedTempFile::new().context("Failed to create temp file")?;
+    if is_gzipped(bytes) {
+        tmp.write_all(bytes)?;
+    } else {
+        let mut encoder = GzEncoder::new(Vec::new(), Compression::best());
+        encoder.write_all(bytes)?;
+        tmp.write_all(&encoder.finish()?)?;
+    }
+    Ok(tmp)
+}
+
+/// Deployment log directory and file.
+const DEPLOY_LOG_DIR: &str = ".dapp";
+const DEPLOY_LOG_FILE: &str = ".dapp/deployments.jsonl";
+
+#[derive(Serialize)]
+struct DeploymentRecord {
+    canister_id: String,
+    frontend: String,
+    dashboard: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    owner: Option<String>,
+    environment: String,
+    timestamp: String,
+}
+
+/// Append a deployment record to `.dapp/deployments.jsonl`.
+fn log_deployment(record: &DeploymentRecord) {
+    if let Err(e) = try_log_deployment(record) {
+        eprintln!("Warning: failed to write deployment log: {e}");
+    }
+}
+
+fn try_log_deployment(record: &DeploymentRecord) -> Result<()> {
+    std::fs::create_dir_all(DEPLOY_LOG_DIR)?;
+    let mut file = OpenOptions::new()
+        .create(true)
+        .append(true)
+        .open(DEPLOY_LOG_FILE)?;
+    let json = serde_json::to_string(record)?;
+    writeln!(file, "{json}")?;
+    Ok(())
 }
 
 /// Construct the canister origin URL from its ID and host.
@@ -188,20 +295,37 @@ fn create_canister_origin(canister_id: &str, host: &str) -> String {
     }
 }
 
-fn print_summary(canister_id: &str, is_mainnet: bool, principal: Option<&str>) {
+fn print_summary(canister_id: &str, is_mainnet: bool, environment: &str, principal: Option<&str>) {
     let base = if is_mainnet {
         format!("https://{canister_id}.icp0.io")
     } else {
         format!("http://{canister_id}.localhost:8080")
     };
 
+    let frontend = base.to_string();
+    let dashboard = format!("{base}/canister-dashboard");
+
     println!("\n--- Deployment complete ---");
     println!("  Canister ID: {canister_id}");
-    println!("  Frontend:    {base}");
-    println!("  Dashboard:   {base}/canister-dashboard");
+    println!("  Frontend:    {frontend}");
+    println!("  Dashboard:   {dashboard}");
     if let Some(p) = principal {
         println!("  Owner:       {p}");
     }
+
+    let now = std::time::SystemTime::now()
+        .duration_since(std::time::UNIX_EPOCH)
+        .map(|d| d.as_secs().to_string())
+        .unwrap_or_default();
+
+    log_deployment(&DeploymentRecord {
+        canister_id: canister_id.to_string(),
+        frontend,
+        dashboard,
+        owner: principal.map(String::from),
+        environment: environment.to_string(),
+        timestamp: now,
+    });
 }
 
 #[cfg(test)]
@@ -296,12 +420,12 @@ mod tests {
     fn resolve_neither_provided_errors() {
         let args = make_args(None, None);
         let err = resolve_canister_and_wasm(&args).unwrap_err().to_string();
-        assert!(err.contains("Canister name is required"));
+        assert!(err.contains("Missing canister name or --wasm flag"));
     }
 
     #[test]
     fn resolve_wasm_not_found_errors() {
-        let args = make_args(Some("my-dapp"), Some("/nonexistent/path.wasm.gz"));
+        let args = make_args(None, Some("/nonexistent/path.wasm.gz"));
         let err = resolve_canister_and_wasm(&args).unwrap_err().to_string();
         assert!(err.contains("Wasm file not found"));
     }
@@ -315,11 +439,41 @@ mod tests {
         assert_eq!(wasm.unwrap(), "/dev/null");
     }
 
+    // -- gzip helper tests --
+
     #[test]
-    fn resolve_both_canister_and_wasm() {
-        let args = make_args(Some("custom-name"), Some("/dev/null"));
-        let (name, wasm) = resolve_canister_and_wasm(&args).unwrap();
-        assert_eq!(name, "custom-name");
-        assert_eq!(wasm.unwrap(), "/dev/null");
+    fn is_gzipped_detects_gzip_magic() {
+        assert!(is_gzipped(&[0x1f, 0x8b, 0x08, 0x00]));
+    }
+
+    #[test]
+    fn is_gzipped_rejects_raw_wasm() {
+        // Wasm magic: \0asm
+        assert!(!is_gzipped(&[0x00, 0x61, 0x73, 0x6d]));
+    }
+
+    #[test]
+    fn is_gzipped_rejects_empty() {
+        assert!(!is_gzipped(&[]));
+    }
+
+    #[test]
+    fn ensure_gzipped_compresses_raw_bytes() {
+        let raw = b"hello wasm";
+        let tmp = ensure_gzipped(raw).unwrap();
+        let result = std::fs::read(tmp.path()).unwrap();
+        assert!(is_gzipped(&result));
+    }
+
+    #[test]
+    fn ensure_gzipped_passes_through_gzipped() {
+        use flate2::write::GzEncoder;
+        let mut encoder = GzEncoder::new(Vec::new(), Compression::fast());
+        encoder.write_all(b"already compressed").unwrap();
+        let compressed = encoder.finish().unwrap();
+
+        let tmp = ensure_gzipped(&compressed).unwrap();
+        let result = std::fs::read(tmp.path()).unwrap();
+        assert_eq!(result, compressed);
     }
 }
