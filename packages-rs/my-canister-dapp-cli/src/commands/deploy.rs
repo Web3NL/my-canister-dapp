@@ -1,5 +1,9 @@
-use anyhow::{Result, bail};
+use anyhow::{Context, Result, bail};
+use flate2::write::GzEncoder;
+use flate2::Compression;
+use std::io::Write;
 use std::path::Path;
+use tempfile::NamedTempFile;
 
 use crate::auth;
 use crate::icp::IcpCli;
@@ -65,29 +69,28 @@ pub fn deploy(args: DeployArgs) -> Result<()> {
     let (canister_name, wasm_path) = resolve_canister_and_wasm(&args)?;
 
     // Step 3: Build (only when no --wasm)
-    if let Some(ref path) = wasm_path {
-        println!("\nWasm: {path}");
-    } else {
+    if wasm_path.is_none() {
         println!("\nBuilding '{canister_name}'...");
         icp.build(&canister_name)?;
         println!("Build complete.");
     }
 
-    // Step 4: Create canister
-    println!("\nCreating canister '{canister_name}'...");
-    icp.canister_create(&canister_name, &args.cycles)?;
+    // Step 4: Resolve wasm bytes and gzip if needed
+    let wasm_bytes = resolve_wasm_bytes(&canister_name, wasm_path.as_deref())?;
+    let gzipped_wasm = ensure_gzipped(&wasm_bytes)?;
+    let gzipped_path = gzipped_wasm.path().to_str().unwrap();
 
-    let canister_id = icp.canister_id(&canister_name)?;
+    // Step 5: Create fresh canister (detached — new ID every time)
+    println!("\nCreating canister...");
+    let canister_id = icp.canister_create_detached(&args.cycles)?;
     println!("Canister ID: {canister_id}");
 
-    // Step 5: Install wasm
-    // Use canister ID (not name) for all post-creation commands to avoid
-    // icp-cli name→ID resolution issues when --wasm is provided.
+    // Step 6: Install wasm
     println!("Installing wasm...");
-    icp.canister_install(&canister_id, wasm_path.as_deref())?;
+    icp.canister_install(&canister_id, Some(gzipped_path))?;
     println!("Wasm installed.");
 
-    // Step 6: II authentication
+    // Step 7: II authentication
     if args.skip_auth {
         println!("\nSkipping II authentication (--skip-auth).");
         print_summary(&canister_id, is_mainnet, None);
@@ -169,6 +172,36 @@ fn derive_canister_name(wasm_path: &str) -> String {
         .unwrap_or("my-dapp")
         .trim_end_matches(".wasm")
         .to_string()
+}
+
+/// Artifact directory where `icp build` places compiled wasms.
+const ARTIFACT_DIR: &str = ".icp/cache/artifacts";
+
+/// Read wasm bytes from the build artifact or a user-provided path.
+fn resolve_wasm_bytes(canister_name: &str, wasm_path: Option<&str>) -> Result<Vec<u8>> {
+    let path = match wasm_path {
+        Some(p) => p.to_string(),
+        None => format!("{ARTIFACT_DIR}/{canister_name}"),
+    };
+    std::fs::read(&path).with_context(|| format!("Failed to read wasm from {path}"))
+}
+
+/// Check if bytes are gzip-compressed (magic bytes 0x1f 0x8b).
+fn is_gzipped(bytes: &[u8]) -> bool {
+    bytes.len() >= 2 && bytes[0] == 0x1f && bytes[1] == 0x8b
+}
+
+/// Ensure wasm bytes are gzipped, writing to a temp file for icp-cli to consume.
+fn ensure_gzipped(bytes: &[u8]) -> Result<NamedTempFile> {
+    let mut tmp = NamedTempFile::new().context("Failed to create temp file")?;
+    if is_gzipped(bytes) {
+        tmp.write_all(bytes)?;
+    } else {
+        let mut encoder = GzEncoder::new(Vec::new(), Compression::best());
+        encoder.write_all(bytes)?;
+        tmp.write_all(&encoder.finish()?)?;
+    }
+    Ok(tmp)
 }
 
 /// Construct the canister origin URL from its ID and host.
@@ -321,5 +354,43 @@ mod tests {
         let (name, wasm) = resolve_canister_and_wasm(&args).unwrap();
         assert_eq!(name, "custom-name");
         assert_eq!(wasm.unwrap(), "/dev/null");
+    }
+
+    // -- gzip helper tests --
+
+    #[test]
+    fn is_gzipped_detects_gzip_magic() {
+        assert!(is_gzipped(&[0x1f, 0x8b, 0x08, 0x00]));
+    }
+
+    #[test]
+    fn is_gzipped_rejects_raw_wasm() {
+        // Wasm magic: \0asm
+        assert!(!is_gzipped(&[0x00, 0x61, 0x73, 0x6d]));
+    }
+
+    #[test]
+    fn is_gzipped_rejects_empty() {
+        assert!(!is_gzipped(&[]));
+    }
+
+    #[test]
+    fn ensure_gzipped_compresses_raw_bytes() {
+        let raw = b"hello wasm";
+        let tmp = ensure_gzipped(raw).unwrap();
+        let result = std::fs::read(tmp.path()).unwrap();
+        assert!(is_gzipped(&result));
+    }
+
+    #[test]
+    fn ensure_gzipped_passes_through_gzipped() {
+        use flate2::write::GzEncoder;
+        let mut encoder = GzEncoder::new(Vec::new(), Compression::fast());
+        encoder.write_all(b"already compressed").unwrap();
+        let compressed = encoder.finish().unwrap();
+
+        let tmp = ensure_gzipped(&compressed).unwrap();
+        let result = std::fs::read(tmp.path()).unwrap();
+        assert_eq!(result, compressed);
     }
 }

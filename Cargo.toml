@@ -37,6 +37,7 @@ sha2 = "0.10.9"
 num-traits = "0.2.19"
 clap = { version = "4", features = ["derive"] }
 flate2 = "1.1"
+tempfile = "3"
 anyhow = "1"
 tiny_http = "0.12"
 open = "5"
