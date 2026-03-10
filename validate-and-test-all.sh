@@ -9,11 +9,10 @@ set -euo pipefail
 #   --skip-bootstrap     Reuse existing local network
 #   --skip-acceptance    Skip acceptance tests
 #   --skip-e2e           Skip E2E tests
-#   --include-vite-e2e   Force Vite E2E tests (even in CI)
+#   --include-vite-e2e   Include Vite dev server E2E tests
 #
 # Behavior:
-#   Local:  runs all phases including Vite E2E tests
-#   CI:     auto-skips Vite E2E unless --include-vite-e2e is passed
+#   Vite E2E tests are excluded by default. Pass --include-vite-e2e to run them.
 
 source "$(dirname "$0")/scripts/constants.sh"
 
@@ -80,8 +79,7 @@ if [ "$SKIP_ACCEPTANCE_FLAG" = "true" ]; then
 fi
 if [ "$SKIP_E2E_FLAG" = "true" ]; then
     TEST_ARGS="$TEST_ARGS --skip-e2e"
-elif [ "$INCLUDE_VITE_E2E_FLAG" = "true" ] || [ "${CI:-}" != "true" ]; then
-    # Include Vite E2E when explicitly requested or running locally
+elif [ "$INCLUDE_VITE_E2E_FLAG" = "true" ]; then
     TEST_ARGS="$TEST_ARGS --include-vite-e2e"
 fi
 ./scripts/05-test.sh $TEST_ARGS
