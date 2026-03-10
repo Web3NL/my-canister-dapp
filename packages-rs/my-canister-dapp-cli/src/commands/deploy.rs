@@ -25,11 +25,12 @@ const MAINNET_HOST: &str = "https://icp0.io";
 /// Arguments for the `dapp deploy` command.
 #[derive(clap::Args)]
 pub struct DeployArgs {
-    /// Canister name (must match a canister defined in icp.yaml for build/install).
-    /// If omitted with --wasm, the name is derived from the wasm filename.
+    /// Canister name (must match a canister defined in icp.yaml).
+    /// Cannot be combined with --wasm.
+    #[arg(conflicts_with = "wasm")]
     pub canister: Option<String>,
 
-    /// Path to a pre-built .wasm or .wasm.gz file (skips build step)
+    /// Path to a pre-built .wasm or .wasm.gz file (skips build step, no icp.yaml needed)
     #[arg(long)]
     pub wasm: Option<String>,
 
@@ -72,8 +73,22 @@ pub fn deploy(args: DeployArgs) -> Result<()> {
 
     // Step 3: Build (only when no --wasm)
     if wasm_path.is_none() {
+        // Verify icp.yaml exists before attempting build
+        if !Path::new("icp.yaml").exists() {
+            bail!(
+                "No icp.yaml found in the current directory.\n\
+                 \n\
+                 `dapp deploy <CANISTER>` requires an icp.yaml that defines the canister.\n\
+                 To deploy a pre-built wasm without icp.yaml, use:\n\
+                 \x20 dapp deploy --wasm <PATH>"
+            );
+        }
         println!("\nBuilding '{canister_name}'...");
-        icp.build(&canister_name)?;
+        icp.build(&canister_name)
+            .with_context(|| format!(
+                "Failed to build canister '{canister_name}'.\n\
+                 Make sure '{canister_name}' is defined in icp.yaml."
+            ))?;
         println!("Build complete.");
     }
 
@@ -114,7 +129,12 @@ pub fn deploy(args: DeployArgs) -> Result<()> {
 
     // 6a. Start auth server and get the port
     println!("Starting authentication server...");
-    let auth_result = auth::run_auth_flow(&ii_provider, &canister_origin, &icp, &canister_id)?;
+    let auth_result = auth::run_auth_flow(&ii_provider, &canister_origin, &icp, &canister_id)
+        .context(
+            "Failed to authenticate with Internet Identity.\n\
+             Make sure the II provider is reachable and you complete the auth flow in the browser.\n\
+             To skip authentication, use: dapp deploy <CANISTER> --skip-auth"
+        )?;
     let principal = &auth_result.principal;
     println!("Derived II principal: {principal}");
 
@@ -142,26 +162,31 @@ pub fn deploy(args: DeployArgs) -> Result<()> {
 }
 
 /// Resolve the canister name and optional wasm path from CLI arguments.
+///
+/// Two mutually exclusive modes:
+/// - `dapp deploy <name>` — builds from icp.yaml, reads artifact from cache
+/// - `dapp deploy --wasm <path>` — uses pre-built wasm, derives name from filename
 fn resolve_canister_and_wasm(args: &DeployArgs) -> Result<(String, Option<String>)> {
     match (&args.canister, &args.wasm) {
-        (Some(name), Some(wasm)) => {
-            if !Path::new(wasm).exists() {
-                bail!("Wasm file not found: {wasm}");
-            }
-            Ok((name.clone(), Some(wasm.clone())))
-        }
         (Some(name), None) => Ok((name.clone(), None)),
         (None, Some(wasm)) => {
             if !Path::new(wasm).exists() {
-                bail!("Wasm file not found: {wasm}");
+                bail!(
+                    "Wasm file not found: {wasm}\n\
+                     Check that the path is correct and the file exists."
+                );
             }
             let name = derive_canister_name(wasm);
             Ok((name, Some(wasm.clone())))
         }
+        // clap's conflicts_with handles (Some, Some) — this arm is unreachable
+        (Some(_), Some(_)) => unreachable!("clap prevents --wasm with positional canister name"),
         (None, None) => bail!(
-            "Canister name is required.\n\
-             Usage: dapp deploy <CANISTER> [-e <env>]\n\
-             Or:    dapp deploy --wasm <path>"
+            "Missing canister name or --wasm flag.\n\
+             \n\
+             Usage:\n\
+             \x20 dapp deploy <CANISTER>       Build and deploy a canister defined in icp.yaml\n\
+             \x20 dapp deploy --wasm <PATH>    Deploy a pre-built .wasm or .wasm.gz file"
         ),
     }
 }
@@ -181,11 +206,24 @@ const ARTIFACT_DIR: &str = ".icp/cache/artifacts";
 
 /// Read wasm bytes from the build artifact or a user-provided path.
 fn resolve_wasm_bytes(canister_name: &str, wasm_path: Option<&str>) -> Result<Vec<u8>> {
-    let path = match wasm_path {
-        Some(p) => p.to_string(),
-        None => format!("{ARTIFACT_DIR}/{canister_name}"),
-    };
-    std::fs::read(&path).with_context(|| format!("Failed to read wasm from {path}"))
+    match wasm_path {
+        Some(p) => std::fs::read(p).with_context(|| {
+            format!(
+                "Wasm file not found: {p}\n\
+                 Check that the path is correct and the file exists."
+            )
+        }),
+        None => {
+            let path = format!("{ARTIFACT_DIR}/{canister_name}");
+            std::fs::read(&path).with_context(|| {
+                format!(
+                    "Build artifact not found: {path}\n\
+                     `icp build` completed but no wasm was produced for '{canister_name}'.\n\
+                     Check that '{canister_name}' is correctly configured in icp.yaml."
+                )
+            })
+        }
+    }
 }
 
 /// Check if bytes are gzip-compressed (magic bytes 0x1f 0x8b).
@@ -381,12 +419,12 @@ mod tests {
     fn resolve_neither_provided_errors() {
         let args = make_args(None, None);
         let err = resolve_canister_and_wasm(&args).unwrap_err().to_string();
-        assert!(err.contains("Canister name is required"));
+        assert!(err.contains("Missing canister name or --wasm flag"));
     }
 
     #[test]
     fn resolve_wasm_not_found_errors() {
-        let args = make_args(Some("my-dapp"), Some("/nonexistent/path.wasm.gz"));
+        let args = make_args(None, Some("/nonexistent/path.wasm.gz"));
         let err = resolve_canister_and_wasm(&args).unwrap_err().to_string();
         assert!(err.contains("Wasm file not found"));
     }
@@ -397,14 +435,6 @@ mod tests {
         let args = make_args(None, Some("/dev/null"));
         let (name, wasm) = resolve_canister_and_wasm(&args).unwrap();
         assert_eq!(name, "null");
-        assert_eq!(wasm.unwrap(), "/dev/null");
-    }
-
-    #[test]
-    fn resolve_both_canister_and_wasm() {
-        let args = make_args(Some("custom-name"), Some("/dev/null"));
-        let (name, wasm) = resolve_canister_and_wasm(&args).unwrap();
-        assert_eq!(name, "custom-name");
         assert_eq!(wasm.unwrap(), "/dev/null");
     }
 
