@@ -2,6 +2,14 @@
 set -euo pipefail
 
 # Run all unit tests (JS + Rust) in parallel, then acceptance tests sequentially.
+# Accepts --skip-acceptance to skip acceptance tests.
+
+SKIP_ACCEPTANCE=""
+for arg in "$@"; do
+  case $arg in
+    --skip-acceptance) SKIP_ACCEPTANCE="true" ;;
+  esac
+done
 
 echo "Running unit tests (JS + Rust) in parallel..."
 npm run test --workspace=@web3nl/my-canister-dashboard &
@@ -21,13 +29,17 @@ wait $pid4
 wait $pid5
 echo "Unit tests passed"
 
-# Acceptance tests run sequentially (each uses PocketIC)
-# Uses the dapp CLI which includes the my-canister-dapp-test library
-echo "Acceptance testing my-hello-world"
-cargo run -p my-canister-dapp-cli -- test wasm/my-hello-world.wasm.gz
+if [ "$SKIP_ACCEPTANCE" != "true" ]; then
+  # Acceptance tests run sequentially (each uses PocketIC)
+  # Uses the dapp CLI which includes the my-canister-dapp-test library
+  echo "Acceptance testing my-hello-world"
+  cargo run -p my-canister-dapp-cli -- test wasm/my-hello-world.wasm.gz
 
-echo "Acceptance testing my-notepad"
-cargo run -p my-canister-dapp-cli -- test wasm/my-notepad.wasm.gz
+  echo "Acceptance testing my-notepad"
+  cargo run -p my-canister-dapp-cli -- test wasm/my-notepad.wasm.gz
 
-echo "Acceptance testing demos canister"
-cargo run -p demos-test
+  echo "Acceptance testing demos canister"
+  cargo run -p demos-test
+else
+  echo "Acceptance tests skipped"
+fi
