@@ -23,23 +23,25 @@ cargo install my-canister-dapp-cli
 
 ## Usage
 
-Deploy a canister locally:
+Build and deploy a canister defined in `icp.yaml`:
 
 ```bash
 dapp deploy <canister-name>
 ```
 
-Deploy with a pre-built wasm:
+Deploy a pre-built wasm (canister name is derived from the filename):
 
 ```bash
-dapp deploy <canister-name> --wasm path/to/canister.wasm.gz
+dapp deploy --wasm path/to/canister.wasm.gz
 ```
 
-Run acceptance tests:
+Run acceptance tests against a wasm:
 
 ```bash
 dapp test path/to/canister.wasm.gz
 ```
+
+Each `dapp deploy` creates a fresh detached canister (no name collisions on redeploy).
 
 ## Prerequisites
 
