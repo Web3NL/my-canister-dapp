@@ -9,9 +9,8 @@ CLI tool (`dapp`) for deploying and testing user-owned dapps on the Internet Com
 
 ## Features
 
-- **`dapp deploy`** — build, compress, and deploy a canister wasm to a fresh detached canister
+- **`dapp deploy`** — build, compress, and deploy a canister wasm to a fresh detached canister (includes Internet Identity authentication for canister ownership)
 - **`dapp test`** — run acceptance tests against a wasm using [PocketIC](https://crates.io/crates/pocket-ic)
-- **`dapp auth`** — authenticate with Internet Identity for canister ownership
 - In-process gzip compression (no system `gzip` dependency)
 - Accepts both raw `.wasm` and pre-gzipped `.wasm.gz` files via `--wasm`
 - Deployment log: each deploy appends a JSON line to `.dapp/deployments.jsonl`
