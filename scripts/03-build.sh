@@ -23,7 +23,9 @@ npm run build --workspace=my-hello-world-frontend &
 pid_hw=$!
 npm run build --workspace=my-notepad-frontend &
 pid_np=$!
-wait $pid_mcd $pid_hw $pid_np
+wait $pid_mcd
+wait $pid_hw
+wait $pid_np
 
 # Batch-build all Rust canister wasms
 echo "Batch-building all canister wasms..."

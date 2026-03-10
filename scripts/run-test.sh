@@ -14,7 +14,11 @@ npm run test --workspace=icp-dapp-launcher &
 pid4=$!
 cargo test --workspace --exclude demos-test &
 pid5=$!
-wait $pid1 $pid2 $pid3 $pid4 $pid5
+wait $pid1
+wait $pid2
+wait $pid3
+wait $pid4
+wait $pid5
 echo "Unit tests passed"
 
 # Acceptance tests run sequentially (each uses PocketIC)
