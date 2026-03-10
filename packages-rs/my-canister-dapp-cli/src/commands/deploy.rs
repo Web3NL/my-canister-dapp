@@ -84,11 +84,12 @@ pub fn deploy(args: DeployArgs) -> Result<()> {
             );
         }
         println!("\nBuilding '{canister_name}'...");
-        icp.build(&canister_name)
-            .with_context(|| format!(
+        icp.build(&canister_name).with_context(|| {
+            format!(
                 "Failed to build canister '{canister_name}'.\n\
                  Make sure '{canister_name}' is defined in icp.yaml."
-            ))?;
+            )
+        })?;
         println!("Build complete.");
     }
 
