@@ -1,0 +1,45 @@
+{
+  "name": "my-canister-dapp",
+  "build": {
+    "dockerfile": "Containerfile",
+    "args": {
+      "HTTP_PROXY": "http://10.89.0.2:3128",
+      "HTTPS_PROXY": "http://10.89.0.2:3128"
+    },
+    "options": ["--network=proxy-net"]
+  },
+  "containerEnv": {
+    "HTTP_PROXY": "http://10.89.0.2:3128",
+    "HTTPS_PROXY": "http://10.89.0.2:3128",
+    "http_proxy": "http://10.89.0.2:3128",
+    "https_proxy": "http://10.89.0.2:3128",
+    "NO_PROXY": "localhost,127.0.0.1"
+  },
+  "runArgs": [
+    "--network=proxy-net",
+    "--security-opt=no-new-privileges:true",
+    "--cap-drop=ALL",
+    "--cap-add=NET_RAW",
+    "--cap-add=CHOWN",
+    "--cap-add=DAC_OVERRIDE",
+    "--cap-add=FOWNER"
+  ],
+  "workspaceMount": "source=${localWorkspaceFolder},target=/workspace,type=bind,consistency=cached",
+  "workspaceFolder": "/workspace",
+  "features": {},
+  "customizations": {
+    "vscode": {
+      "extensions": [
+        "rust-lang.rust-analyzer",
+        "dbaeumer.vscode-eslint",
+        "esbenp.prettier-vscode"
+      ],
+      "settings": {
+        "terminal.integrated.defaultProfile.linux": "bash"
+      }
+    }
+  },
+  "forwardPorts": [8080],
+  "remoteUser": "dev",
+  "shutdownAction": "stopContainer"
+}
