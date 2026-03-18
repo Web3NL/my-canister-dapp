@@ -17,7 +17,7 @@ packages-js/                  Publishable npm packages
   vite-plugin-canister-dapp/    Vite plugin for dev/prod environment detection
 
 canisters/                    Deployable canisters
-  icp-dapp-launcher/            Installer app — SvelteKit frontend hosted as asset canister
+  icp-dapp-launcher/            Launcher app — SvelteKit frontend hosted as asset canister
   wasm-registry/                On-chain registry storing dapp wasms for installation
   demos/                        Demo access code flow — time-limited canister access for trials
 
@@ -42,7 +42,7 @@ Developer builds a dapp using:
   my-canister-dashboard (Rust) ── embeds dashboard UI + management API
 
 User installs dapp via:
-  icp-dapp-launcher (installer) ── browses wasm-registry, creates canister, installs wasm
+  icp-dapp-launcher (launcher) ── browses wasm-registry, creates canister, installs wasm
 
 Developer deploys + tests via:
   my-canister-dapp-cli (`dapp`) ── deploy to local/mainnet with II auth, run acceptance tests
@@ -52,6 +52,110 @@ Testing validates via:
   demos-test ── validates demos canister access code flow via PocketIC
   Playwright E2E ── tests full flows against local ICP network
 ```
+
+## Architecture & Key Patterns
+
+### The Handoff Flow (II Principal Derivation)
+
+The core challenge: Internet Identity derives a *different principal* for each domain. A user at the launcher (`mycanister.app`) gets principal A. At their canister (`<id>.icp0.io`), they get principal B. Ownership must be transferred to principal B.
+
+**Solution**: Re-authenticate the user with II using the `derivationOrigin` parameter set to the new canister's domain. This forces II to derive the principal the user will have when visiting their canister directly.
+
+**The flow (launcher)**:
+1. User creates canister via the launcher app
+2. Launcher adds its own origin to the canister's `/.well-known/ii-alternative-origins` (certified JSON endpoint that tells II which origins are authorized)
+3. Launcher calls `AuthClient.login()` with `derivationOrigin = https://<canister-id>.icp0.io`
+4. II derives the user's principal at the canister's domain and returns it
+5. That principal is set as the canister controller
+6. Launcher removes itself from alternative origins — the bridge is gone, user fully owns the canister
+
+**Key files**:
+- `canisters/icp-dapp-launcher/src/lib/remoteAuthentication/` — derivationOrigin construction and remote auth client
+- `packages-rs/my-canister-dashboard/src/dashboard/alternative_origins.rs` — alternative origins management (add/remove origins, serve certified JSON)
+- `packages-rs/my-canister-dashboard/src/guards/` — guard functions (`only_canister_controllers_guard`, `only_ii_principal_guard`)
+
+### CLI `dapp deploy` Flow
+
+The `dapp` CLI (`my-canister-dapp-cli`) deploys dapps and transfers ownership to the developer's II principal. Each deploy creates a **fresh detached canister** (new ID every time, no upgrades).
+
+**Sequence**:
+1. Build canister wasm (or use `--wasm` to provide one)
+2. Create detached canister via `icp canister create --detached`
+3. Install wasm into the canister
+4. Start an ephemeral HTTP server on a random localhost port
+5. Add `http://localhost:<port>` to the canister's alternative origins
+6. Open browser for II authentication with `derivationOrigin` = canister's domain
+7. Receive the derived principal via POST callback to the local server
+8. Set the II principal on the canister
+9. Remove the CLI origin from alternative origins
+10. Update controllers to `[canister_id, user_principal]` — deployer relinquishes control (must be last step)
+
+Deployments are tracked in `.dapp/deployments.jsonl`.
+
+**Key files**:
+- `packages-rs/my-canister-dapp-cli/src/commands/deploy.rs` — full deploy orchestration
+- `packages-rs/my-canister-dapp-cli/src/auth/server.rs` — ephemeral auth server
+- `packages-rs/my-canister-dapp-cli/src/auth/page.rs` — HTML/JS served for II authentication
+- `packages-rs/my-canister-dapp-cli/src/icp.rs` — icp-cli wrapper struct
+
+### Dashboard Embedding
+
+The dashboard is a Svelte app that gets compiled and embedded into every user canister as part of the `my-canister-dashboard` Rust crate.
+
+**Build process**:
+1. `scripts/prebuild-mcd.sh` builds the Svelte dashboard frontend
+2. Compiled assets (HTML, JS, CSS) are copied to `packages-rs/my-canister-dashboard/assets/`
+3. Rust's `include_dir!()` macro embeds these files into the crate at compile time
+4. At canister init, `setup_dashboard_assets()` registers them with the certified asset router
+
+Every user canister serves the dashboard at `/canister-dashboard` with full HTTP certification, security headers (CSP), and the `/.well-known/ii-alternative-origins` endpoint.
+
+**Key files**:
+- `scripts/prebuild-mcd.sh` — builds dashboard frontend and copies to assets dir
+- `packages-rs/my-canister-dashboard/src/dashboard/mod.rs` — asset embedding via `include_dir!()`
+- `packages-rs/my-canister-dashboard/src/setup/mod.rs` — `setup_dashboard_assets()` function
+- `packages-rs/my-canister-dashboard/frontend/` — Svelte dashboard source
+
+### Demos Access Code Flow
+
+The `demos` canister provides time-limited trial access to dapps via access codes.
+
+**Access codes**: 12-character alphanumeric strings (XXXX-XXXX-XXXX), generated from IC random bytes. Characters exclude 0/O/1/I to avoid ambiguity.
+
+**Redemption flow**:
+1. Code is atomically claimed (prevents double-use)
+2. A canister is taken from a pre-created pool
+3. Wasm is fetched from the wasm-registry and installed
+4. Launcher origin is added to alternative origins
+5. User authenticates with II (same derivationOrigin pattern)
+6. II principal is set, controllers updated
+7. Trial timer starts — on expiry, wasm is uninstalled and canister returned to pool
+
+**Key files**:
+- `canisters/demos/src/codes.rs` — access code generation
+- `canisters/demos/src/redeem.rs` — redemption and finalization logic
+- `docs/demos-feature.md` — feature documentation
+
+## icp-cli
+
+`icp-cli` (the `icp` command) is the **primary CLI tool for the Internet Computer** — it replaces dfx entirely. This project does not use dfx.
+
+**Configuration**: `icp.yaml` defines canisters (with build recipes), networks, and environments.
+
+**Key commands used in this project**:
+| Command | Purpose |
+|---------|---------|
+| `icp build <name>` | Build canister wasm from icp.yaml recipe |
+| `icp canister create --detached` | Create a new canister, return ID immediately |
+| `icp canister install <id> --wasm <path>` | Install wasm into a canister |
+| `icp canister call <id> <method> <args>` | Call canister method with Candid-encoded args |
+| `icp canister settings update <id> --set-controller <principal>` | Update canister controllers |
+
+**Networks**:
+- `local` — managed PocketIC on port 8080 with NNS + II enabled
+- `ic` — mainnet
+
+**Environments** (defined in `icp.yaml`): `local` and `mainnet`, each specifying which canisters to deploy.
 
 ## Tech Stack
 
@@ -104,6 +208,7 @@ npm run deps:fix              # Auto-fix dependency consistency
 - `--clean` — clean build artifacts first
 - `--skip-checks` — skip lint/format/typecheck
 - `--skip-bootstrap` — skip local network setup (reuse existing)
+- `--skip-acceptance` — skip acceptance tests
 - `--skip-e2e` — skip E2E tests
 - `--include-vite-e2e` — force Vite E2E tests (even in CI)
 
@@ -137,6 +242,9 @@ npm run release:publish       # Publish npm packages + push git tags
 ./scripts/build-all-wasm.sh           # Build, shrink, and compress all canister wasms
 ./scripts/generate-declarations.sh    # Regenerate Candid declarations (dashboard, wasm-registry, demos)
 ./scripts/clean.sh                    # Remove build artifacts
+./scripts/prebuild-mcd.sh             # Build dashboard frontend + copy assets to Rust crate
+./scripts/add-asset-hash-entry.sh     # Add asset hash entry for certification
+./scripts/encode-upload-arg.mjs       # Encode wasm upload arguments for registry
 ```
 
 ## CI/CD
