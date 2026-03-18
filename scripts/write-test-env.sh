@@ -12,6 +12,7 @@ cd "$REPO_ROOT"
 
 II_CANISTER_ID="rdmx6-jaaaa-aaaaa-aaadq-cai"
 HELLO_WORLD_ID=$(icp canister status my-hello-world -e local --id-only 2>/dev/null || echo "")
+NOTEPAD_ID=$(icp canister status my-notepad -e local --id-only 2>/dev/null || echo "")
 APP_CANISTER_ID=$(icp canister status icp-dapp-launcher -e local --id-only 2>/dev/null || echo "")
 
 # Write test.env with discovered canister IDs
@@ -23,6 +24,11 @@ EOF
 # Add hello-world ID if it exists (may not exist yet during bootstrap)
 if [ -n "$HELLO_WORLD_ID" ]; then
   echo "VITE_MY_HELLO_WORLD_CANISTER_ID=${HELLO_WORLD_ID}" >> tests/test.env
+fi
+
+# Add notepad canister ID if it exists
+if [ -n "$NOTEPAD_ID" ]; then
+  echo "VITE_MY_NOTEPAD_CANISTER_ID=${NOTEPAD_ID}" >> tests/test.env
 fi
 
 # Add app canister ID if it exists
