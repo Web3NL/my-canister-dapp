@@ -84,4 +84,15 @@ elif [ "$INCLUDE_VITE_E2E_FLAG" = "true" ]; then
 fi
 ./scripts/05-test.sh $TEST_ARGS
 
+# Print local canister URLs
+echo ""
+echo "Local canister URLs:"
+icp canister status -e local --json 2>/dev/null | while IFS= read -r line; do
+    name=$(echo "$line" | python3 -c "import sys,json; print(json.loads(sys.stdin.read())['name'])")
+    id=$(echo "$line" | python3 -c "import sys,json; print(json.loads(sys.stdin.read())['id'])")
+    printf "  %-25s http://%s.localhost:8080\n" "$name" "$id"
+    printf "  %-25s http://%s.local.localhost:8080\n" "" "$name"
+done
+
+echo ""
 echo "Validation finished correctly!"
