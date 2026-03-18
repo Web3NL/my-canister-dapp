@@ -394,7 +394,7 @@
       }
     } else {
       // Invalid parameters, redirect to dapp store
-      await goto('/dapp-store');
+      await goto('/launch/dapp-store');
       return;
     }
 

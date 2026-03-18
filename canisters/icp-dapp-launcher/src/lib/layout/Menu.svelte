@@ -24,10 +24,10 @@
   });
 </script>
 
-<MenuItem href="/" on:click>Home</MenuItem>
-<MenuItem href="my-dapps" on:click>My Dapps</MenuItem>
-<MenuItem href="/dapp-store" on:click>Dapp Store</MenuItem>
+<MenuItem href="/launch" on:click>Home</MenuItem>
+<MenuItem href="/launch/my-dapps" on:click>My Dapps</MenuItem>
+<MenuItem href="/launch/dapp-store" on:click>Dapp Store</MenuItem>
 {#if $isAdminStore}
-  <MenuItem href="/admin" on:click>Admin</MenuItem>
+  <MenuItem href="/launch/admin" on:click>Admin</MenuItem>
 {/if}
-<MenuItem href="/faq" on:click>FAQ</MenuItem>
+<MenuItem href="/launch/faq" on:click>FAQ</MenuItem>

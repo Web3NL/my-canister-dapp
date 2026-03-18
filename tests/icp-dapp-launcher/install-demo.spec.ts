@@ -17,7 +17,7 @@ test('Demo Install E2E Suite', async ({ page }) => {
   expect(accessCode).toMatch(/^[A-Z2-9]{4}-[A-Z2-9]{4}-[A-Z2-9]{4}$/);
 
   const appUrl = icpDappLauncherUrl();
-  await page.goto(appUrl);
+  await page.goto(`${appUrl}/launch`);
 
   // 1. Login with II
   await page
@@ -40,10 +40,7 @@ test('Demo Install E2E Suite', async ({ page }) => {
     .getByRole('link')
     .filter({ hasText: 'Install a Dapp +' })
     .waitFor({ state: 'visible' });
-  await page
-    .getByRole('link')
-    .filter({ hasText: 'Install a Dapp +' })
-    .click();
+  await page.getByRole('link').filter({ hasText: 'Install a Dapp +' }).click();
 
   const helloWorldCard = page
     .getByRole('article')

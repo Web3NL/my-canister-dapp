@@ -11,18 +11,9 @@ import { Principal } from '@icp-sdk/core/principal';
 // Load test environment variables
 loadTestEnv();
 
-const maintenanceMode = false;
-
 test('ICP Dapp Launcher E2E Suite', async ({ page }) => {
   const appUrl = icpDappLauncherUrl();
-  await page.goto(appUrl);
-
-  // Dismiss maintenance mode overlay with Shift+M
-  if (maintenanceMode) {
-    await page.locator('.maintenance-overlay').waitFor({ state: 'visible' });
-    await page.keyboard.press('Shift+KeyM');
-    await page.locator('.maintenance-overlay').waitFor({ state: 'hidden' });
-  }
+  await page.goto(`${appUrl}/launch`);
 
   await page
     .getByRole('button', { name: 'My Dapps', exact: true })
