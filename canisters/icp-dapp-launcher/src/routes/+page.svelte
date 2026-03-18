@@ -93,8 +93,8 @@
           </div>
           <h3>No CLI needed</h3>
           <p>
-            Install dapps from your browser. No terminal, no dfx — just click
-            and go.
+            Launch dapps from your browser. No terminal, no dfx — just click and
+            go.
           </p>
         </div>
 

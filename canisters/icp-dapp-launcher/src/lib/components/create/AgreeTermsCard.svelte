@@ -12,10 +12,10 @@
 
   <p>
     {#if dappName}
-      You are about to install <strong>{dappName}</strong> as an Internet Computer
+      You are about to launch <strong>{dappName}</strong> as an Internet Computer
       canister.
     {:else}
-      You are about to install a custom dapp as an Internet Computer canister.
+      You are about to launch a custom dapp as an Internet Computer canister.
     {/if}
     Please read and accept the following disclaimer before proceeding.
   </p>
@@ -40,12 +40,12 @@
         creation.
       </li>
       <li>
-        The installed dapp code is provided without any guarantee of
-        correctness, security, or fitness for any purpose.
+        The launched dapp code is provided without any guarantee of correctness,
+        security, or fitness for any purpose.
       </li>
       <li>
-        You assume all risks associated with installing and running this
-        canister on the Internet Computer.
+        You assume all risks associated with launching and running this canister
+        on the Internet Computer.
       </li>
     </ul>
   </div>

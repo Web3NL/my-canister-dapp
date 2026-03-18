@@ -35,20 +35,20 @@ test('Demo Install E2E Suite', async ({ page }) => {
   const loginPopup = await loginPopupPromise;
   await handleIIPopup(loginPopup);
 
-  // 2. Go to dapp store, select my-hello-world, click Install
+  // 2. Go to dapp store, select my-hello-world, click Launch
   await page
     .getByRole('link')
-    .filter({ hasText: 'Install a Dapp +' })
+    .filter({ hasText: 'Launch a Dapp +' })
     .waitFor({ state: 'visible' });
-  await page.getByRole('link').filter({ hasText: 'Install a Dapp +' }).click();
+  await page.getByRole('link').filter({ hasText: 'Launch a Dapp +' }).click();
 
   const helloWorldCard = page
     .getByRole('article')
     .filter({ hasText: 'my-hello-world' });
   await helloWorldCard
-    .getByRole('button', { name: 'Install' })
+    .getByRole('button', { name: 'Launch' })
     .waitFor({ state: 'visible' });
-  await helloWorldCard.getByRole('button', { name: 'Install' }).click();
+  await helloWorldCard.getByRole('button', { name: 'Launch' }).click();
 
   // 3. Accept terms and disclaimer
   await page.locator('[data-tid="checkbox"]').waitFor({ state: 'visible' });

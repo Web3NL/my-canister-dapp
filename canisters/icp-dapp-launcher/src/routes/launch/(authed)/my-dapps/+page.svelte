@@ -8,10 +8,10 @@
   <title>My Dapps - My Canister Dapp</title>
 </svelte:head>
 
-<a href="/launch/install" class="install-link">
+<a href="/launch/create" class="launch-link">
   <Card>
-    <h3>Install a Dapp</h3>
-    <div class="install-icon">+</div>
+    <h3>Launch a Dapp</h3>
+    <div class="launch-icon">+</div>
   </Card>
 </a>
 
@@ -20,14 +20,14 @@
 <CreatedCanistersList />
 
 <style>
-  .install-link {
+  .launch-link {
     text-decoration: none;
     color: inherit;
     margin-bottom: 20px;
     display: block;
   }
 
-  .install-icon {
+  .launch-icon {
     display: flex;
     justify-content: center;
     align-items: center;

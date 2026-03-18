@@ -100,7 +100,7 @@
       <p>
         A user can use a service like <a href="https://mycanister.app"
           >mycanister.app</a
-        > to create a new canister with their own funds, install a user-owned dapp
+        > to create a new canister with their own funds, launch a user-owned dapp
         and be the sole controller. The user can use the Canister Dashboard to top-up
         their Dapp with cycles and perform other management tasks.
       </p>
@@ -140,7 +140,7 @@
           href="https://wiki.internetcomputer.org/wiki/VetKD"
           target="_blank"
           rel="noopener noreferrer">vetKD</a
-        > password manager, could be installed once and theoretically run for a very
+        > password manager, could be launched once and theoretically run for a very
         long time without any further updates, only cycle top-ups.
       </p>
     </Collapsible>
@@ -175,7 +175,7 @@
   <div class="faq-item">
     <Collapsible iconSize="medium">
       {#snippet header()}<h2>
-          How does mycanister.app remember my installed app history?
+          How does mycanister.app remember my launched app history?
         </h2>{/snippet}
       <p>
         When you create a new canister, you deposit ICP to an account only you

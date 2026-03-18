@@ -8,7 +8,7 @@
 
   async function handleInstall() {
     await goto(
-      `/launch/install?source=registry&name=${encodeURIComponent(name)}`
+      `/launch/create?source=registry&name=${encodeURIComponent(name)}`
     );
   }
 </script>
@@ -17,5 +17,5 @@
   <h4>{name}</h4>
   <p class="description">{description}</p>
   <p class="version">Version: {version}</p>
-  <button class="primary" on:click={handleInstall}>Install</button>
+  <button class="primary" on:click={handleInstall}>Launch</button>
 </Card>
