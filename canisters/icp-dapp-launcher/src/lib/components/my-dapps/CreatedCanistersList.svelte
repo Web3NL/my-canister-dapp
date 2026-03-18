@@ -32,14 +32,14 @@
         .map(result => result.value)
         .sort((a, b) => Number(b.blockId - a.blockId));
     } catch {
-      showErrorToast('Failed to load installed Dapps');
+      showErrorToast('Failed to load launched Dapps');
     }
     loading = false;
   }
 </script>
 
 <div>
-  <h2>Installed Dapps</h2>
+  <h2>Launched Dapps</h2>
 
   {#if loading}
     <Card>
@@ -63,7 +63,7 @@
     </div>
   {:else}
     <Card>
-      <p>No installed Dapps found from transactions</p>
+      <p>No launched Dapps found from transactions</p>
     </Card>
   {/if}
 </div>

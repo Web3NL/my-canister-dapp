@@ -35,21 +35,21 @@ test('ICP Dapp Launcher E2E Suite', async ({ page }) => {
   // Wait for II to close and authentication to complete
   await page
     .getByRole('link')
-    .filter({ hasText: 'Install a Dapp +' })
+    .filter({ hasText: 'Launch a Dapp +' })
     .waitFor({ state: 'visible' });
 
   await page
     .getByRole('link')
-    .filter({ hasText: 'Install a Dapp +' })
+    .filter({ hasText: 'Launch a Dapp +' })
     .waitFor({ state: 'visible' });
-  await page.getByRole('link').filter({ hasText: 'Install a Dapp +' }).click();
+  await page.getByRole('link').filter({ hasText: 'Launch a Dapp +' }).click();
   const helloWorldCard = page
     .getByRole('article')
     .filter({ hasText: 'my-hello-world' });
   await helloWorldCard
-    .getByRole('button', { name: 'Install' })
+    .getByRole('button', { name: 'Launch' })
     .waitFor({ state: 'visible' });
-  await helloWorldCard.getByRole('button', { name: 'Install' }).click();
+  await helloWorldCard.getByRole('button', { name: 'Launch' }).click();
 
   // Accept terms and disclaimer
   await page.locator('[data-tid="checkbox"]').waitFor({ state: 'visible' });

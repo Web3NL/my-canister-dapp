@@ -25,13 +25,13 @@
     createFrontpageUrl,
     createDashboardUrl,
   } from '$lib/services/createdCanisters';
-  import GoodNewsCard from '$lib/components/install/GoodNewsCard.svelte';
-  import ConnectIICard from '$lib/components/install/ConnectIICard.svelte';
-  import FundAccountCard from '$lib/components/install/FundAccountCard.svelte';
-  import AgreeTermsCard from '$lib/components/install/AgreeTermsCard.svelte';
+  import GoodNewsCard from '$lib/components/create/GoodNewsCard.svelte';
+  import ConnectIICard from '$lib/components/create/ConnectIICard.svelte';
+  import FundAccountCard from '$lib/components/create/FundAccountCard.svelte';
+  import AgreeTermsCard from '$lib/components/create/AgreeTermsCard.svelte';
   import { goto, beforeNavigate } from '$app/navigation';
   import { fetchWasmModule, type WasmSource } from '$lib/utils/fetch';
-  import AccessCodeCard from '$lib/components/install/AccessCodeCard.svelte';
+  import AccessCodeCard from '$lib/components/create/AccessCodeCard.svelte';
   import { redeemDemoCode, completeDemoSetup } from '$lib/flows/redeemDemo';
   import { DEMOS_CANISTER_ID } from '$lib/constants/canisterIds';
 
@@ -310,7 +310,7 @@
         // The canister ID is saved and can be recovered on next attempt
         canisterPrincipal = err.canisterId;
         showErrorToast(
-          'Canister created but installation failed. Click "Retry" to continue.'
+          'Canister created but launch failed. Click "Retry" to continue.'
         );
       } else {
         const errorMsg =
@@ -329,7 +329,7 @@
       initiator: 'connect-ii',
       text: isDemoInstall
         ? 'Keep window open. Connecting II to demo...'
-        : 'Keep window open. Installing and connecting II to Dapp...',
+        : 'Keep window open. Launching and connecting II to Dapp...',
     });
 
     try {
@@ -435,10 +435,10 @@
 </script>
 
 <svelte:head>
-  <title>Install Dapp - My Canister Dapp</title>
+  <title>Launch Dapp - My Canister Dapp</title>
 </svelte:head>
 
-<h1>Install Dapp</h1>
+<h1>Launch Dapp</h1>
 <h3>{dappNameText || 'Custom Dapp'}</h3>
 
 {#if installMode === 'file'}
@@ -460,7 +460,7 @@
 
 {#if installMode === 'remote'}
   <div class="remote-info">
-    <p>Installing from remote URL: <code>{remoteUrl}</code></p>
+    <p>Loading from remote URL: <code>{remoteUrl}</code></p>
     {#if wasmModule}
       <p class="success">WASM loaded successfully</p>
     {:else if wasmFetchError}
@@ -474,9 +474,9 @@
 {#if recoveredCanister}
   <div class="recovery-notice">
     <p>
-      <strong>Resuming previous installation</strong> - We found an incomplete
-      installation from a previous session. Your canister ({canisterPrincipal?.toText()})
-      was already created. Continue from where you left off.
+      <strong>Resuming previous setup</strong> - We found an incomplete setup
+      from a previous session. Your canister ({canisterPrincipal?.toText()}) was
+      already created. Continue from where you left off.
     </p>
   </div>
 {/if}
