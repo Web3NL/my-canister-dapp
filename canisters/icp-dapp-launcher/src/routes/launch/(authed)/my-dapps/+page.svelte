@@ -8,7 +8,7 @@
   <title>My Dapps - My Canister Dapp</title>
 </svelte:head>
 
-<a href="/install" class="install-link">
+<a href="/launch/install" class="install-link">
   <Card>
     <h3>Install a Dapp</h3>
     <div class="install-icon">+</div>
