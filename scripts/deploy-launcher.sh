@@ -44,10 +44,10 @@ echo "📈 Bumping $VERSION_TYPE version..."
 npm version "$VERSION_TYPE" --no-git-tag-version > /dev/null 2>&1
 NEW_VERSION=$(node -p "require('./package.json').version")
 
-# Commit the changes (from within icp-dapp-launcher directory)
+# Commit the changes
 echo "💾 Committing version bump..."
-cd ..
-git add .
+cd ../..
+git add canisters/icp-dapp-launcher/package.json package-lock.json
 git commit -m "chore: bump icp-dapp-launcher version ($VERSION_TYPE)"
 
 # Create git tag
