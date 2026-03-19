@@ -9,24 +9,7 @@
   <main>
     <section class="hero">
       <div class="logo">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 32 32"
-          width="64"
-          height="64"
-        >
-          <rect
-            x="4"
-            y="4"
-            width="24"
-            height="24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            rx="2"
-          />
-          <circle cx="16" cy="16" r="3" fill="currentColor" />
-        </svg>
+        <img src="/favicon.svg" width="64" height="64" alt="My Canister Dapp" />
       </div>
 
       <h1>My Canister Dapp</h1>
@@ -41,7 +24,12 @@
         >
           GitHub
         </a>
-        <a href="/launch/faq" class="btn btn-secondary">FAQ</a>
+        <a
+          href="https://id.ai"
+          class="btn btn-secondary"
+          target="_blank"
+          rel="noopener noreferrer">Internet Identity</a
+        >
       </div>
     </section>
 
@@ -65,36 +53,10 @@
               <path d="M8 12h8" />
             </svg>
           </div>
-          <h3>Own your canister</h3>
+          <h3>Own your dapp</h3>
           <p>
-            You are the controller. No platform lock-in, full ownership of your
-            on-chain app.
-          </p>
-        </div>
-
-        <div class="feature-card">
-          <div class="feature-icon">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="28"
-              height="28"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="1.5"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            >
-              <rect x="2" y="3" width="20" height="14" rx="2" />
-              <path d="M8 21h8" />
-              <path d="M12 17v4" />
-              <path d="M7 8l3 3-3 3" />
-            </svg>
-          </div>
-          <h3>No CLI needed</h3>
-          <p>
-            Launch dapps from your browser. No terminal, no dfx — just click and
-            go.
+            Your ownership is guaranteed with Internet Identity. No platform
+            lock-in, full control of your on-chain app.
           </p>
         </div>
 
@@ -134,14 +96,40 @@
               stroke-linecap="round"
               stroke-linejoin="round"
             >
+              <rect x="2" y="3" width="20" height="14" rx="2" />
+              <path d="M8 21h8" />
+              <path d="M12 17v4" />
+              <path d="M7 8l3 3-3 3" />
+            </svg>
+          </div>
+          <h3>No dev tools needed</h3>
+          <p>
+            Launch dapps from your browser. No dev tools needed — just click and
+            go.
+          </p>
+        </div>
+
+        <div class="feature-card">
+          <div class="feature-icon">
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="28"
+              height="28"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="1.5"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
               <path
                 d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 6-5.5.08-1.25-.27-2.48-1-3.5.28-1.15.28-2.35 0-3.5 0 0-1 0-3 1.5-2.64-.5-5.36-.5-8 0C6 2 5 2 5 2c-.3 1.15-.3 2.35 0 3.5A5.403 5.403 0 0 0 4 9c0 3.5 3 5.5 6 5.5-.39.49-.68 1.05-.85 1.65S8.93 17.38 9 18v4"
               />
               <path d="M9 18c-4.51 2-5-2-7-2" />
             </svg>
           </div>
-          <h3>Open source</h3>
-          <p>Build dapps with our open-source Rust crates and CLI tools.</p>
+          <h3>Build dapps with our SDK</h3>
+          <p>Build dapps with our open-source Rust crates and tools.</p>
         </div>
       </div>
     </section>
@@ -167,8 +155,8 @@
 <style>
   .page {
     min-height: 100vh;
-    background: #0a0a0f;
-    color: #f0f0f0;
+    background: #090a0d;
+    color: #ffffff;
     position: relative;
     overflow: hidden;
     display: flex;
@@ -188,7 +176,7 @@
     right: -100px;
     background: radial-gradient(
       circle,
-      rgba(88, 28, 135, 0.15) 0%,
+      rgba(77, 121, 255, 0.12) 0%,
       transparent 70%
     );
   }
@@ -200,7 +188,7 @@
     left: -100px;
     background: radial-gradient(
       circle,
-      rgba(29, 78, 216, 0.1) 0%,
+      rgba(77, 121, 255, 0.08) 0%,
       transparent 70%
     );
   }
@@ -222,7 +210,6 @@
   }
 
   .logo {
-    color: #c4b5fd;
     margin-bottom: 1.5rem;
   }
 
@@ -231,7 +218,7 @@
     font-weight: 700;
     letter-spacing: -0.02em;
     margin: 0 0 0.75rem;
-    background: linear-gradient(135deg, #f0f0f0 0%, #c4b5fd 100%);
+    background: linear-gradient(135deg, #ffffff 0%, #4d79ff 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
@@ -239,7 +226,7 @@
 
   .tagline {
     font-size: 1.25rem;
-    color: #9ca3af;
+    color: #9badd1;
     margin: 0 0 2.5rem;
   }
 
@@ -262,23 +249,23 @@
   }
 
   .btn-primary {
-    background: linear-gradient(135deg, #7c3aed, #4f46e5);
+    background: #4d79ff;
     color: #fff;
   }
 
   .btn-primary:hover {
-    box-shadow: 0 0 20px rgba(124, 58, 237, 0.4);
+    box-shadow: 0 0 20px rgba(77, 121, 255, 0.4);
     transform: translateY(-1px);
   }
 
   .btn-secondary {
-    background: rgba(255, 255, 255, 0.06);
-    color: #d1d5db;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    background: rgba(155, 173, 209, 0.08);
+    color: #9badd1;
+    border: 1px solid #475266;
   }
 
   .btn-secondary:hover {
-    background: rgba(255, 255, 255, 0.1);
+    background: rgba(155, 173, 209, 0.14);
     transform: translateY(-1px);
   }
 
@@ -293,22 +280,20 @@
   }
 
   .feature-card {
-    background: rgba(255, 255, 255, 0.03);
-    border: 1px solid rgba(255, 255, 255, 0.08);
+    background: #212733;
+    border: 1px solid #475266;
     border-radius: 12px;
     padding: 1.75rem;
-    backdrop-filter: blur(10px);
     transition: all 0.2s ease;
   }
 
   .feature-card:hover {
-    background: rgba(255, 255, 255, 0.05);
-    border-color: rgba(255, 255, 255, 0.12);
+    background: #2b3343;
     transform: translateY(-2px);
   }
 
   .feature-icon {
-    color: #a78bfa;
+    color: #4d79ff;
     margin-bottom: 1rem;
   }
 
@@ -316,12 +301,12 @@
     font-size: 1.1rem;
     font-weight: 600;
     margin: 0 0 0.5rem;
-    color: #f0f0f0;
+    color: #ffffff;
   }
 
   .feature-card p {
     font-size: 0.9rem;
-    color: #9ca3af;
+    color: #9badd1;
     line-height: 1.6;
     margin: 0;
   }
@@ -331,22 +316,22 @@
     z-index: 1;
     text-align: center;
     padding: 2rem 1.5rem;
-    border-top: 1px solid rgba(255, 255, 255, 0.06);
+    border-top: 1px solid #475266;
   }
 
   footer p {
     font-size: 0.85rem;
-    color: #6b7280;
+    color: #76839f;
     margin: 0;
   }
 
   footer a {
-    color: #9ca3af;
+    color: #9badd1;
     text-decoration: none;
   }
 
   footer a:hover {
-    color: #c4b5fd;
+    color: #4d79ff;
   }
 
   @media (max-width: 640px) {
