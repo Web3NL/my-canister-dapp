@@ -13,10 +13,6 @@
     <!-- Init theme as fast as possible -->
     <script>
       try {
-        const isDarkPreferred = window.matchMedia(
-          '(prefers-color-scheme: dark)'
-        ).matches;
-
         const currentTheme =
           localStorage.nnsTheme === null ||
           localStorage.nnsTheme === undefined ||
@@ -24,10 +20,7 @@
             ? undefined
             : JSON.parse(localStorage.nnsTheme);
 
-        document.documentElement.setAttribute(
-          'theme',
-          currentTheme ?? (isDarkPreferred ? 'dark' : 'light')
-        );
+        document.documentElement.setAttribute('theme', currentTheme ?? 'dark');
       } catch (error) {
         console.error('Error initializing theme', error);
       }
