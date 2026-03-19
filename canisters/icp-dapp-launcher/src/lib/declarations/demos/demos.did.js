@@ -34,6 +34,13 @@ export const idlFactory = ({ IDL }) => {
     active: IDL.Nat32,
     available: IDL.Nat32,
   });
+  const SelfStatus = IDL.Record({
+    cycles_balance: IDL.Nat,
+    pool_available: IDL.Nat32,
+    pool_target: IDL.Nat32,
+    total_codes: IDL.Nat32,
+    active_demos: IDL.Nat32,
+  });
   const AccessCodeStatus = IDL.Variant({
     Available: IDL.Null,
     Redeemed: IDL.Record({
@@ -62,6 +69,7 @@ export const idlFactory = ({ IDL }) => {
     get_config: IDL.Func([], [IDL.Opt(DemosConfig)], ['query']),
     get_my_demos: IDL.Func([], [IDL.Vec(ActiveDemo)], ['query']),
     get_pool_status: IDL.Func([], [PoolStatus], ['query']),
+    get_self_status: IDL.Func([], [SelfStatus], ['query']),
     is_admin: IDL.Func([], [IDL.Bool], ['query']),
     list_access_codes: IDL.Func([], [IDL.Vec(AccessCode)], ['query']),
     list_active_demos: IDL.Func([], [IDL.Vec(ActiveDemo)], ['query']),

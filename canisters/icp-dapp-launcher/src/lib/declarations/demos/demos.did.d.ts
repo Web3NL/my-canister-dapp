@@ -50,6 +50,13 @@ export interface PoolStatus {
   available: number;
 }
 export type RedeemResult = { Ok: { canister_id: Principal } } | { Err: string };
+export interface SelfStatus {
+  cycles_balance: bigint;
+  pool_available: number;
+  pool_target: number;
+  total_codes: number;
+  active_demos: number;
+}
 export interface _SERVICE {
   configure: ActorMethod<[DemosConfig], GenericResult>;
   finalize_demo: ActorMethod<[string, Principal], GenericResult>;
@@ -57,6 +64,7 @@ export interface _SERVICE {
   get_config: ActorMethod<[], [] | [DemosConfig]>;
   get_my_demos: ActorMethod<[], Array<ActiveDemo>>;
   get_pool_status: ActorMethod<[], PoolStatus>;
+  get_self_status: ActorMethod<[], SelfStatus>;
   is_admin: ActorMethod<[], boolean>;
   list_access_codes: ActorMethod<[], Array<AccessCode>>;
   list_active_demos: ActorMethod<[], Array<ActiveDemo>>;

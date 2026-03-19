@@ -7,6 +7,7 @@
     AccessCode,
     DemosConfig,
     GenerateCodesResult,
+    SelfStatus,
   } from '$lib/api/demos';
   import type { ActiveDemo } from '$lib/declarations/demos/demos.did.d.ts';
   import { isAdminStore } from '$lib/stores/admin';
@@ -23,6 +24,7 @@
 
   let poolStatus: PoolStatus | null = null;
   let config: DemosConfig | undefined = undefined;
+  let selfStatus: SelfStatus | null = null;
   let accessCodes: AccessCode[] = [];
   let activeDemos: ActiveDemo[] = [];
 
@@ -51,14 +53,16 @@
   async function loadAllData() {
     try {
       const api = await DemosApi.create();
-      const [ps, cfg, codes, demos] = await Promise.all([
+      const [ps, cfg, ss, codes, demos] = await Promise.all([
         api.getPoolStatus(),
         api.getConfig(),
+        api.getSelfStatus(),
         api.listAccessCodes(),
         api.listActiveDemos(),
       ]);
       poolStatus = ps;
       config = cfg;
+      selfStatus = ss;
       accessCodes = codes;
       activeDemos = demos;
     } catch {
@@ -150,7 +154,7 @@
 {:else}
   <h1>Admin Dashboard</h1>
 
-  <PoolOverview {poolStatus} {config} />
+  <PoolOverview {poolStatus} {config} {selfStatus} />
 
   <AdminActions
     onReplenishPool={handleReplenishPool}

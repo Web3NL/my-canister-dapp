@@ -13,7 +13,7 @@ mod wasm_registry;
 
 use storage::{
     AccessCode, ActiveDemo, DemosConfig, GenerateCodesResult, GenericResult, PoolStatus,
-    RedeemResult,
+    RedeemResult, SelfStatus,
 };
 
 // ---------------------------------------------------------------------------
@@ -172,6 +172,18 @@ fn is_admin() -> bool {
 #[query(guard = "guards::only_controllers")]
 fn get_config() -> Option<DemosConfig> {
     storage::with_state(|s| s.config.clone())
+}
+
+/// Return the demos canister's own status including cycles balance.
+#[query(guard = "guards::only_controllers")]
+fn get_self_status() -> SelfStatus {
+    storage::with_state(|s| SelfStatus {
+        cycles_balance: ic_cdk::api::canister_cycle_balance(),
+        pool_available: s.canister_pool.len() as u32,
+        pool_target: s.config.as_ref().map(|c| c.pool_target_size).unwrap_or(0),
+        active_demos: s.active_demos.len() as u32,
+        total_codes: s.access_codes.len() as u32,
+    })
 }
 
 // ---------------------------------------------------------------------------

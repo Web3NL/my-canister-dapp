@@ -1,6 +1,10 @@
 <script lang="ts">
   import { Card } from '@dfinity/gix-components';
   import type { ActiveDemo } from '$lib/api/demos';
+  import {
+    createFrontpageUrl,
+    createDashboardUrl,
+  } from '$lib/services/createdCanisters';
 
   export let activeDemos: ActiveDemo[];
 
@@ -34,6 +38,7 @@
         <thead>
           <tr>
             <th>Canister ID</th>
+            <th>Links</th>
             <th>Wasm</th>
             <th>Code</th>
             <th>Service Principal</th>
@@ -46,6 +51,18 @@
           {#each activeDemos as demo (demo.canister_id.toText())}
             <tr>
               <td><code>{truncatePrincipal(demo.canister_id)}</code></td>
+              <td class="links-cell">
+                <a
+                  href={createFrontpageUrl(demo.canister_id.toText())}
+                  target="_blank"
+                  rel="noopener noreferrer">Frontpage</a
+                >
+                <a
+                  href={createDashboardUrl(demo.canister_id.toText())}
+                  target="_blank"
+                  rel="noopener noreferrer">Dashboard</a
+                >
+              </td>
               <td>{demo.wasm_name}</td>
               <td><code>{demo.access_code}</code></td>
               <td><code>{truncatePrincipal(demo.service_principal)}</code></td>
@@ -84,6 +101,16 @@
   .demos-table th {
     font-weight: var(--font-weight-bold);
     color: var(--description-color);
+  }
+
+  .links-cell {
+    display: flex;
+    gap: var(--padding-0_5x);
+  }
+
+  .links-cell a {
+    font-size: var(--font-size-small);
+    text-decoration: underline;
   }
 
   code {

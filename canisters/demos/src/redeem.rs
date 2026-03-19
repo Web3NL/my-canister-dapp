@@ -105,6 +105,21 @@ pub async fn redeem_code(code: String, wasm_name: String) -> RedeemResult {
         caller
     );
 
+    // Auto-replenish: if pool dropped below target, spawn canister creation in background
+    let should_replenish = storage::with_state(|s| {
+        s.config
+            .as_ref()
+            .is_some_and(|c| (s.canister_pool.len() as u32) < c.pool_target_size)
+    });
+    if should_replenish {
+        ic_cdk::futures::spawn_017_compat(async {
+            match pool::create_pool_canister().await {
+                Ok(id) => ic_cdk::println!("auto-replenish: created canister {}", id),
+                Err(e) => ic_cdk::println!("auto-replenish: failed to create canister: {}", e),
+            }
+        });
+    }
+
     RedeemResult::Ok { canister_id }
 }
 

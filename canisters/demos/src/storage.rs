@@ -65,6 +65,15 @@ pub struct PoolStatus {
     pub active: u32,
 }
 
+#[derive(Clone, Debug, CandidType, Serialize, Deserialize)]
+pub struct SelfStatus {
+    pub cycles_balance: u128,
+    pub pool_available: u32,
+    pub pool_target: u32,
+    pub active_demos: u32,
+    pub total_codes: u32,
+}
+
 // ---------------------------------------------------------------------------
 // Result types
 // ---------------------------------------------------------------------------
