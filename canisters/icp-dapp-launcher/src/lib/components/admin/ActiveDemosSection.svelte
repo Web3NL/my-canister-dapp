@@ -52,8 +52,16 @@
             <tr>
               <td><code>{truncatePrincipal(demo.canister_id)}</code></td>
               <td class="links-cell">
-                <a href={createFrontpageUrl(demo.canister_id.toText())} target="_blank" rel="noopener noreferrer">Frontpage</a>
-                <a href={createDashboardUrl(demo.canister_id.toText())} target="_blank" rel="noopener noreferrer">Dashboard</a>
+                <a
+                  href={createFrontpageUrl(demo.canister_id.toText())}
+                  target="_blank"
+                  rel="noopener noreferrer">Frontpage</a
+                >
+                <a
+                  href={createDashboardUrl(demo.canister_id.toText())}
+                  target="_blank"
+                  rel="noopener noreferrer">Dashboard</a
+                >
               </td>
               <td>{demo.wasm_name}</td>
               <td><code>{demo.access_code}</code></td>

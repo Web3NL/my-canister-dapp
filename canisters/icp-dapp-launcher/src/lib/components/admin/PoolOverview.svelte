@@ -30,11 +30,18 @@
   <h2>Pool Overview</h2>
   {#if selfStatus}
     <Card>
-      <div class="cycles-banner" class:low-cycles={selfStatus.cycles_balance < LOW_CYCLES_THRESHOLD}>
+      <div
+        class="cycles-banner"
+        class:low-cycles={selfStatus.cycles_balance < LOW_CYCLES_THRESHOLD}
+      >
         <span class="cycles-label">Demos Canister Cycles</span>
-        <span class="cycles-value">{formatCycles(selfStatus.cycles_balance)}</span>
+        <span class="cycles-value"
+          >{formatCycles(selfStatus.cycles_balance)}</span
+        >
         {#if selfStatus.cycles_balance < LOW_CYCLES_THRESHOLD}
-          <span class="cycles-warning">Low balance — top up the demos canister</span>
+          <span class="cycles-warning"
+            >Low balance — top up the demos canister</span
+          >
         {/if}
       </div>
     </Card>
