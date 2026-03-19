@@ -3,6 +3,7 @@
 Fully owned on-chain dapps with just Internet Identity — no CLI, no dev tools, just a browser.
 
 [![Build Status](https://github.com/Web3NL/my-canister-dapp/workflows/Release/badge.svg)](https://github.com/Web3NL/my-canister-dapp/actions)
+[![Docs](https://img.shields.io/badge/docs-docs-blue)](https://github.com/Web3NL/my-canister-dapp/tree/main/docs)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
 
 > **Status**: Active development. Demos will be available at [mycanister.app](https://mycanister.app).
