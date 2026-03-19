@@ -16,13 +16,33 @@ set -euo pipefail
 
 source "$(dirname "$0")/scripts/constants.sh"
 
-# Runtime reporting (MM:SS)
+# Per-step timing
 SCRIPT_START_TIME=$(date +%s)
-print_total_time() {
-    local duration=$(( $(date +%s) - SCRIPT_START_TIME ))
-    printf "Total time: %02d:%02d\n" $(( duration / 60 )) $(( duration % 60 ))
+STEP_NAMES=()
+STEP_DURATIONS=()
+
+step_start() { date +%s; }
+
+step_record() {
+    STEP_NAMES+=("$1")
+    STEP_DURATIONS+=($(( $(date +%s) - $2 )))
 }
-trap print_total_time EXIT
+
+print_summary() {
+    echo ""
+    echo "┌──────────────────────────────────────┬─────────┐"
+    echo "│ Step                                 │ Time    │"
+    echo "├──────────────────────────────────────┼─────────┤"
+    for i in "${!STEP_NAMES[@]}"; do
+        printf "│ %-36s │ %02d:%02d   │\n" "${STEP_NAMES[$i]}" \
+            $(( STEP_DURATIONS[$i] / 60 )) $(( STEP_DURATIONS[$i] % 60 ))
+    done
+    local total=$(( $(date +%s) - SCRIPT_START_TIME ))
+    echo "├──────────────────────────────────────┼─────────┤"
+    printf "│ %-36s │ %02d:%02d   │\n" "Total" $(( total / 60 )) $(( total % 60 ))
+    echo "└──────────────────────────────────────┴─────────┘"
+}
+trap print_summary EXIT
 
 CLEAN_FLAG=""
 SKIP_CHECKS_FLAG=""
@@ -49,29 +69,39 @@ fi
 
 # --- Phase 1: Static analysis ---
 if [ "$SKIP_CHECKS_FLAG" != "true" ]; then
+    t=$(step_start)
     ./scripts/01-check.sh
+    step_record "Static analysis" "$t"
 fi
 
 # --- Phase 2: Bootstrap local network ---
 if [ "$SKIP_BOOTSTRAP_FLAG" != "true" ]; then
+    t=$(step_start)
     ./scripts/02-bootstrap.sh
+    step_record "Bootstrap" "$t"
 fi
 
 # --- Phase 3: Build ---
+t=$(step_start)
 ./scripts/03-build.sh
+step_record "Build" "$t"
 
 # Pre-compile acceptance test binaries in background while deploy runs
 echo "Pre-compiling acceptance test binaries..."
+cargo_start=$(step_start)
 cargo build -p my-canister-dapp-cli -p demos-test &
 pid_cdt=$!
 
 # --- Phase 4: Deploy ---
+t=$(step_start)
 ./scripts/04-deploy.sh
+step_record "Deploy" "$t"
 
 # --- Phase 5: Test ---
 echo "Waiting for acceptance test compilation..."
 wait $pid_cdt
 echo "Acceptance test binaries compiled"
+step_record "Cargo pre-compile (parallel)" "$cargo_start"
 
 TEST_ARGS=""
 if [ "$SKIP_ACCEPTANCE_FLAG" = "true" ]; then
@@ -82,7 +112,9 @@ if [ "$SKIP_E2E_FLAG" = "true" ]; then
 elif [ "$INCLUDE_VITE_E2E_FLAG" = "true" ]; then
     TEST_ARGS="$TEST_ARGS --include-vite-e2e"
 fi
+t=$(step_start)
 ./scripts/05-test.sh $TEST_ARGS
+step_record "Test" "$t"
 
 # Print local canister URLs
 echo ""
