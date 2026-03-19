@@ -55,7 +55,7 @@ build/
 
 # dfx / icp-cli files
 .dfx
-.icp
+.icp/cache
 
 # dapp CLI local state
 .dapp
