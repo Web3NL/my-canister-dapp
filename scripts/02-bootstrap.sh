@@ -9,6 +9,7 @@ cd "$REPO_ROOT"
 echo "Starting local network..."
 
 ./scripts/setup-identity.sh
+icp identity default ident-1
 
 # Stop any running network
 icp network stop local 2>/dev/null || true

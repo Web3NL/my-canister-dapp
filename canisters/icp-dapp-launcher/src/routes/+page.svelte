@@ -55,8 +55,8 @@
           </div>
           <h3>Own your dapp</h3>
           <p>
-            Your ownership is guaranteed with Internet Identity. No platform
-            lock-in, full control of your on-chain app.
+            You are the sole controller. No platform lock-in, no middlemen —
+            just you and your canister.
           </p>
         </div>
 
@@ -79,7 +79,8 @@
           </div>
           <h3>Internet Identity</h3>
           <p>
-            Secure passwordless authentication via ICP's native identity system.
+            Sign in securely without passwords. Your keys, your identity —
+            powered by the Internet Computer.
           </p>
         </div>
 
@@ -104,8 +105,8 @@
           </div>
           <h3>No dev tools needed</h3>
           <p>
-            Launch dapps from your browser. No dev tools needed — just click and
-            go.
+            Create and launch dapps straight from your browser. Just connect,
+            click, and go.
           </p>
         </div>
 
@@ -129,7 +130,10 @@
             </svg>
           </div>
           <h3>Build dapps with our SDK</h3>
-          <p>Build dapps with our open-source Rust crates and tools.</p>
+          <p>
+            Everything you need to build, test, and deploy — open source and
+            ready to use.
+          </p>
         </div>
       </div>
     </section>
