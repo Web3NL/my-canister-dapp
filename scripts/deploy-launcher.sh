@@ -28,7 +28,8 @@ fi
 
 # Deploy the app (ICP_NETWORK=ic triggers production build)
 echo "🚢 Deploying to IC..."
-ICP_NETWORK=ic icp deploy icp-dapp-launcher -e mainnet --identity web3nl
+# TODO: remove --mode reinstall after this one-time deploy (breaks stable state)
+ICP_NETWORK=ic icp deploy icp-dapp-launcher -e mainnet --identity web3nl --mode reinstall
 
 # Get current commit hash after successful deploy
 COMMIT_HASH=$(git rev-parse HEAD)
