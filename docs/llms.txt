@@ -1,0 +1,51 @@
+# My Canister Dapp SDK
+
+> SDK for building user-owned dapps on the Internet Computer.
+> Each dapp compiles into a single wasm containing both backend logic and all frontend assets (HTML, JS, CSS).
+> The canister serves its own web frontend — no separate hosting needed.
+> Users create and own canisters from a browser using ICP + Internet Identity — no CLI needed.
+> Developers build the wasm; each user gets their own canister instance and becomes its sole controller.
+
+## Documentation for AI Agents
+
+- [docs/ai-overview.md](ai-overview.md): Architecture, IC concepts, Internet Identity principal derivation, alternative origins, the handoff flow, why the dapp CLI exists, icp-cli (NOT dfx)
+- [docs/ai-backend-reference.md](ai-backend-reference.md): Rust crates API — my-canister-frontend, my-canister-dashboard, required Candid interface (5 mandatory endpoints), minimal backend template, stable memory persistence pattern
+- [docs/ai-frontend-reference.md](ai-frontend-reference.md): JS packages API — @web3nl/vite-plugin-canister-dapp (environment detection, dev proxies), @web3nl/my-canister-dashboard (cycles check, auth check), Vite config templates, authentication patterns
+- [docs/ai-cli-and-testing.md](ai-cli-and-testing.md): dapp CLI (deploy with II auth, test), full 13-step deploy flow, acceptance test suite (what it validates), local development setup
+- [docs/ai-project-setup.md](ai-project-setup.md): Scaffolding a new dapp from scratch — icp.yaml, Cargo.toml, Candid file, build.rs, package.json, vite.config.ts, complete checklist
+
+## Key Constraints for AI Agents
+
+- This project uses `icp-cli` (`icp` command), NOT `dfx`. Do not generate dfx commands or dfx.json files.
+- Local network requires `nns: true` and `ii: true` in icp.yaml (for II authentication and cycles testing).
+- Every dapp MUST implement 5 mandatory Candid endpoints: `http_request`, `wasm_status`, `manage_ii_principal`, `manage_alternative_origins`, `manage_top_up_rule`.
+- Internet Identity derives a DIFFERENT principal for each frontend origin (domain). This is the core challenge — see ai-overview.md for the derivationOrigin solution.
+- The `dapp` CLI is a complement to icp-cli, not a replacement. It handles the II ownership handoff flow that icp-cli doesn't know about.
+- This SDK uses `@icp-sdk/*` npm packages, NOT `@dfinity/*`. Vite alias mappings from `@dfinity/*` to `@icp-sdk/*` are required.
+
+## Examples
+
+- [examples/my-hello-world/](../examples/my-hello-world/) — Minimal dapp: Rust backend + Svelte frontend
+- [examples/my-notepad/](../examples/my-notepad/) — CRUD dapp: Rust backend + React frontend with stable memory persistence
+
+## Per-Package READMEs
+
+- [packages-rs/my-canister-frontend/README.md](../packages-rs/my-canister-frontend/README.md) — Certified HTTP asset serving
+- [packages-rs/my-canister-dashboard/README.md](../packages-rs/my-canister-dashboard/README.md) — Embedded dashboard + management endpoints
+- [packages-rs/my-canister-dapp-cli/README.md](../packages-rs/my-canister-dapp-cli/README.md) — dapp CLI tool
+- [packages-rs/my-canister-dapp-test/README.md](../packages-rs/my-canister-dapp-test/README.md) — Acceptance test suite
+- [packages-js/my-canister-dashboard-js/README.md](../packages-js/my-canister-dashboard-js/README.md) — JS dashboard utilities
+- [packages-js/vite-plugin-canister-dapp/README.md](../packages-js/vite-plugin-canister-dapp/README.md) — Vite plugin
+
+## External IC Documentation
+
+- Internet Identity Specification: https://docs.internetcomputer.org/references/ii-spec
+- Alternative Frontend Origins: https://internetcomputer.org/docs/building-apps/authentication/alternative-origins
+- HTTP Gateway Protocol Spec: https://internetcomputer.org/docs/references/http-gateway-protocol-spec
+- HTTP Certification: https://internetcomputer.org/docs/building-apps/network-features/using-http/http-certification/custom-http-canisters
+- icp-cli: https://github.com/dfinity/icp-cli
+- Migrating from dfx: https://dfinity.github.io/icp-cli/0.1/migration/from-dfx/
+- PocketIC (local testing): https://internetcomputer.org/docs/building-apps/test/pocket-ic
+- Candid Reference: https://internetcomputer.org/docs/references/candid-ref
+- Cycles & Top-up: https://internetcomputer.org/docs/building-apps/canister-management/topping-up
+- IC Developer Docs: https://docs.internetcomputer.org/
