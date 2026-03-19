@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <!-- Background -->
+  <rect width="32" height="32" rx="7" fill="#1a1a2e"/>
+  <!-- Canister shadow -->
+  <ellipse cx="16.5" cy="24.5" rx="7.5" ry="2.5" fill="#000" opacity="0.2"/>
+  <!-- Canister body -->
+  <path d="M8 10 v12 a8 3 0 0 0 16 0 v-12 z" fill="#888"/>
+  <!-- Canister body left highlight -->
+  <path d="M8 10 v12 a8 3 0 0 0 4 2.6 v-14.6 a8 3 0 0 0 -4 0 z" fill="#999" opacity="0.5"/>
+  <!-- Canister bottom rim -->
+  <ellipse cx="16" cy="22" rx="8" ry="3" fill="#777"/>
+  <!-- Canister top face -->
+  <ellipse cx="16" cy="10" rx="8" ry="3" fill="#aaa"/>
+  <!-- Canister top inner -->
+  <ellipse cx="16" cy="10" rx="5.5" ry="2" fill="#999"/>
+  <!-- Top rim stroke -->
+  <ellipse cx="16" cy="10" rx="8" ry="3" fill="none" stroke="#bbb" stroke-width="0.5" opacity="0.6"/>
+  <!-- Shield shape on canister front -->
+  <path d="M16 13.5 l-3.2 0.8 v3.2 c0 2.2 1.4 3.8 3.2 4.5 c1.8 -0.7 3.2 -2.3 3.2 -4.5 v-3.2 z" fill="#d0d0d0"/>
+  <!-- Shield inner -->
+  <path d="M16 14.5 l-2.2 0.6 v2.4 c0 1.6 1 2.8 2.2 3.3 c1.2 -0.5 2.2 -1.7 2.2 -3.3 v-2.4 z" fill="#1a1a2e"/>
+  <!-- Lock shackle -->
+  <path d="M14.8 17.2 v-0.8 a1.2 1.2 0 0 1 2.4 0 v0.8" fill="none" stroke="#d0d0d0" stroke-width="1" stroke-linecap="round"/>
+  <!-- Lock body -->
+  <rect x="14.2" y="17" width="3.6" height="2.8" rx="0.5" fill="#d0d0d0"/>
+  <!-- Keyhole -->
+  <circle cx="16" cy="18.1" r="0.55" fill="#1a1a2e"/>
+  <rect x="15.75" y="18.1" width="0.5" height="0.9" rx="0.2" fill="#1a1a2e"/>
+</svg>
