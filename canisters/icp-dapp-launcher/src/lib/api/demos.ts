@@ -12,6 +12,7 @@ import type {
   AccessCode,
   PoolStatus,
   DemosConfig,
+  SelfStatus,
 } from '$lib/declarations/demos/demos.did.d.ts';
 import type { Principal } from '@icp-sdk/core/principal';
 
@@ -21,6 +22,7 @@ export type {
   PoolStatus,
   DemosConfig,
   GenerateCodesResult,
+  SelfStatus,
 };
 
 export class DemosApi {
@@ -97,5 +99,9 @@ export class DemosApi {
 
   async configure(config: DemosConfig): Promise<GenericResult> {
     return await this.actor.configure(config);
+  }
+
+  async getSelfStatus(): Promise<SelfStatus> {
+    return await this.actor.get_self_status();
   }
 }

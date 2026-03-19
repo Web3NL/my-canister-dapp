@@ -4,7 +4,7 @@ use crate::ic_management;
 use crate::storage::{self, GenericResult};
 
 /// Create a single empty canister and add it to the pool.
-async fn create_pool_canister() -> Result<Principal, String> {
+pub async fn create_pool_canister() -> Result<Principal, String> {
     let (demos_self, cycles) = storage::with_state(|s| {
         let config = s.config.as_ref().ok_or("Demos canister not configured")?;
         Ok::<_, String>((

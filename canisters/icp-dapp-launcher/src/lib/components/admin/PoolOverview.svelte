@@ -1,9 +1,12 @@
 <script lang="ts">
   import { Card, SkeletonText } from '@dfinity/gix-components';
-  import type { PoolStatus, DemosConfig } from '$lib/api/demos';
+  import type { PoolStatus, DemosConfig, SelfStatus } from '$lib/api/demos';
 
   export let poolStatus: PoolStatus | null;
   export let config: DemosConfig | undefined;
+  export let selfStatus: SelfStatus | null = null;
+
+  const LOW_CYCLES_THRESHOLD = 5_000_000_000_000n; // 5T
 
   function formatDuration(ns: bigint): string {
     const hours = Number(ns / 3_600_000_000_000n);
@@ -25,6 +28,18 @@
 
 <section>
   <h2>Pool Overview</h2>
+  {#if selfStatus}
+    <Card>
+      <div class="cycles-banner" class:low-cycles={selfStatus.cycles_balance < LOW_CYCLES_THRESHOLD}>
+        <span class="cycles-label">Demos Canister Cycles</span>
+        <span class="cycles-value">{formatCycles(selfStatus.cycles_balance)}</span>
+        {#if selfStatus.cycles_balance < LOW_CYCLES_THRESHOLD}
+          <span class="cycles-warning">Low balance — top up the demos canister</span>
+        {/if}
+      </div>
+    </Card>
+  {/if}
+
   {#if poolStatus}
     <div class="stats-grid">
       <Card>
@@ -64,6 +79,33 @@
 </section>
 
 <style>
+  .cycles-banner {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: var(--padding-1x) 0;
+  }
+
+  .cycles-label {
+    font-size: var(--font-size-small);
+    color: var(--description-color);
+  }
+
+  .cycles-value {
+    font-size: 2rem;
+    font-weight: var(--font-weight-bold);
+  }
+
+  .low-cycles .cycles-value {
+    color: var(--negative-color, #ea6c6c);
+  }
+
+  .cycles-warning {
+    font-size: var(--font-size-small);
+    color: var(--negative-color, #ea6c6c);
+    margin-top: var(--padding-0_5x);
+  }
+
   .stats-grid {
     display: grid;
     grid-template-columns: repeat(2, 1fr);
