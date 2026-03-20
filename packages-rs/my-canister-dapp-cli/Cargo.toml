@@ -16,7 +16,6 @@ name = "dapp"
 path = "src/main.rs"
 
 [dependencies]
-my-canister-dapp-test = { workspace = true }
 clap = { workspace = true }
 anyhow = { workspace = true }
 tiny_http = { workspace = true }
@@ -24,6 +23,8 @@ serde = { workspace = true }
 serde_json = { workspace = true }
 flate2 = { workspace = true }
 tempfile = { workspace = true }
+
+my-canister-dapp-test = { path = "../my-canister-dapp-test", version = "1.0" }
 
 [package.metadata.release]
 pre-release-replacements = [

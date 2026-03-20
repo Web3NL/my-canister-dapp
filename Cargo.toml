@@ -40,4 +40,3 @@ flate2 = "1.1"
 tempfile = "3"
 anyhow = "1"
 tiny_http = "0.12"
-my-canister-dapp-test = { path = "packages-rs/my-canister-dapp-test", version = "1.0.0" }

@@ -19,3 +19,8 @@ pub use dashboard::{
     ALTERNATIVE_ORIGINS_PATH, CANISTER_DASHBOARD_CSS_PATH, CANISTER_DASHBOARD_HTML_PATH,
     CANISTER_DASHBOARD_JS_PATH,
 };
+
+/// SHA-256 hashes of dashboard frontend assets for each published version.
+/// Used by the acceptance test library to verify deployed canisters serve
+/// unmodified dashboard assets.
+pub const ASSET_HASHES_JSON: &str = include_str!("../asset-hashes.json");
