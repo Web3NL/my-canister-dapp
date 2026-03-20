@@ -108,7 +108,7 @@ pub fn deploy(args: DeployArgs) -> Result<()> {
     let auth_result = auth::run_auth_flow(&ii_provider, &canister_origin, &icp, &canister_id)
         .context(
             "Failed to authenticate with Internet Identity.\n\
-             Make sure the local network is running and you complete the auth flow in the browser."
+             Make sure the local network is running and you complete the auth flow in the browser.",
         )?;
     let principal = &auth_result.principal;
     println!("Derived II principal: {principal}");
