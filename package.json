@@ -62,7 +62,7 @@
     "dev:launcher": "npm run dev --workspace=icp-dapp-launcher",
     "fix": "npm run lint:fix --workspaces && npm run format:fix --workspaces && npm run typecheck --workspaces",
     "release:publish": "changeset publish && git push && git push --tags",
-    "release:version": "changeset version",
+    "release:version": "GITHUB_TOKEN=${GITHUB_TOKEN:-$(gh auth token)} changeset version",
     "test:e2e": "./scripts/run-test-e2e.sh",
     "test:setup-ii": "npm run build:setup-ii && playwright test --project=setup-ii"
   },
