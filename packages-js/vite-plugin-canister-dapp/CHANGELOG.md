@@ -1,5 +1,11 @@
 # @web3nl/vite-plugin-canister-dapp
 
+## 1.0.1
+
+### Patch Changes
+
+- [#265](https://github.com/Web3NL/my-canister-dapp/pull/265) [`e193ffb`](https://github.com/Web3NL/my-canister-dapp/commit/e193ffb5b58c688fa78145b9c9f5ee97d1fd4fd2) Thanks [@Web3NL](https://github.com/Web3NL)! - Update default production Internet Identity provider URL from `https://identity.internetcomputer.org` to `https://id.ai`
+
 ## 1.0.0
 
 ### Major Changes
