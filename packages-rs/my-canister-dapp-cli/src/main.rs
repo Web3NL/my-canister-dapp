@@ -14,7 +14,7 @@ struct Cli {
 
 #[derive(Subcommand)]
 enum Command {
-    /// Deploy a canister dapp to the Internet Computer
+    /// Deploy a canister dapp locally (requires a running local network)
     Deploy(commands::DeployArgs),
     /// Run acceptance tests on a wasm
     Test(commands::TestArgs),

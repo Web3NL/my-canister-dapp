@@ -13,16 +13,12 @@ use crate::icp::IcpCli;
 /// Default II provider for local development (PocketIC with NNS).
 const LOCAL_II_PROVIDER: &str = "http://rdmx6-jaaaa-aaaaa-aaadq-cai.localhost:8080";
 
-/// Default II provider for mainnet.
-const MAINNET_II_PROVIDER: &str = "https://identity.internetcomputer.org";
-
-/// Default local network host.
+/// Local network host.
 const LOCAL_HOST: &str = "http://localhost:8080";
 
-/// Default mainnet host.
-const MAINNET_HOST: &str = "https://icp0.io";
-
 /// Arguments for the `dapp deploy` command.
+///
+/// Deploy currently supports **local deployment only** (requires a running local network on port 8080).
 #[derive(clap::Args)]
 pub struct DeployArgs {
     /// Canister name (must match a canister defined in icp.yaml).
@@ -34,10 +30,6 @@ pub struct DeployArgs {
     #[arg(long)]
     pub wasm: Option<String>,
 
-    /// Environment: "local" or "ic"
-    #[arg(short = 'e', long, default_value = "local")]
-    pub environment: String,
-
     /// icp-cli identity to use (defaults to the currently selected identity)
     #[arg(long)]
     pub identity: Option<String>,
@@ -46,11 +38,7 @@ pub struct DeployArgs {
     #[arg(long, default_value = "1000000000000")]
     pub cycles: String,
 
-    /// Skip Internet Identity authentication (deploy only, no owner setup)
-    #[arg(long)]
-    pub skip_auth: bool,
-
-    /// Internet Identity provider URL (auto-detected from environment)
+    /// Internet Identity provider URL (defaults to local II canister)
     #[arg(long)]
     pub ii_provider: Option<String>,
 }
@@ -61,10 +49,8 @@ pub fn deploy(args: DeployArgs) -> Result<()> {
     let icp_version = IcpCli::check_installed()?;
     println!("Using icp-cli: {icp_version}");
 
-    let is_mainnet = args.environment == "ic";
-
     let icp = IcpCli {
-        environment: args.environment.clone(),
+        environment: "local".to_string(),
         identity: args.identity.clone(),
     };
 
@@ -109,21 +95,10 @@ pub fn deploy(args: DeployArgs) -> Result<()> {
     println!("Wasm installed.");
 
     // Step 7: II authentication
-    if args.skip_auth {
-        println!("\nSkipping II authentication (--skip-auth).");
-        print_summary(&canister_id, is_mainnet, &args.environment, None);
-        return Ok(());
-    }
-
-    let host = if is_mainnet { MAINNET_HOST } else { LOCAL_HOST };
-    let ii_provider = args.ii_provider.unwrap_or_else(|| {
-        if is_mainnet {
-            MAINNET_II_PROVIDER
-        } else {
-            LOCAL_II_PROVIDER
-        }
-        .to_string()
-    });
+    let host = LOCAL_HOST;
+    let ii_provider = args
+        .ii_provider
+        .unwrap_or_else(|| LOCAL_II_PROVIDER.to_string());
 
     let canister_origin = create_canister_origin(&canister_id, host);
     println!("\nCanister origin: {canister_origin}");
@@ -133,8 +108,7 @@ pub fn deploy(args: DeployArgs) -> Result<()> {
     let auth_result = auth::run_auth_flow(&ii_provider, &canister_origin, &icp, &canister_id)
         .context(
             "Failed to authenticate with Internet Identity.\n\
-             Make sure the II provider is reachable and you complete the auth flow in the browser.\n\
-             To skip authentication, use: dapp deploy <CANISTER> --skip-auth"
+             Make sure the local network is running and you complete the auth flow in the browser."
         )?;
     let principal = &auth_result.principal;
     println!("Derived II principal: {principal}");
@@ -157,7 +131,7 @@ pub fn deploy(args: DeployArgs) -> Result<()> {
     println!("Setting controllers...");
     icp.canister_update_settings(&canister_id, &[&canister_id, principal])?;
 
-    print_summary(&canister_id, is_mainnet, &args.environment, Some(principal));
+    print_summary(&canister_id, principal);
 
     Ok(())
 }
@@ -254,9 +228,7 @@ struct DeploymentRecord {
     canister_id: String,
     frontend: String,
     dashboard: String,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    owner: Option<String>,
-    environment: String,
+    owner: String,
     timestamp: String,
 }
 
@@ -295,12 +267,8 @@ fn create_canister_origin(canister_id: &str, host: &str) -> String {
     }
 }
 
-fn print_summary(canister_id: &str, is_mainnet: bool, environment: &str, principal: Option<&str>) {
-    let base = if is_mainnet {
-        format!("https://{canister_id}.icp0.io")
-    } else {
-        format!("http://{canister_id}.localhost:8080")
-    };
+fn print_summary(canister_id: &str, principal: &str) {
+    let base = format!("http://{canister_id}.localhost:8080");
 
     let frontend = base.to_string();
     let dashboard = format!("{base}/canister-dashboard");
@@ -309,9 +277,7 @@ fn print_summary(canister_id: &str, is_mainnet: bool, environment: &str, princip
     println!("  Canister ID: {canister_id}");
     println!("  Frontend:    {frontend}");
     println!("  Dashboard:   {dashboard}");
-    if let Some(p) = principal {
-        println!("  Owner:       {p}");
-    }
+    println!("  Owner:       {principal}");
 
     let now = std::time::SystemTime::now()
         .duration_since(std::time::UNIX_EPOCH)
@@ -322,8 +288,7 @@ fn print_summary(canister_id: &str, is_mainnet: bool, environment: &str, princip
         canister_id: canister_id.to_string(),
         frontend,
         dashboard,
-        owner: principal.map(String::from),
-        environment: environment.to_string(),
+        owner: principal.to_string(),
         timestamp: now,
     });
 }
@@ -400,10 +365,8 @@ mod tests {
         DeployArgs {
             canister: canister.map(String::from),
             wasm: wasm.map(String::from),
-            environment: "local".into(),
             identity: None,
             cycles: "1000000000000".into(),
-            skip_auth: false,
             ii_provider: None,
         }
     }

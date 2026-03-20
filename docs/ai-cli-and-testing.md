@@ -34,7 +34,9 @@ This installs the `dapp` binary.
 
 ## `dapp deploy`
 
-Build and deploy a canister dapp to the Internet Computer with optional II authentication and ownership transfer.
+Build and deploy a canister dapp locally with II authentication and ownership transfer.
+
+> **Note:** Deploy currently supports **local deployment only** (requires a running local network on port 8080).
 
 ### Usage
 
@@ -53,10 +55,9 @@ dapp deploy --wasm path/to/my-dapp.wasm.gz
 |------|---------|-------------|
 | `<canister>` (positional) | — | Canister name from `icp.yaml` (conflicts with `--wasm`) |
 | `--wasm <PATH>` | — | Pre-built `.wasm` or `.wasm.gz` file (conflicts with positional arg) |
-| `-e, --environment <ENV>` | `local` | Environment for deployment |
 | `--identity <IDENTITY>` | current | icp-cli identity to use |
 | `--cycles <CYCLES>` | `1000000000000` (1T) | Cycles for canister creation |
-| `--ii-provider <URL>` | auto-detected | II provider URL override |
+| `--ii-provider <URL>` | local II canister | II provider URL override |
 
 ### Two Modes
 
@@ -141,7 +142,7 @@ Step 13: Update controllers (deployer relinquishes control)
 Each deploy appends a JSON line to `.dapp/deployments.jsonl`:
 
 ```json
-{"canister_id":"bkyz2-fmaaa-aaaaa-qaaaq-cai","frontend":"http://bkyz2-fmaaa-aaaaa-qaaaq-cai.localhost:8080","dashboard":"http://bkyz2-fmaaa-aaaaa-qaaaq-cai.localhost:8080/canister-dashboard","owner":"2vxsx-fae","environment":"local","timestamp":"1710864000"}
+{"canister_id":"bkyz2-fmaaa-aaaaa-qaaaq-cai","frontend":"http://bkyz2-fmaaa-aaaaa-qaaaq-cai.localhost:8080","dashboard":"http://bkyz2-fmaaa-aaaaa-qaaaq-cai.localhost:8080/canister-dashboard","owner":"2vxsx-fae","timestamp":"1710864000"}
 ```
 
 ---
@@ -165,13 +166,11 @@ dapp test my-dapp
 | Flag | Default | Description |
 |------|---------|-------------|
 | `<target>` (positional, required) | — | Path to `.wasm`/`.wasm.gz` file OR canister name in `icp.yaml` |
-| `-e, --environment <ENV>` | `local` | Environment (for `icp build` when target is a canister name) |
-| `--identity <IDENTITY>` | current | icp-cli identity to use (for `icp build`) |
 
 ### How It Works
 
 1. If target is a file path → read wasm bytes directly
-2. If target is a canister name → run `icp build <name>`, read artifact from `.icp/cache/artifacts/<name>`
+2. If target is a canister name → run `icp build <name>` (using local env and default identity), read artifact from `.icp/cache/artifacts/<name>`
 3. Call `my_canister_dapp_test::run_acceptance_suite(&wasm_bytes, &label)`
 4. Tests run in-process using [PocketIC](https://internetcomputer.org/docs/building-apps/test/pocket-ic) (no running network needed)
 5. Exit code 0 = all tests pass, exit code 1 = failure
