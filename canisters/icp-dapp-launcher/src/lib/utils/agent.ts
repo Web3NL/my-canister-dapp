@@ -8,11 +8,9 @@ export async function createHttpAgent(): Promise<HttpAgent> {
   const agent = await HttpAgent.create({
     identity,
     host: HOST,
+    fetch: fetch.bind(globalThis),
+    shouldFetchRootKey: !PROD,
   });
-
-  if (!PROD) {
-    await agent.fetchRootKey();
-  }
 
   return agent;
 }

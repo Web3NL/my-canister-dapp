@@ -18,11 +18,11 @@ export class WasmRegistryApi {
   }
 
   static async create(): Promise<WasmRegistryApi> {
-    const agent = await HttpAgent.create({ host: HOST });
-
-    if (!PROD) {
-      await agent.fetchRootKey();
-    }
+    const agent = await HttpAgent.create({
+      host: HOST,
+      fetch: fetch.bind(globalThis),
+      shouldFetchRootKey: !PROD,
+    });
 
     const actor = Actor.createActor<WasmRegistryService>(idlFactory, {
       agent,

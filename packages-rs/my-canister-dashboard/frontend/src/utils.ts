@@ -38,11 +38,9 @@ export async function createHttpAgent(): Promise<HttpAgent> {
     const agent = await HttpAgent.create({
       identity,
       host: config.host,
+      fetch: fetch.bind(globalThis),
+      shouldFetchRootKey: isDevMode(),
     });
-
-    if (isDevMode()) {
-      await agent.fetchRootKey();
-    }
 
     return agent;
   } catch (error) {

@@ -274,14 +274,14 @@ await new Promise<void>((resolve, reject) => {
 
 // 3. Create agent with the authenticated identity
 const identity = authClient.getIdentity();
-const agent = new HttpAgent({ identity, host: config.host });
+const agent = await HttpAgent.create({
+  identity,
+  host: config.host,
+  fetch: fetch.bind(globalThis),
+  shouldFetchRootKey: isDevMode(),
+});
 
-// 4. CRITICAL: Fetch root key in dev mode only (never in production!)
-if (isDevMode()) {
-  await agent.fetchRootKey();
-}
-
-// 5. Check authorization (verify caller is the canister's II principal)
+// 4. Check authorization (verify caller is the canister's II principal)
 const canisterId = inferCanisterId();
 const dashboard = MyCanisterDashboard.create(agent, canisterId);
 const isAuthorized = await dashboard.isAuthenticated();
@@ -292,7 +292,7 @@ if (!isAuthorized) {
   throw new Error('Not authorized');
 }
 
-// 6. Use the agent to call your canister
+// 5. Use the agent to call your canister
 // Use the agent to call your canister methods
 ```
 

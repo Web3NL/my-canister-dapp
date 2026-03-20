@@ -47,10 +47,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const agent = await HttpAgent.create({
       identity,
       host: env.host,
+      fetch: fetch.bind(globalThis),
+      shouldFetchRootKey: isDevMode(),
     });
-    if (isDevMode()) {
-      await agent.fetchRootKey();
-    }
     return { agent, identity };
   }, []);
 

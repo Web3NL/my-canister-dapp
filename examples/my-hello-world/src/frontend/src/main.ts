@@ -50,10 +50,12 @@ function hideLoading(): void {
 async function setupAgent(): Promise<void> {
   const identity = authClient.getIdentity();
   const config = inferEnvironment();
-  agent = new HttpAgent({ identity, host: config.host });
-  if (isDevMode()) {
-    await agent.fetchRootKey();
-  }
+  agent = await HttpAgent.create({
+    identity,
+    host: config.host,
+    fetch: fetch.bind(globalThis),
+    shouldFetchRootKey: isDevMode(),
+  });
 }
 
 async function checkAuthorization(): Promise<boolean> {
