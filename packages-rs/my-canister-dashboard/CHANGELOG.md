@@ -2,6 +2,12 @@
 
 ## [Unreleased]
 
+## [1.1.1] - 2026-03-20
+
+### Changed
+
+- Dashboard frontend: update default production Internet Identity provider URL from `identity.internetcomputer.org` to `id.ai` (via `@web3nl/vite-plugin-canister-dapp` update)
+
 ## [1.1.0] - 2026-03-20
 
 ### Added

@@ -5,7 +5,7 @@ export * from './canisterIds';
 const MAINNET_HOST = 'https://icp0.io';
 const LOCAL_HOST = 'http://localhost:8080';
 
-const MAINNET_IDENTITY_PROVIDER = 'https://identity.internetcomputer.org';
+const MAINNET_IDENTITY_PROVIDER = 'https://id.ai';
 const LOCAL_IDENTITY_PROVIDER =
   (import.meta.env.VITE_IDENTITY_PROVIDER as string) ||
   'http://rdmx6-jaaaa-aaaaa-aaadq-cai.localhost:8080';

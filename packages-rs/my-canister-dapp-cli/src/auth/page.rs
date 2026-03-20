@@ -93,7 +93,7 @@ mod tests {
 
     fn sample_page() -> String {
         generate_auth_page(
-            "https://identity.internetcomputer.org",
+            "https://id.ai",
             "https://abc123.icp0.io",
             "http://localhost:12345/callback",
         )
@@ -132,9 +132,7 @@ mod tests {
     #[test]
     fn page_config_has_identity_provider() {
         // serde_json outputs JSON keys with quotes
-        assert!(
-            sample_page().contains(r#""identityProvider":"https://identity.internetcomputer.org""#)
-        );
+        assert!(sample_page().contains(r#""identityProvider":"https://id.ai""#));
     }
 
     #[test]

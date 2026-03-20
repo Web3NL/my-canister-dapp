@@ -91,6 +91,7 @@ npm run check                 # Lint + format + typecheck all JS workspaces
 
 ## Workflow
 
+- **Branch first** — create a feature branch before starting any work; never commit directly to main
 - **PRs by default** — open a pull request for new features and patches; push directly to main only when explicitly asked
 - **Validate before push** — run `./validate-and-test-all.sh` before pushing (use `--skip-bootstrap` to reuse a running local network, `--skip-e2e` to skip browser tests when only backend changed)
 - **Changesets** for npm versioning — `npm run changeset` before PRs with publishable changes

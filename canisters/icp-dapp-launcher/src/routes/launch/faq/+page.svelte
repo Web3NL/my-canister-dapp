@@ -18,10 +18,8 @@
           target="_blank"
           rel="noopener noreferrer">Internet Computer</a
         >. It is created by only using a browser and
-        <a
-          href="https://identity.internetcomputer.org"
-          target="_blank"
-          rel="noopener noreferrer">Internet Identity</a
+        <a href="https://id.ai" target="_blank" rel="noopener noreferrer"
+          >Internet Identity</a
         >
         and is only controlled by the user.
       </p>
@@ -44,10 +42,8 @@
         For starters, it's a publicly governed blockchain with a 'liquid
         democracy'. Second, the security and authentication model of the IC
         together with
-        <a
-          href="https://identity.internetcomputer.org"
-          target="_blank"
-          rel="noopener noreferrer">Internet Identity</a
+        <a href="https://id.ai" target="_blank" rel="noopener noreferrer"
+          >Internet Identity</a
         >
         are ahead of legacy Web2 technology by default, giving users more control
         over their data and on-chain assets. For example, the
@@ -85,7 +81,7 @@
       <p>
         A User-owned dapp is a single canister that functions as both a frontend
         server and a backend. It is controlled by the user's <a
-          href="https://identity.internetcomputer.org"
+          href="https://id.ai"
           target="_blank"
           rel="noopener noreferrer">Internet Identity</a
         >
@@ -128,7 +124,7 @@
       <p>
         The domain icp0.io remains a central point of failure, which is inherent
         in the security model of <a
-          href="https://identity.internetcomputer.org"
+          href="https://id.ai"
           target="_blank"
           rel="noopener noreferrer">Internet Identity</a
         >. In practice, Dapps in development rely on the developer to be

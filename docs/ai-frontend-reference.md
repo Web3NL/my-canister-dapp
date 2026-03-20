@@ -10,6 +10,20 @@ Vite plugin that configures environment detection (dev vs. production), dev serv
 
 > Latest version: [npmjs.com/package/@web3nl/vite-plugin-canister-dapp](https://www.npmjs.com/package/@web3nl/vite-plugin-canister-dapp)
 
+### Why This Plugin Is Essential
+
+Every dapp frontend needs three things at runtime that differ between local and production:
+
+| Need | Local | Production |
+|------|-------|------------|
+| IC host URL | `http://localhost:8080` | `https://icp-api.io` |
+| II provider URL | `http://rdmx6-...localhost:8080` | `https://id.ai` |
+| Root key fetch | Required (`shouldFetchRootKey: true`) | Forbidden |
+
+The plugin solves this by embedding **both** configs into the build and detecting the environment from the URL at runtime. This enables the SDK's **single-build architecture** — one `icp build` produces a wasm that works on any network without rebuilding.
+
+Without this plugin, a dapp would need either separate builds per environment or hardcoded values that break when deployed elsewhere. Since IC canisters serve their own frontend (the JS is embedded in the wasm), rebuilding means recompiling the entire canister — the plugin eliminates that need entirely.
+
 ### Plugin Setup (vite.config.ts)
 
 ```typescript
@@ -73,7 +87,7 @@ interface CanisterDappEnvironmentPluginConfig {
 | Setting | Development | Production |
 |---------|------------|------------|
 | `host` | `http://localhost:8080` | `https://icp-api.io` |
-| `identityProvider` | `http://rdmx6-jaaaa-aaaaa-aaadq-cai.localhost:8080` | `https://identity.internetcomputer.org` |
+| `identityProvider` | `http://rdmx6-jaaaa-aaaaa-aaadq-cai.localhost:8080` | `https://id.ai` |
 
 Override `identityProvider` in dev with the `VITE_IDENTITY_PROVIDER` env var.
 
