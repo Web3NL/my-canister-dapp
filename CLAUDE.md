@@ -48,7 +48,7 @@ The core challenge: Internet Identity derives a *different principal* for each d
 
 ### CLI `dapp deploy` Flow
 
-The `dapp` CLI deploys dapps and transfers ownership to the developer's II principal. Each deploy creates a **fresh detached canister** (new ID every time, no upgrades).
+The `dapp` CLI deploys dapps **locally** and transfers ownership to the developer's II principal. Each deploy creates a **fresh detached canister** (new ID every time, no upgrades). Deploy currently supports local deployment only.
 
 **Sequence**:
 1. Build canister wasm (or use `--wasm` to provide one)

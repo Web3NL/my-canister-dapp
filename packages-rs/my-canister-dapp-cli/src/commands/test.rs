@@ -10,14 +10,6 @@ use crate::icp::IcpCli;
 pub struct TestArgs {
     /// Canister name (builds via icp.yaml) or path to a .wasm/.wasm.gz file
     pub target: String,
-
-    /// Environment: "local" or "ic" (used for icp build)
-    #[arg(short = 'e', long, default_value = "local")]
-    pub environment: String,
-
-    /// icp-cli identity to use
-    #[arg(long)]
-    pub identity: Option<String>,
 }
 
 /// Run the my-canister-dapp-test acceptance suite.
@@ -60,8 +52,8 @@ fn resolve_wasm(args: &TestArgs) -> Result<(Vec<u8>, String)> {
 
     // Otherwise treat as canister name — build via icp-cli
     let icp = IcpCli {
-        environment: args.environment.clone(),
-        identity: args.identity.clone(),
+        environment: "local".to_string(),
+        identity: None,
     };
 
     println!("Building '{target}'...");
