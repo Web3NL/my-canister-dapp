@@ -1,7 +1,7 @@
 {
   "name": "canister-dashboard-frontend",
   "description": "Dashboard frontend assets for user-owned dapps on the Internet Computer",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "dependencies": {
     "@web3nl/my-canister-dashboard": "0.8.0"
   },

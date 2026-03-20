@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [1.0.1] - 2026-03-20
+
 ### Fixed
 
 - Dashboard frontend: bind `fetch` to `globalThis` when creating `HttpAgent` to prevent `TypeError: Illegal invocation` in browsers
