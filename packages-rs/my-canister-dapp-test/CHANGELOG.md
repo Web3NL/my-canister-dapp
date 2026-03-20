@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [1.0.1] - 2026-03-20
+
 ### Changed
 
 - Asset hashes now read from `my-canister-dashboard` crate instead of a local JSON file — hashes stay in sync automatically
