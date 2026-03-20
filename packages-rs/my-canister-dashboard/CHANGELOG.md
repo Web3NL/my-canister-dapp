@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [1.1.0] - 2026-03-20
+
 ### Added
 
 - Export `ASSET_HASHES_JSON` constant — SHA-256 hashes of dashboard frontend assets for all published versions, used by the acceptance test library
