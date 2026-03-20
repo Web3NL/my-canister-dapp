@@ -21,7 +21,7 @@ pocket-ic = { workspace = true }
 serde_json = { workspace = true }
 sha2 = { workspace = true }
 
-my-canister-dashboard = { path = "../my-canister-dashboard", version = "1.0" }
+my-canister-dashboard = { path = "../my-canister-dashboard", version = "1" }
 
 [package.metadata.release]
 pre-release-replacements = [

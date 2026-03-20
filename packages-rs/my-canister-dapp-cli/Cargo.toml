@@ -24,7 +24,7 @@ serde_json = { workspace = true }
 flate2 = { workspace = true }
 tempfile = { workspace = true }
 
-my-canister-dapp-test = { path = "../my-canister-dapp-test", version = "1.0" }
+my-canister-dapp-test = { path = "../my-canister-dapp-test", version = "1" }
 
 [package.metadata.release]
 pre-release-replacements = [
