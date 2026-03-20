@@ -76,7 +76,7 @@ interface CanisterDappEnvironmentPluginConfig {
     };
     production?: {
       host: string; // Default: 'https://icp-api.io'
-      identityProvider: string; // Default: 'https://identity.internetcomputer.org'
+      identityProvider: string; // Default: 'https://id.ai'
     };
   };
 
@@ -160,16 +160,23 @@ Works in these scenarios:
 
 ## How It Works
 
-1. **Build time**: The plugin injects both dev and prod configs as global constants
-2. **Runtime**: `inferEnvironment()` checks the URL origin to select the right config
-3. **Canister ID**: `inferCanisterId()` extracts from URL or uses the configured fallback
-4. **Proxies**: In dev mode, requests to `/api`, `/canister-dashboard`, etc. are proxied to the IC host
+IC canisters serve their own web frontend — the JavaScript is compiled into the canister wasm. Rebuilding means recompiling the entire canister. This plugin eliminates that need by making a **single build work in all environments**.
+
+1. **Build time**: The plugin injects both dev and prod configs (`host`, `identityProvider`) as global constants into the JS bundle
+2. **Runtime**: `inferEnvironment()` checks the URL origin — `http://` or `localhost` = development, `https://` = production — and returns the matching config
+3. **Canister ID**: `inferCanisterId()` extracts the canister ID from the URL subdomain (`<id>.localhost:8080` or `<id>.icp0.io`), falling back to `viteDevCanisterId` when running in a Vite dev server
+4. **Root key**: `isDevMode()` returns `true` for local environments where `agent.fetchRootKey()` is required (forbidden in production)
+5. **Proxies**: In Vite dev server mode, `/api`, `/canister-dashboard`, and `/.well-known/ii-alternative-origins` are proxied to the IC host
 
 This enables a single build artifact to work seamlessly across:
 
-- Local development with Vite dev server
-- Local dfx deployment
-- IC mainnet production
+| Scenario | Host | Canister ID Source |
+|----------|------|--------------------|
+| **Vite dev server** (`localhost:5173`) | `http://localhost:8080` | `viteDevCanisterId` config |
+| **Local network** (`<id>.localhost:8080`) | `http://localhost:8080` | URL subdomain |
+| **IC mainnet** (`<id>.icp0.io`) | `https://icp-api.io` | URL subdomain |
+
+This plugin is part of the [@web3nl/my-canister-dapp](https://github.com/Web3NL/my-canister-dapp) SDK for building user-owned dapps on the Internet Computer.
 
 ## API Documentation
 

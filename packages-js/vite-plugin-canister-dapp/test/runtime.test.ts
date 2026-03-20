@@ -109,7 +109,7 @@ describe('runtime', () => {
 
       expect(result).toEqual({
         host: 'https://icp-api.io',
-        identityProvider: 'https://identity.internetcomputer.org',
+        identityProvider: 'https://id.ai',
       });
     });
 

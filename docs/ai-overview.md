@@ -7,7 +7,7 @@
 
 This SDK lets developers build **user-owned dapps** on the [Internet Computer](https://internetcomputer.org/) (IC). A dapp is a **single canister** (smart contract) compiled into a **single wasm** that contains both the backend logic and all frontend assets (HTML, JS, CSS). The canister serves its own web frontend over HTTP — no separate hosting or CDN needed.
 
-The key property: **the user owns the canister, not the developer**. The developer builds and publishes the wasm; each user gets their own canister instance with that wasm installed and becomes its sole controller via [Internet Identity](https://identity.internetcomputer.org/).
+The key property: **the user owns the canister, not the developer**. The developer builds and publishes the wasm; each user gets their own canister instance with that wasm installed and becomes its sole controller via [Internet Identity](https://id.ai/).
 
 ### Single-Wasm Architecture
 
@@ -19,6 +19,17 @@ The build process compiles everything into one wasm file:
 4. **`icp build`** compiles the Rust crate to a single `.wasm` file containing backend code + all frontend assets + the dashboard UI
 
 This means `icp build my-dapp` produces one artifact that, when installed in a canister, serves both the web frontend and the canister API.
+
+### Single Build, Multiple Environments
+
+A single `icp build` produces a wasm that works identically on a local network and on IC mainnet — **no separate builds are needed**.
+
+- **Rust backend**: No conditional compilation or environment flags. The canister logic is the same everywhere.
+- **Frontend**: The Vite plugin (`@web3nl/vite-plugin-canister-dapp`) embeds **both** development and production configurations (IC host URL, Internet Identity provider URL) into the JavaScript bundle at build time.
+- **Runtime detection**: When the frontend loads in a browser, the plugin's `inferEnvironment()` helper checks `window.location.origin` to pick the right config — `http://` or `localhost` means development, otherwise production. No rebuild needed.
+- **Canister ID**: The plugin's `inferCanisterId()` extracts the canister ID from the URL hostname (`<id>.localhost:8080` locally, `<id>.icp0.io` on mainnet). This works because IC canisters are served from a subdomain of their host.
+
+This design means developers build once and the same wasm artifact can be installed on any network. The Vite plugin is **essential** for any dapp frontend that needs to work in both environments — it provides the runtime environment detection that makes this possible.
 
 The SDK provides:
 - Certified HTTP asset serving with security headers (`my-canister-frontend`)
@@ -60,7 +71,7 @@ A **principal** is an identity on the IC. Every caller has a principal. Canister
 
 ## Internet Identity and the Principal Derivation Problem
 
-[Internet Identity](https://identity.internetcomputer.org/) (II) is the IC's authentication system. Users create an "anchor" tied to their devices (WebAuthn/passkeys), and II derives a **principal** for each session.
+[Internet Identity](https://id.ai/) (II) is the IC's authentication system. Users create an "anchor" tied to their devices (WebAuthn/passkeys), and II derives a **principal** for each session.
 
 ### The critical fact
 
@@ -83,7 +94,7 @@ The solution to the principal derivation problem is `derivationOrigin` — a par
 
 ```typescript
 await authClient.login({
-  identityProvider: "https://identity.internetcomputer.org",
+  identityProvider: "https://id.ai",
   derivationOrigin: "https://bkyz2-fmaaa-aaaaa-qaaaq-cai.icp0.io",
   // II will derive the principal the user would have at that canister's domain
 });

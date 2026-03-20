@@ -40,7 +40,7 @@ describe('canisterDappEnvironmentConfig', () => {
       expect(viteConfig.define?.__CANISTER_DAPP_PROD_CONFIG__).toBe(
         JSON.stringify({
           host: 'https://icp-api.io',
-          identityProvider: 'https://identity.internetcomputer.org',
+          identityProvider: 'https://id.ai',
         })
       );
     });

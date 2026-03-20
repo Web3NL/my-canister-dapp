@@ -13,7 +13,7 @@ export const DEFAULT_DEV_CONFIG: CanisterDappEnvironmentConfig = {
  */
 export const DEFAULT_PROD_CONFIG: CanisterDappEnvironmentConfig = {
   host: 'https://icp-api.io',
-  identityProvider: 'https://identity.internetcomputer.org',
+  identityProvider: 'https://id.ai',
 };
 
 /**

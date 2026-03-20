@@ -11,7 +11,7 @@ import {
 export interface CanisterDappEnvironmentConfig {
   /** Host URL for the Internet Computer API (e.g., http://localhost:8080 in dev, https://icp-api.io in prod) */
   host: string;
-  /** Internet Identity provider URL (e.g., http://iiCanisterId.localhost:8080 in dev, https://identity.internetcomputer.org in prod) */
+  /** Internet Identity provider URL (e.g., http://iiCanisterId.localhost:8080 in dev, https://id.ai in prod) */
   identityProvider: string;
 }
 
@@ -77,7 +77,7 @@ export interface CanisterDappEnvironmentPluginConfig {
  *
  * Default configurations:
  * - Development: { host: 'http://localhost:8080', identityProvider: 'http://rdmx6-jaaaa-aaaaa-aaadq-cai.localhost:8080' }
- * - Production: { host: 'https://icp-api.io', identityProvider: 'https://identity.internetcomputer.org' }
+ * - Production: { host: 'https://icp-api.io', identityProvider: 'https://id.ai' }
  *
  * Example usage in vite.config.ts:
  * ```typescript
@@ -94,7 +94,7 @@ export interface CanisterDappEnvironmentPluginConfig {
  *         },
  *         production: {
  *           host: 'https://icp-api.io',
- *           identityProvider: 'https://identity.internetcomputer.org'
+ *           identityProvider: 'https://id.ai'
  *         }
  *       }
  *     })
