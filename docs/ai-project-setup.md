@@ -351,7 +351,7 @@ See [ai-frontend-reference.md — Authentication Pattern](ai-frontend-reference.
 9. Write `src/frontend/index.html` and `src/frontend/src/main.ts`
 10. Build: `icp build my-dapp`
 11. Run acceptance tests: `dapp test my-dapp`
-12. Start local network and deploy with auth: `dapp deploy my-dapp`
+12. Start local network: `icp network start` — then deploy with auth: `dapp deploy my-dapp`
 13. Visit `http://<canister-id>.localhost:8080` to see your dapp
 14. Visit `http://<canister-id>.localhost:8080/canister-dashboard` to see the management dashboard
 

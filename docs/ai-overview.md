@@ -254,7 +254,7 @@ The `dapp` CLI fills exactly this gap:
 
 | Task | Tool |
 |------|------|
-| Start/stop local IC network | `icp` |
+| Start/stop local IC network | `icp network start` / `icp network stop` |
 | Build canister wasm | `icp build` (or `dapp deploy` which calls it) |
 | Deploy with II auth + ownership handoff | `dapp deploy` |
 | Call canister methods manually | `icp canister call` |

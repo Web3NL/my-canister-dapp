@@ -279,7 +279,7 @@ Error: Build artifact not found: .icp/cache/artifacts/my-dapp
 ### Authentication timeout
 
 The CLI waits 120 seconds for the II authentication callback. If it times out:
-- Check the local network is running: `icp canister list` (or similar)
+- Check the local network is running: `icp network status`
 - Check II is deployed: visit `http://rdmx6-jaaaa-aaaaa-aaadq-cai.localhost:8080` in a browser
 - Check the II provider is reachable by visiting the URL in a browser
 
@@ -298,10 +298,10 @@ The test suite verifies dashboard asset hashes against known versions. If hashes
 The network is configured in `icp.yaml` (needs `nns: true`, `ii: true`). Start it with icp-cli:
 
 ```bash
-icp start
+icp network start
 ```
 
-This starts PocketIC on port 8080 with NNS and II canisters deployed.
+This starts PocketIC on port 8080 with NNS and II canisters deployed. Use `icp network start -d` to run it in the background.
 
 ### 2. Build your dapp
 
