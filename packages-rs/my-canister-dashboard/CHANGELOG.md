@@ -2,6 +2,11 @@
 
 ## [Unreleased]
 
+### Fixed
+
+- Dashboard frontend: bind `fetch` to `globalThis` when creating `HttpAgent` to prevent `TypeError: Illegal invocation` in browsers
+- Dashboard frontend: use `HttpAgent.create()` with `shouldFetchRootKey` instead of manual `fetchRootKey()` call
+
 ## [1.0.0] - 2026-03-08
 
 ### Added
