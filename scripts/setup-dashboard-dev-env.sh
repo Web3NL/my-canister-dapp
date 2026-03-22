@@ -20,12 +20,13 @@ APP_ID=$(icp canister status icp-dapp-launcher -e local --id-only)
 DAPP_ORIGIN_APP="http://${APP_ID}.localhost:8080"
 
 echo "Running Internet Identity setup..."
-npx playwright install
-DAPP_ORIGIN_VITE="$DAPP_ORIGIN_VITE" \
-  DAPP_ORIGIN_CANISTER="$DAPP_ORIGIN_CANISTER" \
-  DAPP_ORIGIN_NOTEPAD="$DAPP_ORIGIN_NOTEPAD" \
-  DAPP_ORIGIN_APP="$DAPP_ORIGIN_APP" \
-  npm run test:setup-ii
+npx playwright install chromium
+DAPP_BIN="$REPO_ROOT/target/debug/dapp"
+mkdir -p tests/output
+"$DAPP_BIN" derive-ii-principal "$DAPP_ORIGIN_VITE"     > tests/output/derived-ii-principal-vite.txt
+"$DAPP_BIN" derive-ii-principal "$DAPP_ORIGIN_CANISTER" > tests/output/derived-ii-principal-canister.txt
+"$DAPP_BIN" derive-ii-principal "$DAPP_ORIGIN_NOTEPAD"  > tests/output/derived-ii-principal-notepad.txt
+"$DAPP_BIN" derive-ii-principal "$DAPP_ORIGIN_APP"      > tests/output/derived-ii-principal-app.txt
 
 echo "Reading principals..."
 PRINCIPAL_VITE=$(cat tests/output/derived-ii-principal-vite.txt)

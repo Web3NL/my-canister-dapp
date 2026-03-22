@@ -37,11 +37,6 @@ export default defineConfig({
       name: 'icp-dapp-launcher-canister',
       testMatch: /.*icp-dapp-launcher.*\.spec\.ts/,
     },
-    {
-      name: 'setup-ii',
-      testDir: './tests/ii-setup',
-      testMatch: /.*setup-ii.*\.spec\.ts/,
-    },
   ],
   webServer: process.env.DASHBOARD_VITE_SERVER ? {
     command: 'npm run dev:dashboard',

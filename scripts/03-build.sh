@@ -31,4 +31,8 @@ wait $pid_np
 echo "Batch-building all canister wasms..."
 ./scripts/build-all-wasm.sh
 
+# Build the dapp CLI binary (required by setup-dashboard-dev-env.sh)
+echo "Building dapp CLI..."
+cargo build -p my-canister-dapp-cli
+
 echo "Build phase complete!"

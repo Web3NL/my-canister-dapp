@@ -58,7 +58,7 @@ export function loadTestEnv(): void {
   dotenv.config({ path: envPath });
 }
 
-export function getTestEnv(key: string): string {
+function getTestEnv(key: string): string {
   const value = process.env[key];
 
   if (!value) {

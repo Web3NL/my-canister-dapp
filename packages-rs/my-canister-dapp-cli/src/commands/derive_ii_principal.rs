@@ -1,15 +1,12 @@
-use anyhow::{bail, Context, Result};
+use anyhow::{Context, Result, bail};
 use std::{fs, process::Command};
-use tempfile::TempDir;
 
 const LOCAL_II_PROVIDER: &str = "http://rdmx6-jaaaa-aaaaa-aaadq-cai.localhost:8080";
 
 /// The derive-ii-principal browser bundle, embedded at compile time.
 ///
-/// Source: `tests/ii-setup/derive-ii-principal.ts` → built by Vite.
-/// To rebuild: `cd tests/ii-setup && npx vite build`
-/// Then copy `tests/ii-setup/derive-ii-principal.iife.js` to
-/// `packages-rs/my-canister-dapp-cli/playwright-js/derive-ii-principal.iife.js`.
+/// Source: `packages-rs/my-canister-dapp-cli/playwright-js/derive-ii-principal.ts` → built by Vite.
+/// To rebuild: `cd packages-rs/my-canister-dapp-cli/playwright-js && npx vite build`
 const DERIVE_II_BUNDLE: &str = include_str!("../../playwright-js/derive-ii-principal.iife.js");
 
 /// The Node.js Playwright script, embedded at compile time.
@@ -43,13 +40,18 @@ pub fn derive_ii_principal(args: DeriveIiPrincipalArgs) -> Result<()> {
         .ii_provider
         .unwrap_or_else(|| LOCAL_II_PROVIDER.to_string());
 
-    let tmp = TempDir::new().context("Failed to create temp directory")?;
+    let project_root = std::env::current_dir().context("Failed to determine current directory")?;
+
+    // Create temp dir inside the project root so Node.js ESM module resolution
+    // walks up to project_root/node_modules and finds @playwright/test.
+    let tmp = tempfile::Builder::new()
+        .prefix(".dapp-tmp")
+        .tempdir_in(&project_root)
+        .context("Failed to create temp directory in project root")?;
     let bundle_path = tmp.path().join("bundle.js");
     let script_path = tmp.path().join("derive-principal.mjs");
     fs::write(&bundle_path, DERIVE_II_BUNDLE).context("Failed to write browser bundle")?;
     fs::write(&script_path, DERIVE_PRINCIPAL_MJS).context("Failed to write Playwright script")?;
-
-    let project_root = std::env::current_dir().context("Failed to determine current directory")?;
 
     eprintln!("Deriving II principal for: {}", args.canister_origin);
     eprintln!("Identity provider:         {ii_provider}");
@@ -93,13 +95,10 @@ pub fn derive_ii_principal(args: DeriveIiPrincipalArgs) -> Result<()> {
 }
 
 fn check_node_installed() -> Result<()> {
-    Command::new("node")
-        .arg("--version")
-        .output()
-        .context(
-            "`node` is not installed or not in PATH.\n\
+    Command::new("node").arg("--version").output().context(
+        "`node` is not installed or not in PATH.\n\
              Install Node.js from https://nodejs.org/",
-        )?;
+    )?;
     Ok(())
 }
 
