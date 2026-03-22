@@ -2,6 +2,13 @@
 
 ## [Unreleased]
 
+### Added
+
+- `dapp derive-ii-principal <canister-origin>` — non-interactively derives the II principal for a
+  canister origin using headless Playwright. Always creates a fresh identity. Outputs the principal
+  to stdout. Requires Node.js, `@playwright/test`, Playwright Chromium
+  (`npx playwright install chromium`), and a locally running II canister.
+
 ### Changed
 
 - Deploy creates a fresh detached canister each time (no more name collisions on redeploy)
