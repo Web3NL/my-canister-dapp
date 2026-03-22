@@ -53,7 +53,6 @@
     "build:docs:dashboard": "npm run docs:clean --workspace=@web3nl/my-canister-dashboard && npm run docs:build --workspace=@web3nl/my-canister-dashboard",
     "build:docs:vite-plugin": "npm run docs:clean --workspace=@web3nl/vite-plugin-canister-dapp && npm run docs:build --workspace=@web3nl/vite-plugin-canister-dapp",
     "build:launcher": "npm run build --workspace=icp-dapp-launcher",
-    "build:setup-ii": "cd tests/ii-setup && vite build",
     "changeset": "changeset",
     "check": "npm run lint --workspaces && npm run format --workspaces && npm run typecheck --workspaces",
     "deps:check": "syncpack lint && syncpack format --check && knip",
@@ -63,8 +62,7 @@
     "fix": "npm run lint:fix --workspaces && npm run format:fix --workspaces && npm run typecheck --workspaces",
     "release:publish": "changeset publish && git push && git push --tags",
     "release:version": "GITHUB_TOKEN=${GITHUB_TOKEN:-$(gh auth token)} changeset version",
-    "test:e2e": "./scripts/run-test-e2e.sh",
-    "test:setup-ii": "npm run build:setup-ii && playwright test --project=setup-ii"
+    "test:e2e": "./scripts/run-test-e2e.sh"
   },
   "type": "module",
   "workspaces": [

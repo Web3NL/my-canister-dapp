@@ -10,6 +10,10 @@ edition = { workspace = true }
 license = { workspace = true }
 authors = { workspace = true }
 repository = "https://github.com/Web3NL/my-canister-dapp/tree/main/packages-rs/my-canister-dapp-cli"
+exclude = [
+  "playwright-js/derive-ii-principal.ts",
+  "playwright-js/vite.config.ts",
+]
 
 [[bin]]
 name = "dapp"
