@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [1.1.2] - 2026-03-22
+
 ### Fixed
 
 - Backfill asset hashes for versions 1.1.0 and 1.1.1 in `asset-hashes.json`
