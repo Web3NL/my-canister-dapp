@@ -39,8 +39,4 @@ pre-release-replacements = [
   { file = "frontend/package.json", search = "\"version\": \".*\"", replace = "\"version\": \"{{version}}\"", exactly = 1 },
 ]
 
-pre-release-hook = [
-  "../../scripts/prebuild-mcd.sh",
-  "../../scripts/add-asset-hash-entry.sh",
-  "../../scripts/rust-lint-format.sh",
-]
+pre-release-hook = ["sh", "-c", "../../scripts/prebuild-mcd.sh && ../../scripts/add-asset-hash-entry.sh && ../../scripts/rust-lint-format.sh"]
