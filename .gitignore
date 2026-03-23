@@ -76,4 +76,4 @@ tests/output/
 tests/test.env
 
 # WASM build artifacts (uploaded to wasm-registry canister)
-wasm/
+wasm/REVIEW.md
