@@ -6,39 +6,36 @@ set -euo pipefail
 # Accepts --include-vite-e2e to also run Vite dev server E2E batch.
 # Accepts --skip-e2e to skip E2E tests entirely.
 
-SKIP_ACCEPTANCE=""
-INCLUDE_VITE_E2E=""
-SKIP_E2E=""
-for arg in "$@"; do
-  case $arg in
-    --skip-acceptance) SKIP_ACCEPTANCE="true" ;;
-    --include-vite-e2e) INCLUDE_VITE_E2E="true" ;;
-    --skip-e2e) SKIP_E2E="true" ;;
-  esac
-done
-
 source "$(dirname "$0")/constants.sh"
 cd "$REPO_ROOT"
 
-# Source test env for canister IDs
-set -a
-source tests/test.env
-set +a
+# 📝 Load canister IDs
+source_env tests/test.env
 
-RUN_TEST_ARGS=""
+# 🚩 Parse flags
+SKIP_ACCEPTANCE="false"
+INCLUDE_VITE_E2E="false"
+SKIP_E2E="false"
+
+if [[ "$*" == *"--skip-acceptance"* ]];  then SKIP_ACCEPTANCE="true"; fi
+if [[ "$*" == *"--include-vite-e2e"* ]]; then INCLUDE_VITE_E2E="true"; fi
+if [[ "$*" == *"--skip-e2e"* ]];         then SKIP_E2E="true"; fi
+
+# 🧪 Run unit + acceptance tests
+echo "🧪 Running tests..."
 if [ "$SKIP_ACCEPTANCE" = "true" ]; then
-  RUN_TEST_ARGS="--skip-acceptance"
+  ./scripts/run-test.sh --skip-acceptance
+else
+  ./scripts/run-test.sh
 fi
 
-echo "Running tests..."
-./scripts/run-test.sh $RUN_TEST_ARGS
-
+# 🧪 Run E2E tests
 if [ "$SKIP_E2E" != "true" ]; then
-  E2E_ARGS=""
   if [ "$INCLUDE_VITE_E2E" = "true" ]; then
-    E2E_ARGS="--include-vite-e2e"
+    ./scripts/run-test-e2e.sh --include-vite-e2e
+  else
+    ./scripts/run-test-e2e.sh
   fi
-  ./scripts/run-test-e2e.sh $E2E_ARGS
 fi
 
-echo "All tests passed!"
+echo "✅ All tests passed!"

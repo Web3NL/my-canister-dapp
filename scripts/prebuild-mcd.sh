@@ -9,12 +9,12 @@ set -euo pipefail
 
 cd "$(dirname "$0")/.."
 
-echo "Building dashboard frontend..."
+echo "🔨 Building dashboard frontend..."
 npm run build --workspace=canister-dashboard-frontend
 
-echo "Copying assets from frontend dist to Rust crate..."
+echo "📦 Copying assets from frontend dist to Rust crate..."
 mkdir -p packages-rs/my-canister-dashboard/assets
 rm -rf packages-rs/my-canister-dashboard/assets/*
 cp -r packages-rs/my-canister-dashboard/frontend/dist/* packages-rs/my-canister-dashboard/assets/
 
-echo "Dashboard assets ready"
+echo "✅ Dashboard assets ready"

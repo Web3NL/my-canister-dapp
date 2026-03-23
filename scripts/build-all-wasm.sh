@@ -7,17 +7,25 @@ set -euo pipefail
 # must be built before running this script (icp build triggers cargo
 # which uses include_dir! to embed frontend/dist).
 
-CANISTERS="wasm-registry my-hello-world my-notepad demos"
 ARTIFACT_DIR=".icp/cache/artifacts"
 OUT_DIR="wasm"
 mkdir -p "$OUT_DIR"
 
-echo "Building canister wasms with icp-cli..."
-icp build $CANISTERS
+# 🔨 Build all canister wasms
+echo "🔨 Building canister wasms with icp-cli..."
+icp build wasm-registry my-hello-world my-notepad demos
 
-for name in $CANISTERS; do
-  echo "Compressing ${name}..."
-  gzip -9 -c "${ARTIFACT_DIR}/${name}" > "${OUT_DIR}/${name}.wasm.gz"
-done
+# 🗜️ Compress each wasm for deployment
+echo "🗜️ Compressing wasm-registry..."
+gzip -9 -c "${ARTIFACT_DIR}/wasm-registry" > "${OUT_DIR}/wasm-registry.wasm.gz"
 
-echo "All wasms built and compressed in ${OUT_DIR}/"
+echo "🗜️ Compressing my-hello-world..."
+gzip -9 -c "${ARTIFACT_DIR}/my-hello-world" > "${OUT_DIR}/my-hello-world.wasm.gz"
+
+echo "🗜️ Compressing my-notepad..."
+gzip -9 -c "${ARTIFACT_DIR}/my-notepad" > "${OUT_DIR}/my-notepad.wasm.gz"
+
+echo "🗜️ Compressing demos..."
+gzip -9 -c "${ARTIFACT_DIR}/demos" > "${OUT_DIR}/demos.wasm.gz"
+
+echo "✅ All wasms built and compressed in ${OUT_DIR}/"

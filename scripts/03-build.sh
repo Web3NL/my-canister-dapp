@@ -8,15 +8,13 @@ set -euo pipefail
 source "$(dirname "$0")/constants.sh"
 cd "$REPO_ROOT"
 
-# Source test env vars so frontend builds use correct identity provider URL
+# 📝 Load test env vars so frontend builds use correct identity provider URL
 if [ -f tests/test.env ]; then
-  set -a
-  source tests/test.env
-  set +a
+  source_env tests/test.env
 fi
 
-# Build all frontend assets in parallel
-echo "Building frontend assets..."
+# 🔨 Build all frontend assets in parallel
+echo "🔨 Building frontend assets in parallel..."
 ./scripts/prebuild-mcd.sh &
 pid_mcd=$!
 npm run build --workspace=my-hello-world-frontend &
@@ -26,13 +24,14 @@ pid_np=$!
 wait $pid_mcd
 wait $pid_hw
 wait $pid_np
+echo "✅ Frontend assets built"
 
-# Batch-build all Rust canister wasms
-echo "Batch-building all canister wasms..."
+# 📦 Batch-build all Rust canister wasms
+echo "📦 Batch-building all canister wasms..."
 ./scripts/build-all-wasm.sh
 
-# Build the dapp CLI binary (required by setup-dashboard-dev-env.sh)
-echo "Building dapp CLI..."
+# 🔨 Build the dapp CLI binary (required by setup-dashboard-dev-env.sh)
+echo "🔨 Building dapp CLI..."
 cargo build -p my-canister-dapp-cli
 
-echo "Build phase complete!"
+echo "✅ Build phase complete!"

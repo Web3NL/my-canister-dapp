@@ -1,9 +1,9 @@
 #!/bin/bash
 set -euo pipefail
 
-# Setup icp-cli identity for testing
+# 🔑 Setup icp-cli identity for testing
 
-echo "Setting up test identity..."
+echo "🔑 Setting up test identity..."
 
 # Create a temporary PEM file for import
 PEM_FILE=$(mktemp)
@@ -19,4 +19,4 @@ EOF
 icp identity import ident-1 --from-pem "$PEM_FILE" --storage plaintext 2>/dev/null || true
 rm -f "$PEM_FILE"
 
-echo "Identity setup complete"
+echo "✅ Identity setup complete"
