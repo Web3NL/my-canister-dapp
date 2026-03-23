@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Changed
+
+- Dashboard frontend: inline `uint8ArrayToHexString` to remove direct `@dfinity/utils` dependency
+
 ## [1.1.2] - 2026-03-22
 
 ### Fixed

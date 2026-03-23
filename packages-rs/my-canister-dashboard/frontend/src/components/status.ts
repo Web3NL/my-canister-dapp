@@ -1,5 +1,6 @@
 import { canisterStatusStore } from '../store/statusStore';
-import { uint8ArrayToHexString } from '@dfinity/utils';
+const uint8ArrayToHexString = (bytes: Uint8Array): string =>
+  Array.from(bytes, b => b.toString(16).padStart(2, '0')).join('');
 import { formatMemorySize, formatCycles } from '../helpers';
 import type { CanisterStatusResponse } from '@icp-sdk/canisters/ic-management';
 import { updateStatusDisplay } from '../dom';
