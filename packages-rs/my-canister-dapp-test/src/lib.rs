@@ -205,7 +205,7 @@ pub fn verify_asset_hashes_match_known_version(hashes: &AssetHashes) -> Result<S
     }
 
     msg.push_str(
-        "\nRebuild with a released dashboard version or add hashes via:\n  ./scripts/add-asset-hash-entry.sh\n",
+        "\nRebuild with a released dashboard version or record hashes via:\n  ./scripts/pre-release-mcd.sh\n",
     );
     Err(msg)
 }
