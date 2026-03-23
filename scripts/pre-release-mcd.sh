@@ -2,20 +2,36 @@
 set -euo pipefail
 
 # Pre-release hook for the my-canister-dashboard crate.
-# Runs in order: build frontend → copy assets → record asset hashes → lint/format crate.
+# Parallel: frontend build + cargo fmt run concurrently.
+# Then: copy assets → record hashes → cargo clippy.
 
 cd "$(dirname "$0")/.."
 
-# --- 🔨 Build dashboard frontend and copy assets into Rust crate ---
-echo "🔨 Building dashboard frontend..."
-npm run build --workspace=canister-dashboard-frontend
+# ================================================================
+# 🔨 Frontend Build + 🔍 cargo fmt — parallel
+# ================================================================
+echo "🔨 Building dashboard frontend + 🔍 running cargo fmt in parallel..."
+npm run build --workspace=canister-dashboard-frontend &
+pid_npm=$!
+cargo fmt -p my-canister-dashboard &
+pid_fmt=$!
 
+wait $pid_npm
+echo "✅ Dashboard frontend built"
+wait $pid_fmt
+echo "✅ cargo fmt complete"
+
+# ================================================================
+# 📦 Copy Assets to Rust Crate
+# ================================================================
 echo "📦 Copying assets from frontend dist to Rust crate..."
 mkdir -p packages-rs/my-canister-dashboard/assets
 rm -rf packages-rs/my-canister-dashboard/assets/*
 cp -r packages-rs/my-canister-dashboard/frontend/dist/* packages-rs/my-canister-dashboard/assets/
 
-# --- 📝 Record asset hashes in asset-hashes.json ---
+# ================================================================
+# 📝 Record Asset Hashes
+# ================================================================
 echo "📝 Recording asset hashes..."
 
 # NEW_VERSION is set by cargo-release; fall back to reading Cargo.toml
@@ -62,10 +78,9 @@ echo "  html: $HTML_HASH"
 echo "  js:   $JS_HASH"
 echo "  css:  $CSS_HASH"
 
-# --- 🔍 Lint and format my-canister-dashboard crate only ---
-echo "🔍 Running cargo fmt for my-canister-dashboard..."
-cargo fmt -p my-canister-dashboard
-
+# ================================================================
+# 🔍 cargo clippy
+# ================================================================
 echo "🔍 Running cargo clippy for my-canister-dashboard..."
 cargo clippy -p my-canister-dashboard --all-targets --all-features -- -D warnings
 
