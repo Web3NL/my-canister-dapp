@@ -31,6 +31,7 @@ echo "✅ Frontend assets built"
 # ================================================================
 # 📦 Canister Wasms
 # ================================================================
+mkdir -p wasm
 echo "🔨 Building canister wasms with icp-cli..."
 icp build wasm-registry my-hello-world my-notepad demos
 
