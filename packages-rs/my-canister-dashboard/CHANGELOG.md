@@ -2,9 +2,12 @@
 
 ## [Unreleased]
 
+## [1.1.3] - 2026-03-23
+
 ### Changed
 
 - Dashboard frontend: inline `uint8ArrayToHexString` to remove direct `@dfinity/utils` dependency
+- Consolidate pre-release hook into a single `scripts/pre-release-mcd.sh` — replaces three separate scripts; lint now runs only for the `my-canister-dashboard` crate
 
 ## [1.1.2] - 2026-03-22
 
