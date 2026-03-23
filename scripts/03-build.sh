@@ -8,15 +8,15 @@ set -euo pipefail
 source "$(dirname "$0")/constants.sh"
 cd "$REPO_ROOT"
 
-# Source test env vars so frontend builds use correct identity provider URL
+# 📝 Load test env vars so frontend builds use correct identity provider URL
 if [ -f tests/test.env ]; then
-  set -a
-  source tests/test.env
-  set +a
+  source_env tests/test.env
 fi
 
-# Build all frontend assets in parallel
-echo "Building frontend assets..."
+# ================================================================
+# 🔨 Frontend Assets (parallel)
+# ================================================================
+echo "🔨 Building frontend assets in parallel..."
 ./scripts/prebuild-mcd.sh &
 pid_mcd=$!
 npm run build --workspace=my-hello-world-frontend &
@@ -26,13 +26,33 @@ pid_np=$!
 wait $pid_mcd
 wait $pid_hw
 wait $pid_np
+echo "✅ Frontend assets built"
 
-# Batch-build all Rust canister wasms
-echo "Batch-building all canister wasms..."
-./scripts/build-all-wasm.sh
+# ================================================================
+# 📦 Canister Wasms
+# ================================================================
+mkdir -p wasm
+echo "🔨 Building canister wasms with icp-cli..."
+icp build wasm-registry my-hello-world my-notepad demos
 
-# Build the dapp CLI binary (required by setup-dashboard-dev-env.sh)
-echo "Building dapp CLI..."
+echo "🗜️ Compressing wasm-registry..."
+gzip -9 -c .icp/cache/artifacts/wasm-registry > wasm/wasm-registry.wasm.gz
+
+echo "🗜️ Compressing my-hello-world..."
+gzip -9 -c .icp/cache/artifacts/my-hello-world > wasm/my-hello-world.wasm.gz
+
+echo "🗜️ Compressing my-notepad..."
+gzip -9 -c .icp/cache/artifacts/my-notepad > wasm/my-notepad.wasm.gz
+
+echo "🗜️ Compressing demos..."
+gzip -9 -c .icp/cache/artifacts/demos > wasm/demos.wasm.gz
+
+echo "✅ All wasms built and compressed"
+
+# ================================================================
+# 🔨 dapp CLI Binary
+# ================================================================
+echo "🔨 Building dapp CLI..."
 cargo build -p my-canister-dapp-cli
 
-echo "Build phase complete!"
+echo "✅ Build phase complete!"

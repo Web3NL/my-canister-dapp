@@ -81,7 +81,7 @@ Uses `icp-cli` (`icp` command) — **not dfx**. Config: `icp.yaml`. Networks: `l
 
 ```sh
 npm run check                 # Lint + format + typecheck all JS workspaces
-./scripts/rust-lint-format.sh # cargo fmt + cargo clippy
+./scripts/01-check.sh         # Full check phase: JS + deps + cargo fmt + clippy
 ./validate-and-test-all.sh    # Full pipeline: checks + local network + deploy + all tests
 ```
 
