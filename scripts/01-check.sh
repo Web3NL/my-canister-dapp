@@ -19,7 +19,10 @@ pid_js=$!
 npm run deps:check &
 pid_deps=$!
 
-./scripts/rust-lint-format.sh &
+# ================================================================
+# 🔍 Rust Format + Lint
+# ================================================================
+(cargo fmt && cargo clippy --all-targets --all-features -- -D warnings) &
 pid_rust=$!
 
 wait $pid_js

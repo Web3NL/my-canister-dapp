@@ -152,7 +152,7 @@ fn setup() -> TestEnv {
     let registry_id = pic.create_canister_with_settings(Some(ctrl), None);
     pic.add_cycles(registry_id, MIN_BALANCE);
     let registry_wasm = fs::read("wasm/wasm-registry.wasm.gz")
-        .expect("wasm/wasm-registry.wasm.gz not found — run build-all-wasm.sh first");
+        .expect("wasm/wasm-registry.wasm.gz not found — run scripts/03-build.sh first");
     pic.install_canister(registry_id, registry_wasm, vec![], Some(ctrl));
 
     // 2. Upload my-hello-world to the registry
@@ -178,7 +178,7 @@ fn setup() -> TestEnv {
 
     // 3. Deploy demos canister
     let demos_wasm = fs::read("wasm/demos.wasm.gz")
-        .expect("wasm/demos.wasm.gz not found — run build-all-wasm.sh first");
+        .expect("wasm/demos.wasm.gz not found — run scripts/03-build.sh first");
     let demos_id = pic.create_canister_with_settings(Some(ctrl), None);
     pic.add_cycles(demos_id, DEMOS_BALANCE);
     pic.install_canister(demos_id, demos_wasm.clone(), vec![], Some(ctrl));
