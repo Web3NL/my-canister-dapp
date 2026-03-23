@@ -11,7 +11,7 @@ cd "$(dirname "$0")/.."
 
 VERSION="${1:-}"
 if [ -z "$VERSION" ]; then
-  VERSION="${RELEASE_VERSION:-}"
+  VERSION="${NEW_VERSION:-}"
 fi
 if [ -z "$VERSION" ]; then
   VERSION=$(grep '^version' packages-rs/my-canister-dashboard/Cargo.toml | head -1 | sed 's/.*"\(.*\)"/\1/')
