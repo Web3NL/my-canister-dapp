@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+### Fixed
+
+- Removed unused foo file from package
+
 ### Changed
 
 - Updated terminology: "Canister Dapp" → "User-owned dapp" in package description and documentation
