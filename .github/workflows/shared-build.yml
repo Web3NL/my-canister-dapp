@@ -45,14 +45,6 @@ jobs:
           restore-keys: |
             rust-${{ runner.os }}-${{ hashFiles('rust-toolchain.toml') }}-
 
-      - name: Cache PocketIC binaries
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.local/share/icp-cli/pkg/
-            ~/.cache/dfinity/
-          key: pocket-ic-${{ runner.os }}-v1
-
       - name: Install icp-cli
         run: npm install -g @icp-sdk/icp-cli @icp-sdk/ic-wasm
 
