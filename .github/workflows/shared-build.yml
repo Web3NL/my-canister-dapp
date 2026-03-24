@@ -56,6 +56,7 @@ jobs:
       - name: Download PocketIC binary
         if: steps.cache-pocket-ic.outputs.cache-hit != 'true'
         run: |
+          mkdir -p ~/.local/bin
           curl -fsSL https://github.com/dfinity/pocketic/releases/download/12.0.0/pocket-ic-x86_64-linux.gz \
             | gzip -d > ~/.local/bin/pocket-ic
           chmod +x ~/.local/bin/pocket-ic
