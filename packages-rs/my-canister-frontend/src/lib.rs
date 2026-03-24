@@ -2,7 +2,7 @@
 
 pub mod asset_router;
 
-pub use asset_router::FrontendConfig;
+pub use asset_router::{FrontendConfig, StandardHeader};
 
 use ic_cdk::api::certified_data_set;
 use ic_http_certification::{HttpRequest, HttpResponse, StatusCode};

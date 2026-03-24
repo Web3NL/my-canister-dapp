@@ -27,16 +27,61 @@ const COMPRESSIBLE_EXTENSIONS: &[&str] = &[
     "html", "js", "mjs", "css", "json", "svg", "xml", "txt", "map",
 ];
 
+/// A default security header that can be excluded from responses via [`FrontendConfig::excluded_headers`].
+///
+/// Each variant corresponds to one of the headers set by default on every response.
+/// Use this with [`FrontendConfig::excluded_headers`] to suppress specific defaults,
+/// and [`FrontendConfig::extra_headers`] to replace them with custom values.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum StandardHeader {
+    /// `X-Content-Type-Options: nosniff` — prevents MIME-sniffing attacks.
+    XContentTypeOptions,
+    /// `X-Frame-Options: DENY` — prevents clickjacking via iframe embedding.
+    XFrameOptions,
+    /// `Referrer-Policy: no-referrer` — prevents the URL from leaking via the Referer header.
+    ReferrerPolicy,
+    /// `Permissions-Policy: accelerometer=(), camera=(), ...` — restricts hardware API access.
+    PermissionsPolicy,
+    /// `Cross-Origin-Opener-Policy: same-origin-allow-popups` — isolates the browsing context
+    /// while still allowing Internet Identity popup authentication flows.
+    CrossOriginOpenerPolicy,
+    /// `Cross-Origin-Resource-Policy: same-origin` — prevents other origins from loading your assets.
+    CrossOriginResourcePolicy,
+}
+
+impl StandardHeader {
+    fn header_name(&self) -> &'static str {
+        match self {
+            Self::XContentTypeOptions       => "X-Content-Type-Options",
+            Self::XFrameOptions             => "X-Frame-Options",
+            Self::ReferrerPolicy            => "Referrer-Policy",
+            Self::PermissionsPolicy         => "Permissions-Policy",
+            Self::CrossOriginOpenerPolicy   => "Cross-Origin-Opener-Policy",
+            Self::CrossOriginResourcePolicy => "Cross-Origin-Resource-Policy",
+        }
+    }
+}
+
 /// Configuration for frontend asset processing.
 ///
 /// Use with [`asset_router_configs_with_config`] or
 /// [`setup_frontend_with_config`](crate::setup_frontend_with_config) to
-/// customise validation beyond the defaults.
+/// customise validation and HTTP headers beyond the defaults.
 #[derive(Debug, Clone, Default)]
 pub struct FrontendConfig {
     /// Additional file extensions to allow beyond [`DEFAULT_ALLOWED_EXTENSIONS`].
     /// Extensions should be specified without the leading dot (e.g. `"webmanifest"`).
     pub extra_allowed_extensions: Vec<String>,
+    /// Default security headers to omit from responses.
+    ///
+    /// Each [`StandardHeader`] variant named here is removed from the default set.
+    /// Use [`FrontendConfig::extra_headers`] to supply a replacement value.
+    pub excluded_headers: Vec<StandardHeader>,
+    /// Additional headers included on every asset response.
+    ///
+    /// If any entry's name matches a default header (case-insensitive), the default
+    /// is replaced by this value rather than both appearing in the response.
+    pub extra_headers: Vec<(String, String)>,
 }
 
 thread_local! {
@@ -136,7 +181,7 @@ fn process_dir_recursive(
             let gzipped = gzip_compress(contents)?;
             assets.push(Asset::new(format!("{full_path}.gz"), gzipped));
         }
-        let cfg = create_asset_config(&full_path, compressible);
+        let cfg = create_asset_config(&full_path, compressible, config);
         asset_configs.push(cfg);
     }
     for subdir in dir.dirs() {
@@ -222,9 +267,9 @@ fn gzip_compress(data: &[u8]) -> Result<Vec<u8>, String> {
         .map_err(|e| format!("Gzip finalization failed: {e}"))
 }
 
-fn create_asset_config(path: &str, include_gzip: bool) -> AssetConfig {
+fn create_asset_config(path: &str, include_gzip: bool, config: &FrontendConfig) -> AssetConfig {
     let content_type = infer_content_type(path);
-    let headers = create_default_headers();
+    let headers = build_headers(config);
     let (fallback_for, aliased_by) = if path == "/index.html" {
         (
             vec![AssetFallbackConfig {
@@ -261,16 +306,23 @@ fn infer_content_type(path: &str) -> String {
         .unwrap_or_else(|| "application/octet-stream".to_string())
 }
 
-fn create_default_headers() -> Vec<(String, String)> {
-    vec![
+fn build_headers(config: &FrontendConfig) -> Vec<(String, String)> {
+    let excluded_names: Vec<&str> = config
+        .excluded_headers
+        .iter()
+        .map(|h| h.header_name())
+        .collect();
+
+    let extra_names: Vec<&str> = config
+        .extra_headers
+        .iter()
+        .map(|(name, _)| name.as_str())
+        .collect();
+
+    let mut headers: Vec<(String, String)> = vec![
         ("X-Content-Type-Options".into(), "nosniff".into()),
         ("X-Frame-Options".into(), "DENY".into()),
         ("Referrer-Policy".into(), "no-referrer".into()),
-        ("X-XSS-Protection".into(), "0".into()),
-        (
-            "Strict-Transport-Security".into(),
-            "max-age=31536000; includeSubDomains".into(),
-        ),
         (
             "Permissions-Policy".into(),
             "accelerometer=(), camera=(), geolocation=(), microphone=(), payment=(), usb=()".into(),
@@ -281,6 +333,17 @@ fn create_default_headers() -> Vec<(String, String)> {
         ),
         ("Cross-Origin-Resource-Policy".into(), "same-origin".into()),
     ]
+    .into_iter()
+    .filter(|(name, _): &(String, String)| {
+        !excluded_names.contains(&name.as_str())
+            && !extra_names
+                .iter()
+                .any(|e| e.eq_ignore_ascii_case(name.as_str()))
+    })
+    .collect();
+
+    headers.extend(config.extra_headers.iter().cloned());
+    headers
 }
 
 #[cfg(test)]
@@ -442,7 +505,7 @@ mod tests {
 
         #[test]
         fn index_html_has_fallback_and_alias() {
-            let config = create_asset_config("/index.html", false);
+            let config = create_asset_config("/index.html", false, &FrontendConfig::default());
 
             match config {
                 AssetConfig::File {
@@ -465,7 +528,7 @@ mod tests {
 
         #[test]
         fn non_index_html_has_no_fallback() {
-            let config = create_asset_config("/other.html", false);
+            let config = create_asset_config("/other.html", false, &FrontendConfig::default());
 
             match config {
                 AssetConfig::File {
@@ -486,7 +549,7 @@ mod tests {
 
         #[test]
         fn js_file_config() {
-            let config = create_asset_config("/app.js", false);
+            let config = create_asset_config("/app.js", false, &FrontendConfig::default());
 
             match config {
                 AssetConfig::File {
@@ -515,7 +578,7 @@ mod tests {
 
         #[test]
         fn nested_path_config() {
-            let config = create_asset_config("/assets/images/logo.png", false);
+            let config = create_asset_config("/assets/images/logo.png", false, &FrontendConfig::default());
 
             match config {
                 AssetConfig::File {
@@ -530,7 +593,7 @@ mod tests {
 
         #[test]
         fn config_uses_identity_encoding() {
-            let config = create_asset_config("/style.css", false);
+            let config = create_asset_config("/style.css", false, &FrontendConfig::default());
 
             match config {
                 AssetConfig::File { encodings, .. } => {
@@ -543,52 +606,39 @@ mod tests {
         }
     }
 
-    mod create_default_headers {
+    mod build_headers {
         use super::*;
 
+        fn default_headers() -> Vec<(String, String)> {
+            build_headers(&FrontendConfig::default())
+        }
+
         #[test]
-        fn returns_eight_headers() {
-            let headers = create_default_headers();
-            assert_eq!(headers.len(), 8);
+        fn default_config_produces_six_headers() {
+            assert_eq!(default_headers().len(), 6);
         }
 
         #[test]
         fn includes_x_content_type_options() {
-            let headers = create_default_headers();
-            assert!(headers.contains(&("X-Content-Type-Options".into(), "nosniff".into())));
+            assert!(default_headers()
+                .contains(&("X-Content-Type-Options".into(), "nosniff".into())));
         }
 
         #[test]
         fn includes_x_frame_options() {
-            let headers = create_default_headers();
-            assert!(headers.contains(&("X-Frame-Options".into(), "DENY".into())));
+            assert!(default_headers().contains(&("X-Frame-Options".into(), "DENY".into())));
         }
 
         #[test]
         fn includes_referrer_policy() {
-            let headers = create_default_headers();
-            assert!(headers.contains(&("Referrer-Policy".into(), "no-referrer".into())));
-        }
-
-        #[test]
-        fn includes_xss_protection_disabled() {
-            let headers = create_default_headers();
-            assert!(headers.contains(&("X-XSS-Protection".into(), "0".into())));
-        }
-
-        #[test]
-        fn includes_hsts() {
-            let headers = create_default_headers();
-            assert!(headers.contains(&(
-                "Strict-Transport-Security".into(),
-                "max-age=31536000; includeSubDomains".into()
-            )));
+            assert!(
+                default_headers().contains(&("Referrer-Policy".into(), "no-referrer".into()))
+            );
         }
 
         #[test]
         fn includes_permissions_policy() {
-            let headers = create_default_headers();
-            assert!(headers.contains(&(
+            assert!(default_headers().contains(&(
                 "Permissions-Policy".into(),
                 "accelerometer=(), camera=(), geolocation=(), microphone=(), payment=(), usb=()"
                     .into()
@@ -597,8 +647,7 @@ mod tests {
 
         #[test]
         fn includes_cross_origin_opener_policy() {
-            let headers = create_default_headers();
-            assert!(headers.contains(&(
+            assert!(default_headers().contains(&(
                 "Cross-Origin-Opener-Policy".into(),
                 "same-origin-allow-popups".into(),
             )));
@@ -606,10 +655,87 @@ mod tests {
 
         #[test]
         fn includes_cross_origin_resource_policy() {
-            let headers = create_default_headers();
-            assert!(
-                headers.contains(&("Cross-Origin-Resource-Policy".into(), "same-origin".into()))
-            );
+            assert!(default_headers()
+                .contains(&("Cross-Origin-Resource-Policy".into(), "same-origin".into())));
+        }
+
+        #[test]
+        fn does_not_include_xss_protection() {
+            assert!(!default_headers()
+                .iter()
+                .any(|(name, _)| name == "X-XSS-Protection"));
+        }
+
+        #[test]
+        fn does_not_include_hsts() {
+            assert!(!default_headers()
+                .iter()
+                .any(|(name, _)| name == "Strict-Transport-Security"));
+        }
+
+        #[test]
+        fn excluded_header_is_removed() {
+            let config = FrontendConfig {
+                excluded_headers: vec![StandardHeader::XFrameOptions],
+                ..Default::default()
+            };
+            let headers = build_headers(&config);
+            assert!(!headers.iter().any(|(name, _)| name == "X-Frame-Options"));
+        }
+
+        #[test]
+        fn extra_header_replaces_default() {
+            let config = FrontendConfig {
+                extra_headers: vec![("X-Frame-Options".into(), "SAMEORIGIN".into())],
+                ..Default::default()
+            };
+            let headers = build_headers(&config);
+            let frame_headers: Vec<_> = headers
+                .iter()
+                .filter(|(name, _)| name == "X-Frame-Options")
+                .collect();
+            assert_eq!(frame_headers.len(), 1, "should have exactly one X-Frame-Options");
+            assert_eq!(frame_headers[0].1, "SAMEORIGIN");
+        }
+
+        #[test]
+        fn extra_header_replace_is_case_insensitive() {
+            let config = FrontendConfig {
+                extra_headers: vec![("x-frame-options".into(), "SAMEORIGIN".into())],
+                ..Default::default()
+            };
+            let headers = build_headers(&config);
+            let frame_headers: Vec<_> = headers
+                .iter()
+                .filter(|(name, _)| name.eq_ignore_ascii_case("x-frame-options"))
+                .collect();
+            assert_eq!(frame_headers.len(), 1);
+            assert_eq!(frame_headers[0].1, "SAMEORIGIN");
+        }
+
+        #[test]
+        fn extra_header_is_appended() {
+            let config = FrontendConfig {
+                extra_headers: vec![("Content-Security-Policy".into(), "default-src 'self'".into())],
+                ..Default::default()
+            };
+            let headers = build_headers(&config);
+            assert!(headers.contains(&(
+                "Content-Security-Policy".into(),
+                "default-src 'self'".into()
+            )));
+        }
+
+        #[test]
+        fn excluded_and_extra_can_combine() {
+            let config = FrontendConfig {
+                excluded_headers: vec![StandardHeader::ReferrerPolicy],
+                extra_headers: vec![("Cache-Control".into(), "no-store".into())],
+                ..Default::default()
+            };
+            let headers = build_headers(&config);
+            assert!(!headers.iter().any(|(name, _)| name == "Referrer-Policy"));
+            assert!(headers.contains(&("Cache-Control".into(), "no-store".into())));
         }
     }
 
@@ -650,6 +776,7 @@ mod tests {
         fn allows_extra_extension() {
             let config = FrontendConfig {
                 extra_allowed_extensions: vec!["webmanifest".to_string()],
+                ..Default::default()
             };
             assert!(validate_asset("/manifest.webmanifest", 100, &config).is_ok());
         }
@@ -658,6 +785,7 @@ mod tests {
         fn extra_extension_case_insensitive() {
             let config = FrontendConfig {
                 extra_allowed_extensions: vec!["WebManifest".to_string()],
+                ..Default::default()
             };
             assert!(validate_asset("/manifest.webmanifest", 100, &config).is_ok());
         }
@@ -805,7 +933,7 @@ mod tests {
 
         #[test]
         fn compressible_config_has_two_encodings() {
-            let config = create_asset_config("/app.js", true);
+            let config = create_asset_config("/app.js", true, &FrontendConfig::default());
             match config {
                 AssetConfig::File { encodings, .. } => {
                     assert_eq!(encodings.len(), 2);
@@ -819,7 +947,7 @@ mod tests {
 
         #[test]
         fn non_compressible_config_has_one_encoding() {
-            let config = create_asset_config("/image.png", false);
+            let config = create_asset_config("/image.png", false, &FrontendConfig::default());
             match config {
                 AssetConfig::File { encodings, .. } => {
                     assert_eq!(encodings.len(), 1);
