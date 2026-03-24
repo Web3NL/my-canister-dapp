@@ -26,9 +26,13 @@ if [[ -n $(git status --porcelain) ]]; then
     exit 1
 fi
 
-# Deploy the app (ICP_NETWORK=ic triggers production build)
+# Build the launcher for production — ICP_NETWORK=ic must be set during vite build
+# so the PROD constant is true at compile time (icp deploy does not run npm build)
+echo "🔨 Building icp-dapp-launcher for production..."
+(cd canisters/icp-dapp-launcher && ICP_NETWORK=ic npm run build)
+
 echo "🚢 Deploying to IC..."
-ICP_NETWORK=ic icp deploy icp-dapp-launcher -e mainnet --identity web3nl
+icp deploy icp-dapp-launcher -e mainnet --identity web3nl
 
 # Get current commit hash after successful deploy
 COMMIT_HASH=$(git rev-parse HEAD)
