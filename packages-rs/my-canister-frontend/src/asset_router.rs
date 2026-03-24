@@ -292,7 +292,7 @@ mod tests {
 
         #[test]
         fn max_file_size_is_below_2mib() {
-            assert!(MAX_FILE_SIZE < 2 * 1024 * 1024);
+            const { assert!(MAX_FILE_SIZE < 2 * 1024 * 1024) };
             assert_eq!(MAX_FILE_SIZE, 2 * 1024 * 1024 - 16 * 1024);
         }
 
@@ -651,7 +651,6 @@ mod tests {
         fn allows_extra_extension() {
             let config = FrontendConfig {
                 extra_allowed_extensions: vec!["webmanifest".to_string()],
-                ..Default::default()
             };
             assert!(validate_asset("/manifest.webmanifest", 100, &config).is_ok());
         }
@@ -660,7 +659,6 @@ mod tests {
         fn extra_extension_case_insensitive() {
             let config = FrontendConfig {
                 extra_allowed_extensions: vec!["WebManifest".to_string()],
-                ..Default::default()
             };
             assert!(validate_asset("/manifest.webmanifest", 100, &config).is_ok());
         }
