@@ -224,7 +224,7 @@ fn gzip_compress(data: &[u8]) -> Result<Vec<u8>, String> {
 
 fn create_asset_config(path: &str, include_gzip: bool) -> AssetConfig {
     let content_type = infer_content_type(path);
-    let headers = create_default_headers(&content_type);
+    let headers = create_default_headers();
     let (fallback_for, aliased_by) = if path == "/index.html" {
         (
             vec![AssetFallbackConfig {
@@ -261,7 +261,7 @@ fn infer_content_type(path: &str) -> String {
         .unwrap_or_else(|| "application/octet-stream".to_string())
 }
 
-fn create_default_headers(_content_type: &str) -> Vec<(String, String)> {
+fn create_default_headers() -> Vec<(String, String)> {
     vec![
         ("X-Content-Type-Options".into(), "nosniff".into()),
         ("X-Frame-Options".into(), "DENY".into()),
@@ -548,37 +548,37 @@ mod tests {
 
         #[test]
         fn returns_eight_headers() {
-            let headers = create_default_headers("text/html");
+            let headers = create_default_headers();
             assert_eq!(headers.len(), 8);
         }
 
         #[test]
         fn includes_x_content_type_options() {
-            let headers = create_default_headers("text/html");
+            let headers = create_default_headers();
             assert!(headers.contains(&("X-Content-Type-Options".into(), "nosniff".into())));
         }
 
         #[test]
         fn includes_x_frame_options() {
-            let headers = create_default_headers("text/html");
+            let headers = create_default_headers();
             assert!(headers.contains(&("X-Frame-Options".into(), "DENY".into())));
         }
 
         #[test]
         fn includes_referrer_policy() {
-            let headers = create_default_headers("text/html");
+            let headers = create_default_headers();
             assert!(headers.contains(&("Referrer-Policy".into(), "no-referrer".into())));
         }
 
         #[test]
         fn includes_xss_protection_disabled() {
-            let headers = create_default_headers("text/html");
+            let headers = create_default_headers();
             assert!(headers.contains(&("X-XSS-Protection".into(), "0".into())));
         }
 
         #[test]
         fn includes_hsts() {
-            let headers = create_default_headers("text/html");
+            let headers = create_default_headers();
             assert!(headers.contains(&(
                 "Strict-Transport-Security".into(),
                 "max-age=31536000; includeSubDomains".into()
@@ -587,7 +587,7 @@ mod tests {
 
         #[test]
         fn includes_permissions_policy() {
-            let headers = create_default_headers("text/html");
+            let headers = create_default_headers();
             assert!(headers.contains(&(
                 "Permissions-Policy".into(),
                 "accelerometer=(), camera=(), geolocation=(), microphone=(), payment=(), usb=()"
@@ -597,7 +597,7 @@ mod tests {
 
         #[test]
         fn includes_cross_origin_opener_policy() {
-            let headers = create_default_headers("text/html");
+            let headers = create_default_headers();
             assert!(headers.contains(&(
                 "Cross-Origin-Opener-Policy".into(),
                 "same-origin-allow-popups".into(),
@@ -606,21 +606,12 @@ mod tests {
 
         #[test]
         fn includes_cross_origin_resource_policy() {
-            let headers = create_default_headers("text/html");
+            let headers = create_default_headers();
             assert!(
                 headers.contains(&("Cross-Origin-Resource-Policy".into(), "same-origin".into()))
             );
         }
 
-        #[test]
-        fn same_headers_regardless_of_content_type() {
-            let headers_html = create_default_headers("text/html");
-            let headers_js = create_default_headers("application/javascript");
-            let headers_empty = create_default_headers("");
-
-            assert_eq!(headers_html, headers_js);
-            assert_eq!(headers_js, headers_empty);
-        }
     }
 
     mod validate_asset {
