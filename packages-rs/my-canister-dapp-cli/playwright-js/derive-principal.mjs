@@ -10,9 +10,7 @@ const bundle = readFileSync(process.env.DAPP_BUNDLE_PATH, 'utf8');
  * Never attempts "Use existing identity" (fresh browser context has no stored key).
  */
 async function handleIIPopupAlwaysNew(popup) {
-  // Use 'load' (not 'domcontentloaded') so the II React app has finished
-  // executing its JS before we look for buttons.
-  await popup.waitForLoadState('load');
+  await popup.waitForLoadState('domcontentloaded');
 
   const continueWithPasskey = popup.getByRole('button', {
     name: 'Continue with passkey',
@@ -24,8 +22,8 @@ async function handleIIPopupAlwaysNew(popup) {
   });
 
   await Promise.race([
-    continueWithPasskey.waitFor({ state: 'visible', timeout: 30000 }),
-    continueBtn.waitFor({ state: 'visible', timeout: 30000 }),
+    continueWithPasskey.waitFor({ state: 'visible', timeout: 15000 }),
+    continueBtn.waitFor({ state: 'visible', timeout: 15000 }),
   ]);
 
   if (await continueWithPasskey.isVisible()) {
@@ -36,15 +34,15 @@ async function handleIIPopupAlwaysNew(popup) {
       name: 'Create new identity',
       exact: true,
     });
-    await createNewBtn.waitFor({ state: 'visible', timeout: 20000 });
+    await createNewBtn.waitFor({ state: 'visible', timeout: 10000 });
     await createNewBtn.click();
 
     const nameInput = popup.locator('input[placeholder="Identity name"]');
-    await nameInput.waitFor({ state: 'visible', timeout: 20000 });
+    await nameInput.waitFor({ state: 'visible', timeout: 10000 });
     await nameInput.fill('Test');
     await popup.getByRole('button', { name: 'Create identity', exact: true }).click();
 
-    await continueBtn.waitFor({ state: 'visible', timeout: 30000 });
+    await continueBtn.waitFor({ state: 'visible', timeout: 15000 });
   }
 
   await continueBtn.click();
@@ -70,19 +68,19 @@ async function main() {
   await page.evaluate((ip) => window.DeriveIIPrincipal.setup(ip), identityProvider);
   await page.waitForSelector('[data-tid="login-button"]');
 
-  const popupPromise = page.waitForEvent('popup', { timeout: 30000 });
+  const popupPromise = page.waitForEvent('popup', { timeout: 15000 });
   await page.click('[data-tid="login-button"]');
   const popup = await popupPromise;
 
   await handleIIPopupAlwaysNew(popup);
-  await popup.waitForEvent('close', { timeout: 30000 });
+  await popup.waitForEvent('close', { timeout: 15000 });
 
   await page.waitForFunction(
     () => {
       const el = document.getElementById('principal');
       return el && el.textContent && el.textContent.length > 10;
     },
-    { timeout: 30000 }
+    { timeout: 15000 }
   );
 
   const principal = await page.locator('#principal').textContent();
