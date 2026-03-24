@@ -1,11 +1,11 @@
 {
   "name": "icp-dapp-launcher",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "dependencies": {
     "@dfinity/gix-components": "^10.0.0",
     "@web3nl/my-canister-dashboard": "0.8.0"
   },
-  "deployedAtCommit": "8a47e4467cefcc80488edd65cc7042bdf975c351",
+  "deployedAtCommit": "64a87a494ce6716833a6066318987c11ab2f29f5",
   "engines": {
     "node": ">=22.0.0"
   },
