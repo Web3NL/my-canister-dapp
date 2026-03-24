@@ -52,11 +52,11 @@ pub enum StandardHeader {
 impl StandardHeader {
     fn header_name(&self) -> &'static str {
         match self {
-            Self::XContentTypeOptions       => "X-Content-Type-Options",
-            Self::XFrameOptions             => "X-Frame-Options",
-            Self::ReferrerPolicy            => "Referrer-Policy",
-            Self::PermissionsPolicy         => "Permissions-Policy",
-            Self::CrossOriginOpenerPolicy   => "Cross-Origin-Opener-Policy",
+            Self::XContentTypeOptions => "X-Content-Type-Options",
+            Self::XFrameOptions => "X-Frame-Options",
+            Self::ReferrerPolicy => "Referrer-Policy",
+            Self::PermissionsPolicy => "Permissions-Policy",
+            Self::CrossOriginOpenerPolicy => "Cross-Origin-Opener-Policy",
             Self::CrossOriginResourcePolicy => "Cross-Origin-Resource-Policy",
         }
     }
@@ -578,7 +578,8 @@ mod tests {
 
         #[test]
         fn nested_path_config() {
-            let config = create_asset_config("/assets/images/logo.png", false, &FrontendConfig::default());
+            let config =
+                create_asset_config("/assets/images/logo.png", false, &FrontendConfig::default());
 
             match config {
                 AssetConfig::File {
@@ -620,8 +621,9 @@ mod tests {
 
         #[test]
         fn includes_x_content_type_options() {
-            assert!(default_headers()
-                .contains(&("X-Content-Type-Options".into(), "nosniff".into())));
+            assert!(
+                default_headers().contains(&("X-Content-Type-Options".into(), "nosniff".into()))
+            );
         }
 
         #[test]
@@ -631,9 +633,7 @@ mod tests {
 
         #[test]
         fn includes_referrer_policy() {
-            assert!(
-                default_headers().contains(&("Referrer-Policy".into(), "no-referrer".into()))
-            );
+            assert!(default_headers().contains(&("Referrer-Policy".into(), "no-referrer".into())));
         }
 
         #[test]
@@ -655,22 +655,28 @@ mod tests {
 
         #[test]
         fn includes_cross_origin_resource_policy() {
-            assert!(default_headers()
-                .contains(&("Cross-Origin-Resource-Policy".into(), "same-origin".into())));
+            assert!(
+                default_headers()
+                    .contains(&("Cross-Origin-Resource-Policy".into(), "same-origin".into()))
+            );
         }
 
         #[test]
         fn does_not_include_xss_protection() {
-            assert!(!default_headers()
-                .iter()
-                .any(|(name, _)| name == "X-XSS-Protection"));
+            assert!(
+                !default_headers()
+                    .iter()
+                    .any(|(name, _)| name == "X-XSS-Protection")
+            );
         }
 
         #[test]
         fn does_not_include_hsts() {
-            assert!(!default_headers()
-                .iter()
-                .any(|(name, _)| name == "Strict-Transport-Security"));
+            assert!(
+                !default_headers()
+                    .iter()
+                    .any(|(name, _)| name == "Strict-Transport-Security")
+            );
         }
 
         #[test]
@@ -694,7 +700,11 @@ mod tests {
                 .iter()
                 .filter(|(name, _)| name == "X-Frame-Options")
                 .collect();
-            assert_eq!(frame_headers.len(), 1, "should have exactly one X-Frame-Options");
+            assert_eq!(
+                frame_headers.len(),
+                1,
+                "should have exactly one X-Frame-Options"
+            );
             assert_eq!(frame_headers[0].1, "SAMEORIGIN");
         }
 
@@ -716,7 +726,10 @@ mod tests {
         #[test]
         fn extra_header_is_appended() {
             let config = FrontendConfig {
-                extra_headers: vec![("Content-Security-Policy".into(), "default-src 'self'".into())],
+                extra_headers: vec![(
+                    "Content-Security-Policy".into(),
+                    "default-src 'self'".into(),
+                )],
                 ..Default::default()
             };
             let headers = build_headers(&config);

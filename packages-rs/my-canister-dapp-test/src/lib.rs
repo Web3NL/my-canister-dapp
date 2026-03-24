@@ -433,16 +433,13 @@ pub fn run_acceptance_suite(wasm_bytes: &[u8], wasm_label: &str) {
     assert_header_contains(&fallback_resp, "content-type", "text/html");
 
     // ─── Security/privacy headers on frontend responses ─────────────────
-    // The frontend crate adds 8 security headers to every asset response.
+    // The frontend crate adds 6 security headers to every asset response.
+    // (X-XSS-Protection and Strict-Transport-Security are intentionally omitted:
+    //  X-XSS-Protection is a legacy IE/old-Chrome header ignored by modern browsers;
+    //  HSTS is redundant on ICP since the gateway enforces HTTPS.)
     assert_header_contains(&fallback_resp, "x-content-type-options", "nosniff");
     assert_header_contains(&fallback_resp, "x-frame-options", "deny");
     assert_header_contains(&fallback_resp, "referrer-policy", "no-referrer");
-    assert_header_contains(&fallback_resp, "x-xss-protection", "0");
-    assert_header_contains(
-        &fallback_resp,
-        "strict-transport-security",
-        "max-age=31536000",
-    );
     assert_header_contains(&fallback_resp, "permissions-policy", "accelerometer=()");
     assert_header_contains(
         &fallback_resp,
@@ -454,7 +451,7 @@ pub fn run_acceptance_suite(wasm_bytes: &[u8], wasm_label: &str) {
         "cross-origin-resource-policy",
         "same-origin",
     );
-    println!("Frontend security headers OK (8/8 verified on fallback response)");
+    println!("Frontend security headers OK (6/6 verified on fallback response)");
 
     // ─── Gzip compression ───────────────────────────────────────────────
     // Request with Accept-Encoding: gzip should return compressed content.
