@@ -611,7 +611,6 @@ mod tests {
                 headers.contains(&("Cross-Origin-Resource-Policy".into(), "same-origin".into()))
             );
         }
-
     }
 
     mod validate_asset {
