@@ -28,22 +28,20 @@ T_TEST=0
 print_summary() {
     local total=$(( $(date +%s) - SCRIPT_START_TIME ))
     echo ""
-    echo "┌──────────────────────────────────────┬─────────┐"
-    echo "│ Step                                 │ Time    │"
-    echo "├──────────────────────────────────────┼─────────┤"
     if [ "$SKIP_CHECKS" != "true" ]; then
-        printf "│ %-36s │ %02d:%02d   │\n" "🔍 Static analysis" $(( T_STATIC / 60 )) $(( T_STATIC % 60 ))
+        printf "  🔍 Static analysis       %02d:%02d\n" $(( T_STATIC / 60 )) $(( T_STATIC % 60 ))
     fi
     if [ "$SKIP_BOOTSTRAP" != "true" ]; then
-        printf "│ %-36s │ %02d:%02d   │\n" "🌐 Bootstrap" $(( T_BOOTSTRAP / 60 )) $(( T_BOOTSTRAP % 60 ))
+        printf "  🌐 Bootstrap             %02d:%02d\n" $(( T_BOOTSTRAP / 60 )) $(( T_BOOTSTRAP % 60 ))
     fi
-    printf "│ %-36s │ %02d:%02d   │\n" "🔨 Build"                     $(( T_BUILD / 60 ))     $(( T_BUILD % 60 ))
-    printf "│ %-36s │ %02d:%02d   │\n" "🚀 Deploy"                    $(( T_DEPLOY / 60 ))    $(( T_DEPLOY % 60 ))
-    printf "│ %-36s │ %02d:%02d   │\n" "⚡ Cargo pre-compile (parallel)" $(( T_CARGO / 60 )) $(( T_CARGO % 60 ))
-    printf "│ %-36s │ %02d:%02d   │\n" "🧪 Test"                      $(( T_TEST / 60 ))      $(( T_TEST % 60 ))
-    echo "├──────────────────────────────────────┼─────────┤"
-    printf "│ %-36s │ %02d:%02d   │\n" "Total" $(( total / 60 )) $(( total % 60 ))
-    echo "└──────────────────────────────────────┴─────────┘"
+    printf "  🔨 Build                 %02d:%02d\n" $(( T_BUILD / 60 ))  $(( T_BUILD % 60 ))
+    printf "  🚀 Deploy                %02d:%02d\n" $(( T_DEPLOY / 60 )) $(( T_DEPLOY % 60 ))
+    printf "  ⚡ Cargo pre-compile     %02d:%02d\n" $(( T_CARGO / 60 ))  $(( T_CARGO % 60 ))
+    printf "  🧪 Test                  %02d:%02d\n" $(( T_TEST / 60 ))   $(( T_TEST % 60 ))
+    printf "  ─────────────────────────────\n"
+    printf "  Total                    %02d:%02d\n" $(( total / 60 )) $(( total % 60 ))
+    echo ""
+    echo "✅ Validation finished correctly!"
 }
 trap print_summary EXIT
 
@@ -127,5 +125,4 @@ icp canister status -e local --json 2>/dev/null | while IFS= read -r line; do
     printf "  %-25s http://%s.local.localhost:8080\n" "" "$name"
 done
 
-echo ""
-echo "✅ Validation finished correctly!"
+
