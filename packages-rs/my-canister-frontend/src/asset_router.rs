@@ -16,8 +16,10 @@ pub const DEFAULT_ALLOWED_EXTENSIONS: &[&str] = &[
     "woff2", "ttf", "otf", "eot", "json", "xml", "txt", "wasm", "map",
 ];
 
-/// Maximum file size in bytes (2 MB).
-pub const DEFAULT_MAX_FILE_SIZE: usize = 2 * 1024 * 1024;
+// ICP query responses are capped at 2 MiB. Each response includes ~3.5 KB of
+// HTTP headers (IC-Certificate, security headers, Content-Type, etc.) on top of
+// the body. Reserve 16 KiB to ensure the total response always fits.
+const MAX_FILE_SIZE: usize = 2 * 1024 * 1024 - 16 * 1024;
 
 /// File extensions that benefit from gzip compression.
 /// Binary formats (images, fonts, wasm) are already compressed.
@@ -30,22 +32,11 @@ const COMPRESSIBLE_EXTENSIONS: &[&str] = &[
 /// Use with [`asset_router_configs_with_config`] or
 /// [`setup_frontend_with_config`](crate::setup_frontend_with_config) to
 /// customise validation beyond the defaults.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Default)]
 pub struct FrontendConfig {
     /// Additional file extensions to allow beyond [`DEFAULT_ALLOWED_EXTENSIONS`].
     /// Extensions should be specified without the leading dot (e.g. `"webmanifest"`).
     pub extra_allowed_extensions: Vec<String>,
-    /// Maximum file size in bytes. Defaults to [`DEFAULT_MAX_FILE_SIZE`] (2 MB).
-    pub max_file_size: usize,
-}
-
-impl Default for FrontendConfig {
-    fn default() -> Self {
-        Self {
-            extra_allowed_extensions: Vec::new(),
-            max_file_size: DEFAULT_MAX_FILE_SIZE,
-        }
-    }
 }
 
 thread_local! {
@@ -88,7 +79,7 @@ pub fn asset_router_configs(
 ///
 /// All assets are validated against the [`FrontendConfig`] rules:
 /// - File extension must be in [`DEFAULT_ALLOWED_EXTENSIONS`] or `config.extra_allowed_extensions`
-/// - File size must not exceed `config.max_file_size`
+/// - File size must not exceed the internal limit (2 MiB − 16 KiB)
 /// - Paths must not contain `..`, `//`, or invalid URL characters
 /// - Duplicate paths are rejected
 ///
@@ -206,10 +197,9 @@ fn validate_asset(path: &str, size: usize, config: &FrontendConfig) -> Result<()
         }
     }
     // File size
-    if size > config.max_file_size {
+    if size > MAX_FILE_SIZE {
         return Err(format!(
-            "File size ({size} bytes) exceeds maximum ({} bytes): {path}",
-            config.max_file_size
+            "File size ({size} bytes) exceeds maximum ({MAX_FILE_SIZE} bytes): {path}"
         ));
     }
     Ok(())
@@ -301,9 +291,9 @@ mod tests {
         use super::*;
 
         #[test]
-        fn default_max_file_size_is_2mb() {
-            let config = FrontendConfig::default();
-            assert_eq!(config.max_file_size, 2 * 1024 * 1024);
+        fn max_file_size_is_below_2mib() {
+            assert!(MAX_FILE_SIZE < 2 * 1024 * 1024);
+            assert_eq!(MAX_FILE_SIZE, 2 * 1024 * 1024 - 16 * 1024);
         }
 
         #[test]
@@ -695,24 +685,14 @@ mod tests {
         #[test]
         fn allows_file_at_size_limit() {
             let config = FrontendConfig::default();
-            assert!(validate_asset("/exact.html", DEFAULT_MAX_FILE_SIZE, &config).is_ok());
+            assert!(validate_asset("/exact.html", MAX_FILE_SIZE, &config).is_ok());
         }
 
         #[test]
         fn rejects_file_one_byte_over_limit() {
             let config = FrontendConfig::default();
-            let result = validate_asset("/over.html", DEFAULT_MAX_FILE_SIZE + 1, &config);
+            let result = validate_asset("/over.html", MAX_FILE_SIZE + 1, &config);
             assert!(result.is_err());
-        }
-
-        #[test]
-        fn custom_max_file_size() {
-            let config = FrontendConfig {
-                max_file_size: 500,
-                ..Default::default()
-            };
-            assert!(validate_asset("/small.html", 500, &config).is_ok());
-            assert!(validate_asset("/big.html", 501, &config).is_err());
         }
 
         #[test]

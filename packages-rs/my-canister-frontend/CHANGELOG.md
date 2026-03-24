@@ -5,10 +5,13 @@
 ### Fixed
 
 - Removed unused foo file from package
+- Max file size reduced from 2 MiB to 2 MiB − 16 KiB (2,080,768 bytes) so that total HTTP responses (body + `IC-Certificate` header + security headers) always fit within ICP's 2 MiB query response limit
 
 ### Changed
 
 - Updated terminology: "Canister Dapp" → "User-owned dapp" in package description and documentation
+- **Breaking**: `FrontendConfig` no longer has a `max_file_size` field; the size limit is fixed and non-configurable. Remove any `max_file_size` assignments from `FrontendConfig` struct literals.
+- **Breaking**: `DEFAULT_MAX_FILE_SIZE` constant removed from the public API.
 
 ## [0.3.0] - 2026-02-27
 
