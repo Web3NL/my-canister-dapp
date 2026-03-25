@@ -11,7 +11,7 @@ const bundle = readFileSync(process.env.DAPP_BUNDLE_PATH, 'utf8');
  * Never attempts "Use existing identity" (fresh browser context has no stored key).
  */
 async function handleIIPopupAlwaysNew(popup) {
-  // Use 'load' (not 'domcontentloaded') so the II React app has finished
+  // Use 'load' (not 'domcontentloaded') so the II SvelteKit app has finished
   // executing its JS before we look for buttons.
   await popup.waitForLoadState('load');
 
@@ -66,46 +66,56 @@ async function main() {
     (url) => url.hostname !== 'localhost' && url.hostname.endsWith('.localhost'),
     (route) => {
       const url = new URL(route.request().url());
-      process.stderr.write(`[proxy] intercepted: ${route.request().method()} ${url.href}\n`);
-      try {
-        // Use Node.js http directly so the Host header is sent exactly as set.
-        // route.fetch() derives Host from the target URL and ignores overrides,
-        // which breaks PocketIC's canister routing by subdomain.
-        const req = http.request(
-          {
-            hostname: '127.0.0.1',
-            port: parseInt(url.port) || 80,
-            path: url.pathname + url.search,
-            method: route.request().method(),
-            headers: { ...route.request().headers(), host: url.host },
-          },
-          (res) => {
-            process.stderr.write(`[proxy] response: ${res.statusCode} for ${url.href}\n`);
-            const chunks = [];
-            res.on('data', (c) => chunks.push(c));
-            res.on('end', () => {
-              const headers = {};
-              for (const [k, v] of Object.entries(res.headers)) {
-                headers[k] = Array.isArray(v) ? v.join('\n') : String(v);
-              }
-              route.fulfill({ status: res.statusCode, headers, body: Buffer.concat(chunks) })
-                .catch((e) => process.stderr.write(`[proxy] fulfill error: ${e.message}\n`));
-            });
-          }
-        );
-        req.on('error', (e) => {
-          process.stderr.write(`[proxy] request error: ${url.href}: ${e.message}\n`);
-          route.abort();
-        });
-        const body = route.request().postDataBuffer();
-        if (body) req.write(body);
-        req.end();
-      } catch (e) {
-        process.stderr.write(`[proxy] handler threw: ${e.message}\n`);
+      // Use Node.js http directly so the Host header is sent exactly as set.
+      // route.fetch() derives Host from the target URL and ignores overrides,
+      // which breaks PocketIC's canister routing by subdomain.
+      const req = http.request(
+        {
+          hostname: '127.0.0.1',
+          port: parseInt(url.port) || 80,
+          path: url.pathname + url.search,
+          method: route.request().method(),
+          headers: { ...route.request().headers(), host: url.host },
+        },
+        (res) => {
+          const chunks = [];
+          res.on('data', (c) => chunks.push(c));
+          res.on('end', () => {
+            const headers = {};
+            for (const [k, v] of Object.entries(res.headers)) {
+              headers[k] = Array.isArray(v) ? v.join('\n') : String(v);
+            }
+            route.fulfill({ status: res.statusCode, headers, body: Buffer.concat(chunks) })
+              .catch((e) => process.stderr.write(`[proxy] fulfill error: ${e.message}\n`));
+          });
+        }
+      );
+      req.on('error', (e) => {
+        process.stderr.write(`[proxy] request error: ${url.href}: ${e.message}\n`);
         route.abort();
-      }
+      });
+      const body = route.request().postDataBuffer();
+      if (body) req.write(body);
+      req.end();
     }
   );
+
+  // On Linux, headless Chromium has no platform authenticator, so
+  // navigator.credentials.isUserVerifyingPlatformAuthenticatorAvailable()
+  // returns false and II hides the passkey UI. Add a virtual authenticator
+  // to every new page (including the II popup) so II renders the passkey flow.
+  // automaticPresenceSimulation (default true) auto-handles credentials.create()
+  // with no user interaction. On macOS this is a no-op — the real platform
+  // authenticator takes precedence.
+  context.on('page', async (newPage) => {
+    await newPage.addVirtualAuthenticator({
+      protocol: 'ctap2',
+      transport: 'internal',
+      hasResidentKey: true,
+      hasUserVerification: true,
+      isUserVerified: true,
+    });
+  });
 
   const page = await context.newPage();
 
