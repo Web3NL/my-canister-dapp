@@ -1,6 +1,7 @@
 import { chromium } from '@playwright/test';
 import { readFileSync } from 'fs';
 import http from 'http';
+import zlib from 'zlib';
 
 const canisterOrigin = process.env.DAPP_CANISTER_ORIGIN;
 const identityProvider = process.env.DAPP_II_PROVIDER;
@@ -111,11 +112,36 @@ async function main() {
           const chunks = [];
           res.on('data', (c) => chunks.push(c));
           res.on('end', () => {
+            const rawBody = Buffer.concat(chunks);
+            const encoding = (res.headers['content-encoding'] || '').toLowerCase();
+
+            // route.fulfill() passes the body directly to Chrome without applying
+            // content-encoding — we must decompress here or Chrome will try to parse
+            // gzip/brotli bytes as HTML/JS and fail with "Invalid or unexpected token".
+            // Also strip hop-by-hop headers that don't apply to a fulfilled response.
+            const HOP_BY_HOP = new Set(['content-encoding', 'transfer-encoding', 'connection', 'keep-alive']);
             const headers = {};
             for (const [k, v] of Object.entries(res.headers)) {
-              headers[k] = Array.isArray(v) ? v.join('\n') : String(v);
+              if (!HOP_BY_HOP.has(k)) headers[k] = Array.isArray(v) ? v.join('\n') : String(v);
             }
-            route.fulfill({ status: res.statusCode, headers, body: Buffer.concat(chunks) })
+
+            let body;
+            try {
+              if (encoding === 'gzip' || encoding === 'x-gzip') {
+                body = zlib.gunzipSync(rawBody);
+              } else if (encoding === 'br') {
+                body = zlib.brotliDecompressSync(rawBody);
+              } else if (encoding === 'deflate') {
+                body = zlib.inflateSync(rawBody);
+              } else {
+                body = rawBody;
+              }
+            } catch (e) {
+              process.stderr.write(`[proxy] decompress error (${encoding}): ${e.message}\n`);
+              body = rawBody;
+            }
+
+            route.fulfill({ status: res.statusCode, headers, body })
               .catch((e) => process.stderr.write(`[proxy] fulfill error: ${e.message}\n`));
           });
         }
