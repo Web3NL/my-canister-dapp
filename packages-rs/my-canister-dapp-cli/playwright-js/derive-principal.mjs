@@ -11,13 +11,31 @@ const bundle = readFileSync(process.env.DAPP_BUNDLE_PATH, 'utf8');
  * Never attempts "Use existing identity" (fresh browser context has no stored key).
  */
 async function handleIIPopupAlwaysNew(popup) {
+  process.stderr.write(`[ii-popup] opened, initial URL: ${popup.url()}\n`);
+
+  // Capture console errors, page JS errors, and failed network requests from II.
+  popup.on('console', (msg) => {
+    if (msg.type() === 'error') process.stderr.write(`[ii-console] ${msg.text()}\n`);
+  });
+  popup.on('pageerror', (err) => process.stderr.write(`[ii-pageerror] ${err.message}\n`));
+  popup.on('requestfailed', (req) =>
+    process.stderr.write(`[ii-reqfailed] ${req.url()} — ${req.failure()?.errorText ?? '?'}\n`)
+  );
+
+  // Wait for the popup to navigate away from its initial about:blank state to II.
+  await popup
+    .waitForURL((url) => !url.href.startsWith('about:'), { timeout: 25000 })
+    .catch(() =>
+      process.stderr.write(`[ii-popup] still at about:blank after 25s — URL: ${popup.url()}\n`)
+    );
+  process.stderr.write(`[ii-popup] URL after navigation: ${popup.url()}\n`);
+
   // Use 'load' (not 'domcontentloaded') so the II SvelteKit app has finished
   // executing its JS before we look for buttons.
   await popup.waitForLoadState('load');
 
-  // Diagnostic: log what II actually renders so we can debug button-not-found failures.
   const bodyText = await popup.locator('body').innerText().catch(() => '<read error>');
-  process.stderr.write(`[ii-popup] rendered text (first 800): ${bodyText.slice(0, 800)}\n`);
+  process.stderr.write(`[ii-popup] body after load: ${bodyText.slice(0, 500)}\n`);
 
   const continueWithPasskey = popup.getByRole('button', {
     name: 'Continue with passkey',
@@ -28,10 +46,18 @@ async function handleIIPopupAlwaysNew(popup) {
     exact: true,
   });
 
-  await Promise.race([
-    continueWithPasskey.waitFor({ state: 'visible', timeout: 30000 }),
-    continueBtn.waitFor({ state: 'visible', timeout: 30000 }),
-  ]);
+  try {
+    await Promise.race([
+      continueWithPasskey.waitFor({ state: 'visible', timeout: 30000 }),
+      continueBtn.waitFor({ state: 'visible', timeout: 30000 }),
+    ]);
+  } catch (e) {
+    // Dump full HTML so we can see what II actually rendered on failure.
+    const html = await popup.content().catch(() => '<error reading content>');
+    process.stderr.write(`[ii-popup] URL at timeout: ${popup.url()}\n`);
+    process.stderr.write(`[ii-popup] HTML at timeout:\n${html.slice(0, 4000)}\n`);
+    throw e;
+  }
 
   if (await continueWithPasskey.isVisible()) {
     await continueWithPasskey.click();
