@@ -1441,6 +1441,7 @@ dependencies = [
 name = "my-canister-frontend"
 version = "0.3.0"
 dependencies = [
+ "candid",
  "flate2",
  "ic-asset-certification",
  "ic-cdk",

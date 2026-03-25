@@ -15,6 +15,7 @@ repository = "https://github.com/Web3NL/my-canister-dapp/tree/main/packages-rs/m
 crate-type = ["rlib"]
 
 [dependencies]
+candid.workspace = true
 ic-asset-certification.workspace = true
 ic-http-certification.workspace = true
 ic-cdk.workspace = true
