@@ -15,6 +15,10 @@ async function handleIIPopupAlwaysNew(popup) {
   // executing its JS before we look for buttons.
   await popup.waitForLoadState('load');
 
+  // Diagnostic: log what II actually renders so we can debug button-not-found failures.
+  const bodyText = await popup.locator('body').innerText().catch(() => '<read error>');
+  process.stderr.write(`[ii-popup] rendered text (first 800): ${bodyText.slice(0, 800)}\n`);
+
   const continueWithPasskey = popup.getByRole('button', {
     name: 'Continue with passkey',
     exact: true,
@@ -101,25 +105,40 @@ async function main() {
   );
 
   // On Linux, headless Chromium has no platform authenticator, so
-  // navigator.credentials.isUserVerifyingPlatformAuthenticatorAvailable()
-  // returns false and II hides the passkey UI. Use CDP to add a virtual
-  // platform authenticator to every new page (including the II popup) so
-  // II renders the passkey flow. automaticPresenceSimulation auto-handles
-  // credentials.create() with no user interaction. On macOS the real
-  // platform authenticator takes precedence — this is a no-op there.
+  // PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable()
+  // returns false and II hides the passkey UI.
+  //
+  // Two-part fix:
+  //   1. addInitScript: overrides isUserVerifyingPlatformAuthenticatorAvailable
+  //      synchronously BEFORE any page JS runs, so II always sees true.
+  //      This avoids the race between II's SvelteKit boot and our async CDP setup.
+  //   2. CDP virtual authenticator: handles credentials.create() / credentials.get()
+  //      called later in the flow after the user clicks through the II UI.
+  //      On macOS the real platform authenticator takes precedence — both are no-ops.
+  await context.addInitScript(() => {
+    if (typeof PublicKeyCredential !== 'undefined') {
+      PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable = () =>
+        Promise.resolve(true);
+    }
+  });
+
   context.on('page', async (newPage) => {
-    const cdp = await context.newCDPSession(newPage);
-    await cdp.send('WebAuthn.enable');
-    await cdp.send('WebAuthn.addVirtualAuthenticator', {
-      options: {
-        protocol: 'ctap2',
-        transport: 'internal',
-        hasResidentKey: true,
-        hasUserVerification: true,
-        isUserVerified: true,
-        automaticPresenceSimulation: true,
-      },
-    });
+    try {
+      const cdp = await context.newCDPSession(newPage);
+      await cdp.send('WebAuthn.enable');
+      await cdp.send('WebAuthn.addVirtualAuthenticator', {
+        options: {
+          protocol: 'ctap2',
+          transport: 'internal',
+          hasResidentKey: true,
+          hasUserVerification: true,
+          isUserVerified: true,
+          automaticPresenceSimulation: true,
+        },
+      });
+    } catch (e) {
+      process.stderr.write(`[webauthn] CDP setup failed: ${e.message}\n`);
+    }
   });
 
   const page = await context.newPage();
