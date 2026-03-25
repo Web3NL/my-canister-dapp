@@ -51,16 +51,34 @@ async function handleIIPopupAlwaysNew(popup) {
 }
 
 async function main() {
-  const browser = await chromium.launch({
-    headless: true,
-    // On Ubuntu, Chromium's built-in DNS resolver does not resolve *.localhost
-    // subdomains. Explicitly map them to 127.0.0.1 so the local PocketIC
-    // HTTP gateway (e.g. rdmx6-...-cai.localhost:8080) is reachable.
-    // macOS resolves *.localhost natively; this rule is a no-op there.
-    args: ['--host-resolver-rules=MAP *.localhost 127.0.0.1'],
-  });
+  const browser = await chromium.launch({ headless: true });
   // Fresh context = no stored passkey identity
   const context = await browser.newContext();
+
+  // On Linux, Chromium's built-in DNS resolver does not reliably resolve
+  // *.localhost subdomains (the --host-resolver-rules flag is not propagated
+  // to Chrome's sandboxed network service). Intercept all *.localhost requests
+  // in Node.js and proxy them via localhost, preserving the Host header so
+  // PocketIC's HTTP gateway can route to the correct canister.
+  // macOS resolves *.localhost natively — this adds negligible overhead there.
+  await context.route(
+    (url) => url.hostname !== 'localhost' && url.hostname.endsWith('.localhost'),
+    async (route) => {
+      const url = new URL(route.request().url());
+      const proxied = `http://localhost:${url.port}${url.pathname}${url.search}`;
+      try {
+        const response = await route.fetch({
+          url: proxied,
+          headers: { ...route.request().headers(), host: url.host },
+        });
+        await route.fulfill({ response });
+      } catch (e) {
+        process.stderr.write(`[proxy] ${url.href}: ${e.message}\n`);
+        await route.abort();
+      }
+    }
+  );
+
   const page = await context.newPage();
 
   // Intercept canister origin — canister does not need to be running
