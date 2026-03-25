@@ -5,7 +5,7 @@
 [![Build Status](https://github.com/Web3NL/my-canister-dapp/workflows/Release/badge.svg)](https://github.com/Web3NL/my-canister-dapp/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
 
-Frontend asset processing library for canisters on the Internet Computer.
+Frontend asset processing and static serving library for canisters on the Internet Computer.
 
 ## Usage
 

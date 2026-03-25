@@ -16,10 +16,12 @@ pub const DEFAULT_ALLOWED_EXTENSIONS: &[&str] = &[
     "woff2", "ttf", "otf", "eot", "json", "xml", "txt", "wasm", "map",
 ];
 
-// ICP query responses are capped at 2 MiB. Each response includes ~3.5 KB of
-// HTTP headers (IC-Certificate, security headers, Content-Type, etc.) on top of
-// the body. Reserve 16 KiB to ensure the total response always fits.
-const MAX_FILE_SIZE: usize = 2 * 1024 * 1024 - 16 * 1024;
+/// Maximum allowed file size in bytes (2 MiB − 16 KiB).
+///
+/// ICP query responses are capped at 2 MiB. Each response includes ~3.5 KB of
+/// HTTP headers (IC-Certificate, security headers, Content-Type, etc.) on top of
+/// the body. 16 KiB is reserved to ensure the total response always fits.
+pub const MAX_FILE_SIZE: usize = 2 * 1024 * 1024 - 16 * 1024;
 
 /// File extensions that benefit from gzip compression.
 /// Binary formats (images, fonts, wasm) are already compressed.
@@ -327,6 +329,8 @@ fn build_headers(config: &FrontendConfig) -> Vec<(String, String)> {
             "Permissions-Policy".into(),
             "accelerometer=(), camera=(), geolocation=(), microphone=(), payment=(), usb=()".into(),
         ),
+        // same-origin-allow-popups is required for Internet Identity authentication,
+        // which opens a popup window to complete the login flow.
         (
             "Cross-Origin-Opener-Policy".into(),
             "same-origin-allow-popups".into(),
@@ -884,6 +888,21 @@ mod tests {
         fn allows_hyphens_and_underscores() {
             let config = FrontendConfig::default();
             assert!(validate_asset("/my-app_v2.js", 100, &config).is_ok());
+        }
+
+        #[test]
+        fn rejects_gz_extension() {
+            // A manually-included .gz file (e.g. app.js.gz) is not in the allowlist.
+            // The crate generates its own .gz variants internally; user-provided ones
+            // would collide with those generated paths and produce a confusing duplicate error.
+            // Rejecting .gz at validation gives a clear, actionable message instead.
+            let config = FrontendConfig::default();
+            let result = validate_asset("/app.js.gz", 100, &config);
+            assert!(result.is_err());
+            assert!(
+                result.unwrap_err().contains("not in the allowed list"),
+                "expected 'not in the allowed list' error for .gz file"
+            );
         }
     }
 
