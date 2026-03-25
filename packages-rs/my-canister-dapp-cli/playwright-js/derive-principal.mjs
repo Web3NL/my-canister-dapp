@@ -102,18 +102,23 @@ async function main() {
 
   // On Linux, headless Chromium has no platform authenticator, so
   // navigator.credentials.isUserVerifyingPlatformAuthenticatorAvailable()
-  // returns false and II hides the passkey UI. Add a virtual authenticator
-  // to every new page (including the II popup) so II renders the passkey flow.
-  // automaticPresenceSimulation (default true) auto-handles credentials.create()
-  // with no user interaction. On macOS this is a no-op — the real platform
-  // authenticator takes precedence.
+  // returns false and II hides the passkey UI. Use CDP to add a virtual
+  // platform authenticator to every new page (including the II popup) so
+  // II renders the passkey flow. automaticPresenceSimulation auto-handles
+  // credentials.create() with no user interaction. On macOS the real
+  // platform authenticator takes precedence — this is a no-op there.
   context.on('page', async (newPage) => {
-    await newPage.addVirtualAuthenticator({
-      protocol: 'ctap2',
-      transport: 'internal',
-      hasResidentKey: true,
-      hasUserVerification: true,
-      isUserVerified: true,
+    const cdp = await context.newCDPSession(newPage);
+    await cdp.send('WebAuthn.enable');
+    await cdp.send('WebAuthn.addVirtualAuthenticator', {
+      options: {
+        protocol: 'ctap2',
+        transport: 'internal',
+        hasResidentKey: true,
+        hasUserVerification: true,
+        isUserVerified: true,
+        automaticPresenceSimulation: true,
+      },
     });
   });
 
