@@ -173,81 +173,82 @@ async function main() {
         Promise.resolve(true);
     }
 
+    // Diagnostic: emitted as [ii-console] in stderr
+    const dbg = (msg) => console.error('[dbg] ' + msg);
+
     // CDP virtual authenticators on headless Linux return an empty buffer from
     // AuthenticatorAttestationResponse.getPublicKey(), which causes II's DER parser
     // (DataView.getUint16) to throw "Offset is outside the bounds of the DataView".
-    // Fix: wrap credentials.create() to extract the COSE public key from
-    // getAuthenticatorData() and re-encode it as DER SubjectPublicKeyInfo when
-    // getPublicKey() returns empty.
-    const _origCreate = navigator.credentials.create.bind(navigator.credentials);
-    navigator.credentials.create = async function(options) {
-      const cred = await _origCreate(options);
-      if (!cred || cred.type !== 'public-key' || !cred.response) return cred;
+    //
+    // Strategy: patch AuthenticatorAttestationResponse.prototype.getPublicKey to
+    // fall back to extracting the COSE key from getAuthenticatorData() and
+    // re-encoding it as DER SubjectPublicKeyInfo (EC P-256) when the native call
+    // returns empty.  Prototype patching is simpler and more reliable than a Proxy.
 
-      // Check if getPublicKey already works
-      let pk = null;
-      try { pk = cred.response.getPublicKey(); } catch (e) { /* ignore */ }
-      if (pk && pk.byteLength > 0) return cred;
+    function buildDerFromAuthData(authDataBuf) {
+      const authData = new Uint8Array(authDataBuf);
+      dbg('authData.length=' + authData.length);
+      // authenticatorData: rpIdHash(32)+flags(1)+signCount(4)+AAGUID(16)+credIdLen(2)+credId(N)+coseKey
+      let offset = 53;
+      const credIdLen = (authData[offset] << 8) | authData[offset + 1];
+      dbg('credIdLen=' + credIdLen);
+      offset += 2 + credIdLen;
+      const cose = authData.subarray(offset);
+      dbg('cose.length=' + cose.length + ' cose[0]=0x' + (cose[0] || 0).toString(16));
 
-      // Extract public key from authenticatorData COSE key and re-encode as DER SPKI
-      try {
-        const authData = new Uint8Array(cred.response.getAuthenticatorData());
-        // authenticatorData layout:
-        //   rpIdHash(32) + flags(1) + signCount(4) + AAGUID(16) = 53 bytes
-        //   + credIdLen(2) + credId(N) + coseKey(...)
-        let offset = 53;
-        const credIdLen = (authData[offset] << 8) | authData[offset + 1];
-        offset += 2 + credIdLen;
-        const cose = authData.subarray(offset);
-
-        // Locate x(-2) and y(-3) in COSE map.
-        // Canonical P-256 COSE key has the pattern:
-        //   0x21 0x58 0x20 <32-byte x>  0x22 0x58 0x20 <32-byte y>
-        let xi = -1, yi = -1;
-        for (let i = 0; i < cose.length - 67; i++) {
-          if (cose[i]    === 0x21 && cose[i+1]  === 0x58 && cose[i+2]  === 0x20 &&
-              cose[i+35] === 0x22 && cose[i+36] === 0x58 && cose[i+37] === 0x20) {
-            xi = i + 3;
-            yi = i + 38;
-            break;
-          }
+      // Canonical COSE P-256 key: ... 0x21 0x58 0x20 <x32> 0x22 0x58 0x20 <y32> ...
+      let xi = -1, yi = -1;
+      for (let i = 0; i < cose.length - 67; i++) {
+        if (cose[i]    === 0x21 && cose[i+1]  === 0x58 && cose[i+2]  === 0x20 &&
+            cose[i+35] === 0x22 && cose[i+36] === 0x58 && cose[i+37] === 0x20) {
+          xi = i + 3; yi = i + 38; break;
         }
-        if (xi < 0) return cred; // pattern not found — return unpatched
-
-        // Build DER SubjectPublicKeyInfo for EC P-256 (91 bytes total)
-        const der = new Uint8Array(91);
-        const prefix = [
-          0x30, 0x59,                                           // SEQUENCE (89)
-          0x30, 0x13,                                           //   SEQUENCE (19)
-          0x06, 0x07, 0x2a, 0x86, 0x48, 0xce, 0x3d, 0x02, 0x01, //     OID ecPublicKey
-          0x06, 0x08, 0x2a, 0x86, 0x48, 0xce, 0x3d, 0x03, 0x01, 0x07, // OID P-256
-          0x03, 0x42, 0x00, 0x04,                               //   BIT STRING, uncompressed
-        ];
-        prefix.forEach((b, i) => { der[i] = b; });
-        der.set(cose.subarray(xi, xi + 32), prefix.length);
-        der.set(cose.subarray(yi, yi + 32), prefix.length + 32);
-        const derBuf = der.buffer;
-
-        // Wrap the credential in a Proxy so response.getPublicKey() returns the DER key
-        const origResponse = cred.response;
-        const patchedResponse = new Proxy(origResponse, {
-          get(target, prop) {
-            if (prop === 'getPublicKey') return () => derBuf;
-            const val = target[prop];
-            return typeof val === 'function' ? val.bind(target) : val;
-          },
-        });
-        return new Proxy(cred, {
-          get(target, prop) {
-            if (prop === 'response') return patchedResponse;
-            const val = target[prop];
-            return typeof val === 'function' ? val.bind(target) : val;
-          },
-        });
-      } catch (e) {
-        return cred; // Return unpatched on any error
       }
-    };
+      dbg('xi=' + xi + ' yi=' + yi);
+      if (xi < 0) return null;
+
+      // DER SubjectPublicKeyInfo for EC P-256 (91 bytes)
+      const der = new Uint8Array(91);
+      const prefix = [
+        0x30, 0x59, 0x30, 0x13,
+        0x06, 0x07, 0x2a, 0x86, 0x48, 0xce, 0x3d, 0x02, 0x01,
+        0x06, 0x08, 0x2a, 0x86, 0x48, 0xce, 0x3d, 0x03, 0x01, 0x07,
+        0x03, 0x42, 0x00, 0x04,
+      ];
+      prefix.forEach((b, i) => { der[i] = b; });
+      der.set(cose.subarray(xi, xi + 32), prefix.length);
+      der.set(cose.subarray(yi, yi + 32), prefix.length + 32);
+      dbg('DER built ok (91 bytes)');
+      return der.buffer;
+    }
+
+    if (typeof AuthenticatorAttestationResponse !== 'undefined') {
+      const proto = AuthenticatorAttestationResponse.prototype;
+      const origGetPK = proto.getPublicKey;
+      dbg('patching AuthenticatorAttestationResponse.prototype.getPublicKey');
+      try {
+        Object.defineProperty(proto, 'getPublicKey', {
+          value: function() {
+            let pk = null;
+            try { pk = origGetPK.call(this); } catch (e) { dbg('origGetPK threw: ' + e.message); }
+            dbg('origGetPK byteLength=' + (pk ? pk.byteLength : 'null'));
+            if (pk && pk.byteLength > 0) return pk;
+            try {
+              const der = buildDerFromAuthData(this.getAuthenticatorData());
+              if (der) return der;
+            } catch (e) { dbg('buildDer error: ' + e.message); }
+            return pk;
+          },
+          writable: true,
+          configurable: true,
+        });
+        dbg('prototype patch applied');
+      } catch (e) {
+        dbg('prototype patch FAILED: ' + e.message);
+      }
+    } else {
+      dbg('AuthenticatorAttestationResponse not available in initScript');
+    }
   });
 
   context.on('page', async (newPage) => {
