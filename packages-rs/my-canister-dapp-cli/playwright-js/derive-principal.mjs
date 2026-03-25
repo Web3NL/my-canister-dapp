@@ -1,5 +1,6 @@
 import { chromium } from '@playwright/test';
 import { readFileSync } from 'fs';
+import http from 'http';
 
 const canisterOrigin = process.env.DAPP_CANISTER_ORIGIN;
 const identityProvider = process.env.DAPP_II_PROVIDER;
@@ -63,19 +64,38 @@ async function main() {
   // macOS resolves *.localhost natively — this adds negligible overhead there.
   await context.route(
     (url) => url.hostname !== 'localhost' && url.hostname.endsWith('.localhost'),
-    async (route) => {
+    (route) => {
       const url = new URL(route.request().url());
-      const proxied = `http://localhost:${url.port}${url.pathname}${url.search}`;
-      try {
-        const response = await route.fetch({
-          url: proxied,
+      // Use Node.js http directly so the Host header is sent exactly as set.
+      // route.fetch() derives Host from the target URL and ignores overrides,
+      // which breaks PocketIC's canister routing by subdomain.
+      const req = http.request(
+        {
+          hostname: '127.0.0.1',
+          port: parseInt(url.port) || 80,
+          path: url.pathname + url.search,
+          method: route.request().method(),
           headers: { ...route.request().headers(), host: url.host },
-        });
-        await route.fulfill({ response });
-      } catch (e) {
+        },
+        (res) => {
+          const chunks = [];
+          res.on('data', (c) => chunks.push(c));
+          res.on('end', () => {
+            const headers = {};
+            for (const [k, v] of Object.entries(res.headers)) {
+              headers[k] = Array.isArray(v) ? v.join('\n') : String(v);
+            }
+            route.fulfill({ status: res.statusCode, headers, body: Buffer.concat(chunks) });
+          });
+        }
+      );
+      req.on('error', (e) => {
         process.stderr.write(`[proxy] ${url.href}: ${e.message}\n`);
-        await route.abort();
-      }
+        route.abort();
+      });
+      const body = route.request().postDataBuffer();
+      if (body) req.write(body);
+      req.end();
     }
   );
 
