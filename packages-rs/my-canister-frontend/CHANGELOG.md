@@ -7,6 +7,7 @@
 - `StandardHeader` enum for typed exclusion of default security headers
 - `FrontendConfig::excluded_headers: Vec<StandardHeader>` — omit specific default headers from every response
 - `FrontendConfig::extra_headers: Vec<(String, String)>` — add headers to every response; a name matching a default (case-insensitive) replaces that default rather than duplicating it
+- `MAX_FILE_SIZE: usize` public constant (2,080,768 bytes) — replaces the removed `DEFAULT_MAX_FILE_SIZE`; reference it when you need to check the limit at compile time
 
 ### Fixed
 
@@ -18,9 +19,14 @@
 - Updated terminology: "Canister Dapp" → "User-owned dapp" in package description and documentation
 - **Breaking**: `FrontendConfig` gains two new fields (`excluded_headers`, `extra_headers`); struct literals must add `..Default::default()` to remain valid
 - **Breaking**: `FrontendConfig` no longer has a `max_file_size` field; the size limit is fixed and non-configurable. Remove any `max_file_size` assignments from `FrontendConfig` struct literals.
-- **Breaking**: `DEFAULT_MAX_FILE_SIZE` constant removed from the public API.
+- **Breaking**: `DEFAULT_MAX_FILE_SIZE` constant removed from the public API; use `MAX_FILE_SIZE` instead.
 - `X-XSS-Protection: 0` removed from default headers (legacy IE/old-Chrome header; add via `extra_headers` if still needed)
 - `Strict-Transport-Security` removed from default headers (ICP gateway enforces HTTPS; redundant on `.icp0.io`/`.ic0.app` domains; add via `extra_headers` for custom domains)
+- README tagline extended to mention static serving
+
+### Tests
+
+- Added test asserting that `.gz` files are rejected at validation with a clear "not in the allowed list" error, preventing a confusing duplicate-path error that would otherwise surface if a user manually includes a pre-compressed file alongside its source
 
 ## [0.3.0] - 2026-02-27
 
