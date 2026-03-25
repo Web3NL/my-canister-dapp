@@ -549,7 +549,7 @@ mod tests {
 
         #[test]
         fn js_file_config() {
-            let config = create_asset_config("/app.js", false, &FrontendConfig::default());
+            let config = create_asset_config("/app.js", true, &FrontendConfig::default());
 
             match config {
                 AssetConfig::File {
@@ -569,8 +569,9 @@ mod tests {
                     );
                     assert!(fallback_for.is_empty());
                     assert!(aliased_by.is_empty());
-                    assert_eq!(encodings.len(), 1);
+                    assert_eq!(encodings.len(), 2);
                     assert!(matches!(encodings[0].0, AssetEncoding::Identity));
+                    assert!(matches!(encodings[1].0, AssetEncoding::Gzip));
                 }
                 _ => panic!("Expected AssetConfig::File"),
             }

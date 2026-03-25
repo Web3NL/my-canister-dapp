@@ -9,7 +9,7 @@ use ic_http_certification::{HttpRequest, HttpResponse, StatusCode};
 use include_dir::Dir;
 use std::borrow::Cow;
 
-/// Initialize and certify your user-owned dapp frontend assets.
+/// Initialize and certify frontend assets.
 ///
 /// Embeds files from an [`include_dir`](https://docs.rs/include_dir/latest/include_dir/) `Dir` into the internal
 /// [`AssetRouter`](https://docs.rs/ic-asset-certification/latest/ic_asset_certification/struct.AssetRouter.html)
@@ -38,7 +38,7 @@ pub fn setup_frontend(assets_dir: &Dir<'static>) -> Result<(), String> {
     setup_frontend_with_config(assets_dir, &FrontendConfig::default())
 }
 
-/// Initialize and certify your user-owned dapp frontend assets with custom configuration.
+/// Initialize and certify frontend assets with custom configuration.
 ///
 /// Like [`setup_frontend`], but allows specifying additional allowed file
 /// extensions and other options via [`FrontendConfig`].
@@ -67,9 +67,7 @@ pub fn setup_frontend_with_config(
     })
 }
 
-/// Serve certified frontend assets.
-/// Any other additional assets you may have added to the asset router,
-/// like for example dashboard assets, will also be served.
+/// Serve certified assets from the internal asset router.
 ///
 /// # Example
 /// ```rust,no_run

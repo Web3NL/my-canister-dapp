@@ -1,7 +1,7 @@
 [package]
 name = "my-canister-frontend"
 version = "0.3.0"
-description = "Frontend asset utilities for user-owned dapps on the Internet Computer"
+description = "Frontend asset processing library for canisters on the Internet Computer"
 documentation = "https://docs.rs/my-canister-frontend"
 readme = "README.md"
 keywords = ["internet-computer", "canister", "frontend", "assets", "dapp"]
@@ -15,7 +15,6 @@ repository = "https://github.com/Web3NL/my-canister-dapp/tree/main/packages-rs/m
 crate-type = ["rlib"]
 
 [dependencies]
-candid.workspace = true
 ic-asset-certification.workspace = true
 ic-http-certification.workspace = true
 ic-cdk.workspace = true

@@ -5,7 +5,7 @@
 [![Build Status](https://github.com/Web3NL/my-canister-dapp/workflows/Release/badge.svg)](https://github.com/Web3NL/my-canister-dapp/actions)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
 
-Frontend asset processing library for user-owned dapps on the Internet Computer.
+Frontend asset processing library for canisters on the Internet Computer.
 
 ## Usage
 
@@ -21,7 +21,7 @@ static ASSETS: Dir = include_dir!("$CARGO_MANIFEST_DIR/../dapp-frontend/dist");
 
 #[init]
 fn init() {
-	setup_frontend(&ASSETS);
+	setup_frontend(&ASSETS).expect("Failed to setup frontend");
 }
 
 #[query]
@@ -37,16 +37,18 @@ fn http_request(req: HttpRequest) -> HttpResponse {
 - Automatic MIME type detection using `mime_guess`
 - `index.html` auto-configured as fallback for `/`
 - Certification using [`ic-asset-certification`](https://docs.rs/ic-asset-certification)
-- **Security headers**: 8 default security/privacy headers on all responses (HSTS, X-Frame-Options, Referrer-Policy, etc.)
-- **Asset validation**: File type allowlist, 2 MB size limit, path traversal protection, duplicate detection
+- **Security headers**: 6 default security/privacy headers on all responses (X-Frame-Options, Referrer-Policy, Permissions-Policy, etc.)
+- **Asset validation**: File type allowlist, 2 MiB − 16 KiB size limit, path traversal protection, duplicate detection
 - **Gzip compression**: Automatic gzip for text-based assets (HTML, JS, CSS, JSON, SVG)
-- **Configurable**: Use `FrontendConfig` to allow additional file types or adjust size limits
+- **Configurable**: Use `FrontendConfig` to allow additional file types, suppress default headers, or add custom headers
 - Exposes `with_asset_router` and `with_asset_router_mut` for access to the asset router, see example below.
 - Exposes `asset_router_configs` if you want to implement your own asset router, see [this example](https://github.com/Web3NL/my-canister-dapp/blob/e8fdc0ac81f7bdc702418c05130ace3f9f5399fb/examples/my-hello-world/src/backend/src/lib.rs).
 
 ## Configuration
 
-To allow additional file types or customize settings:
+`FrontendConfig` controls which file types are accepted and what HTTP headers are sent with every response. All fields have sensible defaults — only set what you need, and use `..Default::default()` to fill in the rest.
+
+### Allow additional file types
 
 ```rust,ignore
 use ic_cdk::init;
@@ -65,37 +67,61 @@ fn init() {
 }
 ```
 
-## Usage with [`my_canister_dashboard`](https://crates.io/crates/my-canister-dashboard)
+### Default security headers
+
+Every response includes these headers out of the box:
+
+| Header | Value |
+|---|---|
+| `X-Content-Type-Options` | `nosniff` |
+| `X-Frame-Options` | `DENY` |
+| `Referrer-Policy` | `no-referrer` |
+| `Permissions-Policy` | `accelerometer=(), camera=(), geolocation=(), microphone=(), payment=(), usb=()` |
+| `Cross-Origin-Opener-Policy` | `same-origin-allow-popups` |
+| `Cross-Origin-Resource-Policy` | `same-origin` |
+
+`Strict-Transport-Security` is intentionally omitted — ICP gateways enforce HTTPS at the infrastructure level, making it redundant on `.icp0.io`/`.ic0.app` domains. `X-XSS-Protection` is also omitted as it is a legacy header for old IE/Chrome versions. Both can be added via `extra_headers` if needed.
+
+### Suppress a default header
+
+Use `excluded_headers` with a `StandardHeader` variant to remove a specific default:
 
 ```rust,ignore
-use ic_cdk::{init, query};
-use ic_http_certification::{HttpRequest, HttpResponse};
-use include_dir::{include_dir, Dir};
-use my_canister_dashboard::setup_dashboard_assets;
-use my_canister_frontend::setup_frontend;
-use my_canister_frontend::asset_router::with_asset_router_mut;
+use my_canister_frontend::{setup_frontend_with_config, FrontendConfig, StandardHeader};
 
-static ASSETS: Dir = include_dir!("$CARGO_MANIFEST_DIR/../dapp-frontend/dist");
+let config = FrontendConfig {
+    excluded_headers: vec![StandardHeader::XFrameOptions],
+    ..Default::default()
+};
+```
 
-#[init]
-fn init() {
-	setup_frontend(&ASSETS);
+### Add or override headers
 
-    // Setup dashboard in internal asset router
-    with_asset_router_mut(|router| {
-        setup_dashboard_assets(
-            router,
-            Some(vec![
-                "https://mycanister.app".to_string(),
-            ]),
-        );
-    });
-}
+Use `extra_headers` to append headers to every response. If the name matches a default header (case-insensitive), the default is replaced rather than duplicated:
 
-#[query]
-fn http_request(req: HttpRequest) -> HttpResponse {
-	my_canister_frontend::http_request(req)
-}
+```rust,ignore
+use my_canister_frontend::{setup_frontend_with_config, FrontendConfig};
+
+let config = FrontendConfig {
+    // Replaces the default X-Frame-Options: DENY
+    extra_headers: vec![
+        ("X-Frame-Options".to_string(), "SAMEORIGIN".to_string()),
+        ("Content-Security-Policy".to_string(), "default-src 'self'".to_string()),
+    ],
+    ..Default::default()
+};
+```
+
+To add HSTS on a custom domain:
+
+```rust,ignore
+let config = FrontendConfig {
+    extra_headers: vec![(
+        "Strict-Transport-Security".to_string(),
+        "max-age=31536000; includeSubDomains".to_string(),
+    )],
+    ..Default::default()
+};
 ```
 
 ## License
