@@ -41,8 +41,8 @@ fn http_request(req: HttpRequest) -> HttpResponse {
 - **Asset validation**: File type allowlist, 2 MiB − 16 KiB size limit, path traversal protection, duplicate detection
 - **Gzip compression**: Automatic gzip for text-based assets (HTML, JS, CSS, JSON, SVG)
 - **Configurable**: Use `FrontendConfig` to allow additional file types, suppress default headers, or add custom headers
-- Exposes `with_asset_router` and `with_asset_router_mut` for access to the asset router, see example below.
-- Exposes `asset_router_configs` if you want to implement your own asset router, see [this example](https://github.com/Web3NL/my-canister-dapp/blob/e8fdc0ac81f7bdc702418c05130ace3f9f5399fb/examples/my-hello-world/src/backend/src/lib.rs).
+- Exposes `with_asset_router` and `with_asset_router_mut` for direct access to the internal asset router
+- Exposes `asset_router_configs` and `asset_router_configs_with_config` for building your own asset router pipeline
 
 ## Configuration
 
@@ -79,8 +79,6 @@ Every response includes these headers out of the box:
 | `Permissions-Policy` | `accelerometer=(), camera=(), geolocation=(), microphone=(), payment=(), usb=()` |
 | `Cross-Origin-Opener-Policy` | `same-origin-allow-popups` |
 | `Cross-Origin-Resource-Policy` | `same-origin` |
-
-`Strict-Transport-Security` is intentionally omitted — ICP gateways enforce HTTPS at the infrastructure level, making it redundant on `.icp0.io`/`.ic0.app` domains. `X-XSS-Protection` is also omitted as it is a legacy header for old IE/Chrome versions. Both can be added via `extra_headers` if needed.
 
 ### Suppress a default header
 
