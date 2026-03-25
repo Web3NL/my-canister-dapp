@@ -51,7 +51,14 @@ async function handleIIPopupAlwaysNew(popup) {
 }
 
 async function main() {
-  const browser = await chromium.launch({ headless: true });
+  const browser = await chromium.launch({
+    headless: true,
+    // On Ubuntu, Chromium's built-in DNS resolver does not resolve *.localhost
+    // subdomains. Explicitly map them to 127.0.0.1 so the local PocketIC
+    // HTTP gateway (e.g. rdmx6-...-cai.localhost:8080) is reachable.
+    // macOS resolves *.localhost natively; this rule is a no-op there.
+    args: ['--host-resolver-rules=MAP *.localhost 127.0.0.1'],
+  });
   // Fresh context = no stored passkey identity
   const context = await browser.newContext();
   const page = await context.newPage();
