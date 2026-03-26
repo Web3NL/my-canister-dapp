@@ -75,6 +75,29 @@ Every canister serves the dashboard at `/canister-dashboard` with HTTP certifica
 
 The `demos` canister provides time-limited trial access via access codes (XXXX-XXXX-XXXX). Redemption: atomically claim code → take canister from pool → install wasm → II auth (same derivationOrigin pattern) → set principal → start trial timer. On expiry, wasm is uninstalled and canister returned to pool. See `docs/demos-feature.md`.
 
+## ⚠️ Internet Identity in Local Dev: II v2 DUMMY_AUTH
+
+**IMPORTANT — Read this before working on anything II-related locally.**
+
+The II canister bundled with `icp-cli` (`ii: true` in `icp.yaml`) is **Internet Identity v2 in dev/dummy mode**. It behaves completely differently from production II:
+
+- **No WebAuthn hardware required.** The build flag `pP=!0` (DUMMY_AUTH=true) forces `let Al=M0` — the auth class is always `M0` (dummy), which generates credentials from a fixed seed (all zeros) without calling any WebAuthn APIs.
+- **`M0.createNew()` / `M0.useExisting()`** return `Promise.resolve(new M0(r))` instantly. No `credentials.create()`, no `credentials.get()`, no platform authenticator needed.
+- **Credential ID is always 32 zero bytes** (deterministic, seed=0). First run on a fresh canister: `lookup_device_key(zeros)` → not found → "Create new identity" flow. Subsequent runs → found → "Continue" directly.
+- **`dapp derive-ii-principal`** works out of the box on macOS: `dapp derive-ii-principal https://test.com` returns a principal in ~5s.
+
+**Do NOT add CDP virtual authenticators, attestation patches, or CBOR hacks for local II dev.** These are only relevant for production II or non-DUMMY_AUTH builds.
+
+### Headless Linux CI patches (only for CI, not for logic changes)
+
+Headless Linux Chrome still needs these patches in `derive-principal.mjs` `addInitScript`:
+1. `isUserVerifyingPlatformAuthenticatorAvailable = () => Promise.resolve(true)` — CI's newer II build gates the "Create new identity" button on this returning true; headless Linux returns false by default.
+2. `credentials.get()` intercept for empty `allowCredentials` → reject with `NotAllowedError` — the `/authorize` page calls this on mount for passkey autofill; on headless Linux it throws `NotSupportedError` and blocks the UI.
+3. DNS proxy: `context.route()` + Node.js `http.request()` to `127.0.0.1` for `*.localhost` — Linux headless Chrome doesn't resolve `*.localhost` subdomains.
+4. Gzip decompression: decompress in Node.js before `route.fulfill()` and strip hop-by-hop headers.
+
+These are CI environment workarounds — they don't change the II auth logic (still DUMMY_AUTH).
+
 ## Commands
 
 Uses `icp-cli` (`icp` command) — **not dfx**. Config: `icp.yaml`. Networks: `local` (PocketIC on port 8080), `ic` (mainnet).

@@ -175,18 +175,29 @@ async function main() {
     }
   );
 
-  // The II /authorize page calls credentials.get() with empty allowCredentials on mount
-  // for passkey autofill/discovery. On headless Linux Chrome this throws NotSupportedError
-  // and prevents the passkey UI from rendering.
+  // The II /authorize page on headless Linux needs two patches to render its button UI:
   //
-  // Intercept discoverable-credential calls (allowCredentials undefined or empty) and
-  // reject with NotAllowedError, which II treats as "no passkeys found" and renders the
-  // button UI normally. Non-discoverable calls (allowCredentials non-empty) pass through
-  // to the real implementation — the local II dev build handles those without a real
-  // authenticator (DUMMY_AUTH mode).
+  // 1. isUserVerifyingPlatformAuthenticatorAvailable() returns false on headless Linux.
+  //    II checks this to enable/disable the "Create new identity" button. Override it to
+  //    return true so the button is enabled.
+  //
+  // 2. credentials.get() with empty allowCredentials (discoverable/autofill call) throws
+  //    NotSupportedError on headless Linux, blocking UI render. Intercept and reject with
+  //    NotAllowedError instead — II treats that as "no passkeys found" and shows buttons.
+  //    Non-discoverable calls (allowCredentials non-empty) pass through.
+  //
+  // The local II dev build (icp-cli, ii: true) uses DUMMY_AUTH (M0 class) — no WebAuthn
+  // hardware or CDP virtual authenticators are needed. M0.createNew/useExisting just
+  // return Promise.resolve() without calling any WebAuthn APIs.
   //
   // addInitScript runs on ALL pages (including the II popup) before any page JavaScript.
   await context.addInitScript(() => {
+    try {
+      if (typeof PublicKeyCredential !== 'undefined') {
+        PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable = () =>
+          Promise.resolve(true);
+      }
+    } catch (_) {}
     try {
       const _origGet = navigator.credentials.get.bind(navigator.credentials);
       navigator.credentials.get = function(options) {
