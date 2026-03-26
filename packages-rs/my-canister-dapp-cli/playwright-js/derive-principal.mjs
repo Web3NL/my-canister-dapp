@@ -229,15 +229,33 @@ async function main() {
       try {
         Object.defineProperty(proto, 'getPublicKey', {
           value: function() {
-            let pk = null;
-            try { pk = origGetPK.call(this); } catch (e) { dbg('origGetPK threw: ' + e.message); }
-            dbg('origGetPK byteLength=' + (pk ? pk.byteLength : 'null'));
-            if (pk && pk.byteLength > 0) return pk;
+            dbg('getPublicKey called');
+            // Log what the native implementation returns — for diagnosis.
+            // CDP virtual authenticators may return 91 bytes BUT with malformed DER
+            // (wrong OID encoding or key bytes), causing II's DER parser to throw.
+            let nativePk = null;
+            try { nativePk = origGetPK.call(this); } catch (e) { dbg('origGetPK threw: ' + e.message); }
+            if (nativePk) {
+              const nb = new Uint8Array(nativePk);
+              dbg('native byteLength=' + nb.length + ' first4: ' +
+                Array.from(nb.slice(0, 4)).map(b => b.toString(16).padStart(2,'0')).join(' '));
+            } else {
+              dbg('native returned null/undefined');
+            }
+
+            // ALWAYS build DER from authenticatorData COSE key — do not trust the native
+            // result even when non-empty, because CDP virtual authenticators may return
+            // malformed DER that II's strict parser rejects.
             try {
               const der = buildDerFromAuthData(this.getAuthenticatorData());
-              if (der) return der;
+              if (der) {
+                dbg('returning COSE-derived DER (91 bytes)');
+                return der;
+              }
             } catch (e) { dbg('buildDer error: ' + e.message); }
-            return pk;
+
+            dbg('fallback: returning native result');
+            return nativePk;
           },
           writable: true,
           configurable: true,
