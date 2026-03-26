@@ -91,7 +91,6 @@ async function handleIIPopup(popup) {
         const btn = [...document.querySelectorAll('button')]
           .find((b) => b.textContent.trim() === 'Create new identity');
         if (!btn) return false;
-        process.stderr?.write?.('[ii-popup] removing disabled + dispatching click\n');
         btn.disabled = false;
         btn.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
         return true;
