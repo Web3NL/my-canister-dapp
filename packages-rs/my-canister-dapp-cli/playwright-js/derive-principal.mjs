@@ -319,27 +319,45 @@ async function main() {
       } catch (e) { dbg('getPublicKey patch FAILED: ' + e.message); }
     }
 
-    // ── Fix 3: credentials.create() — store authData + none-attestation Proxy ─
-    // Store authData so Fix 1 can substitute it into 0-byte DataViews.
-    // Also wrap the credential in a Proxy that returns a "none" attestation object,
-    // so II skips packed-attestation signature verification.
-    function buildNoneAttestationCbor(authDataBuf) {
-      function ct(s) {
-        const b = [0x60 | s.length];
-        for (let i = 0; i < s.length; i++) b.push(s.charCodeAt(i));
-        return b;
+    // ── Fix 3: credentials.create() — synthetic authData + packed self-attestation ─
+    // Generate a fresh P-256 keypair + 148-byte synthetic authData with a 16-byte
+    // credId, replacing the CDP virtual authenticator's malformed output (64-byte
+    // credId leaves only 45 bytes for the COSE key — too short for P-256 at ~77b).
+    // Sign authData||SHA256(clientDataJSON) with the generated private key so that
+    // II's packed-attestation verification passes on both client and canister side.
+
+    function b64url(buf) {
+      return btoa(String.fromCharCode(...new Uint8Array(buf)))
+        .replace(/\+/g, '-').replace(/\//g, '_').replace(/=/g, '');
+    }
+
+    // Convert SubtleCrypto ECDSA output (P1363: r||s, 64 bytes) to DER SEQUENCE.
+    function p1363ToDer(p1363Buf) {
+      const a = new Uint8Array(p1363Buf);
+      function encInt(b) {
+        let i = 0; while (i < b.length - 1 && b[i] === 0) i++;
+        b = b.slice(i);
+        if (b[0] & 0x80) b = new Uint8Array([0, ...b]);
+        return [0x02, b.length, ...b];
       }
-      const n = authDataBuf.byteLength;
-      const hdr = [
-        0xa3,
-        ...ct('fmt'), ...ct('none'),
-        ...ct('attStmt'), 0xa0,
-        ...ct('authData'),
-        ...(n <= 23 ? [0x40 | n] : n <= 255 ? [0x58, n] : [0x59, (n >> 8) & 0xff, n & 0xff]),
-      ];
+      const r = encInt(a.slice(0, 32)), s = encInt(a.slice(32, 64));
+      return new Uint8Array([0x30, r.length + s.length, ...r, ...s]).buffer;
+    }
+
+    function buildPackedAttestationCbor(authDataBuf, sigBuf) {
+      function ct(s) { const b=[0x60|s.length]; for(let i=0;i<s.length;i++) b.push(s.charCodeAt(i)); return b; }
+      function bstr(buf) {
+        const n = new Uint8Array(buf).length;
+        const p = n<=23?[0x40|n]:n<=255?[0x58,n]:[0x59,(n>>8)&0xff,n&0xff];
+        return [...p, ...new Uint8Array(buf)];
+      }
+      // attStmt: {alg: -7, sig: sigBuf} — 0xa2=map(2), 0x26=CBOR -7 (ES256)
+      const attStmt = [0xa2, ...ct('alg'), 0x26, ...ct('sig'), ...bstr(sigBuf)];
+      const n = new Uint8Array(authDataBuf).length;
+      const hdr = [0xa3, ...ct('fmt'), ...ct('packed'), ...ct('attStmt'), ...attStmt,
+        ...ct('authData'), ...(n<=23?[0x40|n]:n<=255?[0x58,n]:[0x59,(n>>8)&0xff,n&0xff])];
       const result = new Uint8Array(hdr.length + n);
-      result.set(hdr, 0);
-      result.set(new Uint8Array(authDataBuf), hdr.length);
+      result.set(hdr, 0); result.set(new Uint8Array(authDataBuf), hdr.length);
       return result.buffer;
     }
 
@@ -352,11 +370,8 @@ async function main() {
       if (!cred || !cred.response) return cred;
       dbg('credentials.create returned type=' + cred.type);
 
-      // Generate synthetic authData with a real P-256 key and a short 16-byte
-      // credential ID. CDP virtual authenticators use 64-byte credential IDs,
-      // leaving only ~45 bytes for the COSE key in a 164-byte authData — too
-      // short for a P-256 COSE key (~77 bytes), causing "Input too short".
-      let syntheticAuthData;
+      // Generate synthetic authData with a real P-256 key and a short 16-byte credId.
+      let syntheticAuthData, privateKey, credId;
       try {
         const cdpAD = cred.response.getAuthenticatorData();
         const rpIdHash = cdpAD && cdpAD.byteLength >= 32
@@ -365,10 +380,11 @@ async function main() {
         const kp = await crypto.subtle.generateKey(
           { name: 'ECDSA', namedCurve: 'P-256' }, true, ['sign', 'verify']
         );
+        privateKey = kp.privateKey;
         const raw = new Uint8Array(await crypto.subtle.exportKey('raw', kp.publicKey));
         const x = raw.slice(1, 33), y = raw.slice(33, 65);
 
-        const credId = crypto.getRandomValues(new Uint8Array(16));
+        credId = crypto.getRandomValues(new Uint8Array(16));
         const cose = new Uint8Array([
           0xa5, 0x01, 0x02, 0x03, 0x26, 0x20, 0x01,
           0x21, 0x58, 0x20, ...x,
@@ -400,33 +416,50 @@ async function main() {
         } catch (e2) {}
       }
 
-      let noneAttestCbor;
-      try { noneAttestCbor = buildNoneAttestationCbor(syntheticAuthData); } catch(e) {}
-      if (noneAttestCbor) {
-        const synthAD = syntheticAuthData;
-        const realResp = cred.response;
-        const proxiedResp = new Proxy(realResp, {
-          get(target, prop) {
-            if (prop === 'attestationObject') {
-              dbg('intercepted attestationObject → none CBOR');
-              return noneAttestCbor;
-            }
-            if (prop === 'getAuthenticatorData') {
-              return () => synthAD;
-            }
-            const val = target[prop];
-            return typeof val === 'function' ? val.bind(target) : val;
-          },
-        });
-        cred = new Proxy(cred, {
-          get(target, prop) {
-            if (prop === 'response') return proxiedResp;
-            const val = target[prop];
-            return typeof val === 'function' ? val.bind(target) : val;
-          },
-        });
-        dbg('credential wrapped: synthetic authData + none-attestation');
+      if (!syntheticAuthData) return cred;
+
+      // Build packed self-attestation: sign authData||SHA256(clientDataJSON) with
+      // the private key whose public key is embedded in syntheticAuthData.
+      let attestCbor;
+      try {
+        const cldHash = await crypto.subtle.digest('SHA-256', cred.response.clientDataJSON);
+        const verifBuf = new Uint8Array(syntheticAuthData.byteLength + 32);
+        verifBuf.set(new Uint8Array(syntheticAuthData), 0);
+        verifBuf.set(new Uint8Array(cldHash), syntheticAuthData.byteLength);
+        const sigP1363 = await crypto.subtle.sign(
+          { name: 'ECDSA', hash: 'SHA-256' }, privateKey, verifBuf
+        );
+        const sigDer = p1363ToDer(sigP1363);
+        dbg('packed sig: ' + new Uint8Array(sigDer).length + 'b');
+        attestCbor = buildPackedAttestationCbor(syntheticAuthData, sigDer);
+        dbg('intercepted attestationObject → packed CBOR');
+      } catch (e) {
+        dbg('packed attestation FAILED: ' + e.message);
       }
+
+      if (!attestCbor) return cred;
+
+      const synthAD = syntheticAuthData;
+      const realResp = cred.response;
+      const proxiedResp = new Proxy(realResp, {
+        get(target, prop) {
+          if (prop === 'attestationObject') return attestCbor;
+          if (prop === 'getAuthenticatorData') return () => synthAD;
+          const val = target[prop];
+          return typeof val === 'function' ? val.bind(target) : val;
+        },
+      });
+      const credIdBuf = credId;
+      cred = new Proxy(cred, {
+        get(target, prop) {
+          if (prop === 'response') return proxiedResp;
+          if (prop === 'rawId' && credIdBuf) return credIdBuf.buffer;
+          if (prop === 'id' && credIdBuf) return b64url(credIdBuf);
+          const val = target[prop];
+          return typeof val === 'function' ? val.bind(target) : val;
+        },
+      });
+      dbg('credential wrapped: synthetic authData + packed self-attestation');
       return cred;
     };
 
