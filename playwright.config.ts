@@ -16,7 +16,7 @@ export default defineConfig({
       // subdomains. Explicitly map them to 127.0.0.1 so local PocketIC canisters
       // (e.g. <canister-id>.localhost:8080) and the II canister are reachable.
       // macOS resolves *.localhost natively; this rule is a no-op there.
-      args: ['--host-resolver-rules=MAP *.localhost 127.0.0.1'],
+      args: ['--host-resolver-rules=MAP *.localhost 127.0.0.1,MAP localhost 127.0.0.1'],
     },
   },
   projects: [

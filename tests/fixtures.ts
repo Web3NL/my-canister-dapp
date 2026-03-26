@@ -4,7 +4,7 @@
  * Applies the same fixes as derive-principal.mjs to every test context:
  *   1. addInitScript: isUserVerifyingPlatformAuthenticatorAvailable → true
  *   2. addInitScript: credentials.get → NotAllowedError (stops UI from blocking)
- *   3. context.route: Node.js HTTP proxy for *.localhost (DNS + gzip + bundle patch)
+ *   3. context.route: Node.js HTTP proxy for *.localhost and localhost (DNS + CORS bypass + gzip + bundle patch)
  *   4. II bundle patch: force DUMMY_AUTH path (Vr.dummy_auth check → true)
  *   5. II bundle patch: unique seed per context (avoids credential conflicts between tests)
  */
@@ -36,7 +36,7 @@ async function applyIIPatches(context: BrowserContext, seed: number): Promise<vo
   });
 
   await context.route(
-    (url) => url.hostname !== 'localhost' && url.hostname.endsWith('.localhost'),
+    (url) => url.hostname === 'localhost' || url.hostname.endsWith('.localhost'),
     (route) => {
       const url = new URL(route.request().url());
       const req = http.request(
