@@ -279,8 +279,36 @@ async function main() {
       dbg('AuthenticatorAttestationResponse not available in initScript');
     }
 
-    // Wrap credentials.create() for diagnostics — also check whether our prototype
-    // patch is actually reachable via the returned response object.
+    // CDP virtual authenticators return a "packed" attestationObject whose CBOR may use
+    // CTAP2 integer map keys instead of WebAuthn text keys ("fmt","attStmt","authData").
+    // II's CBOR decoder looks for text key "authData" and returns an empty buffer when
+    // the key is missing, causing DataView.getUint16(53) to throw on a 0-byte DataView.
+    //
+    // Fix: intercept credentials.create() and replace attestationObject on the returned
+    // credential with a well-formed "none" attestation CBOR built from the correct
+    // authData obtained via getAuthenticatorData().
+    function buildNoneAttestationCbor(authDataBuf) {
+      // {"fmt":"none","attStmt":{},"authData":<bytes>}
+      function ct(s) {
+        const b = [0x60 | s.length];
+        for (let i = 0; i < s.length; i++) b.push(s.charCodeAt(i));
+        return b;
+      }
+      const n = authDataBuf.byteLength;
+      const adBytes = new Uint8Array(authDataBuf);
+      const hdr = [
+        0xa3,                        // map(3)
+        ...ct('fmt'), ...ct('none'), // "fmt": "none"
+        ...ct('attStmt'), 0xa0,      // "attStmt": {}
+        ...ct('authData'),           // "authData": <bytes below>
+        ...(n <= 23 ? [0x40 | n] : n <= 255 ? [0x58, n] : [0x59, (n >> 8) & 0xff, n & 0xff]),
+      ];
+      const result = new Uint8Array(hdr.length + n);
+      result.set(hdr, 0);
+      result.set(adBytes, hdr.length);
+      return result.buffer;
+    }
+
     const _origCreate = navigator.credentials.create.bind(navigator.credentials);
     navigator.credentials.create = async function(options) {
       dbg('credentials.create called');
@@ -291,23 +319,47 @@ async function main() {
         dbg('credentials.create THREW: ' + e.message);
         throw e;
       }
-      dbg('credentials.create returned type=' + (cred ? cred.type : 'null'));
-      if (cred && cred.response) {
-        dbg('response instanceof AuthenticatorAttestationResponse: ' +
-            (cred.response instanceof AuthenticatorAttestationResponse));
-        dbg('response.getPublicKey is patched: ' +
-            (cred.response.getPublicKey !== (typeof AuthenticatorAttestationResponse !== 'undefined'
-              ? AuthenticatorAttestationResponse.prototype.getPublicKey : null)));
-        let pk = null;
-        try { pk = cred.response.getPublicKey(); } catch (e) { dbg('getPublicKey threw: ' + e.message); }
-        dbg('getPublicKey byteLength=' + (pk ? pk.byteLength : 'null'));
-        let authDataLen = null;
-        try { authDataLen = cred.response.getAuthenticatorData()?.byteLength; } catch(e) {}
-        dbg('getAuthenticatorData byteLength=' + authDataLen);
-        let attObjLen = null;
-        try { attObjLen = cred.response.attestationObject?.byteLength; } catch(e) {}
-        dbg('attestationObject byteLength=' + attObjLen);
+      if (!cred || !cred.response) return cred;
+      dbg('credentials.create returned type=' + cred.type);
+
+      // Log attestationObject first bytes to confirm CBOR key format (text vs integer).
+      try {
+        const aoBytes = new Uint8Array(cred.response.attestationObject);
+        dbg('attObj first8: ' + Array.from(aoBytes.slice(0, 8)).map(b => b.toString(16).padStart(2,'0')).join(' '));
+      } catch(e) { dbg('attObj read error: ' + e.message); }
+
+      // Get authData from getAuthenticatorData() (always correct) and build a "none"
+      // attestation CBOR to replace the CDP-generated one (which may use integer keys).
+      let noneAttestCbor;
+      try {
+        const authData = cred.response.getAuthenticatorData();
+        dbg('authData byteLength=' + authData.byteLength);
+        noneAttestCbor = buildNoneAttestationCbor(authData);
+        dbg('none CBOR built: ' + noneAttestCbor.byteLength + ' bytes');
+      } catch(e) { dbg('buildNoneAttestCbor error: ' + e.message); }
+
+      if (noneAttestCbor) {
+        const realResp = cred.response;
+        const proxiedResp = new Proxy(realResp, {
+          get(target, prop) {
+            if (prop === 'attestationObject') {
+              dbg('intercepted attestationObject → none CBOR');
+              return noneAttestCbor;
+            }
+            const val = target[prop];
+            return typeof val === 'function' ? val.bind(target) : val;
+          },
+        });
+        cred = new Proxy(cred, {
+          get(target, prop) {
+            if (prop === 'response') return proxiedResp;
+            const val = target[prop];
+            return typeof val === 'function' ? val.bind(target) : val;
+          },
+        });
+        dbg('credential wrapped with none-attestation Proxy');
       }
+
       return cred;
     };
 
