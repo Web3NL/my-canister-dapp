@@ -56,5 +56,5 @@ jobs:
           getent hosts localhost || true
 
       - name: Build, validate and run tests (E2E)
-        # TODO(derive-ii-principal): remove --skip-checks --skip-acceptance before merging
-        run: ./validate-and-test-all.sh --skip-checks --skip-acceptance ${{ inputs.include-vite-e2e && '--include-vite-e2e' || '' }}
+        # TODO(derive-ii-principal): remove --skip-acceptance before merging
+        run: ./validate-and-test-all.sh --skip-acceptance ${{ inputs.include-vite-e2e && '--include-vite-e2e' || '' }}
