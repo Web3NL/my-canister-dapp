@@ -181,17 +181,6 @@ async function main() {
       PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable = () =>
         Promise.resolve(true);
     }
-
-    // On Linux headless, credentials.get() with empty allowCredentials (resident/
-    // discoverable credential discovery) throws NotSupportedError, which prevents
-    // II from rendering its passkey UI. Return null instead so II proceeds normally.
-    const _origGet = navigator.credentials.get.bind(navigator.credentials);
-    navigator.credentials.get = function(options) {
-      if (!options?.allowCredentials?.length || options?.mediation === 'conditional') {
-        return Promise.resolve(null);
-      }
-      return _origGet(options);
-    };
   });
 
   const page = await context.newPage();
