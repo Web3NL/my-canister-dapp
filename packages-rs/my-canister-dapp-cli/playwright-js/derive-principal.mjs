@@ -174,15 +174,6 @@ async function main() {
     }
   );
 
-  await context.addInitScript(() => {
-    // On Linux headless, isUserVerifyingPlatformAuthenticatorAvailable() returns false,
-    // which causes II to hide the passkey UI. Override to always show it.
-    if (typeof PublicKeyCredential !== 'undefined') {
-      PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable = () =>
-        Promise.resolve(true);
-    }
-  });
-
   const page = await context.newPage();
 
   // Intercept canister origin — the canister does not need to be running for
