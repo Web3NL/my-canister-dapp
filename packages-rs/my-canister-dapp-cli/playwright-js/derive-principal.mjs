@@ -173,53 +173,68 @@ async function main() {
         Promise.resolve(true);
     }
 
-    // Diagnostic: emitted as [ii-console] in stderr
     const dbg = (msg) => console.error('[dbg] ' + msg);
 
-    // Intercept DataView.getUint16 to log the buffer size and offset at failure.
-    // This tells us whether it's parsing the 91-byte DER from getPublicKey() or
-    // a different buffer (e.g. attestationObject CBOR).
-    const _origGU16 = DataView.prototype.getUint16;
-    DataView.prototype.getUint16 = function(offset, le) {
-      if (offset + 2 > this.byteLength) {
-        const frames = new Error().stack.split('\n').slice(2, 6).join(' | ');
-        dbg('getUint16 OOB: offset=' + offset + ' byteLength=' + this.byteLength + ' | ' + frames);
+    // ── Fix 1: DataView constructor substitution ─────────────────────────────
+    // II's CBOR decoder (called from uz→pz→sign→createNew) returns a 0-byte
+    // ArrayBuffer for authData when decoding attestationObject. II then creates
+    // new DataView(0-byte) and calls getUint16(53) to read credentialIdLength,
+    // which throws RangeError.
+    //
+    // Root cause: II's CBOR decoder has a bug that produces a 0-byte buffer for
+    // the authData field regardless of attestation format.
+    //
+    // Fix: intercept the DataView constructor. When a 0-byte buffer is passed
+    // and we have a stored authData, substitute the real authData so II can parse
+    // it correctly. The DataView object then covers the full 164-byte authData.
+    const _authDataRef = { buf: null };
+    const _OrigDataView = DataView;
+    const _OrigDVProto = _OrigDataView.prototype;
+
+    function PatchedDataView(buffer, byteOffset, byteLength) {
+      const bLen = buffer && typeof buffer.byteLength === 'number' ? buffer.byteLength : 0;
+      const effective = byteLength !== undefined ? byteLength :
+        byteOffset !== undefined ? bLen - (byteOffset || 0) : bLen;
+      if (effective === 0 && _authDataRef.buf) {
+        dbg('DataView(0-byte) → substituting stored authData');
+        return new _OrigDataView(_authDataRef.buf);
       }
+      if (byteOffset !== undefined && byteLength !== undefined)
+        return new _OrigDataView(buffer, byteOffset, byteLength);
+      if (byteOffset !== undefined)
+        return new _OrigDataView(buffer, byteOffset);
+      return new _OrigDataView(buffer);
+    }
+    PatchedDataView.prototype = _OrigDVProto;
+    Object.setPrototypeOf(PatchedDataView, _OrigDataView);
+    window.DataView = PatchedDataView;
+
+    // Log OOB DataView reads to diagnose any remaining issues.
+    const _origGU16 = _OrigDVProto.getUint16;
+    _OrigDVProto.getUint16 = function(offset, le) {
+      if (offset + 2 > this.byteLength)
+        dbg('getUint16 OOB: offset=' + offset + ' byteLength=' + this.byteLength);
       return _origGU16.call(this, offset, le);
     };
 
-    // CDP virtual authenticators on headless Linux return an empty buffer from
-    // AuthenticatorAttestationResponse.getPublicKey(), which causes II's DER parser
-    // (DataView.getUint16) to throw "Offset is outside the bounds of the DataView".
-    //
-    // Strategy: patch AuthenticatorAttestationResponse.prototype.getPublicKey to
-    // fall back to extracting the COSE key from getAuthenticatorData() and
-    // re-encoding it as DER SubjectPublicKeyInfo (EC P-256) when the native call
-    // returns empty.  Prototype patching is simpler and more reliable than a Proxy.
-
+    // ── Fix 2: getPublicKey() → COSE-derived DER ─────────────────────────────
+    // CDP virtual authenticators return malformed DER from getPublicKey().
+    // Re-build correct DER from the COSE key in getAuthenticatorData().
     function buildDerFromAuthData(authDataBuf) {
       const authData = new Uint8Array(authDataBuf);
-      dbg('authData.length=' + authData.length);
-      // authenticatorData: rpIdHash(32)+flags(1)+signCount(4)+AAGUID(16)+credIdLen(2)+credId(N)+coseKey
       let offset = 53;
       const credIdLen = (authData[offset] << 8) | authData[offset + 1];
-      dbg('credIdLen=' + credIdLen);
       offset += 2 + credIdLen;
       const cose = authData.subarray(offset);
-      dbg('cose.length=' + cose.length + ' cose[0]=0x' + (cose[0] || 0).toString(16));
-
-      // Canonical COSE P-256 key: ... 0x21 0x58 0x20 <x32> 0x22 0x58 0x20 <y32> ...
+      dbg('buildDer: credIdLen=' + credIdLen + ' cose.length=' + cose.length);
       let xi = -1, yi = -1;
       for (let i = 0; i < cose.length - 67; i++) {
-        if (cose[i]    === 0x21 && cose[i+1]  === 0x58 && cose[i+2]  === 0x20 &&
+        if (cose[i] === 0x21 && cose[i+1] === 0x58 && cose[i+2] === 0x20 &&
             cose[i+35] === 0x22 && cose[i+36] === 0x58 && cose[i+37] === 0x20) {
           xi = i + 3; yi = i + 38; break;
         }
       }
-      dbg('xi=' + xi + ' yi=' + yi);
       if (xi < 0) return null;
-
-      // DER SubjectPublicKeyInfo for EC P-256 (91 bytes)
       const der = new Uint8Array(91);
       const prefix = [
         0x30, 0x59, 0x30, 0x13,
@@ -230,83 +245,53 @@ async function main() {
       prefix.forEach((b, i) => { der[i] = b; });
       der.set(cose.subarray(xi, xi + 32), prefix.length);
       der.set(cose.subarray(yi, yi + 32), prefix.length + 32);
-      dbg('DER built ok (91 bytes)');
       return der.buffer;
     }
 
     if (typeof AuthenticatorAttestationResponse !== 'undefined') {
       const proto = AuthenticatorAttestationResponse.prototype;
       const origGetPK = proto.getPublicKey;
-      dbg('patching AuthenticatorAttestationResponse.prototype.getPublicKey');
       try {
         Object.defineProperty(proto, 'getPublicKey', {
           value: function() {
             dbg('getPublicKey called');
-            // Log what the native implementation returns — for diagnosis.
-            // CDP virtual authenticators may return 91 bytes BUT with malformed DER
-            // (wrong OID encoding or key bytes), causing II's DER parser to throw.
-            let nativePk = null;
-            try { nativePk = origGetPK.call(this); } catch (e) { dbg('origGetPK threw: ' + e.message); }
-            if (nativePk) {
-              const nb = new Uint8Array(nativePk);
-              dbg('native byteLength=' + nb.length + ' first4: ' +
-                Array.from(nb.slice(0, 4)).map(b => b.toString(16).padStart(2,'0')).join(' '));
-            } else {
-              dbg('native returned null/undefined');
-            }
-
-            // ALWAYS build DER from authenticatorData COSE key — do not trust the native
-            // result even when non-empty, because CDP virtual authenticators may return
-            // malformed DER that II's strict parser rejects.
             try {
               const der = buildDerFromAuthData(this.getAuthenticatorData());
-              if (der) {
-                dbg('returning COSE-derived DER (91 bytes)');
-                return der;
-              }
+              if (der) { dbg('getPublicKey → COSE-derived DER (91b)'); return der; }
             } catch (e) { dbg('buildDer error: ' + e.message); }
-
-            dbg('fallback: returning native result');
+            let nativePk = null;
+            try { nativePk = origGetPK.call(this); } catch(e) {}
+            dbg('getPublicKey → native (' + (nativePk?.byteLength ?? 'null') + 'b)');
             return nativePk;
           },
-          writable: true,
-          configurable: true,
+          writable: true, configurable: true,
         });
-        dbg('prototype patch applied');
-      } catch (e) {
-        dbg('prototype patch FAILED: ' + e.message);
-      }
-    } else {
-      dbg('AuthenticatorAttestationResponse not available in initScript');
+        dbg('getPublicKey patched');
+      } catch (e) { dbg('getPublicKey patch FAILED: ' + e.message); }
     }
 
-    // CDP virtual authenticators return a "packed" attestationObject whose CBOR may use
-    // CTAP2 integer map keys instead of WebAuthn text keys ("fmt","attStmt","authData").
-    // II's CBOR decoder looks for text key "authData" and returns an empty buffer when
-    // the key is missing, causing DataView.getUint16(53) to throw on a 0-byte DataView.
-    //
-    // Fix: intercept credentials.create() and replace attestationObject on the returned
-    // credential with a well-formed "none" attestation CBOR built from the correct
-    // authData obtained via getAuthenticatorData().
+    // ── Fix 3: credentials.create() — store authData + none-attestation Proxy ─
+    // Store authData so Fix 1 can substitute it into 0-byte DataViews.
+    // Also wrap the credential in a Proxy that returns a "none" attestation object,
+    // so II skips packed-attestation signature verification.
     function buildNoneAttestationCbor(authDataBuf) {
-      // {"fmt":"none","attStmt":{},"authData":<bytes>}
       function ct(s) {
         const b = [0x60 | s.length];
         for (let i = 0; i < s.length; i++) b.push(s.charCodeAt(i));
         return b;
       }
       const n = authDataBuf.byteLength;
-      const adBytes = new Uint8Array(authDataBuf);
+      const adBytes = new _OrigDataView(authDataBuf);
       const hdr = [
-        0xa3,                        // map(3)
-        ...ct('fmt'), ...ct('none'), // "fmt": "none"
-        ...ct('attStmt'), 0xa0,      // "attStmt": {}
-        ...ct('authData'),           // "authData": <bytes below>
+        0xa3,
+        ...ct('fmt'), ...ct('none'),
+        ...ct('attStmt'), 0xa0,
+        ...ct('authData'),
         ...(n <= 23 ? [0x40 | n] : n <= 255 ? [0x58, n] : [0x59, (n >> 8) & 0xff, n & 0xff]),
       ];
       const result = new Uint8Array(hdr.length + n);
       result.set(hdr, 0);
-      result.set(adBytes, hdr.length);
+      result.set(new Uint8Array(authDataBuf), hdr.length);
       return result.buffer;
     }
 
@@ -314,52 +299,20 @@ async function main() {
     navigator.credentials.create = async function(options) {
       dbg('credentials.create called');
       let cred;
-      try {
-        cred = await _origCreate(options);
-      } catch (e) {
-        dbg('credentials.create THREW: ' + e.message);
-        throw e;
-      }
+      try { cred = await _origCreate(options); }
+      catch (e) { dbg('credentials.create THREW: ' + e.message); throw e; }
       if (!cred || !cred.response) return cred;
       dbg('credentials.create returned type=' + cred.type);
 
-      // Log attestationObject first bytes to confirm CBOR key format (text vs integer).
-      try {
-        const aoBytes = new Uint8Array(cred.response.attestationObject);
-        dbg('attObj first8: ' + Array.from(aoBytes.slice(0, 8)).map(b => b.toString(16).padStart(2,'0')).join(' '));
-      } catch(e) { dbg('attObj read error: ' + e.message); }
-
-      // Get authData from getAuthenticatorData() (always correct) and build a "none"
-      // attestation CBOR to replace the CDP-generated one (which may use integer keys).
-      let noneAttestCbor;
-      try {
-        const authData = cred.response.getAuthenticatorData();
-        dbg('authData byteLength=' + authData.byteLength);
-        noneAttestCbor = buildNoneAttestationCbor(authData);
-        dbg('none CBOR built: ' + noneAttestCbor.byteLength + ' bytes');
-        // Verify the first bytes of the none CBOR are correct
-        const nb = new Uint8Array(noneAttestCbor);
-        dbg('none CBOR first8: ' + Array.from(nb.slice(0,8)).map(b=>b.toString(16).padStart(2,'0')).join(' '));
-      } catch(e) { dbg('buildNoneAttestCbor error: ' + e.message); }
-
-      // Also patch getAuthenticatorData on the prototype to log every call with a stack trace.
-      if (typeof AuthenticatorAttestationResponse !== 'undefined') {
-        const proto2 = AuthenticatorAttestationResponse.prototype;
-        const origGetAD = proto2.getAuthenticatorData;
-        if (!proto2._getADPatched) {
-          proto2._getADPatched = true;
-          Object.defineProperty(proto2, 'getAuthenticatorData', {
-            value: function() {
-              const result = origGetAD.call(this);
-              dbg('getAuthenticatorData called → ' + (result?.byteLength ?? 'null') + 'b | ' +
-                  new Error().stack.split('\n').slice(2, 5).join(' | '));
-              return result;
-            },
-            writable: true, configurable: true,
-          });
-        }
+      let authData;
+      try { authData = cred.response.getAuthenticatorData(); } catch(e) {}
+      if (authData && authData.byteLength > 0) {
+        _authDataRef.buf = authData; // Fix 1: DataView substitution data
+        dbg('authData stored: ' + authData.byteLength + 'b');
       }
 
+      let noneAttestCbor;
+      try { noneAttestCbor = buildNoneAttestationCbor(authData); } catch(e) {}
       if (noneAttestCbor) {
         const realResp = cred.response;
         const proxiedResp = new Proxy(realResp, {
@@ -379,25 +332,19 @@ async function main() {
             return typeof val === 'function' ? val.bind(target) : val;
           },
         });
-        dbg('credential wrapped with none-attestation Proxy');
+        dbg('credential wrapped: none-attestation + authData stored');
       }
-
       return cred;
     };
 
-    // Wrap credentials.get() — during II initialization, II issues a conditional-
-    // mediation request to enable passkey autofill. With automaticPresenceSimulation:true
-    // the CDP authenticator auto-responds, which can cause II to process an assertion
-    // response it doesn't expect and throw a DataView error. Return null for these
-    // silent background requests so the flow isn't disrupted.
+    // ── Fix 4: credentials.get() — block conditional mediation ───────────────
+    // II calls credentials.get({mediation:'conditional'}) during init for passkey
+    // autofill. With automaticPresenceSimulation:true, the CDP authenticator would
+    // auto-respond, disrupting the flow. Return null to block this.
     const _origGet = navigator.credentials.get.bind(navigator.credentials);
     navigator.credentials.get = async function(options) {
-      const mediation = options?.mediation;
-      dbg('credentials.get called mediation=' + mediation);
-      if (mediation === 'conditional') {
-        dbg('credentials.get: conditional → returning null to block CDP auto-response');
-        return null;
-      }
+      dbg('credentials.get mediation=' + options?.mediation);
+      if (options?.mediation === 'conditional') return null;
       return _origGet(options);
     };
   });
