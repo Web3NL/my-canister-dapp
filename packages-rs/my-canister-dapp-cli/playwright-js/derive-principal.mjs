@@ -255,10 +255,13 @@ async function main() {
         Object.defineProperty(proto, 'getPublicKey', {
           value: function() {
             dbg('getPublicKey called');
-            try {
-              const der = buildDerFromAuthData(this.getAuthenticatorData());
-              if (der) { dbg('getPublicKey → COSE-derived DER (91b)'); return der; }
-            } catch (e) { dbg('buildDer error: ' + e.message); }
+            const adBuf = _authDataRef.buf;
+            if (adBuf) {
+              try {
+                const der = buildDerFromAuthData(adBuf);
+                if (der) { dbg('getPublicKey → COSE-derived DER (91b)'); return der; }
+              } catch (e) { dbg('buildDer error: ' + e.message); }
+            }
             let nativePk = null;
             try { nativePk = origGetPK.call(this); } catch(e) {}
             dbg('getPublicKey → native (' + (nativePk?.byteLength ?? 'null') + 'b)');
@@ -281,7 +284,6 @@ async function main() {
         return b;
       }
       const n = authDataBuf.byteLength;
-      const adBytes = new _OrigDataView(authDataBuf);
       const hdr = [
         0xa3,
         ...ct('fmt'), ...ct('none'),
@@ -304,22 +306,67 @@ async function main() {
       if (!cred || !cred.response) return cred;
       dbg('credentials.create returned type=' + cred.type);
 
-      let authData;
-      try { authData = cred.response.getAuthenticatorData(); } catch(e) {}
-      if (authData && authData.byteLength > 0) {
-        _authDataRef.buf = authData; // Fix 1: DataView substitution data
-        dbg('authData stored: ' + authData.byteLength + 'b');
+      // Generate synthetic authData with a real P-256 key and a short 16-byte
+      // credential ID. CDP virtual authenticators use 64-byte credential IDs,
+      // leaving only ~45 bytes for the COSE key in a 164-byte authData — too
+      // short for a P-256 COSE key (~77 bytes), causing "Input too short".
+      let syntheticAuthData;
+      try {
+        const cdpAD = cred.response.getAuthenticatorData();
+        const rpIdHash = cdpAD && cdpAD.byteLength >= 32
+          ? new Uint8Array(cdpAD).slice(0, 32) : new Uint8Array(32);
+
+        const kp = await crypto.subtle.generateKey(
+          { name: 'ECDSA', namedCurve: 'P-256' }, true, ['sign', 'verify']
+        );
+        const raw = new Uint8Array(await crypto.subtle.exportKey('raw', kp.publicKey));
+        const x = raw.slice(1, 33), y = raw.slice(33, 65);
+
+        const credId = crypto.getRandomValues(new Uint8Array(16));
+        const cose = new Uint8Array([
+          0xa5, 0x01, 0x02, 0x03, 0x26, 0x20, 0x01,
+          0x21, 0x58, 0x20, ...x,
+          0x22, 0x58, 0x20, ...y,
+        ]);
+
+        const ad = new Uint8Array(55 + credId.length + cose.length);
+        let off = 0;
+        ad.set(rpIdHash, off); off += 32;
+        ad[off++] = 0x45; // flags: UP | UV | AT
+        off += 4; // signCount = 0
+        off += 16; // aaguid = zeros
+        ad[off++] = 0; ad[off++] = credId.length;
+        ad.set(credId, off); off += credId.length;
+        ad.set(cose, off);
+
+        syntheticAuthData = ad.buffer;
+        _authDataRef.buf = syntheticAuthData;
+        dbg('synthetic authData: ' + ad.length + 'b (credIdLen=' + credId.length + ')');
+      } catch (e) {
+        dbg('synthetic authData FAILED: ' + e.message);
+        try {
+          const cdpAD = cred.response.getAuthenticatorData();
+          if (cdpAD && cdpAD.byteLength > 0) {
+            syntheticAuthData = cdpAD;
+            _authDataRef.buf = cdpAD;
+            dbg('CDP authData fallback: ' + cdpAD.byteLength + 'b');
+          }
+        } catch (e2) {}
       }
 
       let noneAttestCbor;
-      try { noneAttestCbor = buildNoneAttestationCbor(authData); } catch(e) {}
+      try { noneAttestCbor = buildNoneAttestationCbor(syntheticAuthData); } catch(e) {}
       if (noneAttestCbor) {
+        const synthAD = syntheticAuthData;
         const realResp = cred.response;
         const proxiedResp = new Proxy(realResp, {
           get(target, prop) {
             if (prop === 'attestationObject') {
               dbg('intercepted attestationObject → none CBOR');
               return noneAttestCbor;
+            }
+            if (prop === 'getAuthenticatorData') {
+              return () => synthAD;
             }
             const val = target[prop];
             return typeof val === 'function' ? val.bind(target) : val;
@@ -332,7 +379,7 @@ async function main() {
             return typeof val === 'function' ? val.bind(target) : val;
           },
         });
-        dbg('credential wrapped: none-attestation + authData stored');
+        dbg('credential wrapped: synthetic authData + none-attestation');
       }
       return cred;
     };
