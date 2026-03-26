@@ -8,30 +8,23 @@ const identityProvider = process.env.DAPP_II_PROVIDER;
 const bundle = readFileSync(process.env.DAPP_BUNDLE_PATH, 'utf8');
 
 /**
- * Automate the II popup, matching the handleIIPopup flow from tests/ii-helpers.ts.
+ * Automate the II popup for the local icp-cli dev II canister.
  *
- * The local NNS II provisioned by icp-cli (ii: true) supports passkey-less auth:
- * credentials.get() ("Use existing identity") works without a real authenticator,
- * so we try that path first. "Create new identity" calls credentials.create()
- * which hangs without an authenticator, so we only fall back to it if needed.
+ * icp-cli 0.2.1 II bundle has DUMMY_AUTH (ga class) that avoids real WebAuthn,
+ * but the canister config sets dummy_auth=opt null instead of opt opt{...}, so
+ * the runtime check `Vr.dummy_auth[0]?.[0]!==void 0` evaluates false and the
+ * real WebAuthn path (ps class) is used. We force the ga path by patching the
+ * bundle in context.route() below — see the proxy handler comment.
  *
  * Scenarios:
- *  - First run (no stored identity): "Use existing" errors → "Create new identity"
- *  - Returning session (same context): "Continue" appears directly
+ *  - First run (no stored identity): CWP → "Create new identity" → name form → done
+ *  - Returning session (same context): CWP → "Continue" appears directly
  */
 async function handleIIPopup(popup) {
-  process.stderr.write(`[ii-popup] opened: ${popup.url()}\n`);
-  popup.on('console', (msg) => process.stderr.write(`[ii-console] ${msg.type()}: ${msg.text()}\n`));
-  popup.on('pageerror', (err) => process.stderr.write(`[ii-pageerror] ${err.message}\n`));
-  popup.on('requestfailed', (req) =>
-    process.stderr.write(`[ii-reqfailed] ${req.url()} — ${req.failure()?.errorText ?? '?'}\n`)
-  );
-
   await popup
     .waitForURL((url) => !url.href.startsWith('about:'), { timeout: 25000 })
-    .catch(() => process.stderr.write(`[ii-popup] still at about:blank after 25s\n`));
+    .catch(() => {});
 
-  process.stderr.write(`[ii-popup] URL after navigation: ${popup.url()}\n`);
   await popup.waitForLoadState('domcontentloaded');
 
   const continueWithPasskey = popup.getByRole('button', {
@@ -58,63 +51,21 @@ async function handleIIPopup(popup) {
   if (await continueWithPasskey.isVisible()) {
     await continueWithPasskey.click();
 
-    // Try "Use existing identity" — in the local NNS II test build this works via
-    // credentials.get() without a real authenticator (passkey-less auth).
-    const useExistingBtn = popup.getByRole('button', {
-      name: 'Use existing identity',
-      exact: true,
-    });
-    await useExistingBtn.waitFor({ state: 'visible', timeout: 10000 });
-    await useExistingBtn.click();
-
-    // Wait for either "Continue" (existing identity found and authenticated) or
-    // "Create new identity" (no identity stored yet). Don't check for specific
-    // error text — the message differs between II builds.
+    // Each call uses a unique random seed (patched into the bundle above), so
+    // every invocation registers a fresh identity — no credential conflicts.
+    // Go straight to "Create new identity".
     const createNewBtn = popup.getByRole('button', {
       name: 'Create new identity',
       exact: true,
     });
-    const needsCreate = await Promise.race([
-      continueBtn.waitFor({ state: 'visible', timeout: 15000 }).then(() => false),
-      createNewBtn.waitFor({ state: 'visible', timeout: 15000 }).then(() => true),
-    ]).catch(() => true);
 
-    if (needsCreate) {
-      process.stderr.write(`[ii-popup] use-existing failed — creating new identity\n`);
-      await createNewBtn.waitFor({ state: 'visible', timeout: 5000 });
+    await createNewBtn.waitFor({ state: 'visible', timeout: 20000 });
+    await createNewBtn.click();
 
-      // On headless Linux CI the button stays disabled while II runs async platform
-      // authenticator checks. Approach:
-      // 1. Remove the disabled IDL attribute so the click event reaches the handler
-      // 2. Fire click via dispatchEvent (bypasses browser's disabled-button no-op)
-      const clicked = await popup.evaluate(() => {
-        const btn = [...document.querySelectorAll('button')]
-          .find((b) => b.textContent.trim() === 'Create new identity');
-        if (!btn) return false;
-        btn.disabled = false;
-        btn.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
-        return true;
-      });
-      process.stderr.write(`[ii-popup] evaluate-click result: ${clicked}\n`);
-
-      // Dump HTML if nothing appears — helps diagnose further failures
-      const nameInput = popup.locator('input[placeholder="Identity name"]');
-      const nameFormVisible = await Promise.race([
-        nameInput.waitFor({ state: 'visible', timeout: 15000 }).then(() => true),
-        continueBtn.waitFor({ state: 'visible', timeout: 15000 }).then(() => false),
-      ]).catch(async () => {
-        const bodyText = await popup.evaluate(() => document.body.innerText).catch(() => '<error>');
-        process.stderr.write(`[ii-popup] nothing after create-new click. body:\n${bodyText.slice(0, 2000)}\n`);
-        return false;
-      });
-
-      if (nameFormVisible) {
-        await nameInput.fill('Test');
-        await popup.getByRole('button', { name: 'Create identity', exact: true }).click();
-      } else {
-        process.stderr.write(`[ii-popup] no name form after create-new — waiting for Continue\n`);
-      }
-    }
+    const nameInput = popup.locator('input[placeholder="Identity name"]');
+    await nameInput.waitFor({ state: 'visible', timeout: 15000 });
+    await nameInput.fill('Test');
+    await popup.getByRole('button', { name: 'Create identity', exact: true }).click();
 
     await continueBtn.waitFor({ state: 'visible', timeout: 30000 });
   }
@@ -145,6 +96,16 @@ async function main() {
   // in Node.js and proxy them via localhost, preserving the Host header so
   // PocketIC's HTTP gateway can route to the correct canister.
   // macOS resolves *.localhost natively — this adds negligible overhead there.
+  //
+  // Additionally: icp-cli 0.2.1 deploys the II canister with dummy_auth=opt null
+  // (Some(None)) instead of opt opt{prompt_for_index:false} (Some(Some({...}))).
+  // The runtime check `Vr.dummy_auth[0]?.[0]!==void 0` therefore evaluates false,
+  // causing the real WebAuthn path (ps class, calls credentials.create()) to run
+  // instead of the DUMMY_AUTH path (ga class, pure software key). On headless
+  // Linux, credentials.create() throws NotSupportedError.
+  //
+  // Fix: detect the II JavaScript entry bundle and replace all dummy_auth checks
+  // with `true` so ga.createNew/ga.useExisting (no WebAuthn) is always used.
   await context.route(
     (url) => url.hostname !== 'localhost' && url.hostname.endsWith('.localhost'),
     (route) => {
@@ -186,6 +147,22 @@ async function main() {
               body = rawBody;
             }
 
+            // Patch the II JavaScript entry bundle to force DUMMY_AUTH (ga class).
+            // The bundle path matches /_app/immutable/entry/start*.js.
+            const p = url.pathname;
+            if (p.includes('/_app/immutable/entry/start') && p.endsWith('.js')) {
+              let src = body.toString('utf8');
+              // Force every dummy_auth check to true so ga (DUMMY_AUTH, no real
+              // WebAuthn) is always used instead of ps (real credentials.create).
+              src = src.replaceAll('Vr.dummy_auth[0]?.[0]!==void 0?', 'true?');
+              // Use a random seed so each CLI invocation registers a unique identity
+              // and avoids credential-already-in-use conflicts when derive-ii-principal
+              // is called multiple times against the same running II canister.
+              // vz() normally returns BigInt(0); we replace the return value.
+              src = src.replace('return BigInt(0)}', 'return BigInt(Math.floor(Math.random()*Number.MAX_SAFE_INTEGER))}');
+              body = Buffer.from(src, 'utf8');
+            }
+
             route.fulfill({ status: res.statusCode, headers, body })
               .catch((e) => process.stderr.write(`[proxy] fulfill error: ${e.message}\n`));
           });
@@ -201,57 +178,27 @@ async function main() {
     }
   );
 
-  // The II /authorize page on headless Linux needs two patches to render its button UI:
+  // addInitScript runs on ALL pages (including the II popup) before any page JavaScript.
+  // Two patches are needed for headless Linux CI:
   //
   // 1. isUserVerifyingPlatformAuthenticatorAvailable() returns false on headless Linux.
-  //    II checks this to enable/disable the "Create new identity" button. Override it to
-  //    return true so the button is enabled.
+  //    II uses this to decide whether to enable the "Create new identity" button.
   //
-  // 2. credentials.get() with empty allowCredentials (discoverable/autofill call) throws
-  //    NotSupportedError on headless Linux, blocking UI render. Intercept and reject with
-  //    NotAllowedError instead — II treats that as "no passkeys found" and shows buttons.
-  //    Non-discoverable calls (allowCredentials non-empty) pass through.
-  //
-  // The local II dev build (icp-cli, ii: true) uses DUMMY_AUTH (M0 class) — no WebAuthn
-  // hardware or CDP virtual authenticators are needed. M0.createNew/useExisting just
-  // return Promise.resolve() without calling any WebAuthn APIs.
-  //
-  // addInitScript runs on ALL pages (including the II popup) before any page JavaScript.
+  // 2. credentials.get() with empty allowCredentials (discoverable/passkey autofill)
+  //    throws NotSupportedError on headless Linux, blocking UI render. Rejecting with
+  //    NotAllowedError instead lets II treat it as "no passkeys found" and show buttons.
   await context.addInitScript(() => {
-    // This runs before any page JS on every page/popup in the context.
-    console.log('[derive-init] addInitScript running, PublicKeyCredential=' +
-      (typeof PublicKeyCredential));
     try {
       if (typeof PublicKeyCredential !== 'undefined') {
         Object.defineProperty(PublicKeyCredential, 'isUserVerifyingPlatformAuthenticatorAvailable', {
-          value: () => {
-            console.log('[derive-init] isUVPAA called → true');
-            return Promise.resolve(true);
-          },
+          value: () => Promise.resolve(true),
           writable: true, configurable: true,
         });
       }
-    } catch (e) {
-      console.log('[derive-init] isUVPAA patch error: ' + e.message);
-    }
+    } catch (_) {}
     try {
-      const _origCreate = navigator.credentials.create.bind(navigator.credentials);
-      navigator.credentials.create = function(options) {
-        console.log('[derive-init] credentials.create called');
-        return _origCreate(options);
-      };
-    } catch (e) {
-      console.log('[derive-init] credentials.create patch error: ' + e.message);
-    }
-    try {
-      const _origGet = navigator.credentials.get.bind(navigator.credentials);
-      navigator.credentials.get = function(options) {
-        const allowCredentials = options?.publicKey?.allowCredentials;
-        console.log('[derive-init] credentials.get called, acLen=' + (allowCredentials?.length ?? 'undef'));
-        if (!allowCredentials || allowCredentials.length === 0) {
-          return Promise.reject(new DOMException('No credentials available', 'NotAllowedError'));
-        }
-        return _origGet(options);
+      navigator.credentials.get = function() {
+        return Promise.reject(new DOMException('No credentials available', 'NotAllowedError'));
       };
     } catch (_) {}
   });
