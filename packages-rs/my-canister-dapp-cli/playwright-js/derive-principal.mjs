@@ -182,7 +182,8 @@ async function main() {
     const _origGU16 = DataView.prototype.getUint16;
     DataView.prototype.getUint16 = function(offset, le) {
       if (offset + 2 > this.byteLength) {
-        dbg('getUint16 OOB: offset=' + offset + ' byteLength=' + this.byteLength);
+        const frames = new Error().stack.split('\n').slice(2, 6).join(' | ');
+        dbg('getUint16 OOB: offset=' + offset + ' byteLength=' + this.byteLength + ' | ' + frames);
       }
       return _origGU16.call(this, offset, le);
     };
@@ -336,7 +337,28 @@ async function main() {
         dbg('authData byteLength=' + authData.byteLength);
         noneAttestCbor = buildNoneAttestationCbor(authData);
         dbg('none CBOR built: ' + noneAttestCbor.byteLength + ' bytes');
+        // Verify the first bytes of the none CBOR are correct
+        const nb = new Uint8Array(noneAttestCbor);
+        dbg('none CBOR first8: ' + Array.from(nb.slice(0,8)).map(b=>b.toString(16).padStart(2,'0')).join(' '));
       } catch(e) { dbg('buildNoneAttestCbor error: ' + e.message); }
+
+      // Also patch getAuthenticatorData on the prototype to log every call with a stack trace.
+      if (typeof AuthenticatorAttestationResponse !== 'undefined') {
+        const proto2 = AuthenticatorAttestationResponse.prototype;
+        const origGetAD = proto2.getAuthenticatorData;
+        if (!proto2._getADPatched) {
+          proto2._getADPatched = true;
+          Object.defineProperty(proto2, 'getAuthenticatorData', {
+            value: function() {
+              const result = origGetAD.call(this);
+              dbg('getAuthenticatorData called → ' + (result?.byteLength ?? 'null') + 'b | ' +
+                  new Error().stack.split('\n').slice(2, 5).join(' | '));
+              return result;
+            },
+            writable: true, configurable: true,
+          });
+        }
+      }
 
       if (noneAttestCbor) {
         const realResp = cred.response;
