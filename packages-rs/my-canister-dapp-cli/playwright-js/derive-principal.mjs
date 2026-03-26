@@ -8,11 +8,16 @@ const identityProvider = process.env.DAPP_II_PROVIDER;
 const bundle = readFileSync(process.env.DAPP_BUNDLE_PATH, 'utf8');
 
 /**
- * Automate the II popup — always creates a new identity.
+ * Automate the II popup, matching the handleIIPopup flow from tests/ii-helpers.ts.
  *
- * The local NNS II provisioned by icp-cli (ii: true) is a test build that does
- * not verify WebAuthn attestation. Clicking through the UI is sufficient; no
- * CDP virtual authenticator or credential patching is needed.
+ * The local NNS II provisioned by icp-cli (ii: true) supports passkey-less auth:
+ * credentials.get() ("Use existing identity") works without a real authenticator,
+ * so we try that path first. "Create new identity" calls credentials.create()
+ * which hangs without an authenticator, so we only fall back to it if needed.
+ *
+ * Scenarios:
+ *  - First run (no stored identity): "Use existing" errors → "Create new identity"
+ *  - Returning session (same context): "Continue" appears directly
  */
 async function handleIIPopup(popup) {
   process.stderr.write(`[ii-popup] opened: ${popup.url()}\n`);
@@ -52,17 +57,36 @@ async function handleIIPopup(popup) {
   if (await continueWithPasskey.isVisible()) {
     await continueWithPasskey.click();
 
-    const createNewBtn = popup.getByRole('button', {
-      name: 'Create new identity',
+    // Try "Use existing identity" — in the local NNS II test build this works via
+    // credentials.get() without a real authenticator (passkey-less auth).
+    const useExistingBtn = popup.getByRole('button', {
+      name: 'Use existing identity',
       exact: true,
     });
-    await createNewBtn.waitFor({ state: 'visible', timeout: 20000 });
-    await createNewBtn.click();
+    await useExistingBtn.waitFor({ state: 'visible', timeout: 10000 });
+    await useExistingBtn.click();
 
-    const nameInput = popup.locator('input[placeholder="Identity name"]');
-    await nameInput.waitFor({ state: 'visible', timeout: 20000 });
-    await nameInput.fill('Test');
-    await popup.getByRole('button', { name: 'Create identity', exact: true }).click();
+    // If no identity exists yet, II shows an error; fall back to creating one.
+    const errorVisible = await popup
+      .getByText('Cannot read properties of undefined')
+      .waitFor({ state: 'visible', timeout: 3000 })
+      .then(() => true)
+      .catch(() => false);
+
+    if (errorVisible) {
+      process.stderr.write(`[ii-popup] use-existing failed — creating new identity\n`);
+      const createNewBtn = popup.getByRole('button', {
+        name: 'Create new identity',
+        exact: true,
+      });
+      await createNewBtn.waitFor({ state: 'visible', timeout: 10000 });
+      await createNewBtn.click();
+
+      const nameInput = popup.locator('input[placeholder="Identity name"]');
+      await nameInput.waitFor({ state: 'visible', timeout: 10000 });
+      await nameInput.fill('Test');
+      await popup.getByRole('button', { name: 'Create identity', exact: true }).click();
+    }
 
     await continueBtn.waitFor({ state: 'visible', timeout: 30000 });
   }
