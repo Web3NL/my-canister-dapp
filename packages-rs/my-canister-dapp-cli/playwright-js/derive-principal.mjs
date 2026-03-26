@@ -21,6 +21,7 @@ const bundle = readFileSync(process.env.DAPP_BUNDLE_PATH, 'utf8');
  */
 async function handleIIPopup(popup) {
   process.stderr.write(`[ii-popup] opened: ${popup.url()}\n`);
+  popup.on('console', (msg) => process.stderr.write(`[ii-console] ${msg.type()}: ${msg.text()}\n`));
   popup.on('pageerror', (err) => process.stderr.write(`[ii-pageerror] ${err.message}\n`));
   popup.on('requestfailed', (req) =>
     process.stderr.write(`[ii-reqfailed] ${req.url()} — ${req.failure()?.errorText ?? '?'}\n`)
@@ -31,7 +32,7 @@ async function handleIIPopup(popup) {
     .catch(() => process.stderr.write(`[ii-popup] still at about:blank after 25s\n`));
 
   process.stderr.write(`[ii-popup] URL after navigation: ${popup.url()}\n`);
-  await popup.waitForLoadState('load');
+  await popup.waitForLoadState('domcontentloaded');
 
   const continueWithPasskey = popup.getByRole('button', {
     name: 'Continue with passkey',
@@ -95,8 +96,21 @@ async function handleIIPopup(popup) {
 }
 
 async function main() {
-  const browser = await chromium.launch({ headless: true });
-  const context = await browser.newContext();
+  const browser = await chromium.launch({
+    headless: true,
+    // On Linux, map *.localhost to 127.0.0.1 at the DNS level so PocketIC
+    // canister subdomains resolve. This mirrors what playwright.config.ts does
+    // for the E2E tests. context.route() is kept below as a belt-and-suspenders
+    // backup that also handles gzip decompression.
+    args: ['--host-resolver-rules=MAP *.localhost 127.0.0.1'],
+  });
+  // Use Desktop Chrome user agent + viewport to avoid headless-detection by II.
+  const context = await browser.newContext({
+    userAgent:
+      'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 ' +
+      '(KHTML, like Gecko) Chrome/131.0.0.0 Safari/537.36',
+    viewport: { width: 1280, height: 720 },
+  });
 
   // On Linux, Chromium's built-in DNS resolver does not reliably resolve
   // *.localhost subdomains (the --host-resolver-rules flag is not propagated
