@@ -83,26 +83,37 @@ async function handleIIPopup(popup) {
       process.stderr.write(`[ii-popup] use-existing failed — creating new identity\n`);
       await createNewBtn.waitFor({ state: 'visible', timeout: 5000 });
 
-      // On headless Linux CI the button may stay disabled while II runs async platform
-      // authenticator checks. element.click() is a spec no-op on disabled buttons, so
-      // force:true (which uses element.click()) doesn't help. Use dispatchEvent instead,
-      // which bypasses the disabled restriction and fires the Svelte on:click handler.
-      await createNewBtn.dispatchEvent('click');
+      // On headless Linux CI the button stays disabled while II runs async platform
+      // authenticator checks. Approach:
+      // 1. Remove the disabled IDL attribute so the click event reaches the handler
+      // 2. Fire click via dispatchEvent (bypasses browser's disabled-button no-op)
+      const clicked = await popup.evaluate(() => {
+        const btn = [...document.querySelectorAll('button')]
+          .find((b) => b.textContent.trim() === 'Create new identity');
+        if (!btn) return false;
+        process.stderr?.write?.('[ii-popup] removing disabled + dispatching click\n');
+        btn.disabled = false;
+        btn.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
+        return true;
+      });
+      process.stderr.write(`[ii-popup] evaluate-click result: ${clicked}\n`);
 
-      // After clicking "Create new identity", wait for either:
-      //  - Identity name input (older II flow): fill and click "Create identity"
-      //  - "Continue" button (newer II flow where creation is automatic/skips name)
+      // Dump HTML if nothing appears — helps diagnose further failures
       const nameInput = popup.locator('input[placeholder="Identity name"]');
       const nameFormVisible = await Promise.race([
         nameInput.waitFor({ state: 'visible', timeout: 15000 }).then(() => true),
         continueBtn.waitFor({ state: 'visible', timeout: 15000 }).then(() => false),
-      ]).catch(() => false);
+      ]).catch(async () => {
+        const html = await popup.content().catch(() => '<error reading content>');
+        process.stderr.write(`[ii-popup] nothing after create-new click. HTML:\n${html.slice(0, 3000)}\n`);
+        return false;
+      });
 
       if (nameFormVisible) {
         await nameInput.fill('Test');
         await popup.getByRole('button', { name: 'Create identity', exact: true }).click();
       } else {
-        process.stderr.write(`[ii-popup] no name form — identity created automatically\n`);
+        process.stderr.write(`[ii-popup] no name form after create-new — waiting for Continue\n`);
       }
     }
 
@@ -208,12 +219,22 @@ async function main() {
   //
   // addInitScript runs on ALL pages (including the II popup) before any page JavaScript.
   await context.addInitScript(() => {
+    // This runs before any page JS on every page/popup in the context.
+    console.log('[derive-init] addInitScript running, PublicKeyCredential=' +
+      (typeof PublicKeyCredential));
     try {
       if (typeof PublicKeyCredential !== 'undefined') {
-        PublicKeyCredential.isUserVerifyingPlatformAuthenticatorAvailable = () =>
-          Promise.resolve(true);
+        Object.defineProperty(PublicKeyCredential, 'isUserVerifyingPlatformAuthenticatorAvailable', {
+          value: () => {
+            console.log('[derive-init] isUVPAA called → true');
+            return Promise.resolve(true);
+          },
+          writable: true, configurable: true,
+        });
       }
-    } catch (_) {}
+    } catch (e) {
+      console.log('[derive-init] isUVPAA patch error: ' + e.message);
+    }
     try {
       const _origGet = navigator.credentials.get.bind(navigator.credentials);
       navigator.credentials.get = function(options) {
