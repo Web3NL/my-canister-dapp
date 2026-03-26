@@ -176,6 +176,17 @@ async function main() {
     // Diagnostic: emitted as [ii-console] in stderr
     const dbg = (msg) => console.error('[dbg] ' + msg);
 
+    // Intercept DataView.getUint16 to log the buffer size and offset at failure.
+    // This tells us whether it's parsing the 91-byte DER from getPublicKey() or
+    // a different buffer (e.g. attestationObject CBOR).
+    const _origGU16 = DataView.prototype.getUint16;
+    DataView.prototype.getUint16 = function(offset, le) {
+      if (offset + 2 > this.byteLength) {
+        dbg('getUint16 OOB: offset=' + offset + ' byteLength=' + this.byteLength);
+      }
+      return _origGU16.call(this, offset, le);
+    };
+
     // CDP virtual authenticators on headless Linux return an empty buffer from
     // AuthenticatorAttestationResponse.getPublicKey(), which causes II's DER parser
     // (DataView.getUint16) to throw "Offset is outside the bounds of the DataView".
@@ -293,6 +304,9 @@ async function main() {
         let authDataLen = null;
         try { authDataLen = cred.response.getAuthenticatorData()?.byteLength; } catch(e) {}
         dbg('getAuthenticatorData byteLength=' + authDataLen);
+        let attObjLen = null;
+        try { attObjLen = cred.response.attestationObject?.byteLength; } catch(e) {}
+        dbg('attestationObject byteLength=' + attObjLen);
       }
       return cred;
     };
