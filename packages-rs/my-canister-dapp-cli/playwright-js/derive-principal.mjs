@@ -67,20 +67,21 @@ async function handleIIPopup(popup) {
     await useExistingBtn.waitFor({ state: 'visible', timeout: 10000 });
     await useExistingBtn.click();
 
-    // If no identity exists yet, II shows an error; fall back to creating one.
-    const errorVisible = await popup
-      .getByText('Cannot read properties of undefined')
-      .waitFor({ state: 'visible', timeout: 3000 })
-      .then(() => true)
-      .catch(() => false);
+    // Wait for either "Continue" (existing identity found and authenticated) or
+    // "Create new identity" (no identity stored yet). Don't check for specific
+    // error text — the message differs between II builds.
+    const createNewBtn = popup.getByRole('button', {
+      name: 'Create new identity',
+      exact: true,
+    });
+    const needsCreate = await Promise.race([
+      continueBtn.waitFor({ state: 'visible', timeout: 15000 }).then(() => false),
+      createNewBtn.waitFor({ state: 'visible', timeout: 15000 }).then(() => true),
+    ]).catch(() => true);
 
-    if (errorVisible) {
+    if (needsCreate) {
       process.stderr.write(`[ii-popup] use-existing failed — creating new identity\n`);
-      const createNewBtn = popup.getByRole('button', {
-        name: 'Create new identity',
-        exact: true,
-      });
-      await createNewBtn.waitFor({ state: 'visible', timeout: 10000 });
+      await createNewBtn.waitFor({ state: 'visible', timeout: 5000 });
       await createNewBtn.click();
 
       const nameInput = popup.locator('input[placeholder="Identity name"]');
