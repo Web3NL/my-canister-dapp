@@ -82,15 +82,28 @@ async function handleIIPopup(popup) {
     if (needsCreate) {
       process.stderr.write(`[ii-popup] use-existing failed — creating new identity\n`);
       await createNewBtn.waitFor({ state: 'visible', timeout: 5000 });
-      // force:true bypasses disabled state — on headless Linux CI the button may stay
-      // disabled while II runs async platform authenticator checks, but DUMMY_AUTH's
-      // click handler doesn't need WebAuthn and works fine regardless.
-      await createNewBtn.click({ force: true });
 
+      // On headless Linux CI the button may stay disabled while II runs async platform
+      // authenticator checks. element.click() is a spec no-op on disabled buttons, so
+      // force:true (which uses element.click()) doesn't help. Use dispatchEvent instead,
+      // which bypasses the disabled restriction and fires the Svelte on:click handler.
+      await createNewBtn.dispatchEvent('click');
+
+      // After clicking "Create new identity", wait for either:
+      //  - Identity name input (older II flow): fill and click "Create identity"
+      //  - "Continue" button (newer II flow where creation is automatic/skips name)
       const nameInput = popup.locator('input[placeholder="Identity name"]');
-      await nameInput.waitFor({ state: 'visible', timeout: 10000 });
-      await nameInput.fill('Test');
-      await popup.getByRole('button', { name: 'Create identity', exact: true }).click();
+      const nameFormVisible = await Promise.race([
+        nameInput.waitFor({ state: 'visible', timeout: 15000 }).then(() => true),
+        continueBtn.waitFor({ state: 'visible', timeout: 15000 }).then(() => false),
+      ]).catch(() => false);
+
+      if (nameFormVisible) {
+        await nameInput.fill('Test');
+        await popup.getByRole('button', { name: 'Create identity', exact: true }).click();
+      } else {
+        process.stderr.write(`[ii-popup] no name form — identity created automatically\n`);
+      }
     }
 
     await continueBtn.waitFor({ state: 'visible', timeout: 30000 });
