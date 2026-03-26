@@ -249,6 +249,51 @@ async function main() {
     } else {
       dbg('AuthenticatorAttestationResponse not available in initScript');
     }
+
+    // Wrap credentials.create() for diagnostics — also check whether our prototype
+    // patch is actually reachable via the returned response object.
+    const _origCreate = navigator.credentials.create.bind(navigator.credentials);
+    navigator.credentials.create = async function(options) {
+      dbg('credentials.create called');
+      let cred;
+      try {
+        cred = await _origCreate(options);
+      } catch (e) {
+        dbg('credentials.create THREW: ' + e.message);
+        throw e;
+      }
+      dbg('credentials.create returned type=' + (cred ? cred.type : 'null'));
+      if (cred && cred.response) {
+        dbg('response instanceof AuthenticatorAttestationResponse: ' +
+            (cred.response instanceof AuthenticatorAttestationResponse));
+        dbg('response.getPublicKey is patched: ' +
+            (cred.response.getPublicKey !== (typeof AuthenticatorAttestationResponse !== 'undefined'
+              ? AuthenticatorAttestationResponse.prototype.getPublicKey : null)));
+        let pk = null;
+        try { pk = cred.response.getPublicKey(); } catch (e) { dbg('getPublicKey threw: ' + e.message); }
+        dbg('getPublicKey byteLength=' + (pk ? pk.byteLength : 'null'));
+        let authDataLen = null;
+        try { authDataLen = cred.response.getAuthenticatorData()?.byteLength; } catch(e) {}
+        dbg('getAuthenticatorData byteLength=' + authDataLen);
+      }
+      return cred;
+    };
+
+    // Wrap credentials.get() — during II initialization, II issues a conditional-
+    // mediation request to enable passkey autofill. With automaticPresenceSimulation:true
+    // the CDP authenticator auto-responds, which can cause II to process an assertion
+    // response it doesn't expect and throw a DataView error. Return null for these
+    // silent background requests so the flow isn't disrupted.
+    const _origGet = navigator.credentials.get.bind(navigator.credentials);
+    navigator.credentials.get = async function(options) {
+      const mediation = options?.mediation;
+      dbg('credentials.get called mediation=' + mediation);
+      if (mediation === 'conditional') {
+        dbg('credentials.get: conditional → returning null to block CDP auto-response');
+        return null;
+      }
+      return _origGet(options);
+    };
   });
 
   context.on('page', async (newPage) => {
