@@ -103,8 +103,8 @@ async function handleIIPopup(popup) {
         nameInput.waitFor({ state: 'visible', timeout: 15000 }).then(() => true),
         continueBtn.waitFor({ state: 'visible', timeout: 15000 }).then(() => false),
       ]).catch(async () => {
-        const html = await popup.content().catch(() => '<error reading content>');
-        process.stderr.write(`[ii-popup] nothing after create-new click. HTML:\n${html.slice(0, 3000)}\n`);
+        const bodyText = await popup.evaluate(() => document.body.innerText).catch(() => '<error>');
+        process.stderr.write(`[ii-popup] nothing after create-new click. body:\n${bodyText.slice(0, 2000)}\n`);
         return false;
       });
 
@@ -235,9 +235,19 @@ async function main() {
       console.log('[derive-init] isUVPAA patch error: ' + e.message);
     }
     try {
+      const _origCreate = navigator.credentials.create.bind(navigator.credentials);
+      navigator.credentials.create = function(options) {
+        console.log('[derive-init] credentials.create called');
+        return _origCreate(options);
+      };
+    } catch (e) {
+      console.log('[derive-init] credentials.create patch error: ' + e.message);
+    }
+    try {
       const _origGet = navigator.credentials.get.bind(navigator.credentials);
       navigator.credentials.get = function(options) {
         const allowCredentials = options?.publicKey?.allowCredentials;
+        console.log('[derive-init] credentials.get called, acLen=' + (allowCredentials?.length ?? 'undef'));
         if (!allowCredentials || allowCredentials.length === 0) {
           return Promise.reject(new DOMException('No credentials available', 'NotAllowedError'));
         }
