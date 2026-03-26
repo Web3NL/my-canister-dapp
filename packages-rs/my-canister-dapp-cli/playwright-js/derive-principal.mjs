@@ -209,6 +209,31 @@ async function main() {
     Object.setPrototypeOf(PatchedDataView, _OrigDataView);
     window.DataView = PatchedDataView;
 
+    // ── Fix 5: Uint8Array.prototype.subarray/slice on 0-byte arrays ──────────
+    // uz calls authData.subarray(55+credIdLen) to extract the COSE key bytes
+    // for CBOR decoding. But authData is a 0-byte Uint8Array (CBOR decoder bug —
+    // it creates a 0-byte slice even though our "none" CBOR correctly encodes
+    // authData as 148 bytes). The DataView substitution above fixes credIdLen
+    // reading but uz still uses the original 0-byte array to extract COSE bytes.
+    const _origSubarray = Uint8Array.prototype.subarray;
+    Uint8Array.prototype.subarray = function(begin, end) {
+      if (this.byteLength === 0 && _authDataRef.buf) {
+        const result = _origSubarray.call(new Uint8Array(_authDataRef.buf), begin, end);
+        dbg('Uint8Array(0).subarray(' + begin + ') → synth(' + result.byteLength + 'b)');
+        return result;
+      }
+      return _origSubarray.call(this, begin, end);
+    };
+    const _origSlice = Uint8Array.prototype.slice;
+    Uint8Array.prototype.slice = function(begin, end) {
+      if (this.byteLength === 0 && _authDataRef.buf) {
+        const result = _origSlice.call(new Uint8Array(_authDataRef.buf), begin, end);
+        dbg('Uint8Array(0).slice(' + begin + ') → synth(' + result.byteLength + 'b)');
+        return result;
+      }
+      return _origSlice.call(this, begin, end);
+    };
+
     // Log OOB DataView reads to diagnose any remaining issues.
     const _origGU16 = _OrigDVProto.getUint16;
     _OrigDVProto.getUint16 = function(offset, le) {
