@@ -174,18 +174,27 @@ async function main() {
     }
   );
 
-  // The local NNS II dev build has DISCOVERABLE_PASSKEY_FLOW=true by default, which
-  // routes #authorize to a new /authorize page that calls credentials.get() with empty
-  // allowCredentials on mount for passkey discovery. On headless Linux this throws
-  // NotSupportedError and prevents the passkey UI from rendering.
+  // The II /authorize page calls credentials.get() with empty allowCredentials on mount
+  // for passkey autofill/discovery. On headless Linux Chrome this throws NotSupportedError
+  // and prevents the passkey UI from rendering.
   //
-  // Setting this feature flag to false routes II to /legacy/authorize instead, which
-  // does not do discoverable passkey discovery and renders the "Continue with passkey"
-  // button as expected. addInitScript runs on ALL pages (including the II popup) before
-  // any page JavaScript, so localStorage is set before the routing decision is made.
+  // Intercept discoverable-credential calls (allowCredentials undefined or empty) and
+  // reject with NotAllowedError, which II treats as "no passkeys found" and renders the
+  // button UI normally. Non-discoverable calls (allowCredentials non-empty) pass through
+  // to the real implementation — the local II dev build handles those without a real
+  // authenticator (DUMMY_AUTH mode).
+  //
+  // addInitScript runs on ALL pages (including the II popup) before any page JavaScript.
   await context.addInitScript(() => {
     try {
-      localStorage.setItem('ii-localstorage-feature-flags__DISCOVERABLE_PASSKEY_FLOW', 'false');
+      const _origGet = navigator.credentials.get.bind(navigator.credentials);
+      navigator.credentials.get = function(options) {
+        const allowCredentials = options?.publicKey?.allowCredentials;
+        if (!allowCredentials || allowCredentials.length === 0) {
+          return Promise.reject(new DOMException('No credentials available', 'NotAllowedError'));
+        }
+        return _origGet(options);
+      };
     } catch (_) {}
   });
 
