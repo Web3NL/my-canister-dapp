@@ -1,4 +1,4 @@
-import { test } from '@playwright/test';
+import { test } from '../fixtures.js';
 import { installedHelloWorldExampleCanisterFrontendUrl, loadTestEnv } from '../helpers.js';
 import { handleIIPopup } from '../ii-helpers.js';
 

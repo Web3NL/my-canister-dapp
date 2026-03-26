@@ -1,4 +1,4 @@
-import { test, expect } from '@playwright/test';
+import { test, expect } from '../fixtures.js';
 import { login, checkPrincipal } from './login';
 import { formatIcpBalance } from '../../packages-rs/my-canister-dashboard/frontend/src/helpers';
 import {
