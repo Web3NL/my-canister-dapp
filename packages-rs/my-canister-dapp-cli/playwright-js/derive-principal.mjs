@@ -82,7 +82,10 @@ async function handleIIPopup(popup) {
     if (needsCreate) {
       process.stderr.write(`[ii-popup] use-existing failed — creating new identity\n`);
       await createNewBtn.waitFor({ state: 'visible', timeout: 5000 });
-      await createNewBtn.click();
+      // force:true bypasses disabled state — on headless Linux CI the button may stay
+      // disabled while II runs async platform authenticator checks, but DUMMY_AUTH's
+      // click handler doesn't need WebAuthn and works fine regardless.
+      await createNewBtn.click({ force: true });
 
       const nameInput = popup.locator('input[placeholder="Identity name"]');
       await nameInput.waitFor({ state: 'visible', timeout: 10000 });
