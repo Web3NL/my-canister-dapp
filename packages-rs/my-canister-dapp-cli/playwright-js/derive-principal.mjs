@@ -174,6 +174,21 @@ async function main() {
     }
   );
 
+  // The local NNS II dev build has DISCOVERABLE_PASSKEY_FLOW=true by default, which
+  // routes #authorize to a new /authorize page that calls credentials.get() with empty
+  // allowCredentials on mount for passkey discovery. On headless Linux this throws
+  // NotSupportedError and prevents the passkey UI from rendering.
+  //
+  // Setting this feature flag to false routes II to /legacy/authorize instead, which
+  // does not do discoverable passkey discovery and renders the "Continue with passkey"
+  // button as expected. addInitScript runs on ALL pages (including the II popup) before
+  // any page JavaScript, so localStorage is set before the routing decision is made.
+  await context.addInitScript(() => {
+    try {
+      localStorage.setItem('ii-localstorage-feature-flags__DISCOVERABLE_PASSKEY_FLOW', 'false');
+    } catch (_) {}
+  });
+
   const page = await context.newPage();
 
   // Intercept canister origin — the canister does not need to be running for
