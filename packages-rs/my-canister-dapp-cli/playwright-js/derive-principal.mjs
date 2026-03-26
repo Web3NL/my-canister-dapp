@@ -234,6 +234,27 @@ async function main() {
       return _origSlice.call(this, begin, end);
     };
 
+    // ── Fix 6: Object.prototype.entries shim for CBOR-decoded COSE key ──────
+    // cbor-x (used by II) returns plain JS objects for CBOR maps, with integer
+    // keys coerced to strings ("-2", "-3", etc.). uz calls n.entries() expecting
+    // a Map-like iterator with integer keys. In normal macOS flow, getPublicKey()
+    // returns valid DER so this COSE parse path is never reached. With CDP
+    // virtual authenticators, getPublicKey() is empty and uz hits this dead code.
+    // Add .entries() to Object.prototype (non-enumerable) with integer key
+    // conversion so plain CBOR-decoded objects work as drop-in Map replacements.
+    if (!Object.prototype.entries) {
+      Object.defineProperty(Object.prototype, 'entries', {
+        value: function() {
+          return Object.entries(this).map(([k, v]) => [
+            /^-?\d+$/.test(k) ? parseInt(k, 10) : k,
+            v,
+          ])[Symbol.iterator]();
+        },
+        writable: true, configurable: true, enumerable: false,
+      });
+      dbg('Object.prototype.entries shim installed');
+    }
+
     // Log OOB DataView reads to diagnose any remaining issues.
     const _origGU16 = _OrigDVProto.getUint16;
     _OrigDVProto.getUint16 = function(offset, le) {
