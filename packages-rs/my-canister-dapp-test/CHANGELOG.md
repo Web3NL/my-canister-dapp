@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [1.0.2] - 2026-03-28
+
 ### Documentation
 
 - Clarified that security header assertions target `my-canister-frontend`'s 6 default headers (X-Content-Type-Options, X-Frame-Options, Referrer-Policy, Permissions-Policy, Cross-Origin-Opener-Policy, Cross-Origin-Resource-Policy); dapps that suppress headers via `FrontendConfig::excluded_headers` will intentionally fail the corresponding assertions

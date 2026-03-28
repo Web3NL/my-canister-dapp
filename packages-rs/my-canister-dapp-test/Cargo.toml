@@ -1,6 +1,6 @@
 [package]
 name = "my-canister-dapp-test"
-version = "1.0.1"
+version = "1.0.2"
 description = "Acceptance suite for WASM binaries built with my-canister-dashboard"
 readme = "README.md"
 documentation = "https://docs.rs/my-canister-dapp-test"
