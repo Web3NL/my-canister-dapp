@@ -16,6 +16,13 @@ set -euo pipefail
 
 source "$(dirname "$0")/scripts/constants.sh"
 
+# 🔧 Enforce pinned icp-cli version (same locally and in CI)
+CURRENT_ICP_VERSION=$(icp --version 2>/dev/null | awk '{print $2}' || echo "not installed")
+if [ "$CURRENT_ICP_VERSION" != "$ICP_CLI_VERSION" ]; then
+  echo "📦 Installing icp-cli@${ICP_CLI_VERSION} (current: ${CURRENT_ICP_VERSION})..."
+  npm install -g "@icp-sdk/icp-cli@${ICP_CLI_VERSION}"
+fi
+
 # ⏱️ Per-step timing
 SCRIPT_START_TIME=$(date +%s)
 T_STATIC=0
