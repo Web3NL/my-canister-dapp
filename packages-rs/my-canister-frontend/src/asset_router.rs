@@ -16,8 +16,12 @@ pub const DEFAULT_ALLOWED_EXTENSIONS: &[&str] = &[
     "woff2", "ttf", "otf", "eot", "json", "xml", "txt", "wasm", "map",
 ];
 
-/// Maximum file size in bytes (2 MB).
-pub const DEFAULT_MAX_FILE_SIZE: usize = 2 * 1024 * 1024;
+/// Maximum allowed file size in bytes (2 MiB − 16 KiB).
+///
+/// ICP query responses are capped at 2 MiB. Each response includes ~3.5 KB of
+/// HTTP headers (IC-Certificate, security headers, Content-Type, etc.) on top of
+/// the body. 16 KiB is reserved to ensure the total response always fits.
+pub const MAX_FILE_SIZE: usize = 2 * 1024 * 1024 - 16 * 1024;
 
 /// File extensions that benefit from gzip compression.
 /// Binary formats (images, fonts, wasm) are already compressed.
@@ -25,27 +29,61 @@ const COMPRESSIBLE_EXTENSIONS: &[&str] = &[
     "html", "js", "mjs", "css", "json", "svg", "xml", "txt", "map",
 ];
 
+/// A default security header that can be excluded from responses via [`FrontendConfig::excluded_headers`].
+///
+/// Each variant corresponds to one of the headers set by default on every response.
+/// Use this with [`FrontendConfig::excluded_headers`] to suppress specific defaults,
+/// and [`FrontendConfig::extra_headers`] to replace them with custom values.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum StandardHeader {
+    /// `X-Content-Type-Options: nosniff` — prevents MIME-sniffing attacks.
+    XContentTypeOptions,
+    /// `X-Frame-Options: DENY` — prevents clickjacking via iframe embedding.
+    XFrameOptions,
+    /// `Referrer-Policy: no-referrer` — prevents the URL from leaking via the Referer header.
+    ReferrerPolicy,
+    /// `Permissions-Policy: accelerometer=(), camera=(), ...` — restricts hardware API access.
+    PermissionsPolicy,
+    /// `Cross-Origin-Opener-Policy: same-origin-allow-popups` — isolates the browsing context
+    /// while still allowing Internet Identity popup authentication flows.
+    CrossOriginOpenerPolicy,
+    /// `Cross-Origin-Resource-Policy: same-origin` — prevents other origins from loading your assets.
+    CrossOriginResourcePolicy,
+}
+
+impl StandardHeader {
+    fn header_name(&self) -> &'static str {
+        match self {
+            Self::XContentTypeOptions => "X-Content-Type-Options",
+            Self::XFrameOptions => "X-Frame-Options",
+            Self::ReferrerPolicy => "Referrer-Policy",
+            Self::PermissionsPolicy => "Permissions-Policy",
+            Self::CrossOriginOpenerPolicy => "Cross-Origin-Opener-Policy",
+            Self::CrossOriginResourcePolicy => "Cross-Origin-Resource-Policy",
+        }
+    }
+}
+
 /// Configuration for frontend asset processing.
 ///
 /// Use with [`asset_router_configs_with_config`] or
 /// [`setup_frontend_with_config`](crate::setup_frontend_with_config) to
-/// customise validation beyond the defaults.
-#[derive(Debug, Clone)]
+/// customise validation and HTTP headers beyond the defaults.
+#[derive(Debug, Clone, Default)]
 pub struct FrontendConfig {
     /// Additional file extensions to allow beyond [`DEFAULT_ALLOWED_EXTENSIONS`].
     /// Extensions should be specified without the leading dot (e.g. `"webmanifest"`).
     pub extra_allowed_extensions: Vec<String>,
-    /// Maximum file size in bytes. Defaults to [`DEFAULT_MAX_FILE_SIZE`] (2 MB).
-    pub max_file_size: usize,
-}
-
-impl Default for FrontendConfig {
-    fn default() -> Self {
-        Self {
-            extra_allowed_extensions: Vec::new(),
-            max_file_size: DEFAULT_MAX_FILE_SIZE,
-        }
-    }
+    /// Default security headers to omit from responses.
+    ///
+    /// Each [`StandardHeader`] variant named here is removed from the default set.
+    /// Use [`FrontendConfig::extra_headers`] to supply a replacement value.
+    pub excluded_headers: Vec<StandardHeader>,
+    /// Additional headers included on every asset response.
+    ///
+    /// If any entry's name matches a default header (case-insensitive), the default
+    /// is replaced by this value rather than both appearing in the response.
+    pub extra_headers: Vec<(String, String)>,
 }
 
 thread_local! {
@@ -88,7 +126,7 @@ pub fn asset_router_configs(
 ///
 /// All assets are validated against the [`FrontendConfig`] rules:
 /// - File extension must be in [`DEFAULT_ALLOWED_EXTENSIONS`] or `config.extra_allowed_extensions`
-/// - File size must not exceed `config.max_file_size`
+/// - File size must not exceed the internal limit (2 MiB − 16 KiB)
 /// - Paths must not contain `..`, `//`, or invalid URL characters
 /// - Duplicate paths are rejected
 ///
@@ -145,7 +183,7 @@ fn process_dir_recursive(
             let gzipped = gzip_compress(contents)?;
             assets.push(Asset::new(format!("{full_path}.gz"), gzipped));
         }
-        let cfg = create_asset_config(&full_path, compressible);
+        let cfg = create_asset_config(&full_path, compressible, config);
         asset_configs.push(cfg);
     }
     for subdir in dir.dirs() {
@@ -206,10 +244,9 @@ fn validate_asset(path: &str, size: usize, config: &FrontendConfig) -> Result<()
         }
     }
     // File size
-    if size > config.max_file_size {
+    if size > MAX_FILE_SIZE {
         return Err(format!(
-            "File size ({size} bytes) exceeds maximum ({} bytes): {path}",
-            config.max_file_size
+            "File size ({size} bytes) exceeds maximum ({MAX_FILE_SIZE} bytes): {path}"
         ));
     }
     Ok(())
@@ -232,9 +269,9 @@ fn gzip_compress(data: &[u8]) -> Result<Vec<u8>, String> {
         .map_err(|e| format!("Gzip finalization failed: {e}"))
 }
 
-fn create_asset_config(path: &str, include_gzip: bool) -> AssetConfig {
+fn create_asset_config(path: &str, include_gzip: bool, config: &FrontendConfig) -> AssetConfig {
     let content_type = infer_content_type(path);
-    let headers = create_default_headers(&content_type);
+    let headers = build_headers(config);
     let (fallback_for, aliased_by) = if path == "/index.html" {
         (
             vec![AssetFallbackConfig {
@@ -271,26 +308,46 @@ fn infer_content_type(path: &str) -> String {
         .unwrap_or_else(|| "application/octet-stream".to_string())
 }
 
-fn create_default_headers(_content_type: &str) -> Vec<(String, String)> {
-    vec![
+fn build_headers(config: &FrontendConfig) -> Vec<(String, String)> {
+    let excluded_names: Vec<&str> = config
+        .excluded_headers
+        .iter()
+        .map(|h| h.header_name())
+        .collect();
+
+    let extra_names: Vec<&str> = config
+        .extra_headers
+        .iter()
+        .map(|(name, _)| name.as_str())
+        .collect();
+
+    let mut headers: Vec<(String, String)> = vec![
         ("X-Content-Type-Options".into(), "nosniff".into()),
         ("X-Frame-Options".into(), "DENY".into()),
         ("Referrer-Policy".into(), "no-referrer".into()),
-        ("X-XSS-Protection".into(), "0".into()),
-        (
-            "Strict-Transport-Security".into(),
-            "max-age=31536000; includeSubDomains".into(),
-        ),
         (
             "Permissions-Policy".into(),
             "accelerometer=(), camera=(), geolocation=(), microphone=(), payment=(), usb=()".into(),
         ),
+        // same-origin-allow-popups is required for Internet Identity authentication,
+        // which opens a popup window to complete the login flow.
         (
             "Cross-Origin-Opener-Policy".into(),
             "same-origin-allow-popups".into(),
         ),
         ("Cross-Origin-Resource-Policy".into(), "same-origin".into()),
     ]
+    .into_iter()
+    .filter(|(name, _): &(String, String)| {
+        !excluded_names.contains(&name.as_str())
+            && !extra_names
+                .iter()
+                .any(|e| e.eq_ignore_ascii_case(name.as_str()))
+    })
+    .collect();
+
+    headers.extend(config.extra_headers.iter().cloned());
+    headers
 }
 
 #[cfg(test)]
@@ -301,9 +358,9 @@ mod tests {
         use super::*;
 
         #[test]
-        fn default_max_file_size_is_2mb() {
-            let config = FrontendConfig::default();
-            assert_eq!(config.max_file_size, 2 * 1024 * 1024);
+        fn max_file_size_is_below_2mib() {
+            const { assert!(MAX_FILE_SIZE < 2 * 1024 * 1024) };
+            assert_eq!(MAX_FILE_SIZE, 2 * 1024 * 1024 - 16 * 1024);
         }
 
         #[test]
@@ -452,7 +509,7 @@ mod tests {
 
         #[test]
         fn index_html_has_fallback_and_alias() {
-            let config = create_asset_config("/index.html", false);
+            let config = create_asset_config("/index.html", false, &FrontendConfig::default());
 
             match config {
                 AssetConfig::File {
@@ -475,7 +532,7 @@ mod tests {
 
         #[test]
         fn non_index_html_has_no_fallback() {
-            let config = create_asset_config("/other.html", false);
+            let config = create_asset_config("/other.html", false, &FrontendConfig::default());
 
             match config {
                 AssetConfig::File {
@@ -496,7 +553,7 @@ mod tests {
 
         #[test]
         fn js_file_config() {
-            let config = create_asset_config("/app.js", false);
+            let config = create_asset_config("/app.js", true, &FrontendConfig::default());
 
             match config {
                 AssetConfig::File {
@@ -516,8 +573,9 @@ mod tests {
                     );
                     assert!(fallback_for.is_empty());
                     assert!(aliased_by.is_empty());
-                    assert_eq!(encodings.len(), 1);
+                    assert_eq!(encodings.len(), 2);
                     assert!(matches!(encodings[0].0, AssetEncoding::Identity));
+                    assert!(matches!(encodings[1].0, AssetEncoding::Gzip));
                 }
                 _ => panic!("Expected AssetConfig::File"),
             }
@@ -525,7 +583,8 @@ mod tests {
 
         #[test]
         fn nested_path_config() {
-            let config = create_asset_config("/assets/images/logo.png", false);
+            let config =
+                create_asset_config("/assets/images/logo.png", false, &FrontendConfig::default());
 
             match config {
                 AssetConfig::File {
@@ -540,7 +599,7 @@ mod tests {
 
         #[test]
         fn config_uses_identity_encoding() {
-            let config = create_asset_config("/style.css", false);
+            let config = create_asset_config("/style.css", false, &FrontendConfig::default());
 
             match config {
                 AssetConfig::File { encodings, .. } => {
@@ -553,52 +612,38 @@ mod tests {
         }
     }
 
-    mod create_default_headers {
+    mod build_headers {
         use super::*;
 
+        fn default_headers() -> Vec<(String, String)> {
+            build_headers(&FrontendConfig::default())
+        }
+
         #[test]
-        fn returns_eight_headers() {
-            let headers = create_default_headers("text/html");
-            assert_eq!(headers.len(), 8);
+        fn default_config_produces_six_headers() {
+            assert_eq!(default_headers().len(), 6);
         }
 
         #[test]
         fn includes_x_content_type_options() {
-            let headers = create_default_headers("text/html");
-            assert!(headers.contains(&("X-Content-Type-Options".into(), "nosniff".into())));
+            assert!(
+                default_headers().contains(&("X-Content-Type-Options".into(), "nosniff".into()))
+            );
         }
 
         #[test]
         fn includes_x_frame_options() {
-            let headers = create_default_headers("text/html");
-            assert!(headers.contains(&("X-Frame-Options".into(), "DENY".into())));
+            assert!(default_headers().contains(&("X-Frame-Options".into(), "DENY".into())));
         }
 
         #[test]
         fn includes_referrer_policy() {
-            let headers = create_default_headers("text/html");
-            assert!(headers.contains(&("Referrer-Policy".into(), "no-referrer".into())));
-        }
-
-        #[test]
-        fn includes_xss_protection_disabled() {
-            let headers = create_default_headers("text/html");
-            assert!(headers.contains(&("X-XSS-Protection".into(), "0".into())));
-        }
-
-        #[test]
-        fn includes_hsts() {
-            let headers = create_default_headers("text/html");
-            assert!(headers.contains(&(
-                "Strict-Transport-Security".into(),
-                "max-age=31536000; includeSubDomains".into()
-            )));
+            assert!(default_headers().contains(&("Referrer-Policy".into(), "no-referrer".into())));
         }
 
         #[test]
         fn includes_permissions_policy() {
-            let headers = create_default_headers("text/html");
-            assert!(headers.contains(&(
+            assert!(default_headers().contains(&(
                 "Permissions-Policy".into(),
                 "accelerometer=(), camera=(), geolocation=(), microphone=(), payment=(), usb=()"
                     .into()
@@ -607,8 +652,7 @@ mod tests {
 
         #[test]
         fn includes_cross_origin_opener_policy() {
-            let headers = create_default_headers("text/html");
-            assert!(headers.contains(&(
+            assert!(default_headers().contains(&(
                 "Cross-Origin-Opener-Policy".into(),
                 "same-origin-allow-popups".into(),
             )));
@@ -616,20 +660,100 @@ mod tests {
 
         #[test]
         fn includes_cross_origin_resource_policy() {
-            let headers = create_default_headers("text/html");
             assert!(
-                headers.contains(&("Cross-Origin-Resource-Policy".into(), "same-origin".into()))
+                default_headers()
+                    .contains(&("Cross-Origin-Resource-Policy".into(), "same-origin".into()))
             );
         }
 
         #[test]
-        fn same_headers_regardless_of_content_type() {
-            let headers_html = create_default_headers("text/html");
-            let headers_js = create_default_headers("application/javascript");
-            let headers_empty = create_default_headers("");
+        fn does_not_include_xss_protection() {
+            assert!(
+                !default_headers()
+                    .iter()
+                    .any(|(name, _)| name == "X-XSS-Protection")
+            );
+        }
 
-            assert_eq!(headers_html, headers_js);
-            assert_eq!(headers_js, headers_empty);
+        #[test]
+        fn does_not_include_hsts() {
+            assert!(
+                !default_headers()
+                    .iter()
+                    .any(|(name, _)| name == "Strict-Transport-Security")
+            );
+        }
+
+        #[test]
+        fn excluded_header_is_removed() {
+            let config = FrontendConfig {
+                excluded_headers: vec![StandardHeader::XFrameOptions],
+                ..Default::default()
+            };
+            let headers = build_headers(&config);
+            assert!(!headers.iter().any(|(name, _)| name == "X-Frame-Options"));
+        }
+
+        #[test]
+        fn extra_header_replaces_default() {
+            let config = FrontendConfig {
+                extra_headers: vec![("X-Frame-Options".into(), "SAMEORIGIN".into())],
+                ..Default::default()
+            };
+            let headers = build_headers(&config);
+            let frame_headers: Vec<_> = headers
+                .iter()
+                .filter(|(name, _)| name == "X-Frame-Options")
+                .collect();
+            assert_eq!(
+                frame_headers.len(),
+                1,
+                "should have exactly one X-Frame-Options"
+            );
+            assert_eq!(frame_headers[0].1, "SAMEORIGIN");
+        }
+
+        #[test]
+        fn extra_header_replace_is_case_insensitive() {
+            let config = FrontendConfig {
+                extra_headers: vec![("x-frame-options".into(), "SAMEORIGIN".into())],
+                ..Default::default()
+            };
+            let headers = build_headers(&config);
+            let frame_headers: Vec<_> = headers
+                .iter()
+                .filter(|(name, _)| name.eq_ignore_ascii_case("x-frame-options"))
+                .collect();
+            assert_eq!(frame_headers.len(), 1);
+            assert_eq!(frame_headers[0].1, "SAMEORIGIN");
+        }
+
+        #[test]
+        fn extra_header_is_appended() {
+            let config = FrontendConfig {
+                extra_headers: vec![(
+                    "Content-Security-Policy".into(),
+                    "default-src 'self'".into(),
+                )],
+                ..Default::default()
+            };
+            let headers = build_headers(&config);
+            assert!(headers.contains(&(
+                "Content-Security-Policy".into(),
+                "default-src 'self'".into()
+            )));
+        }
+
+        #[test]
+        fn excluded_and_extra_can_combine() {
+            let config = FrontendConfig {
+                excluded_headers: vec![StandardHeader::ReferrerPolicy],
+                extra_headers: vec![("Cache-Control".into(), "no-store".into())],
+                ..Default::default()
+            };
+            let headers = build_headers(&config);
+            assert!(!headers.iter().any(|(name, _)| name == "Referrer-Policy"));
+            assert!(headers.contains(&("Cache-Control".into(), "no-store".into())));
         }
     }
 
@@ -695,24 +819,14 @@ mod tests {
         #[test]
         fn allows_file_at_size_limit() {
             let config = FrontendConfig::default();
-            assert!(validate_asset("/exact.html", DEFAULT_MAX_FILE_SIZE, &config).is_ok());
+            assert!(validate_asset("/exact.html", MAX_FILE_SIZE, &config).is_ok());
         }
 
         #[test]
         fn rejects_file_one_byte_over_limit() {
             let config = FrontendConfig::default();
-            let result = validate_asset("/over.html", DEFAULT_MAX_FILE_SIZE + 1, &config);
+            let result = validate_asset("/over.html", MAX_FILE_SIZE + 1, &config);
             assert!(result.is_err());
-        }
-
-        #[test]
-        fn custom_max_file_size() {
-            let config = FrontendConfig {
-                max_file_size: 500,
-                ..Default::default()
-            };
-            assert!(validate_asset("/small.html", 500, &config).is_ok());
-            assert!(validate_asset("/big.html", 501, &config).is_err());
         }
 
         #[test]
@@ -774,6 +888,21 @@ mod tests {
         fn allows_hyphens_and_underscores() {
             let config = FrontendConfig::default();
             assert!(validate_asset("/my-app_v2.js", 100, &config).is_ok());
+        }
+
+        #[test]
+        fn rejects_gz_extension() {
+            // A manually-included .gz file (e.g. app.js.gz) is not in the allowlist.
+            // The crate generates its own .gz variants internally; user-provided ones
+            // would collide with those generated paths and produce a confusing duplicate error.
+            // Rejecting .gz at validation gives a clear, actionable message instead.
+            let config = FrontendConfig::default();
+            let result = validate_asset("/app.js.gz", 100, &config);
+            assert!(result.is_err());
+            assert!(
+                result.unwrap_err().contains("not in the allowed list"),
+                "expected 'not in the allowed list' error for .gz file"
+            );
         }
     }
 
@@ -837,7 +966,7 @@ mod tests {
 
         #[test]
         fn compressible_config_has_two_encodings() {
-            let config = create_asset_config("/app.js", true);
+            let config = create_asset_config("/app.js", true, &FrontendConfig::default());
             match config {
                 AssetConfig::File { encodings, .. } => {
                     assert_eq!(encodings.len(), 2);
@@ -851,7 +980,7 @@ mod tests {
 
         #[test]
         fn non_compressible_config_has_one_encoding() {
-            let config = create_asset_config("/image.png", false);
+            let config = create_asset_config("/image.png", false, &FrontendConfig::default());
             match config {
                 AssetConfig::File { encodings, .. } => {
                     assert_eq!(encodings.len(), 1);

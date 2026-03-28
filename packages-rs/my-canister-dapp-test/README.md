@@ -9,13 +9,19 @@ Acceptance suite for user-owned dapps built with [`my-canister-dashboard`](https
 
 Validates that a WASM module correctly implements every endpoint in the dashboard interface:
 
-- **`http_request`** — certified asset serving (dashboard HTML/JS/CSS, 404 handling, CSP headers)
+- **`http_request`** — certified asset serving (dashboard HTML/JS/CSS, 404 handling, CSP headers, all 6 default security headers from `my-canister-frontend`)
 - **`wasm_status`** — dapp metadata (name, version, memo)
 - **`manage_ii_principal`** — Internet Identity principal CRUD + controller guard
 - **`manage_alternative_origins`** — II alternative origins CRUD + origin validation
 - **`manage_top_up_rule`** — auto top-up rule CRUD + timer-driven ICP→cycles minting
 
 Each WASM is installed into a fresh [PocketIC](https://crates.io/crates/pocket-ic) canister with ICP Ledger and CMC system canisters for end-to-end top-up testing.
+
+> **Security header assertions** target the default configuration of
+> [`my-canister-frontend`](https://crates.io/crates/my-canister-frontend) (6 headers: X-Content-Type-Options,
+> X-Frame-Options, Referrer-Policy, Permissions-Policy, Cross-Origin-Opener-Policy, Cross-Origin-Resource-Policy).
+> Dapps that suppress headers via `FrontendConfig::excluded_headers` will fail the corresponding assertions
+> — by design.
 
 ## Usage
 
