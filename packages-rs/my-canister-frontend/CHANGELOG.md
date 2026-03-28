@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-03-28
+
 ### Added
 
 - `StandardHeader` enum for typed exclusion of default security headers

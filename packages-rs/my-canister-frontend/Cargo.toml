@@ -1,6 +1,6 @@
 [package]
 name = "my-canister-frontend"
-version = "0.3.0"
+version = "0.4.0"
 description = "Frontend asset processing library for canisters on the Internet Computer"
 documentation = "https://docs.rs/my-canister-frontend"
 readme = "README.md"
