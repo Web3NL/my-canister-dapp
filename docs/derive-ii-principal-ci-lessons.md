@@ -152,3 +152,169 @@ the existing session ("Continue" appears directly).
 | `packages-rs/my-canister-dapp-cli/playwright-js/derive-principal.mjs` | CLI: all 4 patches above |
 | `tests/fixtures.ts` | E2E tests: same 4 patches as a Playwright test fixture |
 | `tests/ii-helpers.ts` | Simplified II popup flow (CWP → "Create new identity" directly) |
+
+---
+
+## E2E launcher tests: `derivationOrigin` flow (second II popup)
+
+The icp-dapp-launcher tests have a second II popup triggered by "Connect II to Dapp".
+This popup uses `derivationOrigin` so that II derives the principal the user will have
+when visiting their canister directly (the ownership handoff mechanism).
+
+### Additional patch 5 — `u7()` DUMMY_AUTH boolean check (second popup only)
+
+**Problem**: The second II popup (triggered by "Connect II to Dapp") starts with
+`$isAuthenticatedStore = false` — it's a fresh window with no existing session.
+This means the z() "Continue" handler in `hq()` calls `U.authenticate(i().selected)`
+instead of short-circuiting. `e0.authenticate()` sees `"passkey" in t.authMethod`
+→ calls `u7()`.
+
+`u7()` contains a **boolean assignment** form of the DUMMY_AUTH check:
+
+```javascript
+const s=Vr.dummy_auth[0]?.[0]!==void 0;let o;const a=s?ga.useExisting():ps.useExisting(
+```
+
+The `replaceAll('Vr.dummy_auth[0]?.[0]!==void 0?', 'true?')` patch only covers the
+**ternary** form (5 occurrences, all have a trailing `?`). The boolean assignment in
+`u7()` has no trailing `?`, so `replaceAll` silently skips it. `s` stays `false`,
+`ps.useExisting()` is called (real WebAuthn), which calls `credentials.get()`,
+which our `addInitScript` patch rejects with `NotAllowedError`. The error is silently
+caught by z(), shows a toast, `authorize-client-success` is never sent, `AuthClient.login()`
+hangs forever, and the busy overlay never clears.
+
+Full call chain in the second popup:
+```
+z() → U.authenticate() → e0.authenticate() → u7() → ps.useExisting()
+  → credentials.get() → NotAllowedError (our addInitScript)
+  → z() catch → toast only → authorize-client-success never sent
+  → AuthClient.login() hangs → finally/stopBusy never runs → busy overlay persists
+```
+
+**Fix**: Add a targeted `replace()` after the `replaceAll()` to cover the boolean form:
+
+```javascript
+src = src.replaceAll('Vr.dummy_auth[0]?.[0]!==void 0?', 'true?');
+src = src.replace(
+  'Vr.dummy_auth[0]?.[0]!==void 0;let o;const a=s?ga.useExisting():ps.useExisting(',
+  'true;let o;const a=s?ga.useExisting():ps.useExisting('
+);
+```
+
+**Why the first popup doesn't hit this**: After `handleIIPopup` creates a new identity,
+`$isAuthenticatedStore` becomes `true`. On second mount (the "Continue" flow),
+`o() === true` causes `hq()` to skip `U.authenticate()` entirely and call
+`prepare_account_delegation` directly. So u7() is never reached in the first popup's
+second-phase click.
+
+### Additional patch 6 — `Unverified origin` in II's `Rm()` validator
+
+**Problem**: II v2's `handleRequest` calls `Rm({requestOrigin, derivationOrigin})`
+before showing the auth UI. `Rm()` fetches:
+
+```
+http://localhost:8080/.well-known/ii-alternative-origins?canisterId=<new-canister-id>
+```
+
+(URL built by `nO()` which uses `window.location.hostname` = `*.localhost`.)
+
+The fetch option is `{redirect:"error"}`. PocketIC's HTTP gateway redirects
+`localhost:8080?canisterId=` requests, which causes the fetch to throw. The `catch`
+block returns `{result:"invalid"}` → `throw new Error("Unverified origin")` → the
+auth UI never renders.
+
+**Key insight**: The alternative origins ARE correctly set on the canister by
+`addInstallerOrigin()` before the popup opens. The problem is purely in how II
+fetches them (wrong URL format for our PocketIC setup). Origin security doesn't
+apply in DUMMY_AUTH mode anyway.
+
+**Fix**: Add a third bundle patch after the DUMMY_AUTH and seed patches:
+
+```javascript
+// Bypass derivationOrigin origin-check: Rm() fetch fails in PocketIC local env
+src = src.replace(
+  '.result==="invalid")throw new Error("Unverified origin")',
+  '.result==="__bypassed__")throw new Error("Unverified origin")'
+);
+```
+
+This makes the condition permanently false (Rm() never returns `"__bypassed__"`),
+so `throw new Error("Unverified origin")` never fires. `tp.set({authRequest})` is
+then called normally and the auth UI renders.
+
+**How to find the pattern**: `curl -s http://rdmx6-jaaaa-aaaaa-aaadq-cai.localhost:8080/_app/immutable/entry/start.*.js | gunzip | grep -o '.\{120\}Unverified origin.\{120\}'`
+
+### Additional patch 7 — `fetchRootKey` cross-origin failure
+
+**Problem**: The dapp store page initialises a `WasmRegistryApi` agent with
+`host: 'http://localhost:8080'` (baked in at build time when `PROD=false`).
+`fetchRootKey()` calls `window.fetch('http://localhost:8080/api/v2/status')`.
+This is cross-origin from `*.localhost:8080` and either fails CORS or hits IPv6
+vs IPv4 (`::1` vs `127.0.0.1`).
+
+**Fix**: Extend the `context.route()` filter to also intercept plain `localhost`:
+
+```typescript
+// Before: only *.localhost
+(url) => url.hostname.endsWith('.localhost')
+// After: also plain localhost
+(url) => url.hostname === 'localhost' || url.hostname.endsWith('.localhost')
+```
+
+Also add `MAP localhost 127.0.0.1` to `--host-resolver-rules` in `playwright.config.ts`
+as belt-and-suspenders for cases where Chrome bypasses the route handler.
+
+### Additional fix — popup race condition + missing busy-wait (test-level, not bundle)
+
+**Problem 1 (race)**: Both tests registered `page.waitForEvent('popup')` AFTER
+clicking "Connect II to Dapp". If the `AuthClient.login()` → `window.open()` call
+happens synchronously or very quickly, the popup event fires before the listener is
+registered and Playwright misses it. `handleIIPopup` then runs on the wrong popup
+(or the promise hangs), and the real II popup never gets its "Continue" clicked.
+
+**Fix**: Always register the popup listener BEFORE the click:
+
+```typescript
+// WRONG — race condition:
+await page.click('Connect II to Dapp');
+const popupPromise = page.waitForEvent('popup');
+
+// CORRECT:
+const popupPromise = page.waitForEvent('popup');
+await page.click('Connect II to Dapp');
+```
+
+**Problem 2 (missing busy-wait)**: After `handleIIPopup` returns, the launcher
+still performs canister calls (`setIIPrincipal`, `setControllers` or `finalizeDemo`).
+These run inside a `busyStore.startBusy('connect-ii')` scope. The busy overlay
+(`div[data-tid="busy"]`) intercepts all pointer events until `stopBusy` fires in the
+`finally` block. Without an explicit wait, `page.click('My Dapps')` retries for the
+entire remaining test timeout and fails.
+
+**Fix**: Wait for the busy overlay to hide before navigating:
+
+```typescript
+await handleIIPopup(iiPopup);
+await page.locator('[data-tid="busy"]').waitFor({ state: 'hidden', timeout: 90_000 });
+await page.getByRole('menuitem', { name: 'My Dapps' }).click();
+```
+
+**Why `AuthClient.login()` hangs without the race fix**: `@icp-sdk/auth/client`'s
+`AuthClient.login()` opens a popup and awaits `{kind:"authorize-client-success"}`
+via `window.addEventListener("message", ...)`. If the II popup was missed (wrong
+popup captured), `authorize-client-success` is never received, `remoteAuth()` never
+resolves, and the `finally { stopBusy() }` block never runs → busy overlay persists
+for the full 120s test timeout.
+
+---
+
+## Files changed (complete list)
+
+| File | Purpose |
+|------|---------|
+| `packages-rs/my-canister-dapp-cli/playwright-js/derive-principal.mjs` | CLI: DUMMY_AUTH + seed + DNS proxy patches |
+| `tests/fixtures.ts` | E2E tests: DUMMY_AUTH (ternary + u7 boolean) + seed + Unverified-origin + NoSuchOrigin + fetchRootKey proxy patches |
+| `tests/ii-helpers.ts` | II popup flow handler (CWP → Create new identity, or Continue directly) |
+| `playwright.config.ts` | `--host-resolver-rules` for both `*.localhost` and `localhost` |
+| `tests/icp-dapp-launcher/install-dapp.spec.ts` | Race fix + busy-wait after second II popup |
+| `tests/icp-dapp-launcher/install-demo.spec.ts` | Race fix + busy-wait after second II popup |
