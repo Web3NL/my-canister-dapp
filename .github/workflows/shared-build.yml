@@ -53,8 +53,8 @@ jobs:
             ~/.cache/dfinity/
           key: pocket-ic-${{ runner.os }}-v1
 
-      - name: Install icp-cli dependencies
-        run: npm install -g @icp-sdk/ic-wasm
+      - name: Install icp-cli
+        run: npm install -g @icp-sdk/icp-cli @icp-sdk/ic-wasm
 
       - name: Prefer IPv4 for localhost on runner
         run: |
