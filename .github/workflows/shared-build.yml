@@ -46,7 +46,7 @@ jobs:
             rust-${{ runner.os }}-${{ hashFiles('rust-toolchain.toml') }}-
 
       - name: Install icp-cli
-        run: npm install -g @icp-sdk/icp-cli @icp-sdk/ic-wasm
+        run: npm install -g @icp-sdk/icp-cli@0.2.2 @icp-sdk/ic-wasm
 
       - name: Prefer IPv4 for localhost on runner
         run: |
