@@ -24,6 +24,10 @@
 - `Strict-Transport-Security` removed from default headers (ICP gateway enforces HTTPS; redundant on `.icp0.io`/`.ic0.app` domains; add via `extra_headers` for custom domains)
 - README tagline extended to mention static serving
 
+### Documentation
+
+- Noted in the `excluded_headers` section that the `my-canister-dapp-test` acceptance suite asserts all 6 default headers; suppressing any via `excluded_headers` causes the corresponding assertion to fail by design
+
 ### Tests
 
 - Added test asserting that `.gz` files are rejected at validation with a clear "not in the allowed list" error, preventing a confusing duplicate-path error that would otherwise surface if a user manually includes a pre-compressed file alongside its source

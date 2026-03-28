@@ -93,6 +93,11 @@ let config = FrontendConfig {
 };
 ```
 
+> **Note**: The [`my-canister-dapp-test`](https://crates.io/crates/my-canister-dapp-test) acceptance suite
+> asserts all 6 default headers on every response. Suppressing a header via `excluded_headers` will cause
+> the corresponding assertion to fail — by design. The acceptance suite targets the default security
+> configuration; dapps that intentionally deviate are expected to skip those assertions.
+
 ### Add or override headers
 
 Use `extra_headers` to append headers to every response. If the name matches a default header (case-insensitive), the default is replaced rather than duplicated:
