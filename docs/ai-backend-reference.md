@@ -125,13 +125,14 @@ fn init() {
 
 #### `setup_frontend_with_config(assets_dir: &Dir<'static>, config: &FrontendConfig) -> Result<(), String>`
 
-Initialize with custom configuration (extra file types).
+Initialize with custom configuration (extra file types, larger size limit).
 
 ```rust
 use my_canister_frontend::{setup_frontend_with_config, FrontendConfig};
 
 let config = FrontendConfig {
     extra_allowed_extensions: vec!["webmanifest".to_string(), "glb".to_string()],
+    max_file_size: 5 * 1024 * 1024, // 5 MB
 };
 setup_frontend_with_config(&FRONTEND_DIR, &config).expect("Failed to setup frontend");
 ```
@@ -166,6 +167,8 @@ with_asset_router_mut(|router| {
 pub struct FrontendConfig {
     /// Additional file extensions beyond the defaults (e.g., "webmanifest", "glb")
     pub extra_allowed_extensions: Vec<String>,
+    /// Maximum file size in bytes (default: 2 MB = 2_097_152)
+    pub max_file_size: usize,
 }
 ```
 
