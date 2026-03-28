@@ -6,7 +6,7 @@ export REPO_ROOT
 REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 
 # 🔧 Pinned tool versions
-export ICP_CLI_VERSION="0.2.0"
+export ICP_CLI_VERSION="0.2.2"
 
 # 💰 Cycle amounts
 export CANISTER_INITIAL_CYCLES="1000000000000"
