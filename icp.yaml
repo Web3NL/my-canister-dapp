@@ -46,6 +46,7 @@ networks:
     ii: true
     gateway:
       port: 8080
+    version: "v12.0.0-2026-03-02-11-09"
 
 environments:
   - name: local
